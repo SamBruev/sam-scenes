@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- v55: заголовок сценария синхронизирован с выбранным сценарием -->
+<!-- v56: сворачиваемые настройки сценариев наверху + фикс кнопки «Новый шаблон» -->
 <html lang="ru" style="--logo-x: 0px; --logo-y: 0px; --logo-scale: 1.00;">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Сценарий видео / Sam Bruev (v55)</title>
+  <title>Сценарий видео / Sam Bruev (v56)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bad+Script&family=Pacifico&family=Roboto+Slab:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -96,7 +96,14 @@
       padding-bottom: max(44px, env(safe-area-inset-bottom));
       box-sizing: border-box;
       width: 100%;
+      display: flex;
+      flex-direction: column;
     }
+
+    .wrap > * { order: 10; }
+    #scenario-hub { order: 1; }
+    #daily-plan { order: 2; }
+    .title-row { order: 3; }
 
     .title-row {
       display: flex;
@@ -217,10 +224,45 @@
     }
 
     .scenario-hub {
+      display: block;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .scenario-hub > summary {
+      list-style: none;
+      cursor: pointer;
+      user-select: none;
+      padding: 14px 16px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--cream);
+      border-bottom: 1px solid rgba(255, 228, 160, 0.16);
+      background: #090909;
+    }
+
+    .scenario-hub > summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .scenario-hub > summary::after {
+      content: '▾';
+      float: right;
+      opacity: 0.8;
+      transition: transform 0.18s ease;
+    }
+
+    .scenario-hub:not([open]) > summary::after {
+      transform: rotate(-90deg);
+    }
+
+    .scenario-hub .scenario-hub-body {
       display: grid;
       grid-template-columns: 1fr auto;
       gap: 10px;
       align-items: end;
+      padding: 12px 16px 14px;
     }
 
     .scenario-hub .row {
@@ -1207,8 +1249,13 @@
       }
 
       .scenario-hub {
+        padding: 0;
+      }
+
+      .scenario-hub .scenario-hub-body {
         grid-template-columns: 1fr;
         gap: 12px;
+        padding: 10px 12px 12px;
       }
 
       .scenario-hub .row {
@@ -1301,6 +1348,50 @@
 </head>
 <body>
   <div class="wrap">
+    <details class="card scenario-hub" id="scenario-hub" open>
+      <summary>Настройки сценариев</summary>
+      <div class="scenario-hub-body">
+        <div class="row">
+          <label>Сценарий
+            <select id="scenario-select"></select>
+          </label>
+          <label>Фильтр
+            <select id="scenario-filter">
+              <option value="all" selected>Все</option>
+              <option value="today">Сегодня</option>
+              <option value="week">Эта неделя</option>
+            </select>
+          </label>
+          <label>Название
+            <input id="scenario-name" type="text" placeholder="Название видео">
+          </label>
+          <label>Дата
+            <input id="scenario-date" type="date">
+          </label>
+          <label>Видео в этот день
+            <input id="scenario-count" type="number" min="1" max="50" placeholder="например, 12">
+          </label>
+          <label>Статус
+            <select id="scenario-status">
+              <option value="draft" selected>Черновик</option>
+              <option value="ready">Готов</option>
+              <option value="shot">Снято</option>
+            </select>
+          </label>
+        </div>
+        <div class="actions">
+          <button class="btn" id="btn-scenario-new" type="button">+ Новый шаблон</button>
+          <button class="btn btn-danger" id="btn-scenario-delete" type="button">Удалить</button>
+        </div>
+      </div>
+    </details>
+
+    <div class="card daily-plan" id="daily-plan">
+      <h2>План дня</h2>
+      <div class="plan-summary" id="plan-summary">Нет данных.</div>
+      <div class="plan-list" id="plan-list"></div>
+    </div>
+
     <div class="title-row">
       <h1 class="page-title"><span class="title-lead">Сценарий видео</span><span class="title-subject" contenteditable="true" spellcheck="true">МК Абакан 16–17 мая</span></h1>
       <div class="logo-bg" aria-hidden="true"></div>
@@ -1309,47 +1400,6 @@
         <input id="logo-scale" type="range" min="60" max="220" step="1" value="100">
         <span class="logo-scale-value" id="logo-scale-value">100%</span>
       </label>
-    </div>
-
-    <div class="card scenario-hub" id="scenario-hub">
-      <div class="row">
-        <label>Сценарий
-          <select id="scenario-select"></select>
-        </label>
-        <label>Фильтр
-          <select id="scenario-filter">
-            <option value="all" selected>Все</option>
-            <option value="today">Сегодня</option>
-            <option value="week">Эта неделя</option>
-          </select>
-        </label>
-        <label>Название
-          <input id="scenario-name" type="text" placeholder="Название видео">
-        </label>
-        <label>Дата
-          <input id="scenario-date" type="date">
-        </label>
-        <label>Видео в этот день
-          <input id="scenario-count" type="number" min="1" max="50" placeholder="например, 12">
-        </label>
-        <label>Статус
-          <select id="scenario-status">
-            <option value="draft" selected>Черновик</option>
-            <option value="ready">Готов</option>
-            <option value="shot">Снято</option>
-          </select>
-        </label>
-      </div>
-      <div class="actions">
-        <button class="btn" id="btn-scenario-new" type="button">+ Новый шаблон</button>
-        <button class="btn btn-danger" id="btn-scenario-delete" type="button">Удалить</button>
-      </div>
-    </div>
-
-    <div class="card daily-plan" id="daily-plan">
-      <h2>План дня</h2>
-      <div class="plan-summary" id="plan-summary">Нет данных.</div>
-      <div class="plan-list" id="plan-list"></div>
     </div>
 
     <div class="card">
@@ -3625,6 +3675,20 @@
           renderDailyPlan(bundle);
         });
 
+        function bindTapAndClick(el, handler) {
+          if (!el || !handler) return;
+          var lastTouchTs = 0;
+          el.addEventListener('click', function (e) {
+            if (Date.now() - lastTouchTs < 450) return;
+            handler(e);
+          });
+          el.addEventListener('touchend', function (e) {
+            lastTouchTs = Date.now();
+            e.preventDefault();
+            handler(e);
+          }, { passive: false });
+        }
+
         if (scenarioSelect) {
           scenarioSelect.addEventListener('change', function () {
             persistToStorage('Сохранено');
@@ -3637,7 +3701,7 @@
         }
 
         if (btnScenarioNew) {
-          btnScenarioNew.addEventListener('click', function () {
+          bindTapAndClick(btnScenarioNew, function () {
             persistToStorage('Сохранено');
             var bundle = readScenarioBundle() || { activeId: null, items: [] };
             var name = (scenarioName && scenarioName.value.trim()) ? scenarioName.value.trim() : 'Новый сценарий';
@@ -3661,7 +3725,7 @@
         }
 
         if (btnScenarioDelete) {
-          btnScenarioDelete.addEventListener('click', function () {
+          bindTapAndClick(btnScenarioDelete, function () {
             var bundle = readScenarioBundle();
             if (!bundle || !bundle.items || bundle.items.length <= 1) {
               alert('Нужен минимум один сценарий.');
