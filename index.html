@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- v58: усилено затемнение сцены при отметке «Снято» -->
+<!-- v59: кнопка Play и режим телесуфлера для текста «Говорю» -->
 <html lang="ru" style="--logo-x: 0px; --logo-y: 0px; --logo-scale: 1.00;">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Сценарий видео / Sam Bruev (v58)</title>
+  <title>Сценарий видео / Sam Bruev (v59)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bad+Script&family=Pacifico&family=Roboto+Slab:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -570,6 +570,28 @@
       min-width: 0;
     }
 
+    .scene-time-wrap .scene-play-btn {
+      width: 1.9rem;
+      height: 1.9rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 218, 132, 0.5);
+      background: linear-gradient(180deg, #1a140a, #0f0b06);
+      color: #ffd784;
+      font-weight: 800;
+      font-size: 0.85rem;
+      line-height: 1;
+      cursor: pointer;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+    }
+
+    .scene-time-wrap .scene-play-btn:active {
+      transform: translateY(1px) scale(0.98);
+    }
+
     .scene-time-wrap .scene-done-label.scene-done-checkbox-only {
       grid-column: 3;
       justify-self: end;
@@ -701,6 +723,53 @@
     .scene-main > .line-say .say-editable:focus {
       background: rgba(212, 175, 55, 0.12);
       box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.22);
+    }
+
+    .teleprompter-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(0, 0, 0, 0.96);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: max(16px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+      box-sizing: border-box;
+    }
+
+    .teleprompter-overlay.open {
+      display: flex;
+    }
+
+    .teleprompter-close {
+      position: absolute;
+      top: max(12px, env(safe-area-inset-top));
+      right: max(12px, env(safe-area-inset-right));
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 218, 132, 0.45);
+      background: rgba(16, 16, 16, 0.92);
+      color: #ffe0a1;
+      font-size: 24px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .teleprompter-text {
+      width: min(96vw, 1100px);
+      max-height: calc(100vh - 96px);
+      overflow: auto;
+      color: #fff2cd;
+      text-align: center;
+      font-weight: 800;
+      line-height: 1.25;
+      letter-spacing: 0.01em;
+      font-size: clamp(1.9rem, 6.5vw, 4.1rem);
+      transform: scaleX(-1);
+      white-space: pre-wrap;
+      word-break: break-word;
+      text-shadow: 0 2px 12px rgba(0, 0, 0, 0.65);
     }
 
     .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -2346,6 +2415,11 @@
 
   </div>
 
+  <div class="teleprompter-overlay" id="teleprompter-overlay" aria-hidden="true">
+    <button class="teleprompter-close" id="teleprompter-close" type="button" aria-label="Закрыть телесуфлер">×</button>
+    <div class="teleprompter-text" id="teleprompter-text"></div>
+  </div>
+
   <script>
     (function () {
       var STORAGE_KEY = 'abakan-main-abakan-layout-v14';
@@ -2379,6 +2453,9 @@
       var planList = document.getElementById('plan-list');
       var titleSubject = document.querySelector('.title-row .title-subject');
       var DEFAULT_SCENARIO_TITLE = 'ПОРА СНИМАТЬ КОНТЕНТ';
+      var teleprompterOverlay = document.getElementById('teleprompter-overlay');
+      var teleprompterText = document.getElementById('teleprompter-text');
+      var teleprompterClose = document.getElementById('teleprompter-close');
 
       var x = { value: 0 };
       var y = { value: 0 };
@@ -3144,6 +3221,54 @@
         });
       }
 
+      function ensureScenePlayButtons(scope) {
+        var rootScope = scope || document;
+        rootScope.querySelectorAll('.scene-main[data-scene-role="body"]').forEach(function (scene) {
+          var heading = scene.querySelector('.scene-time-wrap .time-heading');
+          if (!heading) return;
+          var spacer = heading.querySelector('.time-heading-spacer');
+          if (!spacer) {
+            spacer = document.createElement('span');
+            spacer.className = 'time-heading-spacer';
+            spacer.setAttribute('aria-hidden', 'true');
+            heading.insertBefore(spacer, heading.firstChild || null);
+          }
+          var btn = spacer.querySelector('.scene-play-btn');
+          if (!btn) {
+            btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'scene-play-btn';
+            btn.title = 'Телесуфлер';
+            btn.setAttribute('aria-label', 'Открыть телесуфлер');
+            btn.textContent = '▶';
+            spacer.appendChild(btn);
+          }
+        });
+      }
+
+      function readSceneSayText(scene) {
+        if (!scene) return '';
+        var say = scene.querySelector('.say-editable');
+        var text = say ? (say.textContent || '') : '';
+        return text.replace(/_+/g, ' ').replace(/\s{2,}/g, ' ').trim();
+      }
+
+      function openTeleprompterForScene(scene) {
+        if (!teleprompterOverlay || !teleprompterText) return;
+        var text = readSceneSayText(scene);
+        teleprompterText.textContent = text || 'Текст «Говорю» пока пуст.';
+        teleprompterOverlay.classList.add('open');
+        teleprompterOverlay.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeTeleprompter() {
+        if (!teleprompterOverlay) return;
+        teleprompterOverlay.classList.remove('open');
+        teleprompterOverlay.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      }
+
       function renumberScenes() {
         function formatSceneNumber(n) {
           return n >= 4 ? String(n).padStart(2, '0') : String(n);
@@ -3179,6 +3304,7 @@
             if (tlOut) tlOut.innerHTML = 'OUTRO';
           }
         }
+        ensureScenePlayButtons(document);
         updateAllShotlistProgress();
       }
 
@@ -3619,7 +3745,31 @@
         }
         if (btnSave) btnSave.addEventListener('click', function () { saveToStorage(); });
 
+        document.addEventListener('click', function (e) {
+          var playBtn = e.target && e.target.closest ? e.target.closest('.scene-play-btn') : null;
+          if (playBtn) {
+            e.preventDefault();
+            var scene = playBtn.closest('.scene-main');
+            openTeleprompterForScene(scene);
+            return;
+          }
+          if (teleprompterOverlay && e.target === teleprompterOverlay) {
+            closeTeleprompter();
+          }
+        });
+
+        if (teleprompterClose) {
+          teleprompterClose.addEventListener('click', function () {
+            closeTeleprompter();
+          });
+        }
+
         window.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape' && teleprompterOverlay && teleprompterOverlay.classList.contains('open')) {
+            e.preventDefault();
+            closeTeleprompter();
+            return;
+          }
           var isSave = (e.key === 's' || e.key === 'S') && (e.metaKey || e.ctrlKey);
           if (!isSave) return;
           e.preventDefault();
