@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- v41: в шотлисте стабилизировано добавление нескольких сцен в поле «Какие сцены снимаешь здесь» -->
+<!-- v45: добавлен блок «План дня» (дата, видео, статусы) -->
 <html lang="ru" style="--logo-x: 0px; --logo-y: 0px; --logo-scale: 1.00;">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Сценарий видео / Sam Bruev (v41)</title>
+  <title>Сценарий видео / Sam Bruev (v45)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bad+Script&family=Pacifico&family=Roboto+Slab:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -214,6 +214,88 @@
       padding: 14px 16px;
       margin-bottom: 14px;
       box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4);
+    }
+
+    .scenario-hub {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .scenario-hub .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .scenario-hub label {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      color: var(--label);
+      font-size: 12px;
+      min-width: 140px;
+      flex: 1 1 180px;
+    }
+
+    .scenario-hub input,
+    .scenario-hub select {
+      background: #000;
+      border: 1px solid rgba(255, 228, 160, 0.22);
+      border-radius: 10px;
+      color: var(--text);
+      padding: 7px 9px;
+      font: inherit;
+      color-scheme: dark;
+    }
+
+    .scenario-hub .actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .daily-plan {
+      margin-top: 10px;
+    }
+
+    .daily-plan .plan-summary {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    .daily-plan .plan-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .daily-plan .plan-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto auto;
+      gap: 8px;
+      align-items: center;
+      background: #0b0b0b;
+      border: 1px solid rgba(255, 228, 160, 0.2);
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 12px;
+    }
+
+    .daily-plan .plan-row .date {
+      color: var(--cream);
+      font-weight: 700;
+    }
+
+    .daily-plan .tag {
+      border-radius: 999px;
+      border: 1px solid rgba(255, 228, 160, 0.22);
+      padding: 2px 8px;
+      color: var(--label);
+      white-space: nowrap;
     }
 
     .card > h2 {
@@ -1142,6 +1224,47 @@
         <input id="logo-scale" type="range" min="60" max="220" step="1" value="100">
         <span class="logo-scale-value" id="logo-scale-value">100%</span>
       </label>
+    </div>
+
+    <div class="card scenario-hub" id="scenario-hub">
+      <div class="row">
+        <label>Сценарий
+          <select id="scenario-select"></select>
+        </label>
+        <label>Фильтр
+          <select id="scenario-filter">
+            <option value="all" selected>Все</option>
+            <option value="today">Сегодня</option>
+            <option value="week">Эта неделя</option>
+          </select>
+        </label>
+        <label>Название
+          <input id="scenario-name" type="text" placeholder="Название видео">
+        </label>
+        <label>Дата
+          <input id="scenario-date" type="date">
+        </label>
+        <label>Видео в этот день
+          <input id="scenario-count" type="number" min="1" max="50" placeholder="например, 12">
+        </label>
+        <label>Статус
+          <select id="scenario-status">
+            <option value="draft" selected>Черновик</option>
+            <option value="ready">Готов</option>
+            <option value="shot">Снято</option>
+          </select>
+        </label>
+      </div>
+      <div class="actions">
+        <button class="btn" id="btn-scenario-new" type="button">+ Новый шаблон</button>
+        <button class="btn btn-danger" id="btn-scenario-delete" type="button">Удалить</button>
+      </div>
+    </div>
+
+    <div class="card daily-plan" id="daily-plan">
+      <h2>План дня</h2>
+      <div class="plan-summary" id="plan-summary">Нет данных.</div>
+      <div class="plan-list" id="plan-list"></div>
     </div>
 
     <div class="card">
@@ -2092,6 +2215,7 @@
     (function () {
       var STORAGE_KEY = 'abakan-main-abakan-layout-v14';
       var LEGACY_STORAGE_KEYS = ['abakan-main-abakan-layout-v13', 'abakan-main-abakan-layout-v12', 'abakan-main-abakan-layout-v10', 'abakan-main-abakan-layout-v9', 'abakan-main-abakan-layout-v8'];
+      var SCENARIO_STORAGE_KEY = 'abakan-scenarios-v1';
 
       var root = document.documentElement;
       var wrap = document.querySelector('.wrap');
@@ -2106,6 +2230,16 @@
       var btnAdd = document.getElementById('btn-add-scene');
       var btnSave = document.getElementById('btn-save');
       var saveStatus = document.getElementById('save-status');
+      var scenarioSelect = document.getElementById('scenario-select');
+      var scenarioName = document.getElementById('scenario-name');
+      var scenarioDate = document.getElementById('scenario-date');
+      var scenarioCount = document.getElementById('scenario-count');
+      var scenarioStatus = document.getElementById('scenario-status');
+      var scenarioFilter = document.getElementById('scenario-filter');
+      var btnScenarioNew = document.getElementById('btn-scenario-new');
+      var btnScenarioDelete = document.getElementById('btn-scenario-delete');
+      var planSummary = document.getElementById('plan-summary');
+      var planList = document.getElementById('plan-list');
 
       var x = { value: 0 };
       var y = { value: 0 };
@@ -2128,6 +2262,130 @@
         saveStatus.classList.toggle('dirty', !!isDirty);
       }
 
+      function uid() {
+        return 'scn-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
+      }
+
+      function buildEmptyScenarioHtml(baseHtml) {
+        var box = document.createElement('div');
+        box.innerHTML = baseHtml || '';
+        box.querySelectorAll('.say-editable, .intercut-text, .scene-title').forEach(function (el) { el.textContent = ''; });
+        box.querySelectorAll('.scene-shot-checkbox').forEach(function (cb) { cb.checked = false; });
+        box.querySelectorAll('.scene-main').forEach(function (sc) { sc.classList.remove('scene-shot-complete'); });
+        return box.innerHTML;
+      }
+
+      function readScenarioBundle() {
+        try {
+          var raw = localStorage.getItem(SCENARIO_STORAGE_KEY);
+          if (!raw) return null;
+          var parsed = JSON.parse(raw);
+          if (!parsed || !Array.isArray(parsed.items)) return null;
+          return parsed;
+        } catch (e) { return null; }
+      }
+
+      function writeScenarioBundle(bundle) {
+        localStorage.setItem(SCENARIO_STORAGE_KEY, JSON.stringify(bundle));
+      }
+
+      function currentScenarioMeta(bundle) {
+        if (!bundle || !bundle.activeId) return null;
+        return bundle.items.find(function (it) { return it.id === bundle.activeId; }) || null;
+      }
+
+      function renderDailyPlan(bundle) {
+        if (!planSummary || !planList) return;
+        var items = (bundle && bundle.items) ? bundle.items.slice() : [];
+        if (!items.length) {
+          planSummary.textContent = 'Нет данных.';
+          planList.innerHTML = '';
+          return;
+        }
+        var groups = {};
+        items.forEach(function (it) {
+          var key = it.date || 'Без даты';
+          if (!groups[key]) groups[key] = { scenarios: 0, videos: 0, draft: 0, ready: 0, shot: 0 };
+          groups[key].scenarios += 1;
+          groups[key].videos += Number(it.targetCount || 0) || 0;
+          var st = it.status || 'draft';
+          if (st === 'ready') groups[key].ready += 1;
+          else if (st === 'shot') groups[key].shot += 1;
+          else groups[key].draft += 1;
+        });
+        var keys = Object.keys(groups).sort();
+        var totalVideos = 0;
+        var totalScenarios = 0;
+        keys.forEach(function (k) { totalVideos += groups[k].videos; totalScenarios += groups[k].scenarios; });
+        planSummary.textContent = 'Дней: ' + keys.length + ' · Сценариев: ' + totalScenarios + ' · Видео по плану: ' + totalVideos;
+        planList.innerHTML = keys.map(function (k) {
+          var g = groups[k];
+          return '<div class="plan-row">' +
+            '<span class="date">' + k + '</span>' +
+            '<span class="tag">сценариев: ' + g.scenarios + '</span>' +
+            '<span class="tag">видео: ' + g.videos + '</span>' +
+            '<span class="tag">готово: ' + g.ready + '</span>' +
+            '<span class="tag">снято: ' + g.shot + '</span>' +
+          '</div>';
+        }).join('');
+      }
+
+      function renderScenarioList(bundle) {
+        if (!scenarioSelect) return;
+        function isInCurrentWeek(dateStr) {
+          if (!dateStr) return false;
+          var d = new Date(dateStr + 'T00:00:00');
+          if (isNaN(d)) return false;
+          var now = new Date();
+          var day = (now.getDay() + 6) % 7;
+          var monday = new Date(now); monday.setDate(now.getDate() - day); monday.setHours(0,0,0,0);
+          var sunday = new Date(monday); sunday.setDate(monday.getDate() + 7);
+          return d >= monday && d < sunday;
+        }
+        var filter = scenarioFilter ? scenarioFilter.value : 'all';
+        var items = (bundle.items || []).slice().sort(function (a,b) {
+          var da = a.date || '9999-99-99';
+          var db = b.date || '9999-99-99';
+          if (da !== db) return da < db ? -1 : 1;
+          return (a.name || '').localeCompare(b.name || '');
+        }).filter(function (it) {
+          if (filter === 'today') {
+            var today = new Date().toISOString().slice(0,10);
+            return (it.date || '') === today;
+          }
+          if (filter === 'week') return isInCurrentWeek(it.date || '');
+          return true;
+        });
+
+        scenarioSelect.innerHTML = '';
+        var groups = {};
+        items.forEach(function (it) {
+          var key = it.date || 'Без даты';
+          if (!groups[key]) groups[key] = [];
+          groups[key].push(it);
+        });
+        Object.keys(groups).forEach(function (key) {
+          var grp = document.createElement('optgroup');
+          grp.label = key;
+          groups[key].forEach(function (it) {
+            var opt = document.createElement('option');
+            opt.value = it.id;
+            var cnt = it.targetCount ? ' · ' + it.targetCount + ' видео' : '';
+            var statusMap = { draft: 'черновик', ready: 'готов', shot: 'снято' };
+            var st = it.status ? ' · ' + (statusMap[it.status] || it.status) : '';
+            opt.textContent = (it.name || 'Без названия') + cnt + st;
+            grp.appendChild(opt);
+          });
+          scenarioSelect.appendChild(grp);
+        });
+
+        if (bundle.activeId && scenarioSelect.querySelector('option[value="' + bundle.activeId + '"]')) {
+          scenarioSelect.value = bundle.activeId;
+        } else if (scenarioSelect.options.length) {
+          scenarioSelect.value = scenarioSelect.options[0].value;
+        }
+      }
+
       function persistToStorage(statusText) {
         try {
           prepareDomForSave();
@@ -2138,6 +2396,26 @@
             prep: getPrep()
           };
           localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+
+          var bundle = readScenarioBundle();
+          if (!bundle) bundle = { activeId: null, items: [] };
+          var current = currentScenarioMeta(bundle);
+          if (!current) {
+            current = { id: uid(), name: 'Новый сценарий', date: '', targetCount: '', html: '', logo: {}, prep: {}, updatedAt: Date.now() };
+            bundle.items.push(current);
+            bundle.activeId = current.id;
+          }
+          current.name = scenarioName && scenarioName.value.trim() ? scenarioName.value.trim() : (current.name || 'Без названия');
+          current.date = scenarioDate ? (scenarioDate.value || '') : '';
+          current.targetCount = scenarioCount ? (scenarioCount.value || '') : '';
+          current.status = scenarioStatus ? (scenarioStatus.value || 'draft') : 'draft';
+          current.html = state.html;
+          current.logo = state.logo;
+          current.prep = state.prep;
+          current.updatedAt = Date.now();
+          writeScenarioBundle(bundle);
+          renderScenarioList(bundle);
+          renderDailyPlan(bundle);
           setStatus(statusText || 'Сохранено', false);
         } catch (e) {
           setStatus('Не удалось сохранить (браузер / память)', true);
@@ -2453,6 +2731,47 @@
 
       function loadFromStorage() {
         try {
+          var bundle = readScenarioBundle();
+          if (bundle && bundle.items && bundle.items.length) {
+            if (!bundle.activeId || !bundle.items.some(function (it) { return it.id === bundle.activeId; })) bundle.activeId = bundle.items[0].id;
+            var sc = currentScenarioMeta(bundle);
+            if (sc && sc.logo) {
+              x.value = Number(sc.logo.x || 0);
+              y.value = Number(sc.logo.y || 0);
+              s.value = Number(sc.logo.scale || 100);
+              applyLogo();
+            }
+            if (sc && sc.prep) {
+              prepIds.forEach(function (id) {
+                var el = document.getElementById(id);
+                if (el && sc.prep[id] !== undefined && sc.prep[id] !== null) el.value = String(sc.prep[id]);
+              });
+            }
+            if (sc && sc.html && wrap) {
+              wrap.innerHTML = sc.html;
+              sceneStack = document.getElementById('scene-stack');
+              outroStack = document.getElementById('scene-outro-stack');
+              scenesBlock = document.getElementById('scenes-block');
+              tpl = document.getElementById('scene-template');
+              btnAdd = document.getElementById('btn-add-scene');
+              btnSave = document.getElementById('btn-save');
+              saveStatus = document.getElementById('save-status');
+              ensureMainSceneUI();
+              Array.prototype.forEach.call(document.querySelectorAll('.scene-time-wrap[data-time-filled]'), function (el) { el.removeAttribute('data-time-filled'); });
+              repairSceneTimeSelectsInDom(wrap);
+              ensureShotlistLocationsMinCount(4);
+              migrateShotlistPiecesMarkup(wrap);
+              ensureShotlistPieceSelectOptions(wrap);
+            }
+            renderScenarioList(bundle);
+          renderDailyPlan(bundle);
+            if (scenarioName) scenarioName.value = sc && sc.name ? sc.name : '';
+            if (scenarioDate) scenarioDate.value = sc && sc.date ? sc.date : '';
+            if (scenarioCount) scenarioCount.value = sc && sc.targetCount ? sc.targetCount : '';
+            if (scenarioStatus) scenarioStatus.value = sc && sc.status ? sc.status : 'draft';
+            return;
+          }
+
           var raw = localStorage.getItem(STORAGE_KEY);
           if (!raw && LEGACY_STORAGE_KEYS.length) {
             var li = 0;
@@ -2461,62 +2780,54 @@
               if (raw) break;
             }
           }
-          if (!raw) return;
-          var state = JSON.parse(raw);
-          if (state.logo) {
-            x.value = Number(state.logo.x || 0);
-            y.value = Number(state.logo.y || 0);
-            s.value = Number(state.logo.scale || 100);
-            applyLogo();
-          }
-          if (state.prep) {
-            prepIds.forEach(function (id) {
-              var el = document.getElementById(id);
-              if (el && state.prep[id] !== undefined && state.prep[id] !== null) {
-                el.value = String(state.prep[id]);
-              }
-            });
-            var legacyFmt = state.prep['prep-format'];
-            if (legacyFmt && typeof legacyFmt === 'string') {
-              var asp = document.getElementById('prep-format-aspect');
-              var qu = document.getElementById('prep-format-quality');
-              var fp = document.getElementById('prep-format-fps');
-              if (asp && !state.prep['prep-format-aspect']) {
-                if (legacyFmt.indexOf('16:9') >= 0) asp.value = '16:9';
-                else if (legacyFmt.indexOf('1:1') >= 0) asp.value = '1:1';
-                else if (legacyFmt.indexOf('4:3') >= 0) asp.value = '4:3';
-                else if (legacyFmt.indexOf('9:16') >= 0) asp.value = '9:16';
-              }
-              if (qu && !state.prep['prep-format-quality']) {
-                if (legacyFmt.indexOf('4K') >= 0 || legacyFmt.indexOf('2160') >= 0) qu.value = '4K';
-                else if (legacyFmt.indexOf('720') >= 0) qu.value = '720p';
-                else if (legacyFmt.indexOf('1080') >= 0) qu.value = '1080p';
-              }
-              if (fp && !state.prep['prep-format-fps']) {
-                var fm = legacyFmt.match(/\b(24|25|30|50|60)\s*fps/i) || legacyFmt.match(/\b(24|25|30|50|60)\b/);
-                if (fm) fp.value = fm[1];
-              }
+          if (raw) {
+            var state = JSON.parse(raw);
+            if (state.logo) {
+              x.value = Number(state.logo.x || 0);
+              y.value = Number(state.logo.y || 0);
+              s.value = Number(state.logo.scale || 100);
+              applyLogo();
+            }
+            if (state.prep) {
+              prepIds.forEach(function (id) {
+                var el = document.getElementById(id);
+                if (el && state.prep[id] !== undefined && state.prep[id] !== null) el.value = String(state.prep[id]);
+              });
+            }
+            if (state.html && wrap) {
+              wrap.innerHTML = state.html;
+              sceneStack = document.getElementById('scene-stack');
+              outroStack = document.getElementById('scene-outro-stack');
+              scenesBlock = document.getElementById('scenes-block');
+              tpl = document.getElementById('scene-template');
+              btnAdd = document.getElementById('btn-add-scene');
+              btnSave = document.getElementById('btn-save');
+              saveStatus = document.getElementById('save-status');
+              ensureMainSceneUI();
+              Array.prototype.forEach.call(document.querySelectorAll('.scene-time-wrap[data-time-filled]'), function (el) { el.removeAttribute('data-time-filled'); });
+              repairSceneTimeSelectsInDom(wrap);
+              ensureShotlistLocationsMinCount(4);
+              migrateShotlistPiecesMarkup(wrap);
+              ensureShotlistPieceSelectOptions(wrap);
             }
           }
-          if (state.html && wrap) {
-            wrap.innerHTML = state.html;
-            sceneStack = document.getElementById('scene-stack');
-            outroStack = document.getElementById('scene-outro-stack');
-            scenesBlock = document.getElementById('scenes-block');
-            tpl = document.getElementById('scene-template');
-            btnAdd = document.getElementById('btn-add-scene');
-            btnSave = document.getElementById('btn-save');
-            saveStatus = document.getElementById('save-status');
-            ensureMainSceneUI();
-            /* После сохранённого HTML флаг data-time-filled мог остаться, а option — нет; сбрасываем, чтобы заново залить TIME_OPTIONS_HTML */
-            Array.prototype.forEach.call(document.querySelectorAll('.scene-time-wrap[data-time-filled]'), function (el) {
-              el.removeAttribute('data-time-filled');
-            });
-            repairSceneTimeSelectsInDom(wrap);
-            ensureShotlistLocationsMinCount(4);
-            migrateShotlistPiecesMarkup(wrap);
-            ensureShotlistPieceSelectOptions(wrap);
-          }
+
+          var first = {
+            id: uid(),
+            name: 'Новый сценарий',
+            date: '',
+            targetCount: '',
+            status: 'draft',
+            html: buildEmptyScenarioHtml(wrap ? wrap.innerHTML : ''),
+            logo: { x: x.value, y: y.value, scale: s.value },
+            prep: getPrep(),
+            updatedAt: Date.now()
+          };
+          var initialBundle = { activeId: first.id, items: [first] };
+          writeScenarioBundle(initialBundle);
+          renderScenarioList(initialBundle);
+          renderDailyPlan(initialBundle);
+          if (scenarioName) scenarioName.value = first.name;
         } catch (e) {}
       }
 
@@ -3127,6 +3438,66 @@
             s.value = Number(logoScale.value) || 100;
             applyLogo();
             markDirty();
+          });
+        }
+
+        if (scenarioName) scenarioName.addEventListener('input', function () { markDirty(); });
+        if (scenarioDate) scenarioDate.addEventListener('change', function () { markDirty(); });
+        if (scenarioCount) scenarioCount.addEventListener('input', function () { markDirty(); });
+        if (scenarioStatus) scenarioStatus.addEventListener('change', function () { markDirty(); });
+        if (scenarioFilter) scenarioFilter.addEventListener('change', function () {
+          var bundle = readScenarioBundle();
+          if (bundle) renderScenarioList(bundle);
+          renderDailyPlan(bundle);
+        });
+
+        if (scenarioSelect) {
+          scenarioSelect.addEventListener('change', function () {
+            persistToStorage('Сохранено');
+            var bundle = readScenarioBundle();
+            if (!bundle) return;
+            bundle.activeId = scenarioSelect.value;
+            writeScenarioBundle(bundle);
+            location.reload();
+          });
+        }
+
+        if (btnScenarioNew) {
+          btnScenarioNew.addEventListener('click', function () {
+            persistToStorage('Сохранено');
+            var bundle = readScenarioBundle() || { activeId: null, items: [] };
+            var name = (scenarioName && scenarioName.value.trim()) ? scenarioName.value.trim() : 'Новый сценарий';
+            var id = uid();
+            var sc = {
+              id: id,
+              name: name + ' (шаблон)',
+              date: scenarioDate ? (scenarioDate.value || '') : '',
+              targetCount: scenarioCount ? (scenarioCount.value || '') : '',
+              status: 'draft',
+              html: buildEmptyScenarioHtml(wrap ? wrap.innerHTML : ''),
+              logo: { x: x.value, y: y.value, scale: s.value },
+              prep: getPrep(),
+              updatedAt: Date.now()
+            };
+            bundle.items.push(sc);
+            bundle.activeId = id;
+            writeScenarioBundle(bundle);
+            location.reload();
+          });
+        }
+
+        if (btnScenarioDelete) {
+          btnScenarioDelete.addEventListener('click', function () {
+            var bundle = readScenarioBundle();
+            if (!bundle || !bundle.items || bundle.items.length <= 1) {
+              alert('Нужен минимум один сценарий.');
+              return;
+            }
+            if (!confirm('Удалить текущий сценарий?')) return;
+            bundle.items = bundle.items.filter(function (it) { return it.id !== bundle.activeId; });
+            bundle.activeId = bundle.items[0].id;
+            writeScenarioBundle(bundle);
+            location.reload();
           });
         }
 
