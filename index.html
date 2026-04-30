@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- v54: восстановление подчёркиваний в «Перебивка» при очистке -->
+<!-- v55: заголовок сценария синхронизирован с выбранным сценарием -->
 <html lang="ru" style="--logo-x: 0px; --logo-y: 0px; --logo-scale: 1.00;">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Сценарий видео / Sam Bruev (v54)</title>
+  <title>Сценарий видео / Sam Bruev (v55)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bad+Script&family=Pacifico&family=Roboto+Slab:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -2327,6 +2327,8 @@
       var btnScenarioDelete = document.getElementById('btn-scenario-delete');
       var planSummary = document.getElementById('plan-summary');
       var planList = document.getElementById('plan-list');
+      var titleSubject = document.querySelector('.title-row .title-subject');
+      var DEFAULT_SCENARIO_TITLE = 'ПОРА СНИМАТЬ КОНТЕНТ';
 
       var x = { value: 0 };
       var y = { value: 0 };
@@ -2379,6 +2381,12 @@
       function currentScenarioMeta(bundle) {
         if (!bundle || !bundle.activeId) return null;
         return bundle.items.find(function (it) { return it.id === bundle.activeId; }) || null;
+      }
+
+      function syncTitleSubject(name) {
+        if (!titleSubject) return;
+        var next = (name || '').trim();
+        titleSubject.textContent = next || DEFAULT_SCENARIO_TITLE;
       }
 
       function renderDailyPlan(bundle) {
@@ -2471,6 +2479,7 @@
         } else if (scenarioSelect.options.length) {
           scenarioSelect.value = scenarioSelect.options[0].value;
         }
+        if (!scenarioSelect.options.length) syncTitleSubject('');
       }
 
       function persistToStorage(statusText) {
@@ -2911,6 +2920,7 @@
             if (scenarioDate) scenarioDate.value = sc && sc.date ? sc.date : '';
             if (scenarioCount) scenarioCount.value = sc && sc.targetCount ? sc.targetCount : '';
             if (scenarioStatus) scenarioStatus.value = sc && sc.status ? sc.status : 'draft';
+            syncTitleSubject(sc && sc.name ? sc.name : '');
             return;
           }
 
@@ -2970,6 +2980,7 @@
           renderScenarioList(initialBundle);
           renderDailyPlan(initialBundle);
           if (scenarioName) scenarioName.value = first.name;
+          syncTitleSubject(first.name);
         } catch (e) {}
       }
 
@@ -3586,7 +3597,6 @@
           el.addEventListener('change', function () { markDirty(); });
         });
 
-        var titleSubject = document.querySelector('.title-row .title-subject');
         if (titleSubject) titleSubject.addEventListener('input', function () { markDirty(); });
 
         if (logoScale) {
@@ -3602,7 +3612,10 @@
           });
         }
 
-        if (scenarioName) scenarioName.addEventListener('input', function () { markDirty(); });
+        if (scenarioName) scenarioName.addEventListener('input', function () {
+          syncTitleSubject(scenarioName.value || '');
+          markDirty();
+        });
         if (scenarioDate) scenarioDate.addEventListener('change', function () { markDirty(); });
         if (scenarioCount) scenarioCount.addEventListener('input', function () { markDirty(); });
         if (scenarioStatus) scenarioStatus.addEventListener('change', function () { markDirty(); });
