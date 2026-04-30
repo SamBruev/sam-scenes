@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- v49: подписи сцен сделаны крупнее и в верхнем регистре (СЦЕНА 1) -->
+<!-- v50: на iPhone выбор времени сцены через iOS wheel (как в будильнике) -->
 <html lang="ru" style="--logo-x: 0px; --logo-y: 0px; --logo-scale: 1.00;">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Сценарий видео / Sam Bruev (v49)</title>
+  <title>Сценарий видео / Sam Bruev (v50)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bad+Script&family=Pacifico&family=Roboto+Slab:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -607,6 +607,41 @@
       color-scheme: dark;
       accent-color: var(--gold);
       font-variant-numeric: tabular-nums;
+    }
+
+    .scene-time-ios {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      justify-content: flex-end;
+      width: 100%;
+    }
+
+    .scene-time-ios input[type="time"] {
+      background: #0f0f0f;
+      border: 1px solid rgba(255, 228, 160, 0.24);
+      border-radius: 10px;
+      color: var(--text);
+      font: inherit;
+      font-size: 15px;
+      padding: 8px 10px;
+      color-scheme: dark;
+      min-width: 8.8rem;
+      text-align: center;
+    }
+
+    .scene-time-ios .sep {
+      color: rgba(242, 215, 140, 0.55);
+      font-size: 12px;
+      user-select: none;
+    }
+
+    .ios-wheel-time .scene-time-wrap .time-pickers {
+      display: none;
+    }
+
+    .ios-wheel-time .scene-time-wrap .scene-time-ios {
+      display: flex;
     }
 
     .line { margin-top: 8px; color: var(--label); }
@@ -2268,6 +2303,8 @@
       var SCENARIO_STORAGE_KEY = 'abakan-scenarios-v1';
 
       var root = document.documentElement;
+      var isIOSWheel = /iP(ad|hone|od)/i.test(navigator.userAgent || '');
+      if (isIOSWheel) root.classList.add('ios-wheel-time');
       var wrap = document.querySelector('.wrap');
       var logo = document.querySelector('.logo-bg');
       var logoScale = document.getElementById('logo-scale');
@@ -2591,6 +2628,58 @@
         return h;
       })();
 
+      function to2(n) {
+        var x = Math.max(0, Math.min(59, Number(n) || 0));
+        return (x < 10 ? '0' : '') + x;
+      }
+
+      function syncIOSWheelFromSelects(wrap) {
+        if (!wrap) return;
+        var sels = wrap.querySelectorAll('select.scene-time-select');
+        if (sels.length < 4) return;
+        var iosA = wrap.querySelector('input.scene-time-ios-start');
+        var iosB = wrap.querySelector('input.scene-time-ios-end');
+        if (!iosA || !iosB) return;
+        iosA.value = to2(sels[0].value) + ':' + to2(sels[1].value);
+        iosB.value = to2(sels[2].value) + ':' + to2(sels[3].value);
+      }
+
+      function ensureIOSWheelInputs(wrap) {
+        if (!isIOSWheel || !wrap) return;
+        if (wrap.querySelector('.scene-time-ios')) {
+          syncIOSWheelFromSelects(wrap);
+          return;
+        }
+        var ios = document.createElement('div');
+        ios.className = 'scene-time-ios';
+        ios.innerHTML =
+          '<input type="time" step="1" class="scene-time-ios-start" aria-label="Начало">' +
+          '<span class="sep">—</span>' +
+          '<input type="time" step="1" class="scene-time-ios-end" aria-label="Конец">';
+        wrap.appendChild(ios);
+        function readInput(v) {
+          var m = String(v || '').match(/^(\d{2}):(\d{2})$/);
+          if (!m) return { mm: 0, ss: 0 };
+          return { mm: Math.max(0, Math.min(59, Number(m[1]) || 0)), ss: Math.max(0, Math.min(59, Number(m[2]) || 0)) };
+        }
+        function applyFromInputs() {
+          var sels = wrap.querySelectorAll('select.scene-time-select');
+          if (sels.length < 4) return;
+          var a = readInput(ios.querySelector('.scene-time-ios-start').value);
+          var b = readInput(ios.querySelector('.scene-time-ios-end').value);
+          sels[0].value = String(a.mm);
+          sels[1].value = String(a.ss);
+          sels[2].value = String(b.mm);
+          sels[3].value = String(b.ss);
+          markDirty();
+        }
+        ios.querySelectorAll('input').forEach(function (inp) {
+          inp.addEventListener('change', applyFromInputs);
+          inp.addEventListener('input', applyFromInputs);
+        });
+        syncIOSWheelFromSelects(wrap);
+      }
+
       function initSceneTimeBlock(wrap) {
         if (!wrap) return;
         wrap.querySelectorAll('select.scene-time-select').forEach(function (sel) {
@@ -2598,6 +2687,7 @@
           sel.innerHTML = TIME_OPTIONS_HTML;
         });
         wrap.setAttribute('data-time-filled', '1');
+        ensureIOSWheelInputs(wrap);
       }
 
       function clipSaySpan(span) {
@@ -2693,6 +2783,7 @@
           Array.prototype.forEach.call(sels, function (sel, i) {
             if (vals[i] !== undefined && vals[i] !== null && vals[i] !== '') sel.value = vals[i];
           });
+          syncIOSWheelFromSelects(w);
         });
       }
 
@@ -2707,6 +2798,7 @@
         set(sels[1], ss0);
         set(sels[2], mm1);
         set(sels[3], ss1);
+        syncIOSWheelFromSelects(wrap);
       }
 
       function hydrateDatumSceneTimes() {
