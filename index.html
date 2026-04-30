@@ -1,16 +1,10 @@
 <!DOCTYPE html>
-<!-- v46: добавлена иконка-лампа для iPhone (Add to Home Screen) -->
+<!-- v48: улучшена мобильная вёрстка блоков «Сценарий» и «План дня» для iPhone -->
 <html lang="ru" style="--logo-x: 0px; --logo-y: 0px; --logo-scale: 1.00;">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Sam Bruev">
-  <link rel="apple-touch-icon" href="./lamp-icon.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="./lamp-icon.png">
-  <link rel="icon" type="image/png" sizes="512x512" href="./lamp-icon.png">
-  <title>Сценарий видео / Sam Bruev (v46)</title>
+  <title>Сценарий видео / Sam Bruev (v48)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bad+Script&family=Pacifico&family=Roboto+Slab:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -1170,6 +1164,50 @@
       .logo-controls {
         display: none;
       }
+
+      .scenario-hub {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .scenario-hub .row {
+        gap: 10px;
+      }
+
+      .scenario-hub label {
+        flex: 1 1 100%;
+        min-width: 100%;
+      }
+
+      .scenario-hub .actions {
+        width: 100%;
+        justify-content: stretch;
+        flex-direction: row;
+      }
+
+      .scenario-hub .actions .btn {
+        flex: 1 1 0;
+        min-width: 0;
+        padding: 9px 10px;
+        font-size: 14px;
+      }
+
+      .daily-plan .plan-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+      }
+
+      .daily-plan .plan-row .date {
+        grid-column: 1 / -1;
+        margin-bottom: 2px;
+      }
+
+      .daily-plan .tag {
+        width: 100%;
+        text-align: center;
+        box-sizing: border-box;
+      }
+    }
 
       @media (orientation: portrait) {
         body::before {
