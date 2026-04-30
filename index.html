@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- v51: увеличено слово «ШОТЛИСТ» -->
+<!-- v52: фикс добавления нескольких сцен в шотлисте на iPhone (селект №) -->
 <html lang="ru" style="--logo-x: 0px; --logo-y: 0px; --logo-scale: 1.00;">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Сценарий видео / Sam Bruev (v51)</title>
+  <title>Сценарий видео / Sam Bruev (v52)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bad+Script&family=Pacifico&family=Roboto+Slab:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -2052,7 +2052,7 @@
           </div>
           <div class="line shotlist-pieces-row">
             <span class="shotlist-pieces-label"><b>Какие сцены снимаем здесь:</b></span>
-            <span class="shotlist-pieces-display" contenteditable="true" spellcheck="false"></span>
+            <span class="shotlist-pieces-display" contenteditable="false" spellcheck="false"></span>
             <select class="shotlist-piece-digit" aria-label="Добавить номер куска — можно выбрать несколько">
               <option value="">№</option>
               <option value="INTRO">INTRO</option>
@@ -2115,7 +2115,7 @@
           </div>
           <div class="line shotlist-pieces-row">
             <span class="shotlist-pieces-label"><b>Какие сцены снимаем здесь:</b></span>
-            <span class="shotlist-pieces-display" contenteditable="true" spellcheck="false"></span>
+            <span class="shotlist-pieces-display" contenteditable="false" spellcheck="false"></span>
             <select class="shotlist-piece-digit" aria-label="Добавить номер куска — можно выбрать несколько">
               <option value="">№</option>
               <option value="INTRO">INTRO</option>
@@ -2178,7 +2178,7 @@
           </div>
           <div class="line shotlist-pieces-row">
             <span class="shotlist-pieces-label"><b>Какие сцены снимаем здесь:</b></span>
-            <span class="shotlist-pieces-display" contenteditable="true" spellcheck="false"></span>
+            <span class="shotlist-pieces-display" contenteditable="false" spellcheck="false"></span>
             <select class="shotlist-piece-digit" aria-label="Добавить номер куска — можно выбрать несколько">
               <option value="">№</option>
               <option value="INTRO">INTRO</option>
@@ -2242,7 +2242,7 @@
           </div>
           <div class="line shotlist-pieces-row">
             <span class="shotlist-pieces-label"><b>Какие сцены снимаем здесь:</b></span>
-            <span class="shotlist-pieces-display" contenteditable="true" spellcheck="false"></span>
+            <span class="shotlist-pieces-display" contenteditable="false" spellcheck="false"></span>
             <select class="shotlist-piece-digit" aria-label="Добавить номер куска — можно выбрать несколько">
               <option value="">№</option>
               <option value="INTRO">INTRO</option>
@@ -3240,7 +3240,7 @@
         root.querySelectorAll('.shotlist-pieces-text').forEach(function (el) {
           el.classList.remove('shotlist-pieces-text');
           el.classList.add('shotlist-pieces-display');
-          el.setAttribute('contenteditable', 'true');
+          el.setAttribute('contenteditable', 'false');
           normalizeShotlistPiecesDisplay(el);
         });
         root.querySelectorAll('.shotlist-pieces-display').forEach(function (el) {
@@ -3251,21 +3251,30 @@
       }
 
       function wireShotlistPiecePickers() {
+        function appendFromSelect(sel) {
+          var v = normalizePieceToken(sel.value);
+          if (!v) return;
+          var row = sel.closest('.shotlist-pieces-row');
+          var display = row && row.querySelector('.shotlist-pieces-display');
+          if (!display) return;
+          var parts = parsePiecesFromDisplay(display);
+          if (parts.indexOf(v) === -1) parts.push(v);
+          renderPiecesDisplay(display, parts, nextTokenForPieces(parts));
+          sel.value = '';
+          markDirty();
+        }
+
         document.querySelectorAll('select.shotlist-piece-digit').forEach(function (sel) {
           if (sel.getAttribute('data-bound') === '1') return;
           sel.setAttribute('data-bound', '1');
-          sel.addEventListener('change', function () {
-            var v = normalizePieceToken(sel.value);
-            if (!v) return;
-            var row = sel.closest('.shotlist-pieces-row');
-            var display = row && row.querySelector('.shotlist-pieces-display');
-            if (!display) return;
-            var parts = parsePiecesFromDisplay(display);
-            if (parts.indexOf(v) === -1) parts.push(v);
-            renderPiecesDisplay(display, parts, nextTokenForPieces(parts));
-            sel.selectedIndex = 0;
-            markDirty();
-          });
+
+          sel.addEventListener('change', function () { appendFromSelect(sel); });
+          sel.addEventListener('input', function () { appendFromSelect(sel); });
+
+          // iOS fallback: иногда change не приходит стабильно после колёсика.
+          sel.addEventListener('touchend', function () {
+            setTimeout(function () { appendFromSelect(sel); }, 0);
+          }, { passive: true });
         });
       }
 
