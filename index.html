@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- v48: улучшена мобильная вёрстка блоков «Сценарий» и «План дня» для iPhone -->
+<!-- v49: подписи сцен сделаны крупнее и в верхнем регистре (СЦЕНА 1) -->
 <html lang="ru" style="--logo-x: 0px; --logo-y: 0px; --logo-scale: 1.00;">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Сценарий видео / Sam Bruev (v48)</title>
+  <title>Сценарий видео / Sam Bruev (v49)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bad+Script&family=Pacifico&family=Roboto+Slab:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -418,7 +418,7 @@
     .time {
       color: var(--time);
       font-weight: 900;
-      font-size: 15px;
+      font-size: 17px;
       line-height: 1.25;
       margin: 0 0 10px;
       border: 1px solid var(--border-strong);
@@ -475,6 +475,12 @@
       padding-top: 0;
     }
 
+
+    .scene-main[data-scene-role="body"] .scene-time-wrap .time-leading {
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 800;
+    }
     .scene-main[data-scene-role="intro"] .scene-time-wrap .time-leading,
     .scene-main[data-scene-role="outro"] .scene-time-wrap .time-leading {
       font-size: 17px;
@@ -1376,7 +1382,7 @@
         <div class="scene-time-wrap">
           <div class="time-heading">
             <span class="time-heading-spacer" aria-hidden="true"></span>
-            <span class="time-leading">Сцена <span class="scene-index">1</span> — <span class="scene-title" contenteditable="true" spellcheck="true" data-placeholder="название сцены"></span></span>
+            <span class="time-leading">СЦЕНА <span class="scene-index">1</span> — <span class="scene-title" contenteditable="true" spellcheck="true" data-placeholder="название сцены"></span></span>
             <label class="scene-done-label scene-done-checkbox-only" title="Снято">
               <input type="checkbox" class="scene-shot-checkbox" autocomplete="off" title="Снято">
             </label>
@@ -1499,7 +1505,7 @@
         <div class="scene-time-wrap" data-mm0="0" data-ss0="5" data-mm1="0" data-ss1="23">
           <div class="time-heading">
             <span class="time-heading-spacer" aria-hidden="true"></span>
-            <span class="time-leading">Сцена <span class="scene-index">1</span> — <span class="scene-title" contenteditable="true" spellcheck="true" data-placeholder="название сцены"></span></span>
+            <span class="time-leading">СЦЕНА <span class="scene-index">1</span> — <span class="scene-title" contenteditable="true" spellcheck="true" data-placeholder="название сцены"></span></span>
             <label class="scene-done-label scene-done-checkbox-only" title="Снято">
               <input type="checkbox" class="scene-shot-checkbox" autocomplete="off" title="Снято">
             </label>
@@ -1559,7 +1565,7 @@
         <div class="scene-time-wrap" data-mm0="0" data-ss0="23" data-mm1="0" data-ss1="45">
           <div class="time-heading">
             <span class="time-heading-spacer" aria-hidden="true"></span>
-            <span class="time-leading">Сцена <span class="scene-index">2</span> —</span>
+            <span class="time-leading">СЦЕНА <span class="scene-index">2</span> —</span>
             <label class="scene-done-label scene-done-checkbox-only" title="Снято">
               <input type="checkbox" class="scene-shot-checkbox" autocomplete="off" title="Снято">
             </label>
@@ -1619,7 +1625,7 @@
         <div class="scene-time-wrap" data-mm0="0" data-ss0="45" data-mm1="1" data-ss1="8">
           <div class="time-heading">
             <span class="time-heading-spacer" aria-hidden="true"></span>
-            <span class="time-leading">Сцена <span class="scene-index">3</span> —</span>
+            <span class="time-leading">СЦЕНА <span class="scene-index">3</span> —</span>
             <label class="scene-done-label scene-done-checkbox-only" title="Снято">
               <input type="checkbox" class="scene-shot-checkbox" autocomplete="off" title="Снято">
             </label>
@@ -1679,7 +1685,7 @@
         <div class="scene-time-wrap" data-mm0="1" data-ss0="8" data-mm1="1" data-ss1="30">
           <div class="time-heading">
             <span class="time-heading-spacer" aria-hidden="true"></span>
-            <span class="time-leading">Сцена <span class="scene-index">4</span> —</span>
+            <span class="time-leading">СЦЕНА <span class="scene-index">4</span> —</span>
             <label class="scene-done-label scene-done-checkbox-only" title="Снято">
               <input type="checkbox" class="scene-shot-checkbox" autocomplete="off" title="Снято">
             </label>
@@ -1739,7 +1745,7 @@
         <div class="scene-time-wrap" data-mm0="1" data-ss0="30" data-mm1="1" data-ss1="55">
           <div class="time-heading">
             <span class="time-heading-spacer" aria-hidden="true"></span>
-            <span class="time-leading">Сцена <span class="scene-index">5</span> —</span>
+            <span class="time-leading">СЦЕНА <span class="scene-index">5</span> —</span>
             <label class="scene-done-label scene-done-checkbox-only" title="Снято">
               <input type="checkbox" class="scene-shot-checkbox" autocomplete="off" title="Снято">
             </label>
@@ -1799,7 +1805,7 @@
         <div class="scene-time-wrap" data-mm0="1" data-ss0="55" data-mm1="2" data-ss1="17">
           <div class="time-heading">
             <span class="time-heading-spacer" aria-hidden="true"></span>
-            <span class="time-leading">Сцена <span class="scene-index">6</span> —</span>
+            <span class="time-leading">СЦЕНА <span class="scene-index">6</span> —</span>
             <label class="scene-done-label scene-done-checkbox-only" title="Снято">
               <input type="checkbox" class="scene-shot-checkbox" autocomplete="off" title="Снято">
             </label>
@@ -1859,7 +1865,7 @@
         <div class="scene-time-wrap" data-mm0="2" data-ss0="17" data-mm1="2" data-ss1="40">
           <div class="time-heading">
             <span class="time-heading-spacer" aria-hidden="true"></span>
-            <span class="time-leading">Сцена <span class="scene-index">7</span> —</span>
+            <span class="time-leading">СЦЕНА <span class="scene-index">7</span> —</span>
             <label class="scene-done-label scene-done-checkbox-only" title="Снято">
               <input type="checkbox" class="scene-shot-checkbox" autocomplete="off" title="Снято">
             </label>
@@ -2730,7 +2736,7 @@
           wrap.innerHTML =
             '<div class="time-heading">' +
             '<span class="time-heading-spacer" aria-hidden="true"></span>' +
-            '<span class="time-leading">Сцена <span class="scene-index">1</span> — <span class="scene-title" contenteditable="true" spellcheck="true" data-placeholder="название сцены"></span></span>' +
+            '<span class="time-leading">СЦЕНА <span class="scene-index">1</span> — <span class="scene-title" contenteditable="true" spellcheck="true" data-placeholder="название сцены"></span></span>' +
             '<label class="scene-done-label scene-done-checkbox-only" title="Снято">' +
             '<input type="checkbox" class="scene-shot-checkbox" autocomplete="off" title="Снято"></label></div>' +
             '<div class="time-pickers">' +
@@ -3012,7 +3018,7 @@
           var titleEl = tl.querySelector('.scene-title');
           var prevTitle = titleEl ? (titleEl.textContent || '').trim() : '';
           tl.innerHTML =
-            'Сцена <span class="scene-index">' + formatSceneNumber(sceneNumber) +
+            'СЦЕНА <span class="scene-index">' + formatSceneNumber(sceneNumber) +
             '</span> — <span class="scene-title" contenteditable="true" spellcheck="true" data-placeholder="название сцены">' +
             escapeHtml(prevTitle) + '</span>';
         });
