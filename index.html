@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- v53: убрано название сцены из шапки (без пересечения со временем) -->
+<!-- v54: восстановление подчёркиваний в «Перебивка» при очистке -->
 <html lang="ru" style="--logo-x: 0px; --logo-y: 0px; --logo-scale: 1.00;">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Сценарий видео / Sam Bruev (v53)</title>
+  <title>Сценарий видео / Sam Bruev (v54)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bad+Script&family=Pacifico&family=Roboto+Slab:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -3351,6 +3351,11 @@
           if (!/_/.test(t)) return;
           el.textContent = t.replace(/_+/g, '').replace(/\s{2,}/g, ' ').trim();
         }
+        function restoreUnderscoresIfEmpty(el) {
+          if (!el || !el.classList || !el.classList.contains('intercut-text')) return;
+          var t = (el.textContent || '').replace(/\u00a0/g, ' ').trim();
+          if (!t) el.textContent = '________';
+        }
         document.addEventListener(
           'input',
           function (e) {
@@ -3367,6 +3372,14 @@
             if ((t.textContent || '').trim() === '________') {
               t.textContent = '';
             }
+          },
+          true
+        );
+        document.addEventListener(
+          'focusout',
+          function (e) {
+            var t = e.target;
+            restoreUnderscoresIfEmpty(t);
           },
           true
         );
