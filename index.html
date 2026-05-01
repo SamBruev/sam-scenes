@@ -3234,13 +3234,9 @@
 
       function initBottomLogoFromTop() {
         var host = document.getElementById('bottom-logo');
-        var topEl = document.querySelector('.logo-bg');
-        if (!host || !topEl) return;
-        var bg = (window.getComputedStyle && window.getComputedStyle(topEl).backgroundImage) || '';
-        var m = bg.match(/url\((?:"|')?(data:image[^)"']+|[^)"']+)(?:"|')?\)/);
-        var src = m && m[1] ? String(m[1]).replace(/^["']|["']$/g, '') : '';
+        if (!host) return;
+        var src = 'bottom-logo.png';
         host.innerHTML = '';
-        if (!src) return;
         var img = document.createElement('img');
         img.className = 'logo-img-bottom';
         img.alt = 'Sam Bruev — Mixing & Recording';
