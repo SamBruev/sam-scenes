@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- v121: сценарии — блок/папка съёмки + фильтр по блоку, список группируется по блоку -->
-<html lang="ru" style="--logo-x: 0px; --logo-y: 0px; --logo-scale: 2.00;">
+<html lang="ru" style="--logo-x: 0px; --logo-y: 0px; --logo-scale: 2.00; --top-logo-blur: 0px;">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -162,6 +162,15 @@
       min-height: 0;
       gap: 10px;
       pointer-events: none;
+      transition: filter 0.42s ease;
+      filter: blur(var(--top-logo-blur, 0px));
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .top-logo-brand {
+        transition: none !important;
+        filter: none !important;
+      }
     }
 
     .bottom-logo {
@@ -5181,7 +5190,37 @@
         }
       }
 
+      var topLogoScrollBlurRaf = null;
+      function updateTopLogoScrollBlur() {
+        var root = document.documentElement;
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          root.style.setProperty('--top-logo-blur', '0px');
+          return;
+        }
+        var y = window.scrollY || root.scrollTop || (document.body && document.body.scrollTop) || 0;
+        var start = 20;
+        var range = 180;
+        var maxBlur = 11;
+        var t = Math.max(0, Math.min(1, (y - start) / range));
+        root.style.setProperty('--top-logo-blur', (t * maxBlur).toFixed(2) + 'px');
+      }
+      function wireTopLogoScrollBlur() {
+        if (wireTopLogoScrollBlur._done) return;
+        wireTopLogoScrollBlur._done = true;
+        var onScroll = function () {
+          if (topLogoScrollBlurRaf) return;
+          topLogoScrollBlurRaf = requestAnimationFrame(function () {
+            topLogoScrollBlurRaf = null;
+            updateTopLogoScrollBlur();
+          });
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', onScroll, { passive: true });
+        updateTopLogoScrollBlur();
+      }
+
       loadFromStorage();
+      wireTopLogoScrollBlur();
       initBottomLogoFromTop();
       migrateLegacySceneTimes();
       hydrateDatumSceneTimes();
