@@ -144,9 +144,15 @@
       min-height: calc(34vh - env(safe-area-inset-top));
       position: fixed;
       top: 0;
-      left: 50%;
-      transform: translateX(-50%);
+      left: 0;
+      right: 0;
+      margin-left: auto;
+      margin-right: auto;
+      transform: none;
       width: min(980px, 100%);
+      padding-left: max(14px, env(safe-area-inset-left));
+      padding-right: max(14px, env(safe-area-inset-right));
+      box-sizing: border-box;
       z-index: 0;
       pointer-events: none;
     }
