@@ -607,7 +607,7 @@
     .shotlist-pieces-row {
       display: flex;
       flex-wrap: wrap;
-      align-items: center;
+      align-items: stretch;
       gap: 10px 12px;
       margin-top: 10px;
     }
@@ -708,6 +708,8 @@
       border: 1px solid rgba(255, 228, 160, 0.28);
       color: var(--text);
       color-scheme: dark;
+      align-self: stretch;
+      box-sizing: border-box;
     }
 
     .scene {
@@ -4595,6 +4597,7 @@
 
       function wireShotlistPiecePickers() {
         function appendFromSelect(sel) {
+          if (!sel) return;
           var v = normalizePieceToken(sel.value);
           if (!v) return;
           var row = sel.closest('.shotlist-pieces-row');
@@ -4608,10 +4611,14 @@
           markDirty();
         }
 
-        document.querySelectorAll('select.shotlist-piece-digit').forEach(function (sel) {
-          if (sel.getAttribute('data-bound') === '1') return;
-          sel.setAttribute('data-bound', '1');
-          sel.addEventListener('change', function () { appendFromSelect(sel); });
+        var section = document.querySelector('.shotlist-section');
+        if (!section || section.getAttribute('data-shotlist-picker-bound') === '1') return;
+        section.setAttribute('data-shotlist-picker-bound', '1');
+
+        section.addEventListener('change', function (e) {
+          var sel = e.target && e.target.closest && e.target.closest('select.shotlist-piece-digit');
+          if (!sel || !section.contains(sel)) return;
+          appendFromSelect(sel);
         });
       }
 
