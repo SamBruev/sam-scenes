@@ -4861,6 +4861,7 @@
         function onShotCheckboxToggle(e) {
           var t = e.target;
           if (!t || !t.matches || !t.matches('.scene-shot-checkbox')) return;
+          if (e.type === 'change') triggerHaptic('light');
           var scene = t.closest('.scene-main');
           syncShotClassForScene(scene);
           updateAllShotlistProgress();
