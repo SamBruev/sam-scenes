@@ -5387,8 +5387,83 @@
         updateTopLogoScrollBlur();
       }
 
+      function wirePullDownReload() {
+        if (wirePullDownReload._done) return;
+        wirePullDownReload._done = true;
+        if ((navigator.maxTouchPoints || 0) <= 0 && !('ontouchstart' in window)) return;
+
+        var startY = 0;
+        var armed = false;
+        var maxDy = 0;
+        var TOP_EPS = 10;
+        var PULL_MIN = 118;
+
+        function skip(el) {
+          if (!el || !el.closest) return true;
+          if (el.closest('dialog[open]')) return true;
+          if (el.closest('input, textarea, select, button, .logo-bg, .logo-controls, [contenteditable="true"]'))
+            return true;
+          return false;
+        }
+
+        function scrollTopNow() {
+          return (
+            window.scrollY ||
+            document.documentElement.scrollTop ||
+            (document.body && document.body.scrollTop) ||
+            0
+          );
+        }
+
+        document.addEventListener(
+          'touchstart',
+          function (e) {
+            if (skip(e.target)) {
+              armed = false;
+              return;
+            }
+            if (scrollTopNow() > TOP_EPS) {
+              armed = false;
+              return;
+            }
+            armed = true;
+            startY = e.touches[0].clientY;
+            maxDy = 0;
+          },
+          { passive: true }
+        );
+
+        document.addEventListener(
+          'touchmove',
+          function (e) {
+            if (!armed) return;
+            if (scrollTopNow() > TOP_EPS) {
+              armed = false;
+              return;
+            }
+            var dy = e.touches[0].clientY - startY;
+            if (dy > maxDy) maxDy = dy;
+          },
+          { passive: true }
+        );
+
+        document.addEventListener(
+          'touchend',
+          function () {
+            if (!armed) return;
+            armed = false;
+            if (scrollTopNow() <= TOP_EPS && maxDy >= PULL_MIN) {
+              location.reload();
+            }
+            maxDy = 0;
+          },
+          { passive: true }
+        );
+      }
+
       loadFromStorage();
       wireTopLogoScrollBlur();
+      wirePullDownReload();
       initBottomLogoFromTop();
       migrateLegacySceneTimes();
       hydrateDatumSceneTimes();
