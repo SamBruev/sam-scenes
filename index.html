@@ -140,7 +140,7 @@
       justify-content: flex-start;
       gap: 0;
       margin: 0 0 8px;
-      padding-top: calc(env(safe-area-inset-top) + 14px);
+      padding-top: calc(env(safe-area-inset-top) + 4px);
       min-height: calc(34vh - env(safe-area-inset-top));
       position: fixed;
       top: 0;
@@ -181,13 +181,15 @@
       top: 50%;
       width: min(540px, 92vw);
       height: min(540px, 92vw);
-      transform: translate(-50%, calc(-50% + 92px));
+      transform: translate(-50%, calc(-50% + 150px));
       background-image: url("top-lamp-bg.png");
       background-repeat: no-repeat;
       background-position: center center;
       background-size: contain;
-      opacity: 0.34;
-      filter: blur(18px) saturate(1.12) brightness(0.9);
+      opacity: 0.24;
+      filter: blur(10px) saturate(1.04) brightness(0.9);
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0%, transparent 26%, #000 54%, #000 100%);
+      mask-image: linear-gradient(to bottom, transparent 0%, transparent 26%, #000 54%, #000 100%);
       pointer-events: none;
       z-index: 1;
     }
@@ -302,7 +304,7 @@
       height: 168px;
       margin: 0 auto;
       align-self: center;
-      background-color: transparent;
+      background-color: #000;
       background-image: url("top-logo.png");
       background-repeat: no-repeat;
       background-position: center calc(50% + 34px);
@@ -348,23 +350,23 @@
       position: relative;
       z-index: 4;
       margin: 0 0 2px;
-      padding: 8px 18px;
+      padding: 0;
       max-width: min(100%, 22rem);
       box-sizing: border-box;
       color: #faf6ef;
       font-family: var(--brand-serif);
-      font-size: clamp(13px, 3.1vw, 18px);
+      font-size: clamp(26px, 6.2vw, 36px);
       font-weight: 800;
       letter-spacing: 0.14em;
       text-transform: uppercase;
       text-align: center;
       line-height: 1.25;
-      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 20px rgba(0, 0, 0, 0.55);
+      text-shadow: none;
       pointer-events: none;
-      border-radius: 999px;
-      background: rgba(0, 0, 0, 0.72);
-      border: 1px solid rgba(255, 220, 150, 0.42);
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45);
+      border-radius: 0;
+      background: transparent;
+      border: 0;
+      box-shadow: none;
     }
 
     .muted { color: var(--muted); margin: 0 0 14px; }
@@ -1943,7 +1945,7 @@
       }
 
       .top-logo {
-        padding-top: calc(env(safe-area-inset-top) + 18px);
+        padding-top: calc(env(safe-area-inset-top) + 6px);
         min-height: calc(30vh - env(safe-area-inset-top));
         margin-bottom: 10px;
         width: 100%;
@@ -1956,9 +1958,9 @@
       .top-logo-brand::before {
         width: min(430px, 95vw);
         height: min(430px, 95vw);
-        transform: translate(-50%, calc(-50% + 74px));
-        opacity: 0.3;
-        filter: blur(14px) saturate(1.08) brightness(0.9);
+        transform: translate(-50%, calc(-50% + 122px));
+        opacity: 0.2;
+        filter: blur(8px) saturate(1.02) brightness(0.9);
       }
 
       .bottom-logo .logo-img-bottom {
