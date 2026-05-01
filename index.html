@@ -3184,6 +3184,39 @@
         'prep-note', 'prep-assistant'
       ];
 
+      function refreshDomRefs() {
+        wrap = document.querySelector('.wrap');
+        logoScale = document.getElementById('logo-scale');
+        logoScaleValue = document.getElementById('logo-scale-value');
+
+        sceneStack = document.getElementById('scene-stack');
+        outroStack = document.getElementById('scene-outro-stack');
+        scenesBlock = document.getElementById('scenes-block');
+        tpl = document.getElementById('scene-template');
+        btnAdd = document.getElementById('btn-add-scene');
+        btnUndo = document.getElementById('btn-undo');
+        btnSave = document.getElementById('btn-save');
+        saveStatus = document.getElementById('save-status');
+
+        scenarioSelect = document.getElementById('scenario-select');
+        scenarioName = document.getElementById('scenario-name');
+        scenarioDate = document.getElementById('scenario-date');
+        scenarioCount = document.getElementById('scenario-count');
+        scenarioStatus = document.getElementById('scenario-status');
+        scenarioFilter = document.getElementById('scenario-filter');
+        scenarioBlockFilter = document.getElementById('scenario-block-filter');
+        scenarioShootBlock = document.getElementById('scenario-shoot-block');
+        btnScenarioNew = document.getElementById('btn-scenario-new');
+        btnScenarioDelete = document.getElementById('btn-scenario-delete');
+        planSummary = document.getElementById('plan-summary');
+        planList = document.getElementById('plan-list');
+        titleSubject = document.querySelector('.title-row .title-subject');
+
+        teleprompterOverlay = document.getElementById('teleprompter-overlay');
+        teleprompterText = document.getElementById('teleprompter-text');
+        teleprompterClose = document.getElementById('teleprompter-close');
+      }
+
       var autosaveTO = null;
       var AUTOSAVE_MS = 200;
       var undoSnapshotTO = null;
@@ -4151,13 +4184,7 @@
             }
             if (sc && sc.html && wrap) {
               wrap.innerHTML = sc.html;
-              sceneStack = document.getElementById('scene-stack');
-              outroStack = document.getElementById('scene-outro-stack');
-              scenesBlock = document.getElementById('scenes-block');
-              tpl = document.getElementById('scene-template');
-              btnAdd = document.getElementById('btn-add-scene');
-              btnSave = document.getElementById('btn-save');
-              saveStatus = document.getElementById('save-status');
+              refreshDomRefs();
               ensureMainSceneUI();
               Array.prototype.forEach.call(document.querySelectorAll('.scene-time-wrap[data-time-filled]'), function (el) { el.removeAttribute('data-time-filled'); });
               repairSceneTimeSelectsInDom(wrap);
@@ -4201,13 +4228,7 @@
             }
             if (state.html && wrap) {
               wrap.innerHTML = state.html;
-              sceneStack = document.getElementById('scene-stack');
-              outroStack = document.getElementById('scene-outro-stack');
-              scenesBlock = document.getElementById('scenes-block');
-              tpl = document.getElementById('scene-template');
-              btnAdd = document.getElementById('btn-add-scene');
-              btnSave = document.getElementById('btn-save');
-              saveStatus = document.getElementById('save-status');
+              refreshDomRefs();
               ensureMainSceneUI();
               Array.prototype.forEach.call(document.querySelectorAll('.scene-time-wrap[data-time-filled]'), function (el) { el.removeAttribute('data-time-filled'); });
               repairSceneTimeSelectsInDom(wrap);
