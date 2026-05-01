@@ -620,18 +620,22 @@
       flex: 1 1 10rem;
       display: flex;
       align-items: stretch;
-      gap: 8px;
+      gap: 0;
       min-width: min(100%, 12rem);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 228, 160, 0.22);
+      background: #0a0a0a;
+      overflow: hidden;
     }
 
     .shotlist-pieces-field-wrap .shotlist-pieces-display {
       flex: 1 1 auto;
       min-width: 0;
-      min-height: 2.25rem;
+      min-height: 44px;
       padding: 8px 11px;
-      border-radius: 12px;
-      border: 1px solid rgba(255, 228, 160, 0.22);
-      background: #0a0a0a;
+      border-radius: 0;
+      border: 0;
+      background: transparent;
       color: var(--text);
       font-size: 14px;
       font-weight: 600;
@@ -647,9 +651,10 @@
       min-height: 44px;
       align-self: stretch;
       padding: 0;
-      border-radius: 12px;
-      border: 1px solid rgba(255, 228, 160, 0.28);
-      background: #101010;
+      border-radius: 0;
+      border: 0;
+      border-left: 1px solid rgba(255, 228, 160, 0.22);
+      background: rgba(255, 228, 160, 0.06);
       color: rgba(255, 220, 140, 0.95);
       font-size: 20px;
       font-weight: 700;
@@ -692,10 +697,11 @@
       width: auto;
       min-width: 4.25rem;
       max-width: 5rem;
-      padding: 7px 8px;
+      min-height: 44px;
+      padding: 8px 10px;
       border-radius: 11px;
       font: inherit;
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 600;
       background: #000000;
       border: 1px solid rgba(255, 228, 160, 0.28);
@@ -4510,12 +4516,12 @@
         if (!display) return [];
         var raw = (display.textContent || '').trim();
         if (!raw || raw === '— номера —' || raw === '________') return [];
-        var uniq = [];
+        var parts = [];
         raw.split(/\s*,\s*/).forEach(function (part) {
           var token = normalizePieceToken(part);
-          if (token && uniq.indexOf(token) === -1) uniq.push(token);
+          if (token) parts.push(token);
         });
-        return uniq;
+        return parts;
       }
 
       function renderPiecesDisplay(display, pieces, nextToken) {
@@ -4595,7 +4601,7 @@
           var display = row && row.querySelector('.shotlist-pieces-display');
           if (!display) return;
           var parts = parsePiecesFromDisplay(display);
-          if (parts.indexOf(v) === -1) parts.push(v);
+          parts.push(v);
           renderPiecesDisplay(display, parts, nextTokenForPieces(parts));
           sel.selectedIndex = 0;
           updateAllShotlistProgress();
