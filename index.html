@@ -1144,7 +1144,7 @@
       min-width: 2.85rem;
       overflow-y: auto;
       overflow-x: hidden;
-      scroll-snap-type: y mandatory;
+      scroll-snap-type: none;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: contain;
       touch-action: pan-y;
@@ -1161,7 +1161,7 @@
 
     .scene-time-wheel-item {
       height: 34px;
-      scroll-snap-align: center;
+      scroll-snap-align: none;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -3405,7 +3405,7 @@
       }
 
       var autosaveTO = null;
-      var AUTOSAVE_MS = 200;
+      var AUTOSAVE_MS = 40;
       var undoSnapshotTO = null;
       var UNDO_SNAPSHOT_DEBOUNCE_MS = 450;
       var undoHistory = [];
@@ -3533,6 +3533,12 @@
         if (!titleSubject) return;
         var next = (name || '').trim();
         titleSubject.textContent = next || DEFAULT_SCENARIO_TITLE;
+      }
+
+      function mergeScenarioNameFromTitleSubject() {
+        if (!titleSubject || !scenarioName) return;
+        var tit = (titleSubject.textContent || '').replace(/\s+/g, ' ').trim();
+        if (tit && tit !== DEFAULT_SCENARIO_TITLE) scenarioName.value = tit;
       }
 
       function renderDailyPlan(bundle) {
@@ -3702,9 +3708,12 @@
       function persistToStorage(statusText) {
         try {
           prepareDomForSave();
+          mergeScenarioNameFromTitleSubject();
+          var wrapEl = document.querySelector('.wrap');
+          if (wrapEl) wrap = wrapEl;
           var state = {
             v: 12.0,
-            html: wrap ? wrap.innerHTML : '',
+            html: wrapEl ? wrapEl.innerHTML : '',
             logo: { x: x.value, y: y.value, scale: s.value },
             prep: getPrep()
           };
@@ -3735,7 +3744,10 @@
           current.logo = state.logo;
           current.prep = state.prep;
           current.updatedAt = Date.now();
-          writeScenarioBundle(bundle);
+          if (!writeScenarioBundle(bundle)) {
+            setStatus('Не удалось сохранить сценарии', true);
+            return;
+          }
           renderScenarioList(bundle);
           renderDailyPlan(bundle);
           setStatus(statusText || 'Сохранено', false);
@@ -3748,7 +3760,13 @@
         clearTimeout(autosaveTO);
         autosaveTO = setTimeout(function () {
           autosaveTO = null;
-          persistToStorage('Сохранено автоматически');
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+              try {
+                persistToStorage('Сохранено автоматически');
+              } catch (eSave) {}
+            });
+          });
         }, AUTOSAVE_MS);
       }
 
@@ -3937,6 +3955,20 @@
       var sceneTimeDialogWrap = null;
       var sceneTimeDialogPointerAnchor = { x: NaN, y: NaN };
 
+      function sceneTimeWheelMetrics(col) {
+        var pad = SCENE_TIME_W_PAD;
+        var item = SCENE_TIME_W_ITEM;
+        if (!col) return { pad: pad, item: item };
+        var padEl = col.firstElementChild;
+        if (padEl && padEl.classList.contains('scene-time-wheel-pad')) {
+          var ph = padEl.offsetHeight;
+          if (ph > 0) pad = ph;
+        }
+        var itemEl = col.querySelector('.scene-time-wheel-item');
+        if (itemEl && itemEl.offsetHeight > 0) item = itemEl.offsetHeight;
+        return { pad: pad, item: item };
+      }
+
       function resetSceneTimeDialogPosition(dlg) {
         if (!dlg) return;
         dlg.style.top = '';
@@ -4029,14 +4061,19 @@
 
       function setSceneTimeWheelScroll(col, idx) {
         if (!col) return;
+        var m = sceneTimeWheelMetrics(col);
         idx = Math.max(0, Math.min(59, Number(idx) || 0));
-        col.scrollTop = SCENE_TIME_W_PAD + idx * SCENE_TIME_W_ITEM;
+        var st = m.pad + idx * m.item;
+        var maxSt = Math.max(0, col.scrollHeight - ch);
+        col.scrollTop = Math.max(0, Math.min(maxSt, st));
       }
 
       function getSceneTimeWheelValue(col) {
         if (!col) return 0;
-        var i = Math.round((col.scrollTop - SCENE_TIME_W_PAD) / SCENE_TIME_W_ITEM);
-        return Math.max(0, Math.min(59, i));
+        var m = sceneTimeWheelMetrics(col);
+        var raw = (col.scrollTop - m.pad) / m.item;
+        var idx = Math.round(raw);
+        return Math.max(0, Math.min(59, idx));
       }
 
       function ensureSceneTimeCenterDialog() {
@@ -4071,7 +4108,11 @@
         buildSceneTimeWheelColumns(dlg);
         dlg.querySelector('.scene-time-dialog-ok').addEventListener('click', function (e) {
           e.preventDefault();
-          applySceneTimeFromCenterDialog();
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+              applySceneTimeFromCenterDialog();
+            });
+          });
         });
         dlg.querySelector('.scene-time-dialog-cancel').addEventListener('click', function () {
           sceneTimeDialogWrap = null;
@@ -4365,6 +4406,37 @@
         } catch (e) {}
       }
 
+      function syncFormControlStateForSave(root) {
+        if (!root || !root.querySelectorAll) return;
+        root.querySelectorAll('select').forEach(function (sel) {
+          if (sel.multiple) {
+            Array.prototype.forEach.call(sel.options, function (opt) {
+              if (opt.selected) opt.setAttribute('selected', '');
+              else opt.removeAttribute('selected');
+            });
+          } else {
+            Array.prototype.forEach.call(sel.options, function (opt) {
+              opt.removeAttribute('selected');
+            });
+            var idx = sel.selectedIndex;
+            if (idx >= 0 && sel.options[idx]) sel.options[idx].setAttribute('selected', '');
+          }
+        });
+        root.querySelectorAll('input').forEach(function (inp) {
+          var type = (inp.type || '').toLowerCase();
+          if (type === 'checkbox' || type === 'radio') {
+            if (inp.checked) inp.setAttribute('checked', '');
+            else inp.removeAttribute('checked');
+          } else if (type !== 'file' && type !== 'button' && type !== 'submit' && type !== 'reset' && type !== 'image') {
+            if (inp.value === '') inp.removeAttribute('value');
+            else inp.setAttribute('value', inp.value);
+          }
+        });
+        root.querySelectorAll('textarea').forEach(function (ta) {
+          ta.textContent = ta.value;
+        });
+      }
+
       function prepareDomForSave() {
         var shotSecPrep = document.querySelector('.shotlist-section');
         if (shotSecPrep) {
@@ -4381,6 +4453,8 @@
             }
           });
         });
+        var wSave = document.querySelector('.wrap');
+        if (wSave) syncFormControlStateForSave(wSave);
       }
 
       function repairSceneTimeSelectsInDom(root) {
@@ -4500,12 +4574,6 @@
               if (!(s.value > 120)) s.value = 200;
               applyLogo();
             }
-            if (sc && sc.prep) {
-              prepIds.forEach(function (id) {
-                var el = document.getElementById(id);
-                if (el && sc.prep[id] !== undefined && sc.prep[id] !== null) el.value = String(sc.prep[id]);
-              });
-            }
             if (sc && wrap) {
               var htmlBlob = sc.html && String(sc.html).trim();
               wrap.innerHTML = htmlBlob ? sc.html : buildEmptyScenarioHtml(wrap.innerHTML);
@@ -4517,6 +4585,12 @@
               migrateShotlistPiecesMarkup(wrap);
               ensureShotlistPieceSelectOptions(wrap);
             }
+            if (sc && sc.prep) {
+              prepIds.forEach(function (id) {
+                var el = document.getElementById(id);
+                if (el && sc.prep[id] !== undefined && sc.prep[id] !== null) el.value = String(sc.prep[id]);
+              });
+            }
             renderScenarioList(bundle);
           renderDailyPlan(bundle);
             if (scenarioName) scenarioName.value = sc && sc.name ? sc.name : '';
@@ -4524,7 +4598,12 @@
             if (scenarioCount) scenarioCount.value = sc && sc.targetCount ? sc.targetCount : '';
             if (scenarioStatus) scenarioStatus.value = sc && sc.status ? sc.status : 'draft';
             if (scenarioShootBlock) scenarioShootBlock.value = sc && sc.shootBlock ? String(sc.shootBlock) : '';
-            syncTitleSubject(sc && sc.name ? sc.name : '');
+            mergeScenarioNameFromTitleSubject();
+            syncTitleSubject(
+              scenarioName && scenarioName.value.trim()
+                ? scenarioName.value.trim()
+                : (sc && sc.name ? sc.name : '')
+            );
             return;
           }
 
@@ -4545,12 +4624,6 @@
               if (!(s.value > 120)) s.value = 200;
               applyLogo();
             }
-            if (state.prep) {
-              prepIds.forEach(function (id) {
-                var el = document.getElementById(id);
-                if (el && state.prep[id] !== undefined && state.prep[id] !== null) el.value = String(state.prep[id]);
-              });
-            }
             if (state.html && wrap) {
               wrap.innerHTML = state.html;
               refreshDomRefs();
@@ -4560,6 +4633,12 @@
               ensureShotlistLocationsMinCount(4);
               migrateShotlistPiecesMarkup(wrap);
               ensureShotlistPieceSelectOptions(wrap);
+            }
+            if (state.prep) {
+              prepIds.forEach(function (id) {
+                var el = document.getElementById(id);
+                if (el && state.prep[id] !== undefined && state.prep[id] !== null) el.value = String(state.prep[id]);
+              });
             }
           }
 
@@ -4938,7 +5017,13 @@
         options.push('<option value="OUTRO">OUTRO</option>');
         var html = options.join('');
         root.querySelectorAll('select.shotlist-piece-digit').forEach(function (sel) {
+          var prev = sel.value;
           if (sel.innerHTML !== html) sel.innerHTML = html;
+          if (prev !== '' && prev !== undefined && prev !== null) {
+            try {
+              sel.value = String(prev);
+            } catch (err) {}
+          }
         });
       }
 
@@ -5380,6 +5465,7 @@
 
         window.addEventListener('pagehide', flushSave);
         window.addEventListener('beforeunload', flushSave);
+        document.addEventListener('freeze', flushSave);
 
         prepIds.forEach(function (id) {
           var el = document.getElementById(id);
@@ -5388,7 +5474,10 @@
           el.addEventListener('change', function () { markDirty(); });
         });
 
-        if (titleSubject) titleSubject.addEventListener('input', function () { markDirty(); });
+        if (titleSubject) titleSubject.addEventListener('input', function () {
+          mergeScenarioNameFromTitleSubject();
+          markDirty();
+        });
 
         if (logoScale) {
           logoScale.addEventListener('input', function () {
