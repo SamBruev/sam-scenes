@@ -3272,9 +3272,6 @@
       var UNDO_SNAPSHOT_DEBOUNCE_MS = 450;
       var undoHistory = [];
       var UNDO_LIMIT = 40;
-      /* ~12–13 символов/с для спокойной русской речи → ~7 с ≈ 90 символов */
-      var SAY_MAX_CHARS = 90;
-
       function initBottomLogoFromTop() {
         var host = document.getElementById('bottom-logo');
         if (!host) return;
@@ -4041,9 +4038,6 @@
 
       function clipSaySpan(span) {
         if (!span) return;
-        var t = span.textContent || '';
-        if (t.length <= SAY_MAX_CHARS) return;
-        span.textContent = t.slice(0, SAY_MAX_CHARS);
       }
 
       function bindSayLimit(span) {
@@ -4058,7 +4052,7 @@
           e.preventDefault();
           var text = (e.clipboardData || window.clipboardData).getData('text/plain') || '';
           var cur = span.textContent || '';
-          span.textContent = (cur + text).slice(0, SAY_MAX_CHARS);
+          span.textContent = cur + text;
           markDirty();
         });
       }
