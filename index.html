@@ -3309,11 +3309,12 @@
       var SCENARIO_STORAGE_KEY = 'abakan-scenarios-v2';
       var LEGACY_SCENARIO_KEYS = ['abakan-scenarios-v1'];
 
-      // Анти-кэш данных: при новой сборке очищаем старые ключи, чтобы не грузились "старые варианты".
+      // Анти-кэш разметки: при новой сборке чистим только слой «интерфейса», но НЕ abakan-scenarios-v2 —
+      // там все сценарии пользователя; иначе после каждого деплоя всё обнулялось.
       try {
         var savedBuild = localStorage.getItem(APP_BUILD_KEY);
         if (savedBuild !== APP_BUILD) {
-          [STORAGE_KEY].concat(LEGACY_STORAGE_KEYS).concat([SCENARIO_STORAGE_KEY]).concat(LEGACY_SCENARIO_KEYS).forEach(function (k) {
+          [STORAGE_KEY].concat(LEGACY_STORAGE_KEYS).forEach(function (k) {
             try { localStorage.removeItem(k); } catch (e) {}
           });
           localStorage.setItem(APP_BUILD_KEY, APP_BUILD);
@@ -3711,6 +3712,14 @@
 
           var bundle = readScenarioBundle();
           if (!bundle) bundle = { activeId: null, items: [] };
+          if (
+            scenarioSelect &&
+            scenarioSelect.value &&
+            bundle.items &&
+            bundle.items.some(function (it) { return it.id === scenarioSelect.value; })
+          ) {
+            bundle.activeId = scenarioSelect.value;
+          }
           var current = currentScenarioMeta(bundle);
           if (!current) {
             current = { id: uid(), name: 'Новый сценарий', date: '', targetCount: '', status: 'draft', shootBlock: '', html: '', logo: {}, prep: {}, updatedAt: Date.now() };
@@ -4487,8 +4496,9 @@
                 if (el && sc.prep[id] !== undefined && sc.prep[id] !== null) el.value = String(sc.prep[id]);
               });
             }
-            if (sc && sc.html && wrap) {
-              wrap.innerHTML = sc.html;
+            if (sc && wrap) {
+              var htmlBlob = sc.html && String(sc.html).trim();
+              wrap.innerHTML = htmlBlob ? sc.html : buildEmptyScenarioHtml(wrap.innerHTML);
               refreshDomRefs();
               ensureMainSceneUI();
               Array.prototype.forEach.call(document.querySelectorAll('.scene-time-wrap[data-time-filled]'), function (el) { el.removeAttribute('data-time-filled'); });
