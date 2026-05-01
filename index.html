@@ -3239,6 +3239,11 @@
         teleprompterClose = document.getElementById('teleprompter-close');
 
         if (wrap) wrap.querySelectorAll('.logo-caption').forEach(function (el) { el.remove(); });
+        var shotSec = document.querySelector('.shotlist-section');
+        if (shotSec) {
+          shotSec.removeAttribute('data-shotlist-picker-bound');
+          shotSec.removeAttribute('data-shotlist-remove-bound');
+        }
       }
 
       var autosaveTO = null;
@@ -4067,6 +4072,11 @@
       }
 
       function prepareDomForSave() {
+        var shotSecPrep = document.querySelector('.shotlist-section');
+        if (shotSecPrep) {
+          shotSecPrep.removeAttribute('data-shotlist-picker-bound');
+          shotSecPrep.removeAttribute('data-shotlist-remove-bound');
+        }
         document.querySelectorAll('.scene-time-wrap').forEach(function (w) {
           w.removeAttribute('data-time-filled');
           w.querySelectorAll('select.scene-time-select').forEach(function (sel) {
