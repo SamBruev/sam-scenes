@@ -4721,9 +4721,14 @@
         var doneToken = sceneTokenForScene(currentScene);
         if (!doneToken) return;
         var rows = document.querySelectorAll('.shotlist-pieces-row');
+        var sceneLocSel = currentScene.querySelector('select.scene-loc-select');
+        var sceneLocVal = sceneLocSel ? String(sceneLocSel.value || '') : '';
         var rowIndex = -1;
         var tokenIndex = -1;
         var pieces = [];
+        var fallbackRowIndex = -1;
+        var fallbackTokenIndex = -1;
+        var fallbackPieces = [];
         var i;
         for (i = 0; i < rows.length; i++) {
           var row = rows[i];
@@ -4732,9 +4737,25 @@
           pieces = parsePiecesFromDisplay(display);
           var idx = pieces.indexOf(doneToken);
           if (idx === -1) continue;
-          rowIndex = i;
-          tokenIndex = idx;
-          break;
+          if (fallbackRowIndex === -1) {
+            fallbackRowIndex = i;
+            fallbackTokenIndex = idx;
+            fallbackPieces = pieces.slice();
+          }
+          if (!sceneLocVal) continue;
+          var loc = row.closest && row.closest('.shotlist-loc');
+          var locSel = loc ? loc.querySelector('select.shotlist-loc-name') : null;
+          var locVal = locSel ? String(locSel.value || '') : '';
+          if (locVal && locVal === sceneLocVal) {
+            rowIndex = i;
+            tokenIndex = idx;
+            break;
+          }
+        }
+        if (rowIndex === -1 && fallbackRowIndex !== -1) {
+          rowIndex = fallbackRowIndex;
+          tokenIndex = fallbackTokenIndex;
+          pieces = fallbackPieces;
         }
         if (rowIndex === -1) return;
 
