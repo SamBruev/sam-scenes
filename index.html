@@ -170,6 +170,26 @@
       pointer-events: none;
       transition: filter 0.42s ease;
       filter: blur(var(--top-logo-blur, 0px));
+      position: relative;
+      isolation: isolate;
+    }
+
+    .top-logo-brand::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: min(540px, 92vw);
+      height: min(540px, 92vw);
+      transform: translate(-50%, calc(-50% + 92px));
+      background-image: url("top-lamp-bg.png");
+      background-repeat: no-repeat;
+      background-position: center center;
+      background-size: contain;
+      opacity: 0.34;
+      filter: blur(18px) saturate(1.12) brightness(0.9);
+      pointer-events: none;
+      z-index: 1;
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -288,7 +308,7 @@
       background-position: center calc(50% + 34px);
       background-size: contain;
       opacity: .95;
-      z-index: 0;
+      z-index: 3;
       pointer-events: auto;
       cursor: move;
       transform: translate(0px, var(--logo-y, 0px)) scale(var(--logo-scale, 1));
@@ -326,7 +346,7 @@
 
     .logo-caption {
       position: relative;
-      z-index: 2;
+      z-index: 4;
       margin: 0 0 2px;
       padding: 8px 18px;
       max-width: min(100%, 22rem);
@@ -1931,6 +1951,14 @@
 
       .top-logo-brand {
         gap: 8px;
+      }
+
+      .top-logo-brand::before {
+        width: min(430px, 95vw);
+        height: min(430px, 95vw);
+        transform: translate(-50%, calc(-50% + 74px));
+        opacity: 0.3;
+        filter: blur(14px) saturate(1.08) brightness(0.9);
       }
 
       .bottom-logo .logo-img-bottom {
