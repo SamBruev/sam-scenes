@@ -778,10 +778,10 @@
       font-weight: 700;
       flex-shrink: 0;
       color: var(--anna-gold);
-      font-size: 12.5px;
+      font-size: clamp(17px, 5vw, 24px);
       letter-spacing: 0.03em;
       white-space: nowrap;
-      line-height: 1.25;
+      line-height: 1.2;
       padding-top: 0;
       margin: 0;
       min-width: 0;
@@ -795,11 +795,11 @@
       text-transform: uppercase;
       letter-spacing: 0.07em;
       font-weight: 800;
-      font-size: 13.5px;
+      font-size: clamp(18px, 5.8vw, 28px);
     }
     .scene-main[data-scene-role="intro"] .scene-time-wrap .time-leading,
     .scene-main[data-scene-role="outro"] .scene-time-wrap .time-leading {
-      font-size: 13.5px;
+      font-size: clamp(18px, 5.8vw, 28px);
       font-weight: 800;
       letter-spacing: 0.1em;
       text-transform: uppercase;
@@ -2130,10 +2130,6 @@
       .scene-time-ios input[type="time"] {
         font-size: 13px;
         min-height: 34px;
-      }
-
-      .scene-main[data-scene-role="body"] .scene-time-wrap .time-leading {
-        font-size: 13px;
       }
 
       .scene-main > .scene-time-wrap {
