@@ -3664,6 +3664,18 @@
           return b === blockVal;
         });
 
+        var aid = bundle.activeId;
+        if (aid && !items.some(function (it) { return it.id === aid; })) {
+          var keepActive = (bundle.items || []).find(function (it) { return it.id === aid; });
+          if (keepActive) items = [keepActive].concat(items);
+        }
+        if (!items.length && (bundle.items || []).length) {
+          if (scenarioFilter) scenarioFilter.value = 'all';
+          if (scenarioBlockFilter) scenarioBlockFilter.value = '';
+          populateScenarioBlockFilter(bundle.items || []);
+          items = (bundle.items || []).slice();
+        }
+
         scenarioSelect.innerHTML = '';
         var groups = {};
         items.forEach(function (it) {
