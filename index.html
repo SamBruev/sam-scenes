@@ -347,29 +347,6 @@
       font-variant-numeric: tabular-nums;
     }
 
-    .logo-caption {
-      position: relative;
-      z-index: 4;
-      margin: 0 0 2px;
-      padding: 0;
-      max-width: min(100%, 22rem);
-      box-sizing: border-box;
-      color: #faf6ef;
-      font-family: var(--brand-serif);
-      font-size: clamp(52px, 12.4vw, 72px);
-      font-weight: 800;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      text-align: center;
-      line-height: 1.25;
-      text-shadow: none;
-      pointer-events: none;
-      border-radius: 0;
-      background: transparent;
-      border: 0;
-      box-shadow: none;
-    }
-
     .muted { color: var(--muted); margin: 0 0 14px; }
 
     .card {
@@ -3260,6 +3237,8 @@
         teleprompterOverlay = document.getElementById('teleprompter-overlay');
         teleprompterText = document.getElementById('teleprompter-text');
         teleprompterClose = document.getElementById('teleprompter-close');
+
+        if (wrap) wrap.querySelectorAll('.logo-caption').forEach(function (el) { el.remove(); });
       }
 
       var autosaveTO = null;
