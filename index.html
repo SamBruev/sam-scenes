@@ -770,6 +770,8 @@
     }
 
     .scene-time-wrap .time-leading {
+      grid-column: 1;
+      grid-row: 1;
       justify-self: center;
       align-self: center;
       text-align: center;
@@ -783,6 +785,9 @@
       padding-top: 0;
       margin: 0;
       min-width: 0;
+      width: max-content;
+      max-width: 100%;
+      pointer-events: none;
     }
 
 
@@ -828,20 +833,29 @@
 
     .scene-time-wrap .time-heading {
       display: grid;
-      grid-template-columns: 1fr auto 1fr;
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: auto;
       align-items: center;
-      gap: 4px 8px;
+      justify-items: stretch;
+      gap: 0;
       min-width: 0;
       width: 100%;
       grid-column: 1 / -1;
+      position: relative;
     }
 
     .scene-time-wrap .time-heading-spacer {
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
       display: flex;
       align-items: center;
       justify-content: flex-start;
       gap: 8px;
       min-width: 0;
+      z-index: 2;
+      pointer-events: auto;
     }
 
     .scene-time-wrap .scene-play-btn {
@@ -2116,10 +2130,6 @@
       .scene-time-ios input[type="time"] {
         font-size: 13px;
         min-height: 34px;
-      }
-
-      .scene-time-wrap .time-heading {
-        grid-template-columns: auto minmax(0, 1fr) auto;
       }
 
       .scene-main[data-scene-role="body"] .scene-time-wrap .time-leading {
