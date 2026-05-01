@@ -749,10 +749,11 @@
       padding: 5px 8px;
       box-sizing: border-box;
       border: none !important;
-      border-radius: 11px;
+      border-radius: 0;
       color: var(--cream);
-      background-color: #0a0a0a;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+      background-color: transparent;
+      box-shadow: none;
+      outline: none;
       display: grid;
       /* Одна колонка: заголовок «СЦЕНА …», сразу под ним — время по центру */
       grid-template-columns: minmax(0, 1fr);
@@ -764,7 +765,8 @@
     }
 
     .scene-stack .scene-time-wrap:focus-within {
-      box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.14);
+      box-shadow: none;
+      outline: none;
     }
 
     .scene-time-wrap .time-leading {
@@ -940,8 +942,8 @@
       background-position: right 6px center, center;
       background-size: 9px 6px, 100% 100%;
       backdrop-filter: blur(10px);
-      border: 1px solid rgba(212, 175, 55, 0.35);
-      border-radius: 9px;
+      border: none;
+      border-radius: 8px;
       color: #e8ddb8;
       font: inherit;
       font-weight: 600;
@@ -972,7 +974,7 @@
       outline: none !important;
       box-shadow: none !important;
       -webkit-tap-highlight-color: transparent;
-      border-color: rgba(212, 175, 55, 0.35);
+      border-color: transparent;
     }
 
     .scene-time-ios {
@@ -991,8 +993,8 @@
 
     .scene-time-ios input[type="time"] {
       background: rgba(10, 10, 10, 0.6);
-      border: 1px solid rgba(255, 228, 160, 0.22);
-      border-radius: 10px;
+      border: none;
+      border-radius: 8px;
       color: #f1e3be;
       font: inherit;
       font-size: 13px;
@@ -1022,9 +1024,9 @@
       margin: 0;
       padding: 7px 11px;
       box-sizing: border-box;
-      border-radius: 11px;
-      border: 1px solid rgba(255, 228, 160, 0.28);
-      background: rgba(12, 12, 12, 0.95);
+      border-radius: 0;
+      border: none;
+      background: transparent;
       color: #f1e3be;
       font: inherit;
       font-size: 13.5px;
@@ -1036,7 +1038,7 @@
     }
 
     .scene-time-trigger:active {
-      background: rgba(24, 20, 14, 0.98);
+      background: rgba(255, 228, 160, 0.06);
     }
 
     .scene-time-center-dialog {
