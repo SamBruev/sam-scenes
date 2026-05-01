@@ -1936,13 +1936,17 @@
 
     @media (min-width: 701px) {
       .title-row {
-        flex-direction: row;
+        flex-direction: column;
         align-items: center;
-        justify-content: space-between;
+        justify-content: center;
       }
 
       .title-row .page-title {
+        flex: none;
+        width: min(100%, 560px);
         max-width: min(100%, 560px);
+        margin-left: auto;
+        margin-right: auto;
       }
 
       .logo-bg {
