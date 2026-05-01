@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Сценарий видео / Sam Bruev (v121)</title>
+  <title>Сценарий видео / Sam Bruev (v124)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bad+Script&family=Pacifico&family=Roboto+Slab:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -361,7 +361,24 @@
       background: #000000;
       padding: 14px 16px;
       margin-bottom: 14px;
-      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4);
+      box-shadow:
+        0 10px 28px rgba(0, 0, 0, 0.34),
+        inset 0 1px 0 rgba(255, 244, 220, 0.1),
+        inset 0 -1px 0 rgba(255, 228, 160, 0.08);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before,
+    .shotlist-loc::before,
+    .scene-controls::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      border: 1px solid rgba(255, 245, 218, 0.14);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0) 36%);
     }
 
     .scenario-hub {
@@ -752,7 +769,7 @@
     .scene-stack .scene-time-wrap {
       font-size: 26px;
       letter-spacing: 0.02em;
-      padding: 10px 16px;
+      padding: 4px 16px 10px;
       box-sizing: border-box;
       border: none !important;
       border-radius: 0;
@@ -765,7 +782,7 @@
       grid-template-columns: minmax(0, 1fr);
       align-items: center;
       column-gap: 0;
-      row-gap: 4px;
+      row-gap: 0;
       width: 100%;
       max-width: 100%;
       margin-left: auto;
@@ -781,18 +798,19 @@
       position: absolute;
       left: 0;
       right: 0;
-      top: var(--scene-play-corner-pad, 10px);
+      top: calc(var(--scene-play-corner-pad, 10px) + var(--scene-play-size) / 2);
+      transform: translateY(-50%);
       margin: 0;
-      padding: 6px calc(var(--scene-play-corner-pad) + var(--scene-play-size) + 10px) 0;
+      padding: 0 calc(var(--scene-play-corner-pad) + var(--scene-play-size) + 12px);
       box-sizing: border-box;
       text-align: center;
       font-weight: 700;
       flex-shrink: 0;
       color: var(--anna-gold);
-      font-size: clamp(34px, 10vw, 48px);
+      font-size: clamp(40px, 12vw, 58px);
       letter-spacing: 0.03em;
       white-space: nowrap;
-      line-height: 1.2;
+      line-height: 1.05;
       min-width: 0;
       width: 100%;
       max-width: 100%;
@@ -805,11 +823,11 @@
       text-transform: uppercase;
       letter-spacing: 0.07em;
       font-weight: 800;
-      font-size: clamp(36px, 11.6vw, 56px);
+      font-size: clamp(42px, 12.8vw, 62px);
     }
     .scene-main[data-scene-role="intro"] .scene-time-wrap .time-leading,
     .scene-main[data-scene-role="outro"] .scene-time-wrap .time-leading {
-      font-size: clamp(36px, 11.6vw, 56px);
+      font-size: clamp(42px, 12.8vw, 62px);
       font-weight: 800;
       letter-spacing: 0.1em;
       text-transform: uppercase;
@@ -817,7 +835,7 @@
     }
 
     .scene-main[data-scene-role="outro"] .scene-time-wrap .time-leading {
-      transform: none;
+      transform: translateY(-50%);
       text-shadow: 0 0 12px rgba(212, 175, 55, 0.18);
     }
 
@@ -855,7 +873,9 @@
       grid-column: 1 / -1;
       position: relative;
       box-sizing: border-box;
-      min-height: calc(var(--scene-play-size) + var(--scene-play-corner-pad) + 12px);
+      min-height: calc(
+        var(--scene-play-corner-pad) * 2 + max(var(--scene-play-size), min(5.5rem, 20vw))
+      );
     }
 
     .scene-time-wrap .time-heading-spacer {
@@ -940,6 +960,7 @@
       flex: 1 1 auto;
       min-width: 0;
       width: 100%;
+      margin-top: -16px !important;
       overflow-x: auto;
       overflow-y: hidden;
       -webkit-overflow-scrolling: touch;
@@ -1080,7 +1101,7 @@
       padding: 0;
       max-width: min(340px, 92vw);
       width: min(340px, 92vw);
-      max-height: min(440px, 82vh);
+      max-height: min(500px, 90vh);
       background: #100e0a;
       color: var(--text);
       box-shadow: 0 28px 80px rgba(0, 0, 0, 0.65);
@@ -1096,7 +1117,7 @@
     .scene-time-dialog-panel {
       padding: 14px 12px 12px;
       box-sizing: border-box;
-      max-height: min(400px, 78vh);
+      max-height: min(460px, 86vh);
       overflow-x: hidden;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
@@ -1190,11 +1211,11 @@
       .scene-time-center-dialog {
         max-width: calc(100vw - max(24px, env(safe-area-inset-left) + env(safe-area-inset-right) + 16px));
         width: min(340px, calc(100vw - max(24px, env(safe-area-inset-left) + env(safe-area-inset-right) + 16px)));
-        max-height: min(440px, 85dvh, calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 32px));
+        max-height: min(500px, 92dvh, calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 24px));
       }
 
       .scene-time-dialog-panel {
-        max-height: min(400px, calc(85dvh - 72px), calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 96px));
+        max-height: min(460px, calc(88dvh - 56px), calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 72px));
       }
 
       .ios-wheel-time .scene-time-ios .scene-time-trigger {
@@ -1226,6 +1247,8 @@
 
     .ios-wheel-time .scene-time-wrap .scene-time-ios {
       display: flex;
+      margin-top: -16px;
+      padding-top: 4px;
     }
 
     .line { margin-top: 8px; color: var(--label); }
@@ -1677,21 +1700,21 @@
       height: 12px;
       margin-left: -6px;
       border-radius: 999px;
-      background: radial-gradient(circle at 30% 30%, #fff4d4, var(--gold) 48%, #8a7028);
-      box-shadow: 0 0 0 1px rgba(255, 220, 160, 0.55), 0 6px 24px rgba(212, 175, 55, 0.35);
+      background: radial-gradient(circle at 30% 30%, #fff6dc, rgba(212, 175, 55, 0.82) 52%, #7a6322);
+      box-shadow: 0 0 0 1px rgba(255, 220, 160, 0.34), 0 4px 14px rgba(212, 175, 55, 0.2);
       opacity: 0;
       pointer-events: none;
       transform: translateY(-16px) scale(0.85);
-      transition: opacity 0.12s ease, transform 0.15s ease;
+      transition: opacity 0.2s ease, transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
     .pull-reload-hint.pull-reload-hint--ready {
-      animation: pullReloadDotPulse 0.55s ease-in-out infinite alternate;
+      animation: pullReloadDotPulse 0.95s ease-in-out infinite alternate;
     }
 
     @keyframes pullReloadDotPulse {
-      from { transform: translateY(var(--pull-dot-y, 0px)) scale(1); box-shadow: 0 0 0 1px rgba(255, 220, 160, 0.55), 0 6px 20px rgba(212, 175, 55, 0.35); }
-      to { transform: translateY(var(--pull-dot-y, 0px)) scale(1.22); box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.35), 0 10px 36px rgba(212, 175, 55, 0.45); }
+      from { transform: translateY(var(--pull-dot-y, 0px)) scale(1); box-shadow: 0 0 0 1px rgba(255, 220, 160, 0.3), 0 5px 14px rgba(212, 175, 55, 0.18); }
+      to { transform: translateY(var(--pull-dot-y, 0px)) scale(1.1); box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.24), 0 8px 20px rgba(212, 175, 55, 0.24); }
     }
 
     .pull-reload-flash {
@@ -1699,9 +1722,9 @@
       inset: 0;
       z-index: 2147483646;
       pointer-events: none;
-      background: radial-gradient(ellipse 120% 55% at 50% 0%, rgba(212, 175, 55, 0.42), transparent 62%);
+      background: radial-gradient(ellipse 120% 55% at 50% 0%, rgba(212, 175, 55, 0.24), transparent 64%);
       opacity: 0;
-      transition: opacity 0.18s ease;
+      transition: opacity 0.24s ease;
     }
 
     .pull-reload-flash.pull-reload-flash--show {
@@ -1709,7 +1732,7 @@
     }
 
     .pull-reload-flash.pull-reload-flash--from-edge {
-      background: radial-gradient(ellipse 85% 75% at 100% 42%, rgba(212, 175, 55, 0.48), transparent 58%);
+      background: radial-gradient(ellipse 85% 75% at 100% 42%, rgba(212, 175, 55, 0.28), transparent 60%);
     }
 
     .pull-swipe-hint {
@@ -1721,12 +1744,12 @@
       height: 52px;
       margin-top: -26px;
       border-radius: 5px;
-      background: linear-gradient(180deg, rgba(255, 236, 190, 0.55), rgba(212, 175, 55, 0.28) 45%, rgba(90, 74, 28, 0.35));
+      background: linear-gradient(180deg, rgba(255, 236, 190, 0.36), rgba(212, 175, 55, 0.2) 45%, rgba(90, 74, 28, 0.26));
       opacity: 0;
       pointer-events: none;
       transform: translateX(10px) scaleY(0.88);
-      filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.35));
-      transition: opacity 0.16s ease, transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), filter 0.2s ease;
+      filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.2));
+      transition: opacity 0.2s ease, transform 0.24s cubic-bezier(0.22, 1, 0.36, 1), filter 0.24s ease;
     }
 
     .pull-swipe-hint.pull-swipe-hint--show {
@@ -1734,24 +1757,20 @@
     }
 
     .pull-swipe-hint.pull-swipe-hint--ready {
-      filter: drop-shadow(0 0 18px rgba(212, 175, 55, 0.55));
+      filter: drop-shadow(0 0 12px rgba(212, 175, 55, 0.3));
     }
 
     @keyframes pullReloadPageIn {
       from {
-        opacity: 0;
-        transform: translateY(8px) scale(0.992);
-        filter: blur(3px);
+        opacity: 0.93;
       }
       to {
         opacity: 1;
-        transform: none;
-        filter: none;
       }
     }
 
     html.pull-reload-enter .wrap {
-      animation: pullReloadPageIn 0.48s cubic-bezier(0.25, 0.85, 0.32, 1) forwards;
+      animation: pullReloadPageIn 0.28s ease-out forwards;
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -1764,7 +1783,7 @@
       }
 
       .pull-reload-flash.pull-reload-flash--show {
-        opacity: 0.65;
+        opacity: 0.4;
         transition: none;
       }
 
@@ -1779,8 +1798,13 @@
       padding: 16px 14px 14px;
       border-radius: 18px;
       border: 1px solid rgba(255, 228, 160, 0.28);
-      background: rgba(8, 8, 8, 0.92);
-      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+      background: #000000;
+      box-shadow:
+        0 12px 36px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 244, 220, 0.1),
+        inset 0 -1px 0 rgba(255, 228, 160, 0.08);
+      position: relative;
+      overflow: hidden;
     }
 
     .shotlist-loc:first-of-type {
@@ -1844,6 +1868,12 @@
       border: 1px solid rgba(255, 228, 160, 0.22);
       border-radius: 18px;
       background: #000000;
+      box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 244, 220, 0.09),
+        inset 0 -1px 0 rgba(255, 228, 160, 0.08);
+      position: relative;
+      overflow: hidden;
     }
 
     .scene-controls .left { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
@@ -2223,27 +2253,31 @@
       }
 
       .scene-time-wrap .time-leading {
-        font-size: clamp(22px, 5.8vw, 30px);
+        font-size: clamp(27px, 7.1vw, 36px);
         letter-spacing: 0.02em;
-        padding: 10px calc(var(--scene-play-corner-pad) + var(--scene-play-size) + 10px) 0;
+        padding: 0 calc(var(--scene-play-corner-pad) + var(--scene-play-size) + 12px);
       }
 
       .scene-main[data-scene-role="body"] .scene-time-wrap .time-leading {
-        font-size: clamp(22px, 6vw, 32px);
+        font-size: clamp(28px, 7.4vw, 38px);
         letter-spacing: 0.05em;
       }
 
       .scene-main[data-scene-role="intro"] .scene-time-wrap .time-leading,
       .scene-main[data-scene-role="outro"] .scene-time-wrap .time-leading {
-        font-size: clamp(22px, 6vw, 32px);
+        font-size: clamp(28px, 7.4vw, 38px);
         letter-spacing: 0.06em;
       }
 
       .scene-stack .scene-time-wrap {
         grid-template-columns: 1fr;
-        row-gap: 8px;
+        row-gap: 2px;
         align-items: stretch;
-        padding: 14px 20px;
+        padding: 8px 20px 14px;
+      }
+
+      .scene-time-wrap .time-pickers {
+        margin-top: -14px;
       }
 
       .scene-time-wrap .time-pickers {
@@ -3302,14 +3336,19 @@
   <script>
     (function () {
       var PULL_RELOAD_FLAG = 'abakan-pull-reload-flag';
+      var PULL_RELOAD_SCROLL_KEY = 'abakan-pull-reload-scroll-y';
+      var pendingPullReloadScrollY = null;
       try {
         if (sessionStorage.getItem(PULL_RELOAD_FLAG)) {
           sessionStorage.removeItem(PULL_RELOAD_FLAG);
+          var savedPullScroll = sessionStorage.getItem(PULL_RELOAD_SCROLL_KEY);
+          if (savedPullScroll !== null && savedPullScroll !== '') pendingPullReloadScrollY = Number(savedPullScroll);
+          sessionStorage.removeItem(PULL_RELOAD_SCROLL_KEY);
           document.documentElement.classList.add('pull-reload-enter');
         }
       } catch (ePullFlag) {}
 
-      var APP_BUILD = 'v121-scenario-shoot-blocks';
+      var APP_BUILD = 'v124-reload-scroll-and-edges';
       var APP_BUILD_KEY = 'abakan-app-build';
       var STORAGE_KEY = 'abakan-main-abakan-layout-v15';
       var LEGACY_STORAGE_KEYS = ['abakan-main-abakan-layout-v14', 'abakan-main-abakan-layout-v13', 'abakan-main-abakan-layout-v12', 'abakan-main-abakan-layout-v10', 'abakan-main-abakan-layout-v9', 'abakan-main-abakan-layout-v8'];
@@ -4105,6 +4144,9 @@
               col._wheelNormTO = setTimeout(function () {
                 col._wheelNormTO = null;
                 normalizeSceneTimeInfiniteWheel(col);
+                var nv = getSceneTimeWheelValue(col);
+                if (typeof col._lastCommittedV === 'number' && col._lastCommittedV !== nv) triggerHaptic('light');
+                col._lastCommittedV = nv;
               }, 130);
               if (dlg._flushSceneTimeTO) clearTimeout(dlg._flushSceneTimeTO);
               dlg._flushSceneTimeTO = setTimeout(function () {
@@ -4140,19 +4182,32 @@
         return idx;
       }
 
-      function flushSceneTimeDialogToStorage() {
+      function flushSceneTimeDialogToStorage(optWrap) {
         var dlg = document.getElementById('scene-time-center-dialog');
-        var wrap = sceneTimeDialogWrap;
+        var wrap = optWrap !== undefined && optWrap !== null ? optWrap : sceneTimeDialogWrap;
         if (!dlg || !wrap) return;
         var sels = wrap.querySelectorAll('select.scene-time-select');
         if (sels.length < 4) return;
-        [['mm0', 0], ['ss0', 1]].forEach(function (pair) {
+        [['mm0', 0], ['ss0', 1], ['mm1', 2], ['ss1', 3]].forEach(function (pair) {
           var col = dlg.querySelector('.scene-time-wheel[data-key="' + pair[0] + '"]');
           if (!col) return;
           sels[pair[1]].value = String(getSceneTimeWheelValue(col));
         });
+        wrap.setAttribute('data-mm0', String(sels[0].value || '0'));
+        wrap.setAttribute('data-ss0', String(sels[1].value || '0'));
+        wrap.setAttribute('data-mm1', String(sels[2].value || '0'));
+        wrap.setAttribute('data-ss1', String(sels[3].value || '0'));
         syncIOSWheelFromSelects(wrap);
         saveToStorage();
+      }
+
+      function finalizeSceneTimeWheelsAndSave(dlg, wrap) {
+        if (!dlg || !wrap) return;
+        dlg.querySelectorAll('.scene-time-wheel').forEach(function (col) {
+          normalizeSceneTimeInfiniteWheel(col);
+          col._lastCommittedV = getSceneTimeWheelValue(col);
+        });
+        flushSceneTimeDialogToStorage(wrap);
       }
 
       function ensureSceneTimeCenterDialog() {
@@ -4161,7 +4216,7 @@
           var wheels = legacyDlg.querySelectorAll('.scene-time-wheel');
           var sampleWheel = wheels[0];
           var nItems = sampleWheel ? sampleWheel.querySelectorAll('.scene-time-wheel-item').length : 0;
-          if (wheels.length !== 2 || nItems !== 60 * SCENE_TIME_WHEEL_COPIES) legacyDlg.remove();
+          if (wheels.length !== 4 || nItems !== 60 * SCENE_TIME_WHEEL_COPIES) legacyDlg.remove();
         }
         if (document.getElementById('scene-time-center-dialog')) return;
         var dlg = document.createElement('dialog');
@@ -4170,24 +4225,43 @@
         dlg.setAttribute('aria-modal', 'true');
         dlg.innerHTML =
           '<div class="scene-time-dialog-panel">' +
-          '<p class="scene-time-dialog-title">Время сцены — начало</p>' +
+          '<p class="scene-time-dialog-title">Время сцены</p>' +
           '<div class="scene-time-dialog-wheels">' +
           '<div class="scene-time-dialog-row">' +
+          '<span class="scene-time-dialog-label">Начало</span>' +
           '<div class="scene-time-wheel" data-key="mm0" role="listbox" aria-label="Минуты начала"></div>' +
           '<span class="scene-time-dialog-colon" aria-hidden="true">:</span>' +
           '<div class="scene-time-wheel" data-key="ss0" role="listbox" aria-label="Секунды начала"></div>' +
+          '</div>' +
+          '<div class="scene-time-dialog-row">' +
+          '<span class="scene-time-dialog-label">Конец</span>' +
+          '<div class="scene-time-wheel" data-key="mm1" role="listbox" aria-label="Минуты конца"></div>' +
+          '<span class="scene-time-dialog-colon" aria-hidden="true">:</span>' +
+          '<div class="scene-time-wheel" data-key="ss1" role="listbox" aria-label="Секунды конца"></div>' +
           '</div>' +
           '</div>' +
           '</div>';
         document.body.appendChild(dlg);
         buildSceneTimeWheelColumns(dlg);
         dlg.addEventListener('click', function (e) {
-          if (e.target === dlg) dlg.close();
+          if (e.target === dlg) {
+            finalizeSceneTimeWheelsAndSave(dlg, sceneTimeDialogWrap);
+            dlg.close();
+          }
+        });
+        dlg.addEventListener('cancel', function () {
+          finalizeSceneTimeWheelsAndSave(dlg, sceneTimeDialogWrap);
         });
         dlg.addEventListener('close', function () {
-          flushSceneTimeDialogToStorage();
-          sceneTimeDialogWrap = null;
-          resetSceneTimeDialogPosition(dlg);
+          var closedWrap = sceneTimeDialogWrap;
+          finalizeSceneTimeWheelsAndSave(dlg, closedWrap);
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+              finalizeSceneTimeWheelsAndSave(dlg, closedWrap);
+              if (sceneTimeDialogWrap === closedWrap) sceneTimeDialogWrap = null;
+              resetSceneTimeDialogPosition(dlg);
+            });
+          });
         });
       }
 
@@ -4198,7 +4272,7 @@
         sceneTimeDialogWrap = wrap;
         var sels = wrap.querySelectorAll('select.scene-time-select');
         if (sels.length < 4) return;
-        var keys = ['mm0', 'ss0'];
+        var keys = ['mm0', 'ss0', 'mm1', 'ss1'];
         resetSceneTimeDialogPosition(dlg);
         dlg.showModal();
         requestAnimationFrame(function () {
@@ -4210,6 +4284,9 @@
             keys.forEach(function (key, i) {
               var col = dlg.querySelector('.scene-time-wheel[data-key="' + key + '"]');
               setSceneTimeWheelScroll(col, sels[i].value);
+            });
+            dlg.querySelectorAll('.scene-time-wheel').forEach(function (col) {
+              col._lastCommittedV = getSceneTimeWheelValue(col);
             });
             flushSceneTimeDialogToStorage();
           });
@@ -4533,6 +4610,10 @@
         set(sels[1], ss0);
         set(sels[2], mm1);
         set(sels[3], ss1);
+        wrap.setAttribute('data-mm0', String(sels[0].value || '0'));
+        wrap.setAttribute('data-ss0', String(sels[1].value || '0'));
+        wrap.setAttribute('data-mm1', String(sels[2].value || '0'));
+        wrap.setAttribute('data-ss1', String(sels[3].value || '0'));
         syncIOSWheelFromSelects(wrap);
       }
 
@@ -5708,7 +5789,6 @@
         var TOP_EPS = 10;
         var PULL_MIN = 76;
         var SWIPE_MIN = 72;
-        var EDGE = 56;
         var pullReloadedAt = 0;
 
         function skip(el) {
@@ -5765,6 +5845,7 @@
           } catch (eFs) {}
           try {
             sessionStorage.setItem(PULL_RELOAD_FLAG, '1');
+            sessionStorage.setItem(PULL_RELOAD_SCROLL_KEY, String(Math.max(0, Math.round(scrollTopNow()))));
           } catch (e1) {}
           try {
             triggerHaptic('medium');
@@ -5800,8 +5881,7 @@
             pullMaxDy = 0;
             swipeMinDx = 0;
             pullArmed = scrollTopNow() <= TOP_EPS;
-            var iw = window.innerWidth || document.documentElement.clientWidth || 1;
-            swipeArmed = startX >= iw - EDGE;
+            swipeArmed = true;
           },
           { passive: true }
         );
@@ -5832,18 +5912,18 @@
             }
 
             if (swipeArmed && !swipeCancelled) {
-              if (Math.abs(dy) > 38 && Math.abs(dy) > Math.abs(dx) * 1.4) {
+              if (Math.abs(dy) > 36 && Math.abs(dy) > Math.abs(dx) * 1.28) {
                 swipeCancelled = true;
                 swipeArmed = false;
                 resetSwipeHint();
               } else {
                 if (dx < swipeMinDx) swipeMinDx = dx;
                 var sh = swipeHintEl();
-                if (sh && dx < -10) {
+                if (sh && dx < -8) {
                   var prog = Math.min(1, Math.abs(swipeMinDx) / SWIPE_MIN);
                   sh.classList.add('pull-swipe-hint--show');
-                  sh.style.opacity = String(0.22 + prog * 0.73);
-                  sh.style.transform = 'translateX(' + (12 - prog * 24) + 'px) scaleY(' + (0.88 + prog * 0.2) + ')';
+                  sh.style.opacity = String(0.18 + prog * 0.56);
+                  sh.style.transform = 'translateX(' + (12 - prog * 22) + 'px) scaleY(' + (0.9 + prog * 0.14) + ')';
                   sh.classList.toggle('pull-swipe-hint--ready', prog >= 0.92);
                 }
               }
@@ -5929,6 +6009,15 @@
         },
         true
       );
+      window.addEventListener(
+        'pagehide',
+        function () {
+          var dlg = document.getElementById('scene-time-center-dialog');
+          if (!dlg || !dlg.open || !sceneTimeDialogWrap) return;
+          finalizeSceneTimeWheelsAndSave(dlg, sceneTimeDialogWrap);
+        },
+        { passive: true }
+      );
       repairSceneTimeSelectsInDom(document);
       upgradeSayLines();
       bindAllSayLimits(document);
@@ -5948,6 +6037,18 @@
       updateShotlistLocationHeadings(document);
       updateAllShotlistProgress();
       renumberScenes();
+      if (Number.isFinite(pendingPullReloadScrollY) && pendingPullReloadScrollY > 0) {
+        var restoreY = pendingPullReloadScrollY;
+        requestAnimationFrame(function () {
+          window.scrollTo(0, restoreY);
+          requestAnimationFrame(function () {
+            window.scrollTo(0, restoreY);
+            setTimeout(function () {
+              window.scrollTo(0, restoreY);
+            }, 160);
+          });
+        });
+      }
       rememberUndoState();
       setStatus('Готово (автосохранение)', false);
     })();
