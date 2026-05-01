@@ -168,11 +168,11 @@
       min-height: 0;
       gap: 10px;
       pointer-events: none;
-      transition: filter 0.42s ease;
-      filter: blur(var(--top-logo-blur, 0px));
+      transition: none;
+      filter: none;
       position: relative;
       isolation: isolate;
-      background: #000;
+      background: transparent;
     }
 
     .top-logo-brand::before {
@@ -300,15 +300,15 @@
     }
 
     .logo-bg {
-      width: 430px;
-      max-width: min(88vw, 520px);
-      height: 168px;
+      width: 645px;
+      max-width: min(95vw, 780px);
+      height: 252px;
       margin: 0 auto;
       align-self: center;
       background-color: transparent;
       background-image: url("top-logo.png");
       background-repeat: no-repeat;
-      background-position: center calc(50% - 38px);
+      background-position: center center;
       background-size: contain;
       opacity: .95;
       z-index: 3;
@@ -1933,9 +1933,9 @@
       }
 
       .logo-bg {
-        width: 470px;
-        max-width: 52%;
-        height: 186px;
+        width: 705px;
+        max-width: 78%;
+        height: 279px;
         align-self: center;
         margin-top: 0;
       }
@@ -2096,12 +2096,12 @@
       }
 
       .logo-bg {
-        width: 320px;
-        height: 126px;
+        width: 480px;
+        height: 189px;
         transform: translate(0px, 0px) scale(var(--logo-scale, 1));
         margin: 0 auto;
         align-self: center;
-        background-position: center calc(50% - 28px);
+        background-position: center center;
       }
     @media (max-width: 520px) {
       .scene-stack .scene-time-wrap {
@@ -2146,7 +2146,6 @@
   <div class="wrap">
     <div class="top-logo" id="top-logo-block">
       <div class="top-logo-brand">
-        <div class="logo-caption">СЪЁМКА ВИДЕО</div>
         <div class="logo-bg" aria-hidden="true"></div>
       </div>
       <label class="logo-controls" for="logo-scale">
