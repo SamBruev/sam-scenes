@@ -1144,7 +1144,7 @@
       min-width: 2.85rem;
       overflow-y: auto;
       overflow-x: hidden;
-      scroll-snap-type: none;
+      scroll-snap-type: y mandatory;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: contain;
       touch-action: pan-y;
@@ -1161,7 +1161,7 @@
 
     .scene-time-wheel-item {
       height: 34px;
-      scroll-snap-align: none;
+      scroll-snap-align: center;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -2372,11 +2372,11 @@
             <select id="prep-format-quality" class="format-select" aria-label="Качество">
               <option value="720p">720p</option>
               <option value="1080p">1080p</option>
-              <option value="4K">4K</option>
+              <option value="4K" selected>4K</option>
             </select>
             <select id="prep-format-fps" class="format-select" aria-label="Частота кадров">
               <option value="24">24 fps</option>
-              <option value="25">25 fps</option>
+              <option value="25" selected>25 fps</option>
               <option value="30">30 fps</option>
               <option value="50">50 fps</option>
               <option value="60">60 fps</option>
@@ -3723,13 +3723,6 @@
           mergeScenarioNameFromTitleSubject();
           var wrapEl = document.querySelector('.wrap');
           if (wrapEl) wrap = wrapEl;
-          var state = {
-            v: 12.0,
-            html: wrapEl ? wrapEl.innerHTML : '',
-            logo: { x: x.value, y: y.value, scale: s.value },
-            prep: getPrep()
-          };
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 
           var bundle = readScenarioBundle();
           if (!bundle) bundle = { activeId: null, items: [] };
@@ -3752,9 +3745,21 @@
           current.targetCount = scenarioCount ? (scenarioCount.value || '') : '';
           current.status = scenarioStatus ? (scenarioStatus.value || 'draft') : 'draft';
           current.shootBlock = scenarioShootBlock && scenarioShootBlock.value.trim ? scenarioShootBlock.value.trim() : '';
+
+          var freshPrep = getPrep();
+          var mergedPrep = Object.assign({}, current.prep || {}, freshPrep);
+
+          var state = {
+            v: 12.0,
+            html: wrapEl ? wrapEl.innerHTML : '',
+            logo: { x: x.value, y: y.value, scale: s.value },
+            prep: mergedPrep
+          };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+
           current.html = state.html;
           current.logo = state.logo;
-          current.prep = state.prep;
+          current.prep = mergedPrep;
           current.updatedAt = Date.now();
           if (!writeScenarioBundle(bundle)) {
             setStatus('Не удалось сохранить сценарии', true);
@@ -3964,6 +3969,8 @@
 
       var SCENE_TIME_W_PAD = 64;
       var SCENE_TIME_W_ITEM = 34;
+      var SCENE_TIME_WHEEL_COPIES = 5;
+      var SCENE_TIME_WHEEL_MID_COPY = 2;
       var sceneTimeDialogWrap = null;
       var sceneTimeDialogPointerAnchor = { x: NaN, y: NaN };
 
@@ -4051,6 +4058,20 @@
         return { x: NaN, y: NaN };
       }
 
+      function normalizeSceneTimeInfiniteWheel(col) {
+        if (!col) return;
+        var m = sceneTimeWheelMetrics(col);
+        var ch = col.clientHeight || 168;
+        var item = m.item;
+        var pad = m.pad;
+        var rows = 60 * SCENE_TIME_WHEEL_COPIES;
+        var centerLine = col.scrollTop + ch / 2;
+        var raw = (centerLine - pad - item / 2) / item;
+        var g = Math.round(raw);
+        if (g < 50) col.scrollTop += 60 * item * 2;
+        else if (g >= rows - 50) col.scrollTop -= 60 * item * 2;
+      }
+
       function buildSceneTimeWheelColumns(dlg) {
         if (!dlg || dlg.getAttribute('data-wheels-built') === '1') return;
         dlg.setAttribute('data-wheels-built', '1');
@@ -4058,16 +4079,29 @@
           var padTop = document.createElement('div');
           padTop.className = 'scene-time-wheel-pad';
           col.appendChild(padTop);
-          var i;
-          for (i = 0; i <= 59; i++) {
-            var d = document.createElement('div');
-            d.className = 'scene-time-wheel-item';
-            d.textContent = (i < 10 ? '0' : '') + i;
-            col.appendChild(d);
+          var copy, i;
+          for (copy = 0; copy < SCENE_TIME_WHEEL_COPIES; copy++) {
+            for (i = 0; i <= 59; i++) {
+              var d = document.createElement('div');
+              d.className = 'scene-time-wheel-item';
+              d.textContent = (i < 10 ? '0' : '') + i;
+              col.appendChild(d);
+            }
           }
           var padBot = document.createElement('div');
           padBot.className = 'scene-time-wheel-pad';
           col.appendChild(padBot);
+          col.addEventListener(
+            'scroll',
+            function () {
+              if (col._wheelNormTO) clearTimeout(col._wheelNormTO);
+              col._wheelNormTO = setTimeout(function () {
+                col._wheelNormTO = null;
+                normalizeSceneTimeInfiniteWheel(col);
+              }, 120);
+            },
+            { passive: true }
+          );
         });
       }
 
@@ -4076,7 +4110,9 @@
         var m = sceneTimeWheelMetrics(col);
         idx = Math.max(0, Math.min(59, Number(idx) || 0));
         var ch = col.clientHeight || 168;
-        var st = m.pad + idx * m.item;
+        var globalRow = SCENE_TIME_WHEEL_MID_COPY * 60 + idx;
+        var centerY = m.pad + globalRow * m.item + m.item / 2;
+        var st = centerY - ch / 2;
         var maxSt = Math.max(0, col.scrollHeight - ch);
         col.scrollTop = Math.max(0, Math.min(maxSt, st));
       }
@@ -4084,12 +4120,21 @@
       function getSceneTimeWheelValue(col) {
         if (!col) return 0;
         var m = sceneTimeWheelMetrics(col);
-        var raw = (col.scrollTop - m.pad) / m.item;
-        var idx = Math.round(raw);
-        return Math.max(0, Math.min(59, idx));
+        var ch = col.clientHeight || 168;
+        var centerLine = col.scrollTop + ch / 2;
+        var raw = (centerLine - m.pad - m.item / 2) / m.item;
+        var g = Math.round(raw);
+        var idx = ((g % 60) + 60) % 60;
+        return idx;
       }
 
       function ensureSceneTimeCenterDialog() {
+        var legacyDlg = document.getElementById('scene-time-center-dialog');
+        if (legacyDlg) {
+          var sampleWheel = legacyDlg.querySelector('.scene-time-wheel');
+          var nItems = sampleWheel ? sampleWheel.querySelectorAll('.scene-time-wheel-item').length : 0;
+          if (nItems !== 60 * SCENE_TIME_WHEEL_COPIES) legacyDlg.remove();
+        }
         if (document.getElementById('scene-time-center-dialog')) return;
         var dlg = document.createElement('dialog');
         dlg.id = 'scene-time-center-dialog';
@@ -4436,11 +4481,18 @@
               else opt.removeAttribute('selected');
             });
           } else {
+            var curVal = sel.value;
+            var matched = false;
             Array.prototype.forEach.call(sel.options, function (opt) {
               opt.removeAttribute('selected');
+              if (opt.value === curVal) {
+                opt.setAttribute('selected', '');
+                matched = true;
+              }
             });
-            var idx = sel.selectedIndex;
-            if (idx >= 0 && sel.options[idx]) sel.options[idx].setAttribute('selected', '');
+            if (!matched && sel.selectedIndex >= 0 && sel.options[sel.selectedIndex]) {
+              sel.options[sel.selectedIndex].setAttribute('selected', '');
+            }
           }
         });
         root.querySelectorAll('input').forEach(function (inp) {
