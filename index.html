@@ -5600,13 +5600,36 @@
         }, true);
 
         if (wrap) {
-          wrap.addEventListener('change', function (e) {
-            var t = e.target;
-            if (!t || !t.matches || !t.matches('select.scene-select')) return;
-            if (scenesBlock && scenesBlock.contains(t)) return;
-            if (t.matches('select.shotlist-loc-name')) updateShotlistLocationHeadings(document);
-            markDirty();
-          });
+          function prepFieldDirtyTarget(t) {
+            if (!t || !t.matches) return false;
+            if (t.matches('#prep-hook-location, #prep-main-location, #prep-date, #prep-note, #prep-assistant'))
+              return true;
+            if (t.matches('#prep-format-aspect, #prep-format-quality, #prep-format-fps')) return true;
+            if (t.classList.contains('prep-select') || t.classList.contains('format-select')) return true;
+            return false;
+          }
+          wrap.addEventListener(
+            'change',
+            function (e) {
+              var t = e.target;
+              if (prepFieldDirtyTarget(t)) {
+                markDirty();
+                return;
+              }
+              if (!t || !t.matches || !t.matches('select.scene-select')) return;
+              if (scenesBlock && scenesBlock.contains(t)) return;
+              if (t.matches('select.shotlist-loc-name')) updateShotlistLocationHeadings(document);
+              markDirty();
+            },
+            true
+          );
+          wrap.addEventListener(
+            'input',
+            function (e) {
+              if (prepFieldDirtyTarget(e.target)) markDirty();
+            },
+            true
+          );
         }
       }
 
