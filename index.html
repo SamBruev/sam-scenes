@@ -744,21 +744,21 @@
     }
 
     .scene-stack .scene-time-wrap {
-      font-size: 15px;
+      font-size: 13px;
       letter-spacing: 0.02em;
-      padding: 8px 10px;
+      padding: 5px 8px;
       box-sizing: border-box;
       border: none !important;
-      border-radius: 14px;
+      border-radius: 11px;
       color: var(--cream);
       background-color: #0a0a0a;
-      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.32);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
       display: grid;
       /* Одна колонка: заголовок «СЦЕНА …», сразу под ним — время по центру */
       grid-template-columns: minmax(0, 1fr);
       align-items: center;
       column-gap: 0;
-      row-gap: 3px;
+      row-gap: 2px;
       width: 100%;
       max-width: 100%;
     }
@@ -774,10 +774,10 @@
       font-weight: 700;
       flex-shrink: 0;
       color: var(--anna-gold);
-      font-size: 15px;
+      font-size: 12.5px;
       letter-spacing: 0.03em;
       white-space: nowrap;
-      line-height: 1.3;
+      line-height: 1.25;
       padding-top: 0;
       margin: 0 auto;
     }
@@ -785,15 +785,15 @@
 
     .scene-main[data-scene-role="body"] .scene-time-wrap .time-leading {
       text-transform: uppercase;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.07em;
       font-weight: 800;
-      font-size: 17px;
+      font-size: 13.5px;
     }
     .scene-main[data-scene-role="intro"] .scene-time-wrap .time-leading,
     .scene-main[data-scene-role="outro"] .scene-time-wrap .time-leading {
-      font-size: 17px;
+      font-size: 13.5px;
       font-weight: 800;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
       color: #f2d78c;
     }
@@ -843,14 +843,14 @@
 
     .scene-time-wrap .scene-play-btn {
       flex-shrink: 0;
-      width: 1.9rem;
-      height: 1.9rem;
+      width: 1.65rem;
+      height: 1.65rem;
       border-radius: 999px;
       border: 1px solid rgba(255, 218, 132, 0.5);
       background: linear-gradient(180deg, #1a140a, #0f0b06);
       color: #ffd784;
       font-weight: 800;
-      font-size: 0.85rem;
+      font-size: 0.78rem;
       line-height: 1;
       cursor: pointer;
       padding: 0;
@@ -920,7 +920,7 @@
     .scene-time-wrap .time-sep {
       color: rgba(212, 175, 55, 0.42);
       font-weight: 500;
-      font-size: 12px;
+      font-size: 11px;
       line-height: 1;
       user-select: none;
       padding: 0;
@@ -936,19 +936,19 @@
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath fill='%23e6cc8c' d='M1.4 1.3 6 6l4.6-4.7L12 2.7 6 8 0 2.7z'/%3E%3C/svg%3E"),
         linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02));
       background-repeat: no-repeat, no-repeat;
-      background-position: right 8px center, center;
-      background-size: 10px 7px, 100% 100%;
+      background-position: right 6px center, center;
+      background-size: 9px 6px, 100% 100%;
       backdrop-filter: blur(10px);
       border: 1px solid rgba(212, 175, 55, 0.35);
-      border-radius: 11px;
+      border-radius: 9px;
       color: #e8ddb8;
       font: inherit;
       font-weight: 600;
-      font-size: 12.5px;
+      font-size: 11px;
       line-height: 1.15;
-      padding: 5px 22px 5px 8px;
-      min-height: 36px;
-      min-width: 3.1rem;
+      padding: 3px 18px 3px 6px;
+      min-height: 28px;
+      min-width: 2.75rem;
       flex: 0 0 auto;
       max-width: none;
       color-scheme: dark;
@@ -977,12 +977,12 @@
     .scene-time-ios {
       display: none;
       align-items: center;
-      gap: 10px 14px;
+      gap: 6px 10px;
       justify-content: center;
       width: 100%;
       max-width: 100%;
       margin-inline: auto;
-      padding: 6px 4px 4px;
+      padding: 4px 2px 2px;
       box-sizing: border-box;
       grid-column: 1 / -1;
       flex-wrap: wrap;
@@ -991,14 +991,14 @@
     .scene-time-ios input[type="time"] {
       background: rgba(10, 10, 10, 0.6);
       border: 1px solid rgba(255, 228, 160, 0.22);
-      border-radius: 12px;
+      border-radius: 10px;
       color: #f1e3be;
       font: inherit;
-      font-size: 15px;
+      font-size: 13px;
       font-weight: 700;
-      padding: 8px 12px;
+      padding: 5px 9px;
       color-scheme: dark;
-      min-width: min(9.5rem, 42vw);
+      min-width: min(8.5rem, 38vw);
       text-align: center;
       box-shadow: none;
       outline: none;
@@ -1014,19 +1014,19 @@
       display: none;
       align-items: center;
       justify-content: center;
-      gap: 8px 12px;
+      gap: 6px 10px;
       flex-wrap: wrap;
       width: 100%;
       max-width: 100%;
       margin: 0;
-      padding: 10px 14px;
+      padding: 7px 11px;
       box-sizing: border-box;
-      border-radius: 14px;
+      border-radius: 11px;
       border: 1px solid rgba(255, 228, 160, 0.28);
       background: rgba(12, 12, 12, 0.95);
       color: #f1e3be;
       font: inherit;
-      font-size: 16px;
+      font-size: 13.5px;
       font-weight: 700;
       font-variant-numeric: tabular-nums;
       cursor: pointer;
@@ -1045,11 +1045,11 @@
       transform: translate(-50%, -50%);
       margin: 0;
       border: none;
-      border-radius: 22px;
+      border-radius: 18px;
       padding: 0;
-      max-width: min(400px, 94vw);
-      width: min(400px, 94vw);
-      max-height: min(520px, 88vh);
+      max-width: min(340px, 92vw);
+      width: min(340px, 92vw);
+      max-height: min(440px, 82vh);
       background: #100e0a;
       color: var(--text);
       box-shadow: 0 28px 80px rgba(0, 0, 0, 0.65);
@@ -1063,18 +1063,18 @@
     }
 
     .scene-time-dialog-panel {
-      padding: 18px 16px 16px;
+      padding: 14px 12px 12px;
       box-sizing: border-box;
-      max-height: min(480px, 85vh);
+      max-height: min(400px, 78vh);
       overflow-x: hidden;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
     }
 
     .scene-time-dialog-title {
-      margin: 0 0 14px;
+      margin: 0 0 10px;
       text-align: center;
-      font-size: 15px;
+      font-size: 13px;
       font-weight: 800;
       letter-spacing: 0.06em;
       text-transform: uppercase;
@@ -1085,14 +1085,14 @@
       display: flex;
       flex-direction: column;
       align-items: stretch;
-      gap: 14px;
+      gap: 10px;
     }
 
     .scene-time-dialog-row {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px 12px;
+      gap: 8px 10px;
       flex-wrap: wrap;
     }
 
@@ -1108,33 +1108,33 @@
     }
 
     .scene-time-wheel {
-      height: 220px;
-      width: 3.5rem;
-      min-width: 3.25rem;
+      height: 168px;
+      width: 3rem;
+      min-width: 2.85rem;
       overflow-y: auto;
       overflow-x: hidden;
       scroll-snap-type: y mandatory;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: contain;
       touch-action: pan-y;
-      border-radius: 12px;
+      border-radius: 10px;
       border: 1px solid rgba(255, 228, 160, 0.22);
       background: #080808;
       box-sizing: border-box;
     }
 
     .scene-time-wheel-pad {
-      height: 88px;
+      height: 64px;
       flex-shrink: 0;
     }
 
     .scene-time-wheel-item {
-      height: 44px;
+      height: 34px;
       scroll-snap-align: center;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 19px;
+      font-size: 15px;
       font-weight: 800;
       font-variant-numeric: tabular-nums;
       color: #f0e6d4;
@@ -1142,7 +1142,7 @@
     }
 
     .scene-time-dialog-colon {
-      font-size: 18px;
+      font-size: 15px;
       font-weight: 800;
       color: rgba(212, 175, 55, 0.55);
       padding: 0 2px;
@@ -1157,16 +1157,16 @@
 
     .scene-time-dialog-actions {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       justify-content: stretch;
-      margin-top: 18px;
+      margin-top: 14px;
     }
 
     .scene-time-dialog-actions .btn {
       flex: 1 1 auto;
-      padding: 12px 14px;
-      font-size: 15px;
-      border-radius: 14px;
+      padding: 9px 11px;
+      font-size: 13px;
+      border-radius: 12px;
     }
 
     .scene-time-dialog-cancel {
@@ -1815,8 +1815,8 @@
     .scene-main > .scene-time-wrap {
       order: 1;
       position: relative;
-      margin: 0 -18px;
-      width: calc(100% + 36px);
+      margin: 0 -14px;
+      width: calc(100% + 28px);
       max-width: none;
       align-self: center;
       transform: none;
@@ -2094,9 +2094,9 @@
     @media (max-width: 520px) {
       .scene-stack .scene-time-wrap {
         grid-template-columns: 1fr;
-        row-gap: 6px;
+        row-gap: 4px;
         align-items: stretch;
-        padding: 12px 14px;
+        padding: 7px 10px;
       }
 
       .scene-time-wrap .time-pickers {
@@ -2111,8 +2111,8 @@
       }
 
       .scene-time-ios input[type="time"] {
-        font-size: 16px;
-        min-height: 44px;
+        font-size: 13px;
+        min-height: 34px;
       }
 
       .scene-time-wrap .time-heading {
@@ -2120,12 +2120,12 @@
       }
 
       .scene-main[data-scene-role="body"] .scene-time-wrap .time-leading {
-        font-size: 16px;
+        font-size: 13px;
       }
 
       .scene-main > .scene-time-wrap {
-        margin-inline: -8px;
-        width: calc(100% + 16px);
+        margin-inline: -10px;
+        width: calc(100% + 20px);
       }
     }
   </style>
@@ -3770,8 +3770,8 @@
         return typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 932px)').matches;
       }
 
-      var SCENE_TIME_W_PAD = 88;
-      var SCENE_TIME_W_ITEM = 44;
+      var SCENE_TIME_W_PAD = 64;
+      var SCENE_TIME_W_ITEM = 34;
       var sceneTimeDialogWrap = null;
 
       function buildSceneTimeWheelColumns(dlg) {
