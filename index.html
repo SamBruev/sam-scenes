@@ -3774,6 +3774,57 @@
       var SCENE_TIME_W_PAD = 64;
       var SCENE_TIME_W_ITEM = 34;
       var sceneTimeDialogWrap = null;
+      var sceneTimeDialogPointerAnchor = { x: NaN, y: NaN };
+
+      function resetSceneTimeDialogPosition(dlg) {
+        if (!dlg) return;
+        dlg.style.top = '';
+        dlg.style.left = '';
+        dlg.style.right = '';
+        dlg.style.bottom = '';
+        dlg.style.margin = '';
+        dlg.style.transform = '';
+      }
+
+      function positionSceneTimeDialogNearAnchor(dlg, ax, ay) {
+        if (!dlg) return;
+        if (!Number.isFinite(ax) || !Number.isFinite(ay)) return;
+
+        dlg.style.margin = '0';
+        dlg.style.position = 'fixed';
+
+        var vv = window.visualViewport;
+        var vw = vv ? vv.width : window.innerWidth;
+        var vh = vv ? vv.height : window.innerHeight;
+
+        var rect = dlg.getBoundingClientRect();
+        var w = rect.width;
+        var h = rect.height;
+        if (w < 4 || h < 4) return;
+
+        var gap = 12;
+        var pad = 10;
+        var left = ax - w / 2;
+        var top = ay + gap;
+
+        if (top + h > vh - pad) top = ay - h - gap;
+        if (top < pad) top = pad;
+        left = Math.max(pad, Math.min(left, vw - w - pad));
+
+        dlg.style.left = Math.round(left) + 'px';
+        dlg.style.top = Math.round(top) + 'px';
+        dlg.style.transform = 'none';
+      }
+
+      function pickSceneTimeOpenAnchor(e) {
+        var ax = e.clientX;
+        var ay = e.clientY;
+        var okClick = Number.isFinite(ax) && Number.isFinite(ay) && !(ax === 0 && ay === 0);
+        if (okClick) return { x: ax, y: ay };
+        if (Number.isFinite(sceneTimeDialogPointerAnchor.x) && Number.isFinite(sceneTimeDialogPointerAnchor.y))
+          return { x: sceneTimeDialogPointerAnchor.x, y: sceneTimeDialogPointerAnchor.y };
+        return { x: NaN, y: NaN };
+      }
 
       function buildSceneTimeWheelColumns(dlg) {
         if (!dlg || dlg.getAttribute('data-wheels-built') === '1') return;
@@ -3853,10 +3904,11 @@
         });
         dlg.addEventListener('close', function () {
           sceneTimeDialogWrap = null;
+          resetSceneTimeDialogPosition(dlg);
         });
       }
 
-      function openSceneTimeCenterDialog(wrap) {
+      function openSceneTimeCenterDialog(wrap, anchorX, anchorY) {
         ensureSceneTimeCenterDialog();
         var dlg = document.getElementById('scene-time-center-dialog');
         if (!dlg || !wrap) return;
@@ -3864,9 +3916,12 @@
         var sels = wrap.querySelectorAll('select.scene-time-select');
         if (sels.length < 4) return;
         var keys = ['mm0', 'ss0', 'mm1', 'ss1'];
+        resetSceneTimeDialogPosition(dlg);
         dlg.showModal();
         requestAnimationFrame(function () {
+          positionSceneTimeDialogNearAnchor(dlg, anchorX, anchorY);
           requestAnimationFrame(function () {
+            positionSceneTimeDialogNearAnchor(dlg, anchorX, anchorY);
             keys.forEach(function (key, i) {
               var col = dlg.querySelector('.scene-time-wheel[data-key="' + key + '"]');
               setSceneTimeWheelScroll(col, sels[i].value);
@@ -5326,6 +5381,17 @@
       document.querySelectorAll('.scene-time-wrap').forEach(ensureSceneTimeTriggerInWrap);
       ensureSceneTimeCenterDialog();
       document.addEventListener(
+        'pointerdown',
+        function (e) {
+          if (!useSceneTimeCenterModal()) return;
+          var btn = e.target && e.target.closest && e.target.closest('.scene-time-trigger');
+          if (!btn) return;
+          sceneTimeDialogPointerAnchor.x = e.clientX;
+          sceneTimeDialogPointerAnchor.y = e.clientY;
+        },
+        true
+      );
+      document.addEventListener(
         'click',
         function (e) {
           if (!useSceneTimeCenterModal()) return;
@@ -5334,7 +5400,11 @@
           e.preventDefault();
           e.stopPropagation();
           var wrap = btn.closest('.scene-time-wrap');
-          if (wrap) openSceneTimeCenterDialog(wrap);
+          if (!wrap) return;
+          var a = pickSceneTimeOpenAnchor(e);
+          sceneTimeDialogPointerAnchor.x = NaN;
+          sceneTimeDialogPointerAnchor.y = NaN;
+          openSceneTimeCenterDialog(wrap, a.x, a.y);
         },
         true
       );
