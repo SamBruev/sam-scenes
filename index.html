@@ -4075,6 +4075,7 @@
         if (!col) return;
         var m = sceneTimeWheelMetrics(col);
         idx = Math.max(0, Math.min(59, Number(idx) || 0));
+        var ch = col.clientHeight || 168;
         var st = m.pad + idx * m.item;
         var maxSt = Math.max(0, col.scrollHeight - ch);
         col.scrollTop = Math.max(0, Math.min(maxSt, st));
@@ -4118,14 +4119,22 @@
           '</div>';
         document.body.appendChild(dlg);
         buildSceneTimeWheelColumns(dlg);
-        dlg.querySelector('.scene-time-dialog-ok').addEventListener('click', function (e) {
-          e.preventDefault();
+        var sceneTimeOkBtn = dlg.querySelector('.scene-time-dialog-ok');
+        function scheduleApplySceneTimeDialog(e) {
+          if (e) e.preventDefault();
           requestAnimationFrame(function () {
-            requestAnimationFrame(function () {
-              applySceneTimeFromCenterDialog();
-            });
+            requestAnimationFrame(applySceneTimeFromCenterDialog);
           });
-        });
+        }
+        sceneTimeOkBtn.addEventListener('click', scheduleApplySceneTimeDialog);
+        sceneTimeOkBtn.addEventListener(
+          'touchend',
+          function (e) {
+            e.preventDefault();
+            scheduleApplySceneTimeDialog(e);
+          },
+          { passive: false }
+        );
         dlg.querySelector('.scene-time-dialog-cancel').addEventListener('click', function () {
           sceneTimeDialogWrap = null;
           dlg.close();
@@ -4189,7 +4198,7 @@
         sceneTimeDialogWrap = null;
         dlg.close();
         syncIOSWheelFromSelects(wrap);
-        markDirty();
+        saveToStorage();
       }
 
       function ensureSceneTimeTriggerInWrap(wrap) {
