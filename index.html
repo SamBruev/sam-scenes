@@ -1694,16 +1694,26 @@
       margin-top: 0.2em;
     }
 
-    .voice-cmd-block {
-      margin-top: 14px;
-      padding-top: 14px;
-      border-top: 1px solid rgba(255, 228, 160, 0.16);
+    .voice-cmd-card .voice-cmd-summary {
+      font-weight: 800;
+      font-size: 1rem;
+      letter-spacing: 0.04em;
+      color: var(--cream);
+    }
+
+    .voice-cmd-card-body {
+      padding: 4px 2px 10px;
     }
 
     .voice-cmd-lead {
-      font-size: 0.88rem;
-      margin: 0 0 10px;
-      line-height: 1.45;
+      font-size: 0.9rem;
+      margin: 0 0 12px;
+      line-height: 1.5;
+    }
+
+    .voice-cmd-lead b {
+      color: var(--accent);
+      font-weight: 700;
     }
 
     .voice-cmd-row {
@@ -1718,12 +1728,91 @@
       gap: 8px;
       cursor: pointer;
       white-space: nowrap;
+      font-weight: 700;
+    }
+
+    .voice-cmd-word-label input {
+      min-width: 11rem;
     }
 
     .voice-cmd-status {
-      margin: 8px 0 0;
+      margin: 10px 0 0;
       min-height: 1.25em;
-      font-size: 0.85rem;
+      font-size: 0.88rem;
+      color: var(--gold);
+    }
+
+    /* Свайп вниз от верха (в т.ч. PWA на главном экране iPhone): подсказка + вспышка и вход после reload */
+    .pull-reload-hint {
+      position: fixed;
+      left: 50%;
+      top: calc(10px + env(safe-area-inset-top, 0px));
+      z-index: 2147483000;
+      width: 12px;
+      height: 12px;
+      margin-left: -6px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 30%, #fff4d4, var(--gold) 48%, #8a7028);
+      box-shadow: 0 0 0 1px rgba(255, 220, 160, 0.55), 0 6px 24px rgba(212, 175, 55, 0.35);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-16px) scale(0.85);
+      transition: opacity 0.12s ease, transform 0.15s ease;
+    }
+
+    .pull-reload-hint.pull-reload-hint--ready {
+      animation: pullReloadDotPulse 0.55s ease-in-out infinite alternate;
+    }
+
+    @keyframes pullReloadDotPulse {
+      from { transform: translateY(var(--pull-dot-y, 0px)) scale(1); box-shadow: 0 0 0 1px rgba(255, 220, 160, 0.55), 0 6px 20px rgba(212, 175, 55, 0.35); }
+      to { transform: translateY(var(--pull-dot-y, 0px)) scale(1.22); box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.35), 0 10px 36px rgba(212, 175, 55, 0.45); }
+    }
+
+    .pull-reload-flash {
+      position: fixed;
+      inset: 0;
+      z-index: 2147483646;
+      pointer-events: none;
+      background: radial-gradient(ellipse 120% 55% at 50% 0%, rgba(212, 175, 55, 0.42), transparent 62%);
+      opacity: 0;
+      transition: opacity 0.18s ease;
+    }
+
+    .pull-reload-flash.pull-reload-flash--show {
+      opacity: 1;
+    }
+
+    @keyframes pullReloadPageIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.988);
+        filter: blur(4px);
+      }
+      to {
+        opacity: 1;
+        transform: none;
+        filter: none;
+      }
+    }
+
+    html.pull-reload-enter .wrap {
+      animation: pullReloadPageIn 0.62s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .pull-reload-hint.pull-reload-hint--ready {
+        animation: none;
+      }
+
+      html.pull-reload-enter .wrap {
+        animation: none;
+      }
+
+      .pull-reload-flash.pull-reload-flash--show {
+        opacity: 0.65;
+        transition: none;
+      }
     }
 
     /* Локации шотлиста — три отдельные карточки */
@@ -2224,6 +2313,8 @@
   </style>
 </head>
 <body>
+  <div id="pull-reload-hint" class="pull-reload-hint" aria-hidden="true"></div>
+  <div id="pull-reload-flash" class="pull-reload-flash" aria-hidden="true"></div>
   <div class="wrap">
     <div class="top-logo" id="top-logo-block">
       <div class="top-logo-brand">
@@ -2279,16 +2370,6 @@
           <button class="btn" id="btn-scenario-new" type="button">+ Новый шаблон</button>
           <button class="btn btn-danger" id="btn-scenario-delete" type="button">Удалить</button>
         </div>
-        <div class="voice-cmd-block">
-          <p class="muted voice-cmd-lead">Голос вместо Enter: произнесите своё слово в конце фразы — в активном поле («Говорю», примечание, заголовок…) вставится новая строка. Нужны HTTPS и доступ к микрофону. С системной диктовкой клавиатуры одновременно обычно конфликтует.</p>
-          <div class="row voice-cmd-row">
-            <label class="voice-cmd-check"><input type="checkbox" id="voice-cmd-enabled" autocomplete="off"> Слушать команду</label>
-            <label>Слово-команда
-              <input id="voice-cmd-word" type="text" maxlength="48" placeholder="дальше" autocomplete="off" autocapitalize="off" spellcheck="false">
-            </label>
-          </div>
-          <p class="muted voice-cmd-status" id="voice-cmd-status" aria-live="polite"></p>
-        </div>
       </div>
     </details>
 
@@ -2297,6 +2378,20 @@
       <div class="daily-plan-body">
         <div class="plan-summary" id="plan-summary">Нет данных.</div>
         <div class="plan-list" id="plan-list"></div>
+      </div>
+    </details>
+
+    <details class="card voice-cmd-card" id="voice-cmd-panel" open>
+      <summary class="voice-cmd-summary">Голос вместо Enter — новая строка в тексте</summary>
+      <div class="voice-cmd-card-body">
+        <p class="muted voice-cmd-lead">Нажать Enter не нужно: курсор в поле «Говорю», примечание или заголовок — произнесите <b>ваше слово</b> (пауза и отдельно фразой). Браузер спросит микрофон; нужен <b>HTTPS</b>. С диктовкой клавиатуры телефона одновременно часто не работает.</p>
+        <div class="row voice-cmd-row">
+          <label class="voice-cmd-check"><input type="checkbox" id="voice-cmd-enabled" autocomplete="off"> Включить голос вместо Enter</label>
+          <label class="voice-cmd-word-label">Мое слово (рус.)
+            <input id="voice-cmd-word" type="text" maxlength="48" placeholder="например: дальше" autocomplete="off" autocapitalize="off" spellcheck="false">
+          </label>
+        </div>
+        <p class="muted voice-cmd-status" id="voice-cmd-status" aria-live="polite"></p>
       </div>
     </details>
 
@@ -3261,6 +3356,14 @@
 
   <script>
     (function () {
+      var PULL_RELOAD_FLAG = 'abakan-pull-reload-flag';
+      try {
+        if (sessionStorage.getItem(PULL_RELOAD_FLAG)) {
+          sessionStorage.removeItem(PULL_RELOAD_FLAG);
+          document.documentElement.classList.add('pull-reload-enter');
+        }
+      } catch (ePullFlag) {}
+
       var APP_BUILD = 'v121-scenario-shoot-blocks';
       var APP_BUILD_KEY = 'abakan-app-build';
       var STORAGE_KEY = 'abakan-main-abakan-layout-v15';
@@ -5492,59 +5595,6 @@
           saveToStorage();
         });
 
-        // Mobile pull-to-refresh: свайп вниз от самого верха перезагружает страницу.
-        var pullStartY = null;
-        var pullDistance = 0;
-        var pullArmed = false;
-        var pullReloadedAt = 0;
-        function isAtTop() {
-          var se = document.scrollingElement || document.documentElement || document.body;
-          return (window.scrollY || 0) <= 0 && (!se || (se.scrollTop || 0) <= 0);
-        }
-        document.addEventListener('touchstart', function (e) {
-          if (!e.touches || e.touches.length !== 1) return;
-          var t = e.target;
-          if (t && t.closest && t.closest('input, textarea, select, [contenteditable="true"], .teleprompter-overlay')) {
-            pullStartY = null;
-            pullDistance = 0;
-            pullArmed = false;
-            return;
-          }
-          if (!isAtTop()) {
-            pullStartY = null;
-            pullDistance = 0;
-            pullArmed = false;
-            return;
-          }
-          pullStartY = e.touches[0].clientY;
-          pullDistance = 0;
-          pullArmed = true;
-        }, { passive: true });
-        document.addEventListener('touchmove', function (e) {
-          if (!pullArmed || pullStartY == null || !e.touches || !e.touches.length) return;
-          var dy = e.touches[0].clientY - pullStartY;
-          pullDistance = Math.max(pullDistance, dy);
-          if (dy < 0) pullArmed = false;
-        }, { passive: true });
-        document.addEventListener('touchend', function () {
-          if (!pullArmed || pullStartY == null) {
-            pullStartY = null;
-            pullDistance = 0;
-            pullArmed = false;
-            return;
-          }
-          var now = Date.now();
-          var shouldReload = isAtTop() && pullDistance >= 90;
-          if (now - pullReloadedAt < 1200) shouldReload = false;
-          if (shouldReload) {
-            pullReloadedAt = now;
-            location.reload();
-          }
-          pullStartY = null;
-          pullDistance = 0;
-          pullArmed = false;
-        }, { passive: true });
-
         document.addEventListener('pointerdown', function (e) {
           var t = e.target;
           if (!t || !t.matches || !t.matches('select')) return;
@@ -5746,10 +5796,12 @@
         var maxDy = 0;
         var TOP_EPS = 10;
         var PULL_MIN = 118;
+        var pullReloadedAt = 0;
 
         function skip(el) {
           if (!el || !el.closest) return true;
           if (el.closest('dialog[open]')) return true;
+          if (el.closest('.teleprompter-overlay')) return true;
           if (el.closest('input, textarea, select, button, .logo-bg, .logo-controls, [contenteditable="true"]'))
             return true;
           return false;
@@ -5764,9 +5816,45 @@
           );
         }
 
+        function pullHintEl() {
+          return document.getElementById('pull-reload-hint');
+        }
+
+        function resetPullHint() {
+          var hint = pullHintEl();
+          if (!hint) return;
+          hint.style.opacity = '';
+          hint.style.setProperty('--pull-dot-y', '0px');
+          hint.style.transform = '';
+          hint.classList.remove('pull-reload-hint--ready');
+        }
+
+        function scheduleReloadAfterPullGesture() {
+          var now = Date.now();
+          if (now - pullReloadedAt < 1300) return;
+          pullReloadedAt = now;
+          try {
+            sessionStorage.setItem(PULL_RELOAD_FLAG, '1');
+          } catch (e1) {}
+          try {
+            triggerHaptic('medium');
+          } catch (e2) {}
+          resetPullHint();
+          var flash = document.getElementById('pull-reload-flash');
+          if (flash) {
+            flash.classList.add('pull-reload-flash--show');
+            flash.setAttribute('aria-hidden', 'false');
+          }
+          var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          setTimeout(function () {
+            location.reload();
+          }, reduced ? 80 : 280);
+        }
+
         document.addEventListener(
           'touchstart',
           function (e) {
+            resetPullHint();
             if (skip(e.target)) {
               armed = false;
               return;
@@ -5788,10 +5876,19 @@
             if (!armed) return;
             if (scrollTopNow() > TOP_EPS) {
               armed = false;
+              resetPullHint();
               return;
             }
             var dy = e.touches[0].clientY - startY;
             if (dy > maxDy) maxDy = dy;
+            var hint = pullHintEl();
+            if (hint && dy > 24) {
+              var yShift = Math.min(36, dy * 0.2);
+              hint.style.setProperty('--pull-dot-y', yShift + 'px');
+              hint.style.opacity = String(Math.min(1, 0.2 + (dy / PULL_MIN) * 0.85));
+              hint.style.transform = 'translateY(' + yShift + 'px)';
+              hint.classList.toggle('pull-reload-hint--ready', dy >= PULL_MIN * 0.92);
+            }
           },
           { passive: true }
         );
@@ -5799,12 +5896,27 @@
         document.addEventListener(
           'touchend',
           function () {
-            if (!armed) return;
+            if (!armed) {
+              resetPullHint();
+              return;
+            }
             armed = false;
             if (scrollTopNow() <= TOP_EPS && maxDy >= PULL_MIN) {
-              location.reload();
+              scheduleReloadAfterPullGesture();
+            } else {
+              resetPullHint();
             }
             maxDy = 0;
+          },
+          { passive: true }
+        );
+
+        document.addEventListener(
+          'touchcancel',
+          function () {
+            armed = false;
+            maxDy = 0;
+            resetPullHint();
           },
           { passive: true }
         );
@@ -5813,6 +5925,11 @@
       loadFromStorage();
       wireTopLogoScrollBlur();
       wirePullDownReload();
+      if (document.documentElement.classList.contains('pull-reload-enter')) {
+        setTimeout(function () {
+          document.documentElement.classList.remove('pull-reload-enter');
+        }, 720);
+      }
       initBottomLogoFromTop();
       migrateLegacySceneTimes();
       hydrateDatumSceneTimes();
