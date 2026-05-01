@@ -3769,6 +3769,16 @@
         persistToStorage('Сохранено');
       }
 
+      /** Сразу записать в localStorage (отменяет отложенный autosave и сохраняет актуальный DOM). Нужно перед закрытием вкладки / reload. */
+      function flushSave() {
+        clearTimeout(autosaveTO);
+        autosaveTO = null;
+        flushUndoSnapshot();
+        try {
+          persistToStorage(null);
+        } catch (e) {}
+      }
+
       function applyLogo() {
         var scaleNum = Number(s.value) || 100;
         root.style.setProperty('--logo-x', x.value + 'px');
@@ -5364,20 +5374,12 @@
           }, 0);
         }, true);
 
-        function flushSave() {
-          clearTimeout(autosaveTO);
-          autosaveTO = null;
-          flushUndoSnapshot();
-          try {
-            persistToStorage(null);
-          } catch (e2) {}
-        }
-
         document.addEventListener('visibilitychange', function () {
           if (document.visibilityState === 'hidden') flushSave();
         });
 
         window.addEventListener('pagehide', flushSave);
+        window.addEventListener('beforeunload', flushSave);
 
         prepIds.forEach(function (id) {
           var el = document.getElementById(id);
@@ -5583,6 +5585,9 @@
           var now = Date.now();
           if (now - pullReloadedAt < 1300) return;
           pullReloadedAt = now;
+          try {
+            flushSave();
+          } catch (eFs) {}
           try {
             sessionStorage.setItem(PULL_RELOAD_FLAG, '1');
           } catch (e1) {}
