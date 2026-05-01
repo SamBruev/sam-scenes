@@ -200,6 +200,10 @@
         transition: none !important;
         filter: none !important;
       }
+
+      .logo-bg {
+        transition: none !important;
+      }
     }
 
     .bottom-logo {
@@ -318,6 +322,8 @@
       transform-origin: center center;
       user-select: none;
       touch-action: none;
+      filter: blur(var(--top-logo-blur, 0px));
+      transition: filter 0.2s ease-out;
     }
 
     .logo-controls {
