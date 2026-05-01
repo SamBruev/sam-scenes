@@ -1208,6 +1208,16 @@
     }
 
     @media (max-width: 932px) {
+      .scene-time-center-dialog {
+        max-width: calc(100vw - max(24px, env(safe-area-inset-left) + env(safe-area-inset-right) + 16px));
+        width: min(340px, calc(100vw - max(24px, env(safe-area-inset-left) + env(safe-area-inset-right) + 16px)));
+        max-height: min(440px, 85dvh, calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 32px));
+      }
+
+      .scene-time-dialog-panel {
+        max-height: min(400px, calc(85dvh - 72px), calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 96px));
+      }
+
       .ios-wheel-time .scene-time-ios .scene-time-trigger {
         display: flex;
       }
@@ -2122,6 +2132,22 @@
         background-position: center center;
       }
     @media (max-width: 520px) {
+      .scene-time-wrap .time-leading {
+        font-size: clamp(22px, 5.8vw, 30px);
+        letter-spacing: 0.02em;
+      }
+
+      .scene-main[data-scene-role="body"] .scene-time-wrap .time-leading {
+        font-size: clamp(22px, 6vw, 32px);
+        letter-spacing: 0.05em;
+      }
+
+      .scene-main[data-scene-role="intro"] .scene-time-wrap .time-leading,
+      .scene-main[data-scene-role="outro"] .scene-time-wrap .time-leading {
+        font-size: clamp(22px, 6vw, 32px);
+        letter-spacing: 0.06em;
+      }
+
       .scene-stack .scene-time-wrap {
         grid-template-columns: 1fr;
         row-gap: 8px;
@@ -3807,6 +3833,26 @@
         dlg.style.transform = '';
       }
 
+      /** На телефоне модалка должна целиком входить в экран — центр видимого viewport (учёт URL-панели Safari). */
+      function centerSceneTimeDialogInViewport(dlg) {
+        if (!dlg) return;
+        var vv = window.visualViewport;
+        dlg.style.margin = '0';
+        dlg.style.position = 'fixed';
+        dlg.style.right = 'auto';
+        dlg.style.bottom = 'auto';
+        if (vv && vv.width > 0 && vv.height > 0) {
+          var cx = vv.offsetLeft + vv.width / 2;
+          var cy = vv.offsetTop + vv.height / 2;
+          dlg.style.left = Math.round(cx) + 'px';
+          dlg.style.top = Math.round(cy) + 'px';
+        } else {
+          dlg.style.left = '50%';
+          dlg.style.top = '50%';
+        }
+        dlg.style.transform = 'translate(-50%, -50%)';
+      }
+
       function positionSceneTimeDialogNearAnchor(dlg, ax, ay) {
         if (!dlg) return;
         if (!Number.isFinite(ax) || !Number.isFinite(ay)) return;
@@ -3940,9 +3986,11 @@
         resetSceneTimeDialogPosition(dlg);
         dlg.showModal();
         requestAnimationFrame(function () {
-          positionSceneTimeDialogNearAnchor(dlg, anchorX, anchorY);
+          if (useSceneTimeCenterModal()) centerSceneTimeDialogInViewport(dlg);
+          else positionSceneTimeDialogNearAnchor(dlg, anchorX, anchorY);
           requestAnimationFrame(function () {
-            positionSceneTimeDialogNearAnchor(dlg, anchorX, anchorY);
+            if (useSceneTimeCenterModal()) centerSceneTimeDialogInViewport(dlg);
+            else positionSceneTimeDialogNearAnchor(dlg, anchorX, anchorY);
             keys.forEach(function (key, i) {
               var col = dlg.querySelector('.scene-time-wheel[data-key="' + key + '"]');
               setSceneTimeWheelScroll(col, sels[i].value);
