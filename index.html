@@ -3969,8 +3969,8 @@
 
       var SCENE_TIME_W_PAD = 64;
       var SCENE_TIME_W_ITEM = 34;
-      var SCENE_TIME_WHEEL_COPIES = 5;
-      var SCENE_TIME_WHEEL_MID_COPY = 2;
+      var SCENE_TIME_WHEEL_COPIES = 3;
+      var SCENE_TIME_WHEEL_MID_COPY = 1;
       var sceneTimeDialogWrap = null;
       var sceneTimeDialogPointerAnchor = { x: NaN, y: NaN };
 
@@ -4068,8 +4068,8 @@
         var centerLine = col.scrollTop + ch / 2;
         var raw = (centerLine - pad - item / 2) / item;
         var g = Math.round(raw);
-        if (g < 50) col.scrollTop += 60 * item * 2;
-        else if (g >= rows - 50) col.scrollTop -= 60 * item * 2;
+        if (g < 36) col.scrollTop += 60 * item;
+        else if (g >= rows - 36) col.scrollTop -= 60 * item;
       }
 
       function buildSceneTimeWheelColumns(dlg) {
@@ -4098,7 +4098,12 @@
               col._wheelNormTO = setTimeout(function () {
                 col._wheelNormTO = null;
                 normalizeSceneTimeInfiniteWheel(col);
-              }, 120);
+              }, 130);
+              if (dlg._flushSceneTimeTO) clearTimeout(dlg._flushSceneTimeTO);
+              dlg._flushSceneTimeTO = setTimeout(function () {
+                dlg._flushSceneTimeTO = null;
+                flushSceneTimeDialogToStorage();
+              }, 180);
             },
             { passive: true }
           );
@@ -4128,12 +4133,28 @@
         return idx;
       }
 
+      function flushSceneTimeDialogToStorage() {
+        var dlg = document.getElementById('scene-time-center-dialog');
+        var wrap = sceneTimeDialogWrap;
+        if (!dlg || !wrap) return;
+        var sels = wrap.querySelectorAll('select.scene-time-select');
+        if (sels.length < 4) return;
+        [['mm0', 0], ['ss0', 1]].forEach(function (pair) {
+          var col = dlg.querySelector('.scene-time-wheel[data-key="' + pair[0] + '"]');
+          if (!col) return;
+          sels[pair[1]].value = String(getSceneTimeWheelValue(col));
+        });
+        syncIOSWheelFromSelects(wrap);
+        saveToStorage();
+      }
+
       function ensureSceneTimeCenterDialog() {
         var legacyDlg = document.getElementById('scene-time-center-dialog');
         if (legacyDlg) {
-          var sampleWheel = legacyDlg.querySelector('.scene-time-wheel');
+          var wheels = legacyDlg.querySelectorAll('.scene-time-wheel');
+          var sampleWheel = wheels[0];
           var nItems = sampleWheel ? sampleWheel.querySelectorAll('.scene-time-wheel-item').length : 0;
-          if (nItems !== 60 * SCENE_TIME_WHEEL_COPIES) legacyDlg.remove();
+          if (wheels.length !== 2 || nItems !== 60 * SCENE_TIME_WHEEL_COPIES) legacyDlg.remove();
         }
         if (document.getElementById('scene-time-center-dialog')) return;
         var dlg = document.createElement('dialog');
@@ -4142,55 +4163,22 @@
         dlg.setAttribute('aria-modal', 'true');
         dlg.innerHTML =
           '<div class="scene-time-dialog-panel">' +
-          '<p class="scene-time-dialog-title">Время сцены</p>' +
+          '<p class="scene-time-dialog-title">Время сцены — начало</p>' +
           '<div class="scene-time-dialog-wheels">' +
           '<div class="scene-time-dialog-row">' +
-          '<span class="scene-time-dialog-label">Начало</span>' +
           '<div class="scene-time-wheel" data-key="mm0" role="listbox" aria-label="Минуты начала"></div>' +
           '<span class="scene-time-dialog-colon" aria-hidden="true">:</span>' +
           '<div class="scene-time-wheel" data-key="ss0" role="listbox" aria-label="Секунды начала"></div>' +
           '</div>' +
-          '<div class="scene-time-dialog-row">' +
-          '<span class="scene-time-dialog-label">Конец</span>' +
-          '<div class="scene-time-wheel" data-key="mm1" role="listbox" aria-label="Минуты конца"></div>' +
-          '<span class="scene-time-dialog-colon" aria-hidden="true">:</span>' +
-          '<div class="scene-time-wheel" data-key="ss1" role="listbox" aria-label="Секунды конца"></div>' +
-          '</div>' +
-          '</div>' +
-          '<div class="scene-time-dialog-actions">' +
-          '<button type="button" class="btn scene-time-dialog-cancel">Отмена</button>' +
-          '<button type="button" class="btn scene-time-dialog-ok">Готово</button>' +
           '</div>' +
           '</div>';
         document.body.appendChild(dlg);
         buildSceneTimeWheelColumns(dlg);
-        var sceneTimeOkBtn = dlg.querySelector('.scene-time-dialog-ok');
-        function scheduleApplySceneTimeDialog(e) {
-          if (e) e.preventDefault();
-          requestAnimationFrame(function () {
-            requestAnimationFrame(applySceneTimeFromCenterDialog);
-          });
-        }
-        sceneTimeOkBtn.addEventListener('click', scheduleApplySceneTimeDialog);
-        sceneTimeOkBtn.addEventListener(
-          'touchend',
-          function (e) {
-            e.preventDefault();
-            scheduleApplySceneTimeDialog(e);
-          },
-          { passive: false }
-        );
-        dlg.querySelector('.scene-time-dialog-cancel').addEventListener('click', function () {
-          sceneTimeDialogWrap = null;
-          dlg.close();
-        });
         dlg.addEventListener('click', function (e) {
-          if (e.target === dlg) {
-            sceneTimeDialogWrap = null;
-            dlg.close();
-          }
+          if (e.target === dlg) dlg.close();
         });
         dlg.addEventListener('close', function () {
+          flushSceneTimeDialogToStorage();
           sceneTimeDialogWrap = null;
           resetSceneTimeDialogPosition(dlg);
         });
@@ -4203,7 +4191,7 @@
         sceneTimeDialogWrap = wrap;
         var sels = wrap.querySelectorAll('select.scene-time-select');
         if (sels.length < 4) return;
-        var keys = ['mm0', 'ss0', 'mm1', 'ss1'];
+        var keys = ['mm0', 'ss0'];
         resetSceneTimeDialogPosition(dlg);
         dlg.showModal();
         requestAnimationFrame(function () {
@@ -4216,34 +4204,9 @@
               var col = dlg.querySelector('.scene-time-wheel[data-key="' + key + '"]');
               setSceneTimeWheelScroll(col, sels[i].value);
             });
+            flushSceneTimeDialogToStorage();
           });
         });
-      }
-
-      function applySceneTimeFromCenterDialog() {
-        var dlg = document.getElementById('scene-time-center-dialog');
-        var wrap = sceneTimeDialogWrap;
-        if (!dlg || !wrap) {
-          sceneTimeDialogWrap = null;
-          if (dlg) dlg.close();
-          return;
-        }
-        var sels = wrap.querySelectorAll('select.scene-time-select');
-        if (sels.length < 4) {
-          sceneTimeDialogWrap = null;
-          dlg.close();
-          return;
-        }
-        var keys = ['mm0', 'ss0', 'mm1', 'ss1'];
-        keys.forEach(function (key, i) {
-          var col = dlg.querySelector('.scene-time-wheel[data-key="' + key + '"]');
-          var v = getSceneTimeWheelValue(col);
-          sels[i].value = String(v);
-        });
-        sceneTimeDialogWrap = null;
-        dlg.close();
-        syncIOSWheelFromSelects(wrap);
-        saveToStorage();
       }
 
       function ensureSceneTimeTriggerInWrap(wrap) {
