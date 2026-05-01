@@ -4876,6 +4876,9 @@
             onShotCheckboxToggle(e);
             return;
           }
+          if (t.matches('select.scene-select') && t.closest && t.closest('.scene-main')) {
+            triggerHaptic('light');
+          }
           if (t.matches('select.scene-time-select') || t.matches('select.scene-select')) markDirty();
         });
 
@@ -5018,7 +5021,9 @@
 
         document.addEventListener('pointerdown', function (e) {
           var t = e.target;
-          if (t && t.matches && t.matches('select')) triggerHaptic('light');
+          if (!t || !t.matches || !t.matches('select')) return;
+          if (t.closest && t.closest('.scene-main') && t.matches('select.scene-select')) return;
+          triggerHaptic('light');
         }, true);
 
         // iOS/Yandex: снимаем фокус после выбора там, где без blur нативный picker залипает.
