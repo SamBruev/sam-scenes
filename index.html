@@ -1645,6 +1645,14 @@
       line-height: 1.45;
     }
 
+    .shotlist-section p.muted.shotlist-hint .shotlist-hint-line {
+      display: block;
+    }
+
+    .shotlist-section p.muted.shotlist-hint .shotlist-hint-line + .shotlist-hint-line {
+      margin-top: 0.2em;
+    }
+
     /* Локации шотлиста — три отдельные карточки */
     .shotlist-loc {
       margin: 0;
@@ -2862,7 +2870,10 @@
           <span class="shotlist-title-main" contenteditable="true">Шотлист</span>
           <span class="shotlist-title-sub" contenteditable="true">Съёмка по локациям</span>
         </h2>
-        <p class="muted">Снимай не по порядку текста,<br>а по блокам, по локации.</p>
+        <p class="muted shotlist-hint">
+          <span class="shotlist-hint-line">Снимай не по порядку текста,</span>
+          <span class="shotlist-hint-line">а блоками по локации.</span>
+        </p>
 
         <div class="shotlist-loc">
           <div class="shotlist-loc-head">
@@ -4583,6 +4594,14 @@
           var parts = parsePiecesFromDisplay(el);
           renderPiecesDisplay(el, parts, nextTokenForPieces(parts));
         });
+
+        var hint = root.querySelector('.shotlist-section .card > h2.shotlist-title + p.muted');
+        if (hint && !hint.classList.contains('shotlist-hint')) {
+          hint.classList.add('shotlist-hint');
+          hint.innerHTML =
+            '<span class="shotlist-hint-line">Снимай не по порядку текста,</span>' +
+            '<span class="shotlist-hint-line">а блоками по локации.</span>';
+        }
       }
 
       function wireShotlistPiecePickers() {
