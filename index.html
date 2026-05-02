@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Сценарий видео / Sam Bruev (v124)</title>
+  <title>Сценарий видео / Sam Bruev (v126)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bad+Script&family=Pacifico&family=Roboto+Slab:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -454,9 +454,16 @@
       border-radius: 10px;
       color: var(--text);
       padding: 7px 9px;
-      font: inherit;
+      font-family: inherit;
+      font-size: 16px;
+      line-height: 1.3;
       color-scheme: dark;
     }
+
+    /*
+      iPhone Safari включает «умное» масштабирование поля до удобочитаемого размера, если текст < ~16px;
+      после «ОК» viewport иногда не возвращается — для полей хаба сценария держим 16px, чтобы вообще не зумило.
+    */
 
     .scenario-hub select {
       appearance: none;
@@ -831,12 +838,12 @@
       font-weight: 800;
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: #f2d78c;
+      color: #ff4d4d;
     }
 
     .scene-main[data-scene-role="outro"] .scene-time-wrap .time-leading {
       transform: translateY(-50%);
-      text-shadow: 0 0 12px rgba(212, 175, 55, 0.18);
+      text-shadow: 0 0 14px rgba(255, 80, 80, 0.28);
     }
 
     .scene-time-wrap .scene-index {
@@ -3348,7 +3355,7 @@
         }
       } catch (ePullFlag) {}
 
-      var APP_BUILD = 'v124-reload-scroll-and-edges';
+      var APP_BUILD = 'v126-scene-time-persist-fix';
       var APP_BUILD_KEY = 'abakan-app-build';
       var STORAGE_KEY = 'abakan-main-abakan-layout-v15';
       var LEGACY_STORAGE_KEYS = ['abakan-main-abakan-layout-v14', 'abakan-main-abakan-layout-v13', 'abakan-main-abakan-layout-v12', 'abakan-main-abakan-layout-v10', 'abakan-main-abakan-layout-v9', 'abakan-main-abakan-layout-v8'];
@@ -3980,6 +3987,18 @@
         return h;
       })();
 
+      function getOrderedSceneTimeSelects(wrap) {
+        if (!wrap || !wrap.querySelector) return null;
+        var a = wrap.querySelector('select.st-mm0');
+        var b = wrap.querySelector('select.st-ss0');
+        var c = wrap.querySelector('select.st-mm1');
+        var d = wrap.querySelector('select.st-ss1');
+        if (a && b && c && d) return [a, b, c, d];
+        var nl = wrap.querySelectorAll('select.scene-time-select');
+        if (!nl || nl.length < 4) return null;
+        return [nl[0], nl[1], nl[2], nl[3]];
+      }
+
       function to2(n) {
         var x = Math.max(0, Math.min(59, Number(n) || 0));
         return (x < 10 ? '0' : '') + x;
@@ -3987,8 +4006,8 @@
 
       function syncIOSWheelFromSelects(wrap) {
         if (!wrap) return;
-        var sels = wrap.querySelectorAll('select.scene-time-select');
-        if (sels.length < 4) return;
+        var sels = getOrderedSceneTimeSelects(wrap);
+        if (!sels) return;
         var iosA = wrap.querySelector('input.scene-time-ios-start');
         var iosB = wrap.querySelector('input.scene-time-ios-end');
         if (!iosA || !iosB) return;
@@ -3998,8 +4017,8 @@
       }
 
       function formatSceneTimeTriggerLabel(wrap) {
-        var sels = wrap.querySelectorAll('select.scene-time-select');
-        if (sels.length < 4) return '—';
+        var sels = getOrderedSceneTimeSelects(wrap);
+        if (!sels) return '—';
         return to2(sels[0].value) + ':' + to2(sels[1].value) + ' — ' + to2(sels[2].value) + ':' + to2(sels[3].value);
       }
 
@@ -4011,6 +4030,28 @@
 
       function useSceneTimeCenterModal() {
         return typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 932px)').matches;
+      }
+
+      function openSceneCenterDialogSafe(dlg) {
+        if (!dlg) return;
+        try {
+          if (typeof dlg.showModal === 'function') {
+            dlg.showModal();
+            return;
+          }
+        } catch (eOpen) {}
+        dlg.setAttribute('open', '');
+      }
+
+      function closeSceneCenterDialogSafe(dlg) {
+        if (!dlg) return;
+        try {
+          if (typeof dlg.close === 'function') {
+            dlg.close();
+            return;
+          }
+        } catch (eClose) {}
+        dlg.removeAttribute('open');
       }
 
       var SCENE_TIME_W_PAD = 64;
@@ -4186,8 +4227,8 @@
         var dlg = document.getElementById('scene-time-center-dialog');
         var wrap = optWrap !== undefined && optWrap !== null ? optWrap : sceneTimeDialogWrap;
         if (!dlg || !wrap) return;
-        var sels = wrap.querySelectorAll('select.scene-time-select');
-        if (sels.length < 4) return;
+        var sels = getOrderedSceneTimeSelects(wrap);
+        if (!sels) return;
         [['mm0', 0], ['ss0', 1], ['mm1', 2], ['ss1', 3]].forEach(function (pair) {
           var col = dlg.querySelector('.scene-time-wheel[data-key="' + pair[0] + '"]');
           if (!col) return;
@@ -4198,7 +4239,14 @@
         wrap.setAttribute('data-mm1', String(sels[2].value || '0'));
         wrap.setAttribute('data-ss1', String(sels[3].value || '0'));
         syncIOSWheelFromSelects(wrap);
-        saveToStorage();
+        try {
+          saveToStorage();
+        } catch (eSaveWheel) {}
+        try {
+          sels.forEach(function (sel) {
+            sel.dispatchEvent(new Event('change', { bubbles: true }));
+          });
+        } catch (eEvt) {}
       }
 
       function finalizeSceneTimeWheelsAndSave(dlg, wrap) {
@@ -4246,7 +4294,7 @@
         dlg.addEventListener('click', function (e) {
           if (e.target === dlg) {
             finalizeSceneTimeWheelsAndSave(dlg, sceneTimeDialogWrap);
-            dlg.close();
+            closeSceneCenterDialogSafe(dlg);
           }
         });
         dlg.addEventListener('cancel', function () {
@@ -4270,11 +4318,11 @@
         var dlg = document.getElementById('scene-time-center-dialog');
         if (!dlg || !wrap) return;
         sceneTimeDialogWrap = wrap;
-        var sels = wrap.querySelectorAll('select.scene-time-select');
-        if (sels.length < 4) return;
+        var sels = getOrderedSceneTimeSelects(wrap);
+        if (!sels) return;
         var keys = ['mm0', 'ss0', 'mm1', 'ss1'];
         resetSceneTimeDialogPosition(dlg);
-        dlg.showModal();
+        openSceneCenterDialogSafe(dlg);
         requestAnimationFrame(function () {
           if (useSceneTimeCenterModal()) centerSceneTimeDialogInViewport(dlg);
           else positionSceneTimeDialogNearAnchor(dlg, anchorX, anchorY);
@@ -4288,7 +4336,7 @@
             dlg.querySelectorAll('.scene-time-wheel').forEach(function (col) {
               col._lastCommittedV = getSceneTimeWheelValue(col);
             });
-            flushSceneTimeDialogToStorage();
+            updateSceneTimeTriggerText(wrap);
           });
         });
       }
@@ -4340,8 +4388,8 @@
           return { mm: Math.max(0, Math.min(59, Number(m[1]) || 0)), ss: Math.max(0, Math.min(59, Number(m[2]) || 0)) };
         }
         function applyFromInputs() {
-          var sels = wrap.querySelectorAll('select.scene-time-select');
-          if (sels.length < 4) return;
+          var sels = getOrderedSceneTimeSelects(wrap);
+          if (!sels) return;
           var a = readInput(ios.querySelector('.scene-time-ios-start').value);
           var b = readInput(ios.querySelector('.scene-time-ios-end').value);
           sels[0].value = String(a.mm);
@@ -4580,19 +4628,21 @@
       function repairSceneTimeSelectsInDom(root) {
         var scope = root || document;
         scope.querySelectorAll('.scene-time-wrap').forEach(function (w) {
-          var sels = w.querySelectorAll('select.scene-time-select');
-          if (sels.length < 4) return;
+          var selsProbe = getOrderedSceneTimeSelects(w);
+          if (!selsProbe) return;
           var need = false;
-          Array.prototype.forEach.call(sels, function (sel) {
+          selsProbe.forEach(function (sel) {
             if (!sel.options || sel.options.length < 60) need = true;
           });
           if (!need) return;
-          var vals = Array.prototype.map.call(sels, function (sel) {
+          var vals = selsProbe.map(function (sel) {
             return sel.value;
           });
           w.removeAttribute('data-time-filled');
           initSceneTimeBlock(w);
-          Array.prototype.forEach.call(sels, function (sel, i) {
+          var restored = getOrderedSceneTimeSelects(w);
+          if (!restored) return;
+          restored.forEach(function (sel, i) {
             if (vals[i] !== undefined && vals[i] !== null && vals[i] !== '') sel.value = vals[i];
           });
           syncIOSWheelFromSelects(w);
@@ -4600,8 +4650,8 @@
       }
 
       function setSceneTimeValues(wrap, mm0, ss0, mm1, ss1) {
-        var sels = wrap.querySelectorAll('select.scene-time-select');
-        if (sels.length < 4) return;
+        var sels = getOrderedSceneTimeSelects(wrap);
+        if (!sels) return;
         function set(sel, v) {
           var n = Math.max(0, Math.min(59, Number(v) || 0));
           sel.value = String(n);
