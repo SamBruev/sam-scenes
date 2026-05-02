@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Сценарий видео / Sam Bruev (v126)</title>
+  <title>Сценарий видео / Sam Bruev (v127)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bad+Script&family=Pacifico&family=Roboto+Slab:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -1767,25 +1767,8 @@
       filter: drop-shadow(0 0 12px rgba(212, 175, 55, 0.3));
     }
 
-    @keyframes pullReloadPageIn {
-      from {
-        opacity: 0.93;
-      }
-      to {
-        opacity: 1;
-      }
-    }
-
-    html.pull-reload-enter .wrap {
-      animation: pullReloadPageIn 0.28s ease-out forwards;
-    }
-
     @media (prefers-reduced-motion: reduce) {
       .pull-reload-hint.pull-reload-hint--ready {
-        animation: none;
-      }
-
-      html.pull-reload-enter .wrap {
         animation: none;
       }
 
@@ -3344,18 +3327,12 @@
     (function () {
       var PULL_RELOAD_FLAG = 'abakan-pull-reload-flag';
       var PULL_RELOAD_SCROLL_KEY = 'abakan-pull-reload-scroll-y';
-      var pendingPullReloadScrollY = null;
       try {
-        if (sessionStorage.getItem(PULL_RELOAD_FLAG)) {
-          sessionStorage.removeItem(PULL_RELOAD_FLAG);
-          var savedPullScroll = sessionStorage.getItem(PULL_RELOAD_SCROLL_KEY);
-          if (savedPullScroll !== null && savedPullScroll !== '') pendingPullReloadScrollY = Number(savedPullScroll);
-          sessionStorage.removeItem(PULL_RELOAD_SCROLL_KEY);
-          document.documentElement.classList.add('pull-reload-enter');
-        }
+        if (sessionStorage.getItem(PULL_RELOAD_FLAG)) sessionStorage.removeItem(PULL_RELOAD_FLAG);
+        sessionStorage.removeItem(PULL_RELOAD_SCROLL_KEY);
       } catch (ePullFlag) {}
 
-      var APP_BUILD = 'v126-scene-time-persist-fix';
+      var APP_BUILD = 'v127-pull-reload-stable-view';
       var APP_BUILD_KEY = 'abakan-app-build';
       var STORAGE_KEY = 'abakan-main-abakan-layout-v15';
       var LEGACY_STORAGE_KEYS = ['abakan-main-abakan-layout-v14', 'abakan-main-abakan-layout-v13', 'abakan-main-abakan-layout-v12', 'abakan-main-abakan-layout-v10', 'abakan-main-abakan-layout-v9', 'abakan-main-abakan-layout-v8'];
@@ -5895,7 +5872,6 @@
           } catch (eFs) {}
           try {
             sessionStorage.setItem(PULL_RELOAD_FLAG, '1');
-            sessionStorage.setItem(PULL_RELOAD_SCROLL_KEY, String(Math.max(0, Math.round(scrollTopNow()))));
           } catch (e1) {}
           try {
             triggerHaptic('medium');
@@ -6019,11 +5995,6 @@
       loadFromStorage();
       wireTopLogoScrollBlur();
       wirePullDownReload();
-      if (document.documentElement.classList.contains('pull-reload-enter')) {
-        setTimeout(function () {
-          document.documentElement.classList.remove('pull-reload-enter');
-        }, 720);
-      }
       initBottomLogoFromTop();
       migrateLegacySceneTimes();
       hydrateDatumSceneTimes();
@@ -6087,18 +6058,6 @@
       updateShotlistLocationHeadings(document);
       updateAllShotlistProgress();
       renumberScenes();
-      if (Number.isFinite(pendingPullReloadScrollY) && pendingPullReloadScrollY > 0) {
-        var restoreY = pendingPullReloadScrollY;
-        requestAnimationFrame(function () {
-          window.scrollTo(0, restoreY);
-          requestAnimationFrame(function () {
-            window.scrollTo(0, restoreY);
-            setTimeout(function () {
-              window.scrollTo(0, restoreY);
-            }, 160);
-          });
-        });
-      }
       rememberUndoState();
       setStatus('Готово (автосохранение)', false);
     })();
