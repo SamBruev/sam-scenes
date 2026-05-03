@@ -369,9 +369,9 @@
       margin: 0;
       padding: calc(12px + env(safe-area-inset-top, 0px)) 14px calc(24px + env(safe-area-inset-bottom, 0px))
         calc(14px + env(safe-area-inset-left, 0px));
-      background: var(--ui-popup-bg);
-      backdrop-filter: none;
-      -webkit-backdrop-filter: none;
+      background: rgba(10, 9, 8, 0.82);
+      backdrop-filter: blur(22px) saturate(108%);
+      -webkit-backdrop-filter: blur(22px) saturate(108%);
       border-right: 1px solid var(--ui-select-border);
       box-shadow: 10px 0 48px rgba(0, 0, 0, 0.2);
       transform: translateX(-102%);
@@ -441,7 +441,12 @@
       .scene.scene-main[data-scene-role="body"] {
         backdrop-filter: none;
         -webkit-backdrop-filter: none;
-        background: #070707;
+        background: linear-gradient(
+          180deg,
+          rgba(18, 18, 18, 0.92) 0%,
+          rgba(10, 10, 10, 0.97) 45%,
+          #000000 100%
+        );
         border-color: rgba(255, 255, 255, 0.04);
         box-shadow: 0 10px 26px rgba(0, 0, 0, 0.45);
       }
@@ -525,61 +530,6 @@
     body.assistant-drawer-open .assistant-open-strip {
       opacity: 0;
       pointer-events: none;
-    }
-
-    /*
-      Справа у экрана: тот же визуальный ритм, что у полоски «План съёмок» слева (только декор, тапы проходят к контенту).
-    */
-    .assistant-edge-strip-decor--right {
-      position: fixed;
-      right: env(safe-area-inset-right, 0px);
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 100;
-      width: 6px;
-      min-width: 5px;
-      height: min(168px, 46vh);
-      min-height: 72px;
-      margin: 0;
-      padding: 0;
-      border: none;
-      border-radius: 9px 0 0 9px;
-      pointer-events: none;
-      background: linear-gradient(
-        90deg,
-        rgba(212, 175, 55, 0.26) 0%,
-        var(--assistant-hint-violet-mid) 38%,
-        rgba(212, 175, 55, 0.12) 62%,
-        rgba(12, 10, 8, 0.76) 100%
-      );
-      box-shadow:
-        inset 1px 0 7px var(--assistant-hint-violet-soft),
-        inset 1px 0 5px rgba(212, 175, 55, 0.1),
-        -1px 0 10px rgba(0, 0, 0, 0.38),
-        0 0 16px var(--assistant-hint-violet-glow);
-      transition: opacity 0.2s ease;
-    }
-
-    .assistant-edge-strip-decor--right::before {
-      content: '\203A';
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 12px;
-      font-weight: 500;
-      line-height: 1;
-      color: var(--ui-violet);
-      pointer-events: none;
-      letter-spacing: -0.08em;
-      opacity: 0.88;
-      text-shadow:
-        0 0 10px var(--ui-violet-glow),
-        0 0 4px rgba(255, 255, 255, 0.1);
-    }
-
-    body.assistant-drawer-open .assistant-edge-strip-decor--right {
-      opacity: 0;
     }
 
     .assistant-drawer-host {
@@ -1620,9 +1570,54 @@
     }
 
     .scenario-hub label > input,
-    .scenario-hub label > select {
+    .scenario-hub label > select,
+    .scenario-hub label > .scenario-hub-date-wrap {
       width: 100%;
       box-sizing: border-box;
+    }
+
+    .scenario-hub-date-wrap {
+      position: relative;
+      display: block;
+    }
+
+    .scenario-hub input.scenario-hub-date-input[type="date"] {
+      padding-right: 38px;
+      position: relative;
+    }
+
+    .scenario-hub-date-icon {
+      position: absolute;
+      right: 9px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(245, 204, 118, 0.9);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .scenario-hub-date-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Невидимая зона тапа поверх SVG — открывает нативный календарь (WebKit) */
+    .scenario-hub input.scenario-hub-date-input[type="date"]::-webkit-calendar-picker-indicator {
+      position: absolute;
+      right: 4px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 34px;
+      height: 34px;
+      margin: 0;
+      padding: 0;
+      cursor: pointer;
+      opacity: 0;
     }
 
     .scenario-hub input,
@@ -1782,14 +1777,15 @@
       position: relative;
     }
 
-    /* Intro / Outro — вертикальное затемнение вниз, только чёрный (#000 × альфа), без цветового сдвига */
+    /* Intro / Outro — сверху лёгкое «стекло», к низу непрозрачный чёрный */
     .scene-main.scene-role-intro,
     .scene-main.scene-role-outro {
       background: linear-gradient(
         180deg,
-        rgba(0, 0, 0, 0.12) 0%,
-        rgba(0, 0, 0, 0.4) 40%,
-        rgba(0, 0, 0, 0.78) 100%
+        rgba(0, 0, 0, 0.14) 0%,
+        rgba(0, 0, 0, 0.42) 32%,
+        rgba(0, 0, 0, 0.82) 68%,
+        #000000 100%
       );
       backdrop-filter: blur(16px) saturate(105%);
       -webkit-backdrop-filter: blur(16px) saturate(105%);
@@ -1968,9 +1964,16 @@
       position: relative;
     }
 
-    /* Основные сцены: слегка прозрачное «стекло» (слабый blur, без сильной вычитки фона). */
+    /* Основные сцены: сверху «стекло» (blur), к низу плавно в непрозрачный чёрный */
     .scene.scene-main[data-scene-role="body"] {
-      background: rgba(10, 10, 12, 0.88);
+      background: linear-gradient(
+        180deg,
+        rgba(14, 14, 16, 0.36) 0%,
+        rgba(10, 10, 12, 0.58) 26%,
+        rgba(5, 5, 6, 0.82) 55%,
+        rgba(2, 2, 2, 0.96) 78%,
+        #000000 100%
+      );
       backdrop-filter: blur(7px) saturate(103%);
       -webkit-backdrop-filter: blur(7px) saturate(103%);
       border: 1px solid rgba(255, 255, 255, 0.05);
@@ -1981,7 +1984,7 @@
 
     .scene.scene-main.scene-shot-complete {
       filter: brightness(0.42);
-      transition: filter 0.22s ease;
+      transition: filter 0.34s ease;
     }
 
     @keyframes scene-shot-guide-pulse {
@@ -2892,6 +2895,13 @@
       min-height: 46px;
       position: relative;
       z-index: 2;
+      text-align: left;
+      direction: ltr;
+    }
+
+    .field-prep-date input[type='date'].prep-date-input::-webkit-datetime-edit,
+    .field-prep-date input[type='date'].prep-date-input::-webkit-datetime-edit-fields-wrapper {
+      text-align: left;
     }
 
     .field-prep-date input[type='date'].prep-date-input::-webkit-calendar-picker-indicator {
@@ -3005,6 +3015,23 @@
       border: none;
       box-shadow: none;
       color: #f5e6b8;
+    }
+
+    /*
+      Подготовка: у карточки .card общий outer-glow (--ui-violet-soft) на чёрном даёт холодный / «зеленоватый»
+      сдвиг у верха — здесь только тёплое свечение и янтарный верхний блик ::before.
+    */
+    .card.card-prep {
+      box-shadow:
+        0 10px 28px rgba(0, 0, 0, 0.34),
+        inset 0 1px 0 rgba(255, 244, 220, 0.1),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.055),
+        0 0 34px -14px rgba(232, 201, 104, 0.07);
+    }
+
+    .card.card-prep::before {
+      border-color: rgba(255, 230, 200, 0.11);
+      background: linear-gradient(180deg, rgba(255, 210, 165, 0.05), rgba(255, 255, 255, 0) 38%);
     }
 
     /* Подготовка: убираем холодный серый — подсказки и акценты в тёплой палитре (крем / янтарь). */
@@ -3743,7 +3770,7 @@
       box-sizing: border-box;
     }
 
-    /* «Снято» — круглый затвор: две шторки + щелчок по тапу */
+    /* «Снято» — круг с хлопушкой: верхняя планка захлопывается */
     .scene-main > .scene-toolbar .scene-done-label.scene-done-checkbox-only {
       display: inline-flex;
       align-items: center;
@@ -3787,7 +3814,7 @@
       outline-offset: 3px;
     }
 
-    .scene-main > .scene-toolbar .scene-done-label.scene-done-checkbox-only:active .shutter-icon {
+    .scene-main > .scene-toolbar .scene-done-label.scene-done-checkbox-only:active .take-mark-icon {
       transform: scale(0.94);
       transition: transform 0.14s ease;
     }
@@ -3802,57 +3829,43 @@
       transform-origin: center center;
     }
 
-    .scene-main > .scene-toolbar .shutter-icon {
+    .scene-main > .scene-toolbar .take-mark-icon {
       display: block;
       transform-origin: center center;
       overflow: visible;
     }
 
-    .scene-main > .scene-toolbar .shutter-rim {
+    .scene-main > .scene-toolbar .take-rim {
       transform-origin: center;
       transition: filter 0.2s ease;
     }
 
-    /* Лепестки затвора: в разомкнутом состоянии расходятся, при «Снято» смыкаются */
-    .scene-main > .scene-toolbar .shutter-leaf {
+    .scene-main > .scene-toolbar .take-clapper-up {
       transform-box: fill-box;
-      transform-origin: center;
-      transition: transform 0.38s cubic-bezier(0.34, 1.18, 0.36, 1);
-    }
-
-    .scene-main > .scene-toolbar .shutter-leaf--top {
-      transform: translateY(-13px);
-    }
-
-    .scene-main > .scene-toolbar .shutter-leaf--bottom {
-      transform: translateY(13px);
+      transform-origin: 8px 33px;
+      transform: rotate(-46deg);
+      transition: transform 0.42s cubic-bezier(0.34, 1.18, 0.36, 1);
     }
 
     .scene-main > .scene-toolbar .scene-done-label.scene-done-checkbox-only:has(.scene-shot-checkbox:checked)
-      .shutter-leaf--top,
-    .scene-main > .scene-toolbar .scene-done-label.scene-done-checkbox-only.is-shot-checked .shutter-leaf--top {
-      transform: translateY(4px);
+      .take-clapper-up,
+    .scene-main > .scene-toolbar .scene-done-label.scene-done-checkbox-only.is-shot-checked .take-clapper-up {
+      transform: rotate(0deg);
     }
 
-    .scene-main > .scene-toolbar .scene-done-label.scene-done-checkbox-only:has(.scene-shot-checkbox:checked)
-      .shutter-leaf--bottom,
-    .scene-main > .scene-toolbar .scene-done-label.scene-done-checkbox-only.is-shot-checked .shutter-leaf--bottom {
-      transform: translateY(-4px);
-    }
-
-    @keyframes shutter-rim-flash {
+    @keyframes take-rim-flash {
       0% {
         filter: brightness(1);
       }
       28% {
-        filter: brightness(1.42) drop-shadow(0 0 10px rgba(255, 245, 220, 0.35));
+        filter: brightness(1.4) drop-shadow(0 0 10px rgba(255, 245, 220, 0.32));
       }
       100% {
         filter: brightness(1);
       }
     }
 
-    @keyframes shutter-deck-pop {
+    @keyframes take-mark-pop {
       0% {
         transform: scale(1);
       }
@@ -3867,28 +3880,51 @@
       }
     }
 
-    .scene-main > .scene-toolbar .camera-lens-shutter.lens-shutter-anim {
-      animation: shutter-deck-pop 0.48s cubic-bezier(0.34, 1.28, 0.36, 1);
+    @keyframes take-clapper-slam {
+      0% {
+        transform: rotate(-46deg);
+      }
+      38% {
+        transform: rotate(11deg);
+      }
+      68% {
+        transform: rotate(-3deg);
+      }
+      100% {
+        transform: rotate(0deg);
+      }
     }
 
-    .scene-main > .scene-toolbar .camera-lens-shutter.lens-shutter-anim .shutter-rim {
-      animation: shutter-rim-flash 0.48s ease-out;
+    .scene-main > .scene-toolbar .camera-lens-shutter.take-mark-anim {
+      animation: take-mark-pop 0.52s cubic-bezier(0.34, 1.28, 0.36, 1);
+    }
+
+    .scene-main > .scene-toolbar .camera-lens-shutter.take-mark-anim .take-clapper-up {
+      animation: take-clapper-slam 0.52s cubic-bezier(0.34, 1.42, 0.36, 1) forwards;
+    }
+
+    .scene-main > .scene-toolbar .camera-lens-shutter.take-mark-anim .take-rim {
+      animation: take-rim-flash 0.52s ease-out;
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .scene-main > .scene-toolbar .scene-done-label.scene-done-checkbox-only:active .shutter-icon {
+      .scene-main > .scene-toolbar .scene-done-label.scene-done-checkbox-only:active .take-mark-icon {
         transform: none;
       }
 
-      .scene-main > .scene-toolbar .shutter-leaf {
-        transition-duration: 0.06s !important;
+      .scene-main > .scene-toolbar .take-clapper-up {
+        transition-duration: 0.08s !important;
       }
 
-      .scene-main > .scene-toolbar .camera-lens-shutter.lens-shutter-anim {
+      .scene-main > .scene-toolbar .camera-lens-shutter.take-mark-anim {
         animation: none !important;
       }
 
-      .scene-main > .scene-toolbar .camera-lens-shutter.lens-shutter-anim .shutter-rim {
+      .scene-main > .scene-toolbar .camera-lens-shutter.take-mark-anim .take-clapper-up {
+        animation: none !important;
+      }
+
+      .scene-main > .scene-toolbar .camera-lens-shutter.take-mark-anim .take-rim {
         animation: none !important;
       }
     }
@@ -4318,7 +4354,6 @@
     id="app-build-chip"
     role="status"
     title="Версия и время сборки на странице — сравните с последним деплоем GitHub Pages"></div>
-  <div class="assistant-edge-strip-decor--right" aria-hidden="true"></div>
   <div class="wrap">
     <div class="top-logo" id="top-logo-block">
       <div class="top-logo-brand">
@@ -4357,7 +4392,22 @@
             <input id="scenario-shoot-block" type="text" placeholder="например: Май — студия, Блок A" maxlength="120" autocomplete="off">
           </label>
           <label>Дата
-            <input id="scenario-date" type="date">
+            <div class="scenario-hub-date-wrap">
+              <input id="scenario-date" class="scenario-hub-date-input" type="date" />
+              <span class="scenario-hub-date-icon" aria-hidden="true"
+                ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+                  <rect x="3.5" y="5" width="17" height="15.5" rx="2" stroke="currentColor" stroke-width="1.65" />
+                  <path d="M3.5 9.5h17" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" />
+                  <path d="M8 3.8v3.5M16 3.8v3.5" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" />
+                  <path
+                    d="M7.7 13h2M11.8 13h2M15.9 13h2M7.7 15.8h2M11.8 15.8h2"
+                    stroke="currentColor"
+                    stroke-width="1.35"
+                    stroke-linecap="round"
+                    opacity="0.45"
+                  />
+                </svg></span>
+            </div>
           </label>
           <label>Видео в этот день
             <input id="scenario-count" type="number" min="1" max="50" placeholder="например, 12">
@@ -9203,15 +9253,18 @@
         mainScenes().forEach(syncShotClassForScene);
       }
 
-      /** Разметка «Снято» — чекбокс + иконка затвора (две шторки смыкаются). */
+      /** Разметка «Снято» — чекбокс + иконка хлопушки (верхняя планка захлопывается). */
       var SHOT_CHECKBOX_LENS_INNER =
         '<input type="checkbox" class="scene-shot-checkbox" autocomplete="off" title="Снято" aria-label="Снято" />' +
         '<span class="camera-lens-shutter" aria-hidden="true">' +
-        '<svg class="shutter-icon" viewBox="0 0 56 56" width="100%" height="100%" focusable="false">' +
-        '<circle class="shutter-rim" cx="28" cy="28" r="26" fill="#131211" stroke="rgba(210, 198, 175, 0.38)" stroke-width="1"/>' +
-        '<circle cx="28" cy="28" r="17.25" fill="rgba(28, 34, 40, 0.72)" stroke="rgba(255, 248, 235, 0.08)" stroke-width="0.75"/>' +
-        '<rect class="shutter-leaf shutter-leaf--top" x="9" y="11" width="38" height="15" rx="1.75" fill="#121110" stroke="rgba(0, 0, 0, 0.55)" stroke-width="0.6"/>' +
-        '<rect class="shutter-leaf shutter-leaf--bottom" x="9" y="30" width="38" height="15" rx="1.75" fill="#121110" stroke="rgba(0, 0, 0, 0.55)" stroke-width="0.6"/>' +
+        '<svg class="take-mark-icon" viewBox="0 0 56 56" width="100%" height="100%" focusable="false">' +
+        '<circle class="take-rim" cx="28" cy="28" r="26" fill="#131211" stroke="rgba(210, 198, 175, 0.38)" stroke-width="1"/>' +
+        '<rect class="take-base" x="8" y="34" width="40" height="10" rx="2.25" fill="#141210" stroke="rgba(0, 0, 0, 0.5)" stroke-width="0.65"/>' +
+        '<path d="M12 38.5h32" stroke="rgba(255, 248, 235, 0.1)" stroke-width="1.1" stroke-linecap="round"/>' +
+        '<g class="take-clapper-up">' +
+        '<rect x="8" y="14" width="40" height="19" rx="2.25" fill="#161411" stroke="rgba(0, 0, 0, 0.48)" stroke-width="0.65"/>' +
+        '<path d="M13 23h30M13 27h26" stroke="rgba(255, 248, 235, 0.09)" stroke-width="1" stroke-linecap="round"/>' +
+        '</g>' +
         '</svg>' +
         '</span>';
 
@@ -9228,26 +9281,26 @@
         var wrap = lab && lab.querySelector('.camera-lens-shutter');
         if (!wrap) return;
         try {
-          wrap.classList.remove('lens-shutter-anim');
+          wrap.classList.remove('take-mark-anim', 'lens-shutter-anim');
           if (wrap._lensAnimT) clearTimeout(wrap._lensAnimT);
           if (wrap._lensAnimRaf) cancelAnimationFrame(wrap._lensAnimRaf);
           wrap._lensAnimRaf = requestAnimationFrame(function () {
             void wrap.offsetWidth;
-            wrap.classList.add('lens-shutter-anim');
+            wrap.classList.add('take-mark-anim');
             wrap._lensAnimRaf = null;
             wrap._lensAnimT = setTimeout(function () {
               try {
-                wrap.classList.remove('lens-shutter-anim');
+                wrap.classList.remove('take-mark-anim', 'lens-shutter-anim');
               } catch (e1) {}
               wrap._lensAnimT = null;
-            }, 520);
+            }, 560);
           });
         } catch (e) {}
       }
 
       function migrateShotCheckboxLensMarkup(root) {
         (root || document).querySelectorAll('label.scene-done-checkbox-only').forEach(function (lab) {
-          if (lab.querySelector('.camera-lens-shutter') && lab.querySelector('.shutter-icon')) {
+          if (lab.querySelector('.camera-lens-shutter') && lab.querySelector('.take-mark-icon')) {
             syncShotLensLabelClass(lab);
             return;
           }
@@ -10185,15 +10238,39 @@
           var t = e.target;
           if (!t || !t.matches || !t.matches('.scene-shot-checkbox')) return;
           if (e.type !== 'change') return;
+          var scene = t.closest('.scene-main');
+          if (scene && scene._shotSeqClear) {
+            try {
+              scene._shotSeqClear();
+            } catch (eClr) {}
+            scene._shotSeqClear = null;
+          }
           triggerHaptic(t.checked ? 'shot' : 'micro');
           syncShotLensLabelClass(t.closest('label.scene-done-checkbox-only'));
           triggerLensShutterAnim(t);
-          var scene = t.closest('.scene-main');
-          syncShotClassForScene(scene);
-          updateAllShotlistProgress();
-          /* Только постановка галочки; при снятии не скроллим (input/touch иногда дают старое checked) */
-          if (t.checked) scrollToNextShotlistScene(scene);
           markDirty();
+          if (!t.checked) {
+            syncShotClassForScene(scene);
+            updateAllShotlistProgress();
+            return;
+          }
+          /* Постановка «Снято»: 1) анимация хлопушки → 2) затемнение сцены → 3) скролл к следующей */
+          var SHOT_TAKE_ICON_MS = 540;
+          var SHOT_AFTER_DIM_MS = 380;
+          var tDim = setTimeout(function () {
+            syncShotClassForScene(scene);
+            updateAllShotlistProgress();
+          }, SHOT_TAKE_ICON_MS);
+          var tScroll = setTimeout(function () {
+            scrollToNextShotlistScene(scene);
+            if (scene) scene._shotSeqClear = null;
+          }, SHOT_TAKE_ICON_MS + SHOT_AFTER_DIM_MS);
+          if (scene) {
+            scene._shotSeqClear = function () {
+              clearTimeout(tDim);
+              clearTimeout(tScroll);
+            };
+          }
         }
 
         root.addEventListener('change', function (e) {
@@ -10613,11 +10690,7 @@
             var sum = detailsToggleArm.sum;
             detailsToggleArm = null;
             if (Math.hypot(e.clientX - sx, e.clientY - sy) > TAP_MAX_PX) return;
-            var under = null;
-            try {
-              under = document.elementFromPoint(e.clientX, e.clientY);
-            } catch (efp) {}
-            if (!under || !sum.contains(under)) return;
+            /* Не полагаемся на elementFromPoint: под blur/логотипом/fixed-слоями WebKit часто отдаёт не summary — <details> не раскрывается. */
             try {
               e.preventDefault();
             } catch (pe) {}
