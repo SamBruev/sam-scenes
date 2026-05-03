@@ -1320,29 +1320,14 @@
       color: rgba(232, 201, 104, 0.92);
     }
 
-    /* Секции жанра — отдельные тяжёлые острова над общим фоном */
+    /* Секции жанра — без отдельного градиентного блока, как раньше: только вертикальные отступы */
     section.portfolio-genre {
       position: relative;
       margin-bottom: clamp(2rem, 5.5vw, 3.15rem);
-      padding:
-        clamp(1.12rem, 4.2vw, 1.82rem)
-        clamp(0.68rem, 3.2vw, 1.22rem)
-        clamp(1.18rem, 4.5vw, 2.08rem);
-      border-radius: 22px;
-      background:
-        radial-gradient(ellipse 118% 68% at 50% -14%, rgba(212, 175, 55, 0.085), transparent 54%),
-        linear-gradient(
-          166deg,
-          #101012 0%,
-          #060607 46%,
-          var(--surface-ink) 100%
-        );
-      box-shadow:
-        0 0 0 1px rgba(212, 175, 55, 0.16),
-        0 22px 56px rgba(0, 0, 0, 0.65),
-        0 6px 20px rgba(0, 0, 0, 0.48),
-        inset 0 1px 0 rgba(212, 175, 55, 0.09),
-        inset 0 -32px 48px rgba(0, 0, 0, 0.38);
+      padding: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
     }
 
     section.portfolio-genre:last-of-type {
@@ -1353,25 +1338,18 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin: 0 auto clamp(1.05rem, 3.2vw, 1.35rem);
-      padding: 0 clamp(0.42rem, 2.4vw, 0.92rem)
-        clamp(0.92rem, 3.2vw, 1.32rem);
+      margin: 1.65rem auto 1.05rem;
+      padding: 0 0.5rem 0.85rem;
       text-align: center;
-      border-bottom: 1px solid rgba(212, 175, 55, 0.22);
+      border-bottom: none;
     }
 
     section.portfolio-genre:first-of-type .portfolio-genre-banner {
-      margin-top: 0;
-      padding-top: clamp(0.08rem, 0.65vw, 0.38rem);
+      margin-top: 0.35rem;
     }
 
     .portfolio-genre-banner .tag {
       margin-bottom: 0.42rem;
-    }
-
-    /* Метка «Жанр» с анимацией — немного левее оси заголовка */
-    .portfolio-genre-banner .tag.tag--genre-live {
-      margin-left: clamp(-28px, -6.25vw, -10px);
     }
 
     .portfolio-genre-title {
