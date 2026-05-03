@@ -338,6 +338,48 @@
       border: 1px solid rgba(255, 228, 160, 0.1);
     }
 
+    /* Список выполненных работ / компетенций */
+    .work-list-shell {
+      margin-top: 0.25rem;
+    }
+
+    .work-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 0;
+    }
+
+    .work-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.65rem;
+      padding: 0.62rem 0;
+      border-bottom: 1px solid rgba(255, 228, 160, 0.06);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: rgba(243, 236, 224, 0.92);
+      line-height: 1.42;
+      letter-spacing: 0.01em;
+    }
+
+    .work-list li:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .work-list li::before {
+      content: "";
+      flex-shrink: 0;
+      width: 7px;
+      height: 7px;
+      margin-top: 0.42em;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, rgba(255, 248, 220, 0.55), rgba(212, 175, 55, 0.9));
+      box-shadow: 0 0 12px rgba(212, 175, 55, 0.22);
+    }
+
     footer {
       margin-top: 2.85rem;
       text-align: center;
@@ -391,9 +433,31 @@
       <div class="brand-mark__lamp-stem" aria-hidden="true"></div>
       <div>
         <h1>Примеры работ</h1>
-        <p class="subtitle">Сравнение демо и мастера по дорожкам — барабаны, вокал, гитары. Положите свои файлы в <code>portfolio-audio/</code> с теми же именами.</p>
+        <p class="subtitle">Ниже — что входило в работу по проектам и примеры сравнения демо / мастер по дорожкам. Аудио подставляйте в <code>portfolio-audio/</code>.</p>
       </div>
     </header>
+
+    <article class="card">
+      <div class="tag-row">
+        <span class="tag">Компетенции</span>
+        <span class="tag">Скоуп работ</span>
+      </div>
+      <h2>Выполненные работы</h2>
+      <p class="meta">Чек-лист направлений, с которыми работаю: от записи партий до мастеринга.</p>
+      <div class="work-list-shell media-shell">
+        <ul class="work-list">
+          <li>Сведение</li>
+          <li>Запись гитары</li>
+          <li>Запись Bus гитары</li>
+          <li>Запись вокала</li>
+          <li>Продакшн вокала</li>
+          <li>Продакшн гитары</li>
+          <li>Продакшн барабанов</li>
+          <li>Продакшн FX</li>
+          <li>Мастеринг · Mastery Inc</li>
+        </ul>
+      </div>
+    </article>
 
     <article class="card">
       <div class="tag-row">
