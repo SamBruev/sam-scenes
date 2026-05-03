@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Сценарий видео / Sam Bruev (v162)</title>
+  <title>Сценарий видео / Sam Bruev (v163)</title>
   <!-- До отрисовки тела: восстановить скролл после reload без «прыжка» картинки/фона -->
   <script>
     (function () {
@@ -3974,10 +3974,13 @@
       }
 
       /** Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages). */
-      var APP_VERSION = 'v162';
-      var BUILD_TIME = '2026-05-03 11:55 MSK';
+      var APP_VERSION = 'v163';
+      var BUILD_TIME = '2026-05-03 14:10 MSK';
       var APP_BUILD = APP_VERSION + ' · ' + BUILD_TIME;
       var lastSceneTimeTriggerTouchAt = 0;
+      /** Открывать диалог времени только при коротком тапе; при скролле палец смещается сильнее. */
+      var SCENE_TIME_TAP_MAX_PX = 18;
+      var sceneTimeFingerStart = null;
       var APP_BUILD_KEY = 'abakan-app-build';
       var STORAGE_KEY = 'abakan-main-abakan-layout-v15';
       var LEGACY_STORAGE_KEYS = ['abakan-main-abakan-layout-v14', 'abakan-main-abakan-layout-v13', 'abakan-main-abakan-layout-v12', 'abakan-main-abakan-layout-v10', 'abakan-main-abakan-layout-v9', 'abakan-main-abakan-layout-v8'];
@@ -7300,21 +7303,77 @@
         true
       );
       document.addEventListener(
-        'touchend',
+        'touchstart',
         function (e) {
           var btn = e.target && e.target.closest && e.target.closest('.scene-time-trigger');
-          if (!btn) return;
+          if (!btn || !e.changedTouches || !e.changedTouches.length) return;
+          var t = e.changedTouches[0];
+          sceneTimeFingerStart = {
+            id: t.identifier,
+            x: t.clientX,
+            y: t.clientY,
+            btn: btn
+          };
+        },
+        { passive: true, capture: true }
+      );
+      document.addEventListener(
+        'touchmove',
+        function (e) {
+          if (!sceneTimeFingerStart) return;
+          var t = null;
+          for (var i = 0; i < e.touches.length; i++) {
+            if (e.touches[i].identifier === sceneTimeFingerStart.id) {
+              t = e.touches[i];
+              break;
+            }
+          }
+          if (!t) return;
+          var dx = t.clientX - sceneTimeFingerStart.x;
+          var dy = t.clientY - sceneTimeFingerStart.y;
+          if (Math.hypot(dx, dy) > SCENE_TIME_TAP_MAX_PX) sceneTimeFingerStart = null;
+        },
+        { passive: true, capture: true }
+      );
+      document.addEventListener(
+        'touchcancel',
+        function (e) {
+          if (!sceneTimeFingerStart) return;
+          for (var j = 0; j < e.changedTouches.length; j++) {
+            if (e.changedTouches[j].identifier === sceneTimeFingerStart.id) {
+              sceneTimeFingerStart = null;
+              return;
+            }
+          }
+        },
+        { passive: true, capture: true }
+      );
+      document.addEventListener(
+        'touchend',
+        function (e) {
+          var arm = sceneTimeFingerStart;
+          if (!arm) return;
+          var te = null;
+          for (var k = 0; k < e.changedTouches.length; k++) {
+            if (e.changedTouches[k].identifier === arm.id) {
+              te = e.changedTouches[k];
+              break;
+            }
+          }
+          if (!te) return;
+          sceneTimeFingerStart = null;
+          var btn = e.target && e.target.closest && e.target.closest('.scene-time-trigger');
+          if (!btn || arm.btn !== btn) return;
+          var dx = te.clientX - arm.x;
+          var dy = te.clientY - arm.y;
+          if (Math.hypot(dx, dy) > SCENE_TIME_TAP_MAX_PX) return;
           lastSceneTimeTriggerTouchAt = Date.now();
           e.preventDefault();
           e.stopPropagation();
           var wrap = btn.closest('.scene-time-wrap');
           if (!wrap) return;
-          var ax = NaN;
-          var ay = NaN;
-          if (e.changedTouches && e.changedTouches[0]) {
-            ax = e.changedTouches[0].clientX;
-            ay = e.changedTouches[0].clientY;
-          }
+          var ax = te.clientX;
+          var ay = te.clientY;
           sceneTimeDialogPointerAnchor.x = NaN;
           sceneTimeDialogPointerAnchor.y = NaN;
           openSceneTimeCenterDialog(wrap, ax, ay);
