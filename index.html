@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v214: удаление по намеренному тапу (не при скролле); шотлист/примечания; build-info -->
+<!-- v215: Sam Scenes — ключи storage samscenes-* (миграция с abakan-* при первом заходе) -->
 <html lang="ru" style="--logo-x: 0px; --logo-y: 0px; --logo-scale: 2.00; --top-logo-blur: 0px;">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -13,21 +13,21 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Sam Scenes (v214)</title>
+  <title>Sam Scenes (v215)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
-  <style id="abakan-restore-critical">
+  <style id="samscenes-restore-critical">
     html {
       background-color: #000;
     }
-    html.abakan-restore-scroll-pending {
+    html.samscenes-restore-scroll-pending {
       opacity: 0;
     }
-    html.abakan-restore-scroll-ready {
+    html.samscenes-restore-scroll-ready {
       opacity: 1;
       transition: opacity 0.16s ease-out;
     }
     @media (prefers-reduced-motion: reduce) {
-      html.abakan-restore-scroll-ready {
+      html.samscenes-restore-scroll-ready {
         transition: none;
       }
     }
@@ -35,21 +35,29 @@
   <script>
     (function () {
       try {
-        var raw = sessionStorage.getItem('abakan-restore-scroll-y');
+        var K = 'samscenes-restore-scroll-y';
+        var KOLD = 'abakan-restore-scroll-y';
+        var raw = sessionStorage.getItem(K);
+        if (raw == null) raw = sessionStorage.getItem(KOLD);
         if (raw == null) return;
         var y = Math.max(0, parseInt(raw, 10) || 0);
         if (y < 24) return;
-        document.documentElement.classList.add('abakan-restore-scroll-pending');
+        document.documentElement.classList.add('samscenes-restore-scroll-pending');
       } catch (e) {}
     })();
   </script>
   <script>
     (function () {
-      var K = 'abakan-restore-scroll-y';
+      var K = 'samscenes-restore-scroll-y';
+      var KOLD = 'abakan-restore-scroll-y';
       try {
         var raw = sessionStorage.getItem(K);
+        if (raw == null) raw = sessionStorage.getItem(KOLD);
         if (raw == null) return;
         sessionStorage.removeItem(K);
+        try {
+          sessionStorage.removeItem(KOLD);
+        } catch (eOld) {}
         var y = Math.max(0, parseInt(raw, 10) || 0);
         if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 
@@ -67,11 +75,11 @@
         function reveal() {
           try {
             var el = document.documentElement;
-            if (el.classList.contains('abakan-restore-scroll-pending')) {
-              el.classList.remove('abakan-restore-scroll-pending');
-              el.classList.add('abakan-restore-scroll-ready');
+            if (el.classList.contains('samscenes-restore-scroll-pending')) {
+              el.classList.remove('samscenes-restore-scroll-pending');
+              el.classList.add('samscenes-restore-scroll-ready');
               setTimeout(function () {
-                el.classList.remove('abakan-restore-scroll-ready');
+                el.classList.remove('samscenes-restore-scroll-ready');
               }, 280);
             }
           } catch (e) {}
@@ -112,7 +120,7 @@
         setTimeout(reveal, 480);
       } catch (e) {
         try {
-          document.documentElement.classList.remove('abakan-restore-scroll-pending');
+          document.documentElement.classList.remove('samscenes-restore-scroll-pending');
         } catch (e2) {}
       }
     })();
@@ -4662,14 +4670,42 @@
     <div class="teleprompter-text" id="teleprompter-text"></div>
   </div>
 
-  <script type="application/json" id="abakan-say-lines-json">["«16 и 17 мая, Хакасия, Абакан. Я проведу двухдневный мастер-классом по сведению и современному продакшену рок, поп и метал музыки!».","Меня зовут Семён Бруев, я профессиональный микс-инженер и музыкальный продюсер. 20 из 36 лет я занимаюсь музыкой. В 2017 году я окончил ИСИ в Москве, получив высшее образование по музыкальной звукорежиссере, потом онлайн учёба в Berklee College of Music, работа с Биланом, Трофимом, продюссерском центре MALFA Макса Фадеева и так далее","16 и 17 мая я лечу к своим друзьям в Минусинский колледж культуры и искусства на кафедру “Музыкальное звукооператорское мастерство” с двухдневным мастер-классом. Но вы тоже можете к нам присоединиться!».","Кроме тем вокального, гитарного и барабанного продакшена, мы подробно разберём ваши проекты, песни, сведения. Послушаем исходники барабанщика ARCHITECTS Дэна Сирли, разберем аранжировки Taylor Swift, Dua Lipa и развенчаем миф о неком русском стиле сведения музыки.","Однажды мне довелось пообщаться с музыкальным продюсером RAMMSTEIN и знаниями о работе в студии этой группы я тоже поделюсь. Всё это поможет вам яснее понять что делать, чтобы добиваться хорошего звучания. И деньги тут не при чём».","«В один из дней я обязательно научу вас пользоваться новейшими AI-инструментам Cursor и Claude Code. Вы будете шокированы! Но не переживайте, в доброжелательной компании приручать их будет одно удовольствие!».","«Короче тем у нас масса. Благо и времени целых два дня без особых ограничений на встречу! Но можно прийти и на один! ».","У нас уже есть открытый чатик для участников, поэтому добавляйтесь! Ссылочку вам пришлёт организатор Лиза.<br>30 мест. Абакан, Черногорск, Красноярск — приезжайте, будет интересно и весело!».","«Я еду к вам с практикой, разбором и реальными инструментами. Присоединяйтесь — сделаем звук плотным, громким и дорогим вместе»."]</script>
+  <script type="application/json" id="samscenes-say-lines-json">["«16 и 17 мая, Хакасия, Абакан. Я проведу двухдневный мастер-классом по сведению и современному продакшену рок, поп и метал музыки!».","Меня зовут Семён Бруев, я профессиональный микс-инженер и музыкальный продюсер. 20 из 36 лет я занимаюсь музыкой. В 2017 году я окончил ИСИ в Москве, получив высшее образование по музыкальной звукорежиссере, потом онлайн учёба в Berklee College of Music, работа с Биланом, Трофимом, продюссерском центре MALFA Макса Фадеева и так далее","16 и 17 мая я лечу к своим друзьям в Минусинский колледж культуры и искусства на кафедру “Музыкальное звукооператорское мастерство” с двухдневным мастер-классом. Но вы тоже можете к нам присоединиться!».","Кроме тем вокального, гитарного и барабанного продакшена, мы подробно разберём ваши проекты, песни, сведения. Послушаем исходники барабанщика ARCHITECTS Дэна Сирли, разберем аранжировки Taylor Swift, Dua Lipa и развенчаем миф о неком русском стиле сведения музыки.","Однажды мне довелось пообщаться с музыкальным продюсером RAMMSTEIN и знаниями о работе в студии этой группы я тоже поделюсь. Всё это поможет вам яснее понять что делать, чтобы добиваться хорошего звучания. И деньги тут не при чём».","«В один из дней я обязательно научу вас пользоваться новейшими AI-инструментам Cursor и Claude Code. Вы будете шокированы! Но не переживайте, в доброжелательной компании приручать их будет одно удовольствие!».","«Короче тем у нас масса. Благо и времени целых два дня без особых ограничений на встречу! Но можно прийти и на один! ».","У нас уже есть открытый чатик для участников, поэтому добавляйтесь! Ссылочку вам пришлёт организатор Лиза.<br>30 мест. Абакан, Черногорск, Красноярск — приезжайте, будет интересно и весело!».","«Я еду к вам с практикой, разбором и реальными инструментами. Присоединяйтесь — сделаем звук плотным, громким и дорогим вместе»."]</script>
 
   <script>
     (function () {
-      var PULL_RELOAD_FLAG = 'abakan-pull-reload-flag';
-      var ABAKAN_RESTORE_SCROLL_KEY = 'abakan-restore-scroll-y';
+      try {
+        (function migrateAbakanKeysToSamScenes() {
+          try {
+            var L = typeof localStorage !== 'undefined' ? localStorage : null;
+            if (!L) return;
+            function copyIfMissing(oldK, newK) {
+              try {
+                var o = L.getItem(oldK);
+                if (o == null) return;
+                if (L.getItem(newK) != null) return;
+                L.setItem(newK, o);
+              } catch (e) {}
+            }
+            copyIfMissing('abakan-app-build', 'samscenes-app-build');
+            copyIfMissing('abakan-main-abakan-layout-v15', 'samscenes-main-layout-v15');
+            ['v14', 'v13', 'v12', 'v10', 'v9', 'v8'].forEach(function (ver) {
+              copyIfMissing('abakan-main-abakan-layout-' + ver, 'samscenes-main-layout-' + ver);
+            });
+            copyIfMissing('abakan-scenarios-v2', 'samscenes-scenarios-v2');
+            copyIfMissing('abakan-scenarios-v1', 'samscenes-scenarios-v1');
+            copyIfMissing('abakan-say-bundle-v', 'samscenes-say-bundle-v');
+          } catch (e) {}
+        })();
+      } catch (eMig) {}
+
+      var PULL_RELOAD_FLAG = 'samscenes-pull-reload-flag';
+      var SAMSCENES_RESTORE_SCROLL_KEY = 'samscenes-restore-scroll-y';
       try {
         if (sessionStorage.getItem(PULL_RELOAD_FLAG)) sessionStorage.removeItem(PULL_RELOAD_FLAG);
+        try {
+          if (sessionStorage.getItem('abakan-pull-reload-flag')) sessionStorage.removeItem('abakan-pull-reload-flag');
+        } catch (ePr) {}
       } catch (ePullFlag) {}
 
       function saveScrollForNextLoad() {
@@ -4679,7 +4715,7 @@
             (document.documentElement && document.documentElement.scrollTop) ||
             (document.body && document.body.scrollTop) ||
             0;
-          sessionStorage.setItem(ABAKAN_RESTORE_SCROLL_KEY, String(Math.max(0, Math.round(y))));
+          sessionStorage.setItem(SAMSCENES_RESTORE_SCROLL_KEY, String(Math.max(0, Math.round(y))));
         } catch (e) {}
       }
 
@@ -4688,8 +4724,8 @@
        * Дублируйте те же поля в build-info.json — подпись внизу подгружает его с cache: no-store,
        * чтобы не залипала старая версия при закэшированном index.html.
        */
-      var APP_VERSION = 'v214';
-      var BUILD_TIME = '2026-05-03 09:03 MSK';
+      var APP_VERSION = 'v215';
+      var BUILD_TIME = '2026-05-03 09:06 MSK';
       var APP_BUILD = APP_VERSION + ' · ' + BUILD_TIME;
       var BUILD_INFO_FILE = 'build-info.json';
       var lastSceneTimeTriggerTouchAt = 0;
@@ -4698,11 +4734,11 @@
       /** Макс. сдвиг пальца/курсора для «чистого» тапа по кнопкам удаления (не срабатывать при скролле). */
       var INTENT_TAP_MAX_PX = 16;
       var sceneTimeFingerStart = null;
-      var APP_BUILD_KEY = 'abakan-app-build';
-      var STORAGE_KEY = 'abakan-main-abakan-layout-v15';
-      var LEGACY_STORAGE_KEYS = ['abakan-main-abakan-layout-v14', 'abakan-main-abakan-layout-v13', 'abakan-main-abakan-layout-v12', 'abakan-main-abakan-layout-v10', 'abakan-main-abakan-layout-v9', 'abakan-main-abakan-layout-v8'];
-      var SCENARIO_STORAGE_KEY = 'abakan-scenarios-v2';
-      var LEGACY_SCENARIO_KEYS = ['abakan-scenarios-v1'];
+      var APP_BUILD_KEY = 'samscenes-app-build';
+      var STORAGE_KEY = 'samscenes-main-layout-v15';
+      var LEGACY_STORAGE_KEYS = ['samscenes-main-layout-v14', 'samscenes-main-layout-v13', 'samscenes-main-layout-v12', 'samscenes-main-layout-v10', 'samscenes-main-layout-v9', 'samscenes-main-layout-v8'];
+      var SCENARIO_STORAGE_KEY = 'samscenes-scenarios-v2';
+      var LEGACY_SCENARIO_KEYS = ['samscenes-scenarios-v1'];
       /** Авто-перезагрузка страницы: подтягивает свежую версию с сервера; данные сценариев — из localStorage этой же вкладки. */
       var AUTO_PAGE_RELOAD_MS = 3 * 60 * 1000;
       /** Не перехватывать жесты pull/assist на интерактиве; иначе <summary> в <details> не раскрывается. */
@@ -4749,7 +4785,7 @@
         return gestureHitTargetFromClientXY(x, y, e.target);
       }
 
-      // Анти-кэш разметки: при новой сборке чистим только слой «интерфейса», но НЕ abakan-scenarios-v2 —
+      // Анти-кэш разметки: при новой сборке чистим только слой «интерфейса», но НЕ samscenes-scenarios-v2 —
       // там все сценарии пользователя; иначе после каждого деплоя всё обнулялось.
       try {
         var savedBuild = localStorage.getItem(APP_BUILD_KEY);
@@ -6701,12 +6737,14 @@
         ensureSayReplaceButtons(document);
       }
 
-      var ABAKAN_SAY_BUNDLE_LS_KEY = 'abakan-say-bundle-v';
-      var ABAKAN_SAY_BUNDLE_VER = 2;
+      var SAMSCENES_SAY_BUNDLE_LS_KEY = 'samscenes-say-bundle-v';
+      var SAMSCENES_SAY_BUNDLE_VER = 2;
 
-      function getBundledAbakanSayLines() {
+      function getBundledSayLinesFromJson() {
         try {
-          var el = document.getElementById('abakan-say-lines-json');
+          var el =
+            document.getElementById('samscenes-say-lines-json') ||
+            document.getElementById('abakan-say-lines-json');
           if (!el || !el.textContent) return null;
           var arr = JSON.parse(el.textContent.trim());
           return Array.isArray(arr) ? arr : null;
@@ -6715,7 +6753,7 @@
         }
       }
 
-      function isAbakanSayPlaceholder(span) {
+      function isBundledSayPlaceholder(span) {
         if (!span) return true;
         var text = String(span.textContent || '').replace(/\u00a0/g, ' ').trim();
         if (!text) return true;
@@ -6723,11 +6761,11 @@
         return false;
       }
 
-      function migrateAbakanSayLinesFromBundled() {
+      function migrateBundledSayLinesFromJson() {
         try {
-          var storedVer = parseInt(localStorage.getItem(ABAKAN_SAY_BUNDLE_LS_KEY) || '0', 10) || 0;
-          if (storedVer >= ABAKAN_SAY_BUNDLE_VER) return;
-          var lines = getBundledAbakanSayLines();
+          var storedVer = parseInt(localStorage.getItem(SAMSCENES_SAY_BUNDLE_LS_KEY) || '0', 10) || 0;
+          if (storedVer >= SAMSCENES_SAY_BUNDLE_VER) return;
+          var lines = getBundledSayLinesFromJson();
           if (!lines || lines.length !== 9) return;
           var scenes = mainScenes();
           if (scenes.length < lines.length) return;
@@ -6736,14 +6774,14 @@
             var sc = scenes[i];
             var span = sc.querySelector('.line-say .say-editable') || sc.querySelector('.say-editable');
             if (!span) continue;
-            if (!isAbakanSayPlaceholder(span)) continue;
+            if (!isBundledSayPlaceholder(span)) continue;
             span.innerHTML = lines[i];
             clipSaySpan(span);
             var line = span.closest('.line-say');
             if (line) normalizeSayLineWhitespaceNodes(line);
             changed = true;
           }
-          localStorage.setItem(ABAKAN_SAY_BUNDLE_LS_KEY, String(ABAKAN_SAY_BUNDLE_VER));
+          localStorage.setItem(SAMSCENES_SAY_BUNDLE_LS_KEY, String(SAMSCENES_SAY_BUNDLE_VER));
           if (changed) persistToStorage('Подставлены тексты «Говорю» из шаблона');
         } catch (e) {}
       }
@@ -8803,7 +8841,7 @@
       repairSceneTimeSelectsInDom(document);
       upgradeSayLines();
       bindAllSayLimits(document);
-      migrateAbakanSayLinesFromBundled();
+      migrateBundledSayLinesFromJson();
       ensureShotCheckboxInHeading();
       syncAllShotClasses();
       wireSceneUI();
