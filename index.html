@@ -554,63 +554,6 @@
       pointer-events: none;
     }
 
-    /*
-      Декор слева внутри .wrap: тот же ритм, что у полоски «План съёмок» (только визуал, без тапа).
-      Скругление слева, градиент зеркально к фиксированной кнопке у края экрана.
-    */
-    .assistant-menu-edge-decor {
-      position: absolute;
-      left: max(4px, calc(env(safe-area-inset-left, 0px) * 0.35));
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 4;
-      width: 6px;
-      min-width: 5px;
-      height: min(168px, 46vh);
-      min-height: 72px;
-      margin: 0;
-      padding: 0;
-      border: none;
-      border-radius: min(18px, 2.6vh) 0 0 min(18px, 2.6vh);
-      pointer-events: none;
-      background: linear-gradient(
-        270deg,
-        rgba(12, 10, 8, 0.76) 0%,
-        rgba(212, 175, 55, 0.11) 38%,
-        var(--assistant-hint-violet-mid) 62%,
-        rgba(212, 175, 55, 0.26) 100%
-      );
-      box-shadow:
-        inset 1px 0 7px var(--assistant-hint-violet-soft),
-        inset 1px 0 5px rgba(212, 175, 55, 0.1),
-        -1px 0 10px rgba(0, 0, 0, 0.38),
-        0 0 16px var(--assistant-hint-violet-glow);
-      opacity: 0.95;
-      transition: opacity 0.2s ease;
-    }
-
-    .assistant-menu-edge-decor::before {
-      content: '\203A';
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 12px;
-      font-weight: 500;
-      line-height: 1;
-      color: var(--ui-violet);
-      pointer-events: none;
-      letter-spacing: -0.08em;
-      opacity: 0.88;
-      text-shadow:
-        0 0 10px var(--ui-violet-glow),
-        0 0 4px rgba(255, 255, 255, 0.1);
-    }
-
-    body.assistant-drawer-open .assistant-menu-edge-decor {
-      opacity: 0;
-    }
-
     .assistant-drawer-host {
       margin: 0 0 18px;
       padding: 8px 2px 16px;
@@ -4549,7 +4492,6 @@
     role="status"
     title="Версия и время сборки на странице — сравните с последним деплоем GitHub Pages"></div>
   <div class="wrap">
-    <div class="assistant-menu-edge-decor" aria-hidden="true"></div>
     <div class="top-logo" id="top-logo-block">
       <div class="top-logo-brand">
         <div class="logo-bg" aria-hidden="true"></div>
