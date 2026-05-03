@@ -1,0 +1,13 @@
+#!/bin/sh
+# После каждого коммита в этом репозитории — сразу push на origin (GitHub Pages видит обновления).
+# Включение один раз из корня репозитория: git config core.hooksPath .githooks
+
+branch=$(git symbolic-ref --short HEAD 2>/dev/null) || exit 0
+[ "$branch" = "main" ] || exit 0
+
+if git push origin "$branch"; then
+  printf '%s\n' "SamScenes: отправлено на GitHub (origin/$branch)."
+else
+  printf '%s\n' "SamScenes: не удалось выполнить git push — проверьте сеть и доступ к origin." >&2
+  exit 0
+fi
