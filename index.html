@@ -13,7 +13,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Sam Scenes (v221)</title>
+  <title>Sam Scenes (v222)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -839,6 +839,101 @@
       font-size: 13px;
       color: var(--muted);
       margin: 0;
+    }
+
+    /* Долгое нажатие на строку сценария — дублировать / удалить */
+    .assistant-scenario-action-sheet {
+      position: fixed;
+      inset: 0;
+      z-index: 2147483640;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding: max(12px, env(safe-area-inset-bottom));
+      padding-left: max(12px, env(safe-area-inset-left));
+      padding-right: max(12px, env(safe-area-inset-right));
+      box-sizing: border-box;
+      pointer-events: none;
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.2s ease, visibility 0.2s;
+    }
+
+    .assistant-scenario-action-sheet.is-open {
+      pointer-events: auto;
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .assistant-scenario-action-sheet__backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px);
+      border: none;
+      padding: 0;
+      margin: 0;
+      cursor: pointer;
+    }
+
+    .assistant-scenario-action-sheet__panel {
+      position: relative;
+      width: min(100%, 400px);
+      max-width: 100%;
+      border-radius: 16px;
+      padding: 10px;
+      box-sizing: border-box;
+      background: linear-gradient(165deg, rgba(28, 22, 16, 0.96), rgba(10, 8, 6, 0.96));
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      box-shadow: 0 18px 56px rgba(0, 0, 0, 0.55);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .assistant-scenario-action-sheet__btn {
+      display: block;
+      width: 100%;
+      margin: 0;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 228, 160, 0.22);
+      background: rgba(0, 0, 0, 0.45);
+      color: var(--cream);
+      font: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      text-align: center;
+      cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: rgba(212, 175, 55, 0.25);
+    }
+
+    .assistant-scenario-action-sheet__btn:active {
+      filter: brightness(1.08);
+    }
+
+    .assistant-scenario-action-sheet__btn--danger {
+      border-color: rgba(232, 96, 82, 0.45);
+      color: #ffc9c2;
+      background: rgba(48, 14, 10, 0.55);
+    }
+
+    .assistant-scenario-action-sheet__cancel {
+      display: block;
+      width: 100%;
+      margin: 4px 0 0;
+      padding: 11px 16px;
+      border: none;
+      border-radius: 12px;
+      background: transparent;
+      color: var(--muted);
+      font: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      touch-action: manipulation;
     }
 
     .wrap > * { order: 10; }
@@ -4685,8 +4780,8 @@
        * Дублируйте те же поля в build-info.json — подпись внизу подгружает его с cache: no-store,
        * чтобы не залипала старая версия при закэшированном index.html.
        */
-      var APP_VERSION = 'v221';
-      var BUILD_TIME = '2026-05-03 12:05 MSK';
+      var APP_VERSION = 'v222';
+      var BUILD_TIME = '2026-05-03 14:40 MSK';
       var APP_BUILD = APP_VERSION + ' · ' + BUILD_TIME;
       var BUILD_INFO_FILE = 'build-info.json';
       var lastSceneTimeTriggerTouchAt = 0;
@@ -4925,6 +5020,42 @@
         }
         if (!writeScenarioBundle(bundle)) {
           alert('Не удалось удалить сценарий. Освободите память сайта (кэш/данные) и попробуйте снова.');
+          return false;
+        }
+        saveScrollForNextLoad();
+        location.reload();
+        return true;
+      }
+
+      /** Копия сценария в наборе (отдельный id, разметка и prep как у источника). */
+      function duplicateScenarioById(scenarioId) {
+        if (!scenarioId) return false;
+        try {
+          persistToStorage('Сохранено');
+        } catch (e0) {}
+        var bundle = readScenarioBundle();
+        if (!bundle || !bundle.items || !bundle.items.length) return false;
+        var src = null;
+        for (var i = 0; i < bundle.items.length; i++) {
+          if (bundle.items[i].id === scenarioId) {
+            src = bundle.items[i];
+            break;
+          }
+        }
+        if (!src) return false;
+        var copy;
+        try {
+          copy = JSON.parse(JSON.stringify(src));
+        } catch (eJ) {
+          return false;
+        }
+        copy.id = uid();
+        copy.name = String(copy.name || 'Сценарий').trim() + ' (копия)';
+        copy.updatedAt = Date.now();
+        bundle.items.push(copy);
+        bundle.activeId = copy.id;
+        if (!writeScenarioBundle(bundle)) {
+          alert('Не удалось сохранить копию. Освободите память сайта (кэш/данные) и попробуйте снова.');
           return false;
         }
         saveScrollForNextLoad();
@@ -5398,6 +5529,7 @@
 
       function closeAssistantDrawer() {
         if (!document.body.classList.contains('assistant-drawer-open')) return;
+        hideAssistantScenarioActionSheet();
         if (document.body.getAttribute('data-assistant-drawer-closing') === '1') return;
         clearAssistantDrawerCloseListeners();
         var d = document.getElementById('assistant-drawer');
@@ -5642,6 +5774,92 @@
         } catch (e) {}
       }
 
+      var assistantScenarioActionSheetEl = null;
+      var assistantScenarioActionPendingId = null;
+      var assistantScenarioLP = { timer: null, btn: null, x: 0, y: 0 };
+      var ASSISTANT_SCENARIO_LONGPRESS_MS = 520;
+      var ASSISTANT_SCENARIO_LONGPRESS_MOVE_PX = 14;
+
+      function assistantScenarioActionSheetOnKey(e) {
+        if (e.key !== 'Escape' && e.key !== 'Esc') return;
+        if (!assistantScenarioActionSheetEl || !assistantScenarioActionSheetEl.classList.contains('is-open')) return;
+        e.preventDefault();
+        try {
+          e.stopPropagation();
+        } catch (e0) {}
+        hideAssistantScenarioActionSheet();
+      }
+
+      function hideAssistantScenarioActionSheet() {
+        assistantScenarioActionPendingId = null;
+        try {
+          document.removeEventListener('keydown', assistantScenarioActionSheetOnKey, true);
+        } catch (eR) {}
+        if (assistantScenarioActionSheetEl) {
+          assistantScenarioActionSheetEl.classList.remove('is-open');
+          assistantScenarioActionSheetEl.setAttribute('aria-hidden', 'true');
+        }
+      }
+
+      function ensureAssistantScenarioActionSheet() {
+        if (assistantScenarioActionSheetEl) return assistantScenarioActionSheetEl;
+        var root = document.createElement('div');
+        root.id = 'assistant-scenario-action-sheet';
+        root.className = 'assistant-scenario-action-sheet';
+        root.setAttribute('aria-hidden', 'true');
+        root.innerHTML =
+          '<button type="button" class="assistant-scenario-action-sheet__backdrop" tabindex="-1" aria-label="Закрыть"></button>' +
+          '<div class="assistant-scenario-action-sheet__panel" role="dialog" aria-modal="true" aria-label="Действия со сценарием">' +
+          '<button type="button" class="assistant-scenario-action-sheet__btn" data-assistant-scenario-act="duplicate">Дублировать</button>' +
+          '<button type="button" class="assistant-scenario-action-sheet__btn assistant-scenario-action-sheet__btn--danger" data-assistant-scenario-act="delete">Удалить</button>' +
+          '<button type="button" class="assistant-scenario-action-sheet__cancel">Отмена</button>' +
+          '</div>';
+        document.body.appendChild(root);
+        assistantScenarioActionSheetEl = root;
+        var bd = root.querySelector('.assistant-scenario-action-sheet__backdrop');
+        var cancel = root.querySelector('.assistant-scenario-action-sheet__cancel');
+        if (bd) {
+          bd.addEventListener('click', function (e) {
+            e.preventDefault();
+            hideAssistantScenarioActionSheet();
+          });
+        }
+        if (cancel) {
+          cancel.addEventListener('click', function (e) {
+            e.preventDefault();
+            hideAssistantScenarioActionSheet();
+          });
+        }
+        root.querySelectorAll('[data-assistant-scenario-act]').forEach(function (b) {
+          b.addEventListener('click', function (e) {
+            e.preventDefault();
+            var act = b.getAttribute('data-assistant-scenario-act');
+            var id = assistantScenarioActionPendingId;
+            hideAssistantScenarioActionSheet();
+            if (!id) return;
+            if (act === 'duplicate') {
+              triggerHaptic('medium');
+              duplicateScenarioById(id);
+            } else if (act === 'delete') {
+              triggerHaptic('danger');
+              removeScenarioById(id);
+            }
+          });
+        });
+        return root;
+      }
+
+      function showAssistantScenarioActionSheet(scenarioId) {
+        if (!scenarioId) return;
+        ensureAssistantScenarioActionSheet();
+        assistantScenarioActionPendingId = scenarioId;
+        assistantScenarioActionSheetEl.classList.add('is-open');
+        assistantScenarioActionSheetEl.setAttribute('aria-hidden', 'false');
+        try {
+          document.addEventListener('keydown', assistantScenarioActionSheetOnKey, true);
+        } catch (eK) {}
+      }
+
       function wireAssistantDrawer() {
         if (wireAssistantDrawer._done) return;
         wireAssistantDrawer._done = true;
@@ -5699,6 +5917,69 @@
               scenarioSelect.dispatchEvent(new Event('change', { bubbles: true }));
             } catch (eCh) {}
           });
+          function assistantScenarioLPClear() {
+            if (assistantScenarioLP.timer) {
+              clearTimeout(assistantScenarioLP.timer);
+              assistantScenarioLP.timer = null;
+            }
+            assistantScenarioLP.btn = null;
+          }
+          list.addEventListener(
+            'pointerdown',
+            function (e) {
+              if (!document.body.classList.contains('assistant-drawer-open')) return;
+              var btn =
+                e.target && e.target.closest
+                  ? e.target.closest('button.assistant-drawer-item[data-scenario-id]')
+                  : null;
+              if (!btn) return;
+              if (e.pointerType === 'mouse' && e.button !== 0) return;
+              assistantScenarioLPClear();
+              assistantScenarioLP.btn = btn;
+              assistantScenarioLP.x = e.clientX;
+              assistantScenarioLP.y = e.clientY;
+              var sid = btn.getAttribute('data-scenario-id');
+              if (!sid) return;
+              assistantScenarioLP.timer = setTimeout(function () {
+                assistantScenarioLP.timer = null;
+                assistantScenarioLP.btn = null;
+                try {
+                  triggerHaptic('medium');
+                } catch (eH) {}
+                assistantDrawerSuppressClickUntil = Date.now() + 700;
+                showAssistantScenarioActionSheet(sid);
+              }, ASSISTANT_SCENARIO_LONGPRESS_MS);
+            },
+            true
+          );
+          list.addEventListener(
+            'pointermove',
+            function (e) {
+              if (!assistantScenarioLP.timer || !assistantScenarioLP.btn) return;
+              var dx = e.clientX - assistantScenarioLP.x;
+              var dy = e.clientY - assistantScenarioLP.y;
+              if (Math.hypot(dx, dy) > ASSISTANT_SCENARIO_LONGPRESS_MOVE_PX) assistantScenarioLPClear();
+            },
+            true
+          );
+          list.addEventListener('pointerup', assistantScenarioLPClear, true);
+          list.addEventListener('pointercancel', assistantScenarioLPClear, true);
+          list.addEventListener(
+            'contextmenu',
+            function (e) {
+              var btn =
+                e.target && e.target.closest
+                  ? e.target.closest('button.assistant-drawer-item[data-scenario-id]')
+                  : null;
+              if (!btn || !document.body.classList.contains('assistant-drawer-open')) return;
+              e.preventDefault();
+              var cid = btn.getAttribute('data-scenario-id');
+              if (!cid) return;
+              assistantDrawerSuppressClickUntil = Date.now() + 400;
+              showAssistantScenarioActionSheet(cid);
+            },
+            true
+          );
           var swipeDel = {
             active: false,
             startX: 0,
