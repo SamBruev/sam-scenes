@@ -1726,17 +1726,32 @@
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 0.45rem 1rem;
-      align-items: baseline;
+      align-items: center;
+      gap: 0.35rem 0.55rem;
+    }
+
+    .site-footer__social-list > li {
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .site-footer__social-list > li:not(:last-child)::after {
+      content: "·";
+      margin-left: 0.55rem;
+      font-weight: 300;
+      color: rgba(146, 136, 124, 0.55);
+      pointer-events: none;
+      user-select: none;
     }
 
     .site-footer__social-link {
       font-family: var(--brand-serif);
-      font-size: 0.68rem;
-      font-weight: 800;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: rgba(212, 175, 55, 0.62);
+      font-size: clamp(0.6475rem, 2vw, 0.72rem);
+      font-weight: 700;
+      letter-spacing: 0.045em;
+      text-transform: none;
+      font-variant-numeric: tabular-nums;
+      color: rgba(222, 200, 120, 0.88);
       text-decoration: none;
       white-space: nowrap;
       transition: color 0.18s ease, text-shadow 0.18s ease;
@@ -1745,7 +1760,7 @@
     }
 
     .site-footer__social-link:hover {
-      color: rgba(238, 214, 140, 0.95);
+      color: rgba(252, 232, 180, 0.98);
     }
 
     .site-footer__social-link:focus {
@@ -1756,6 +1771,18 @@
       outline: 2px solid rgba(232, 201, 104, 0.45);
       outline-offset: 3px;
       border-radius: 4px;
+    }
+
+    .site-footer__social-handle {
+      margin: 0.42rem 0 0;
+      padding: 0 0.5rem;
+      text-align: center;
+      font-family: var(--brand-serif);
+      font-size: clamp(0.5975rem, 1.8vw, 0.655rem);
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      color: rgba(235, 227, 214, 0.4);
+      text-transform: none;
     }
 
     .site-footer__mail-line {
@@ -2386,31 +2413,36 @@
             <a
               href="https://www.tiktok.com/@sam_bruev"
               class="site-footer__social-link"
+              aria-label="TikTok, профиль @sam_bruev"
               target="_blank"
-              rel="noopener noreferrer">TikTok @sam_bruev</a>
+              rel="noopener noreferrer">TikTok</a>
           </li>
           <li>
             <a
               href="https://www.instagram.com/sam_bruev/"
               class="site-footer__social-link"
+              aria-label="Instagram, профиль @sam_bruev"
               target="_blank"
-              rel="noopener noreferrer">Instagram @sam_bruev</a>
+              rel="noopener noreferrer">Instagram</a>
           </li>
           <li>
             <a
               href="https://www.youtube.com/@sam_bruev"
               class="site-footer__social-link"
+              aria-label="YouTube, канал @sam_bruev"
               target="_blank"
-              rel="noopener noreferrer">YouTube @sam_bruev</a>
+              rel="noopener noreferrer">YouTube</a>
           </li>
           <li>
             <a
               href="https://vk.com/sam_bruev"
               class="site-footer__social-link"
+              aria-label="ВКонтакте, sam_bruev"
               target="_blank"
-              rel="noopener noreferrer">VK sam_bruev</a>
+              rel="noopener noreferrer">VK</a>
           </li>
         </ul>
+        <p class="site-footer__social-handle" aria-hidden="true">@sam_bruev</p>
       </nav>
       <p class="site-footer__mail-line">
         <a
