@@ -13,7 +13,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Sam Scenes (v256)</title>
+  <title>Sam Scenes (v259)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -910,7 +910,7 @@
       border-radius: 14px;
     }
 
-    /* Под плашкой: свайп вправо открывает две кнопки (дублировать / удалить) */
+    /* Под плашкой: свайп вправо открывает кнопки — без свайпа рельс скрыт (не «просвечивает» сбоку). */
     .assistant-drawer-item-swipe-rail {
       position: absolute;
       left: 0;
@@ -921,6 +921,14 @@
       flex-direction: row;
       z-index: 0;
       box-sizing: border-box;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.16s ease;
+    }
+
+    .assistant-drawer-item-row.is-swipe-open .assistant-drawer-item-swipe-rail {
+      opacity: 1;
+      pointer-events: auto;
     }
 
     .assistant-drawer-item-slide {
@@ -929,7 +937,8 @@
       flex: 1 1 auto;
       min-width: 0;
       touch-action: pan-y;
-      background: transparent;
+      background: #000000;
+      border-radius: 14px;
     }
 
     .assistant-drawer-item-slide .assistant-drawer-item {
@@ -1055,15 +1064,20 @@
 
     .assistant-drawer-trash-actions {
       display: flex;
-      flex-wrap: wrap;
+      flex-direction: row;
+      flex-wrap: nowrap;
       gap: 8px;
-      align-items: center;
+      align-items: stretch;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .assistant-drawer-trash-btn {
       appearance: none;
+      flex: 1 1 0;
+      min-width: 0;
       margin: 0;
-      padding: 7px 12px;
+      padding: 9px 10px;
       border-radius: 10px;
       border: 1px solid var(--ui-select-border);
       background: #000000;
@@ -1074,6 +1088,10 @@
       cursor: pointer;
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
     }
 
     .assistant-drawer-trash-btn:active {
@@ -4017,7 +4035,7 @@
       <div class="assistant-drawer-inner">
         <div class="assistant-drawer-host">
           <span class="assistant-drawer-host-role">Ассистент</span>
-          <p class="assistant-drawer-host-name">Анна Непряхина</p>
+          <p class="assistant-drawer-host-name" id="assistant-drawer-host-name">Анна Непряхина</p>
         </div>
         <div class="assistant-drawer-head">
           <h2 class="assistant-drawer-title" id="assistant-drawer-title">План съёмок</h2>
@@ -4072,8 +4090,7 @@
         <div class="assistant-drawer-trash" id="assistant-drawer-trash">
           <h3 class="assistant-drawer-trash-title">Корзина · журнал</h3>
           <p class="assistant-drawer-trash-hint">
-            Удалённые сценарии хранятся здесь <strong>30 дней</strong> (около одного месяца), затем удаляются автоматически.
-            Можно восстановить или стереть навсегда.
+            Удалённые сценарии хранятся здесь <strong>30 дней</strong>, затем удаляются автоматически.
           </p>
           <div id="assistant-drawer-trash-list" class="assistant-drawer-trash-list" aria-live="polite"></div>
         </div>
@@ -5199,8 +5216,8 @@
        * Дублируйте те же поля в build-info.json — подпись внизу подгружает его с cache: no-store,
        * чтобы не залипала старая версия при закэшированном index.html.
        */
-      var APP_VERSION = 'v256';
-      var BUILD_TIME = '2026-05-03 22:52 MSK';
+      var APP_VERSION = 'v259';
+      var BUILD_TIME = '2026-05-03 23:18 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -6465,6 +6482,8 @@
         try {
           renderAssistantTrashList();
         } catch (eTrOpen) {}
+        var hostNameEl = document.getElementById('assistant-drawer-host-name');
+        if (hostNameEl) hostNameEl.textContent = 'Анна Непряхина';
         resetAssistantDrawerScrollToTop();
         var ad = document.getElementById('assistant-new-date');
         if (ad && !ad.value) {
@@ -7133,6 +7152,7 @@
             pointerId: null,
             slide: null,
             startX: 0,
+            startY: 0,
             baseTx: 0,
           };
           function endAssistantRowSwipeGesture(slide, pointerId) {
@@ -7215,9 +7235,20 @@
               if (e.pointerType === 'mouse' && e.button !== 0) return;
               var row = btn.closest('.assistant-drawer-item-row');
               var slideImmediate = row && row.querySelector('.assistant-drawer-item-slide');
-              if (slideImmediate && getAssistantSlideTx(slideImmediate) > 10) {
-                setAssistantSlideTx(slideImmediate, 0);
-                assistantDrawerSuppressClickUntil = Date.now() + 320;
+              var txOpen = slideImmediate ? getAssistantSlideTx(slideImmediate) : 0;
+              /* Панель уже открыта — не закрывать по touchstart; дать свайпнуть влево или отпустить тапом в pointerup */
+              if (slideImmediate && txOpen > 10) {
+                assistantDrawerItemLPClear(true);
+                assistantRowSwipe.active = true;
+                assistantRowSwipe.pointerId = e.pointerId;
+                assistantRowSwipe.slide = slideImmediate;
+                assistantRowSwipe.startX = e.clientX;
+                assistantRowSwipe.startY = e.clientY;
+                assistantRowSwipe.baseTx = txOpen;
+                try {
+                  slideImmediate.setPointerCapture(e.pointerId);
+                } catch (eCapOpen) {}
+                assistantDrawerSuppressClickUntil = Date.now() + 420;
                 return;
               }
               assistantDrawerItemLPClear(true);
@@ -7296,6 +7327,7 @@
                   assistantRowSwipe.pointerId = e.pointerId;
                   assistantRowSwipe.slide = slideH;
                   assistantRowSwipe.startX = e.clientX;
+                  assistantRowSwipe.startY = e.clientY;
                   assistantRowSwipe.baseTx = getAssistantSlideTx(slideH);
                   closeOtherAssistantRowSwipes(rowH);
                   try {
@@ -7330,7 +7362,22 @@
             'pointerup',
             function (e) {
               if (assistantRowSwipe.active && e.pointerId === assistantRowSwipe.pointerId) {
-                endAssistantRowSwipeGesture(assistantRowSwipe.slide, assistantRowSwipe.pointerId);
+                var slUp = assistantRowSwipe.slide;
+                var pidUp = assistantRowSwipe.pointerId;
+                var dxTap = e.clientX - assistantRowSwipe.startX;
+                var dyTap = e.clientY - assistantRowSwipe.startY;
+                if (slUp && pidUp != null && Math.abs(dxTap) < 14 && Math.abs(dyTap) < 20) {
+                  setAssistantSlideTx(slUp, 0);
+                  try {
+                    slUp.releasePointerCapture(pidUp);
+                  } catch (eRelTap) {}
+                  assistantRowSwipe.active = false;
+                  assistantRowSwipe.pointerId = null;
+                  assistantRowSwipe.slide = null;
+                  assistantDrawerSuppressClickUntil = Date.now() + 320;
+                } else {
+                  endAssistantRowSwipeGesture(slUp, pidUp);
+                }
                 return;
               }
               if (!assistantDrawerItemLP.down || e.pointerId !== assistantDrawerItemLP.pointerId) return;
