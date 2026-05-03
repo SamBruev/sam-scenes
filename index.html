@@ -169,14 +169,14 @@
       flex-direction: column;
       position: relative;
       z-index: 12;
-      will-change: transform, filter;
+      will-change: filter;
     }
 
+    /* Панель «План съёмок» не сдвигает основной контент — только blur и блок кликов */
     body.assistant-drawer-open .wrap {
-      transform: translateX(var(--assistant-drawer-w));
       pointer-events: none;
       user-select: none;
-      transition: transform 0.38s cubic-bezier(0.25, 0.85, 0.32, 1), filter 0.38s cubic-bezier(0.25, 0.85, 0.32, 1);
+      transition: filter 0.38s cubic-bezier(0.25, 0.85, 0.32, 1);
       filter: blur(11px) saturate(118%);
       -webkit-filter: blur(11px) saturate(118%);
     }
