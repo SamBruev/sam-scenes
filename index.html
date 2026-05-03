@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Сценарий видео / Sam Bruev (v144)</title>
+  <title>Сценарий видео / Sam Bruev (v145)</title>
   <!-- До отрисовки тела: восстановить скролл после reload без «прыжка» картинки/фона -->
   <script>
     (function () {
@@ -3772,7 +3772,10 @@
         } catch (e) {}
       }
 
-      var APP_BUILD = 'v144-assistant-drawer-glass-bg';
+      /** Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages). */
+      var APP_VERSION = 'v145';
+      var BUILD_TIME = '2026-05-03 04:43 MSK';
+      var APP_BUILD = APP_VERSION + ' · ' + BUILD_TIME;
       var lastSceneTimeTriggerTouchAt = 0;
       var APP_BUILD_KEY = 'abakan-app-build';
       var STORAGE_KEY = 'abakan-main-abakan-layout-v15';
@@ -4368,7 +4371,10 @@
         if (wireAssistantDrawer._done) return;
         wireAssistantDrawer._done = true;
         var deployTag = document.getElementById('deploy-build-tag');
-        var buildTxt = 'Сборка: ' + APP_BUILD + ' — если эта строка старая, сайт не обновился.';
+        var buildTxt =
+          'Сборка: ' +
+          APP_BUILD +
+          ' — если время/версия не совпадают с последним деплоем, обновите страницу или подождите GitHub Pages.';
         if (deployTag) deployTag.textContent = buildTxt;
         var btnAssistHub = document.getElementById('btn-assistant-plan-open');
         if (btnAssistHub) {
