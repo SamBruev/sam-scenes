@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v191: фиолетовый акцент — details/wrap/чип/жесты в одном тоне с полоской ассистента -->
+<!-- v194: селекты на узком экране — снова стеклянные (убран override appearance:auto); v193 blur только в JS -->
 <html lang="ru" style="--logo-x: 0px; --logo-y: 0px; --logo-scale: 2.00; --top-logo-blur: 0px;">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Sam Scenes (v191)</title>
+  <title>Sam Scenes (v194)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="abakan-restore-critical">
     html {
@@ -905,6 +905,7 @@
       font-size: clamp(14px, 3.8vw, 20px);
       text-transform: uppercase;
       text-align: center;
+      transform: translateY(-8px);
     }
 
     .title-row .title-subject {
@@ -2677,21 +2678,25 @@
       height: 52px;
       margin-top: -26px;
       border-radius: 5px;
-      /* Полоска у края: свет с бока (ярче к внешнему правому краю) */
+      /* Полоска у края: золото + тот же аметист, что у полоски ассистента */
       background: linear-gradient(
         100deg,
-        rgba(55, 44, 20, 0.45) 0%,
-        rgba(212, 175, 55, 0.32) 42%,
-        rgba(255, 236, 190, 0.55) 78%,
+        rgba(42, 34, 56, 0.55) 0%,
+        var(--assistant-hint-violet-mid) 36%,
+        rgba(212, 175, 55, 0.3) 58%,
+        rgba(255, 236, 190, 0.52) 82%,
         rgba(255, 248, 230, 0.68) 100%
       );
       opacity: 0;
       pointer-events: none;
       transform: translateX(10px) scaleY(0.88);
       box-shadow:
-        -4px 0 14px rgba(212, 175, 55, 0.16),
-        inset -2px 0 8px rgba(255, 236, 190, 0.22);
-      filter: drop-shadow(-6px 0 10px rgba(212, 175, 55, 0.16));
+        -4px 0 14px rgba(212, 175, 55, 0.12),
+        -2px 0 18px var(--assistant-hint-violet-soft),
+        inset -2px 0 8px rgba(255, 236, 190, 0.2);
+      filter:
+        drop-shadow(-5px 0 10px rgba(212, 175, 55, 0.12))
+        drop-shadow(-4px 0 14px var(--assistant-hint-violet-soft));
       transition: opacity 0.2s ease, transform 0.24s cubic-bezier(0.22, 1, 0.36, 1), filter 0.24s ease, box-shadow 0.24s ease;
     }
 
@@ -2707,30 +2712,46 @@
 
     @keyframes pullSwipeSideGlow {
       from {
-        filter: drop-shadow(-4px 0 8px rgba(212, 175, 55, 0.14)) drop-shadow(-10px 0 18px rgba(255, 220, 160, 0.06));
+        filter:
+          drop-shadow(-4px 0 8px rgba(212, 175, 55, 0.14))
+          drop-shadow(-5px 0 14px rgba(145, 120, 210, 0.14))
+          drop-shadow(-10px 0 18px rgba(255, 220, 160, 0.06));
         box-shadow:
           -3px 0 12px rgba(212, 175, 55, 0.12),
+          -2px 0 16px var(--assistant-hint-violet-soft),
           inset -1px 0 6px rgba(255, 236, 190, 0.16);
       }
       to {
-        filter: drop-shadow(-7px 0 14px rgba(212, 175, 55, 0.26)) drop-shadow(-14px 0 22px rgba(255, 230, 190, 0.12));
+        filter:
+          drop-shadow(-7px 0 14px rgba(212, 175, 55, 0.26))
+          drop-shadow(-8px 0 20px rgba(145, 120, 210, 0.18))
+          drop-shadow(-14px 0 22px rgba(255, 230, 190, 0.12));
         box-shadow:
           -6px 0 20px rgba(212, 175, 55, 0.22),
+          -4px 0 22px var(--assistant-hint-violet-soft),
           inset -2px 0 11px rgba(255, 248, 220, 0.32);
       }
     }
 
     @keyframes pullSwipeSideGlowReady {
       from {
-        filter: drop-shadow(-5px 0 12px rgba(212, 175, 55, 0.22)) drop-shadow(-12px 0 22px rgba(255, 224, 150, 0.1));
+        filter:
+          drop-shadow(-5px 0 12px rgba(212, 175, 55, 0.22))
+          drop-shadow(-6px 0 16px rgba(145, 120, 210, 0.16))
+          drop-shadow(-12px 0 22px rgba(255, 224, 150, 0.1));
         box-shadow:
           -4px 0 16px rgba(212, 175, 55, 0.18),
+          -3px 0 20px var(--assistant-hint-violet-soft),
           inset -2px 0 9px rgba(255, 240, 215, 0.26);
       }
       to {
-        filter: drop-shadow(-9px 0 18px rgba(212, 175, 55, 0.34)) drop-shadow(-18px 0 28px rgba(255, 236, 200, 0.16));
+        filter:
+          drop-shadow(-9px 0 18px rgba(212, 175, 55, 0.34))
+          drop-shadow(-10px 0 22px rgba(145, 120, 210, 0.22))
+          drop-shadow(-18px 0 28px rgba(255, 236, 200, 0.16));
         box-shadow:
           -8px 0 26px rgba(212, 175, 55, 0.28),
+          -6px 0 26px var(--assistant-hint-violet-soft),
           inset -3px 0 14px rgba(255, 250, 235, 0.38);
       }
     }
@@ -2801,9 +2822,11 @@
     .scroll-axis-hint-arrow {
       font-size: 8px;
       line-height: 1;
-      color: rgba(212, 175, 55, 0.42);
-      text-shadow: 0 0 6px rgba(212, 175, 55, 0.22);
-      opacity: 0.75;
+      color: var(--ui-violet);
+      text-shadow:
+        0 0 8px var(--ui-violet-glow),
+        0 0 5px rgba(212, 175, 55, 0.16);
+      opacity: 0.78;
       letter-spacing: 0;
       user-select: none;
     }
@@ -2816,13 +2839,13 @@
       border-radius: 4px;
       background: linear-gradient(
         180deg,
-        rgba(212, 175, 55, 0.08) 0%,
-        rgba(0, 0, 0, 0.35) 48%,
-        rgba(212, 175, 55, 0.12) 100%
+        rgba(212, 175, 55, 0.07) 0%,
+        var(--assistant-hint-violet-mid) 48%,
+        rgba(212, 175, 55, 0.11) 100%
       );
       box-shadow:
         inset 0 0 6px rgba(0, 0, 0, 0.45),
-        0 0 10px rgba(212, 175, 55, 0.06);
+        0 0 12px var(--assistant-hint-violet-soft);
     }
 
     .scroll-axis-hint-thumb {
@@ -2835,13 +2858,14 @@
       top: 14%;
       background: linear-gradient(
         180deg,
-        rgba(255, 248, 230, 0.72) 0%,
-        rgba(212, 175, 55, 0.45) 48%,
-        rgba(120, 96, 40, 0.55) 100%
+        rgba(232, 224, 255, 0.65) 0%,
+        rgba(212, 175, 55, 0.42) 42%,
+        rgba(95, 72, 130, 0.42) 100%
       );
       box-shadow:
-        0 0 10px rgba(212, 175, 55, 0.35),
-        inset 0 1px 0 rgba(255, 255, 255, 0.35);
+        0 0 12px var(--ui-violet-glow),
+        0 0 8px rgba(212, 175, 55, 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 0.32);
       animation: scroll-axis-thumb-slide 2.55s ease-in-out infinite alternate;
     }
 
@@ -3252,16 +3276,6 @@
         align-content: center;
         justify-items: center;
         row-gap: 4px;
-      }
-
-      /* Нативная анимация только у хаба подготовки — селекты сцен/шотлиста остаются кастомными (золото/чёрный, без зелёного iOS-accent) */
-      .scenario-hub select,
-      .field select.prep-select,
-      .field select.format-select {
-        -webkit-appearance: menulist;
-        appearance: auto;
-        background-image: none;
-        backdrop-filter: none;
       }
     }
 
@@ -4517,7 +4531,7 @@
       }
 
       /** Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages). */
-      var APP_VERSION = 'v191';
+      var APP_VERSION = 'v194';
       var BUILD_TIME = '2026-05-03 05:49 MSK';
       var APP_BUILD = APP_VERSION + ' · ' + BUILD_TIME;
       var lastSceneTimeTriggerTouchAt = 0;
@@ -7337,15 +7351,29 @@
           saveToStorage();
         });
 
+        /** Отложенные blur после change — отменяем при новом тапе по тому же select, иначе поздний blur срывает повторное открытие. */
+        var pendingSelectBlurTimeouts = typeof WeakMap !== 'undefined' ? new WeakMap() : null;
+
+        function clearPendingSelectBlur(sel) {
+          if (!pendingSelectBlurTimeouts || !sel) return;
+          var ids = pendingSelectBlurTimeouts.get(sel);
+          if (!ids || !ids.length) return;
+          ids.forEach(function (id) {
+            clearTimeout(id);
+          });
+          pendingSelectBlurTimeouts.delete(sel);
+        }
+
         document.addEventListener('pointerdown', function (e) {
           var t = e.target;
+          if (t && t.matches && t.matches('select')) clearPendingSelectBlur(t);
           if (!t || !t.matches || !t.matches('select')) return;
           if (t.closest && t.closest('.scene-main') && t.matches('select.scene-select')) return;
           triggerHaptic('light');
         }, true);
 
-        // iOS: после выбора в нативном списке фокус остаётся/возвращается на <select> — повторный тап не открывает sheet,
-        // пока не погаснет :focus. Один rAF слишком рано: sheet ещё закрывается. Несколько blur с задержками.
+        // iOS/touch: после выбора фокус может зависнуть на <select> — без blur второй тап не открывает sheet.
+        // Раньше стояла гроза таймаутов до 520ms — она срабатывала уже на повторном открытии и убивала меню.
         function scheduleSelectBlurAfterNativeChoice(sel) {
           if (!sel || sel.nodeName !== 'SELECT') return;
           if (sel.classList && sel.classList.contains('shotlist-piece-digit')) return;
@@ -7354,6 +7382,28 @@
               if (document.activeElement === sel) sel.blur();
             } catch (err) {}
           }
+
+          var coarse =
+            (navigator.maxTouchPoints || 0) > 0 ||
+            (window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+
+          clearPendingSelectBlur(sel);
+
+          if (!coarse) {
+            requestAnimationFrame(doBlur);
+            return;
+          }
+
+          var ids = [];
+          if (pendingSelectBlurTimeouts) pendingSelectBlurTimeouts.set(sel, ids);
+
+          function arm(delay) {
+            var id = setTimeout(function () {
+              doBlur();
+            }, delay);
+            ids.push(id);
+          }
+
           doBlur();
           requestAnimationFrame(function () {
             doBlur();
@@ -7361,9 +7411,8 @@
               doBlur();
             });
           });
-          [32, 80, 160, 320, 520].forEach(function (ms) {
-            setTimeout(doBlur, ms);
-          });
+          arm(40);
+          arm(120);
         }
         document.addEventListener('change', function (e) {
           var t = e.target;
