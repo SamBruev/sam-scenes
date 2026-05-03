@@ -13,7 +13,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Sam Scenes (v220)</title>
+  <title>Sam Scenes (v221)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -1130,6 +1130,7 @@
       flex: 1;
       min-width: 0;
       text-align: left;
+      pointer-events: none;
     }
 
     .scenario-hub > summary::-webkit-details-marker {
@@ -1333,6 +1334,7 @@
       flex: 1;
       min-width: 0;
       text-align: left;
+      pointer-events: none;
     }
 
     .daily-plan > summary::-webkit-details-marker {
@@ -1688,7 +1690,9 @@
       min-width: 0;
       width: 100%;
       max-width: 100%;
-      pointer-events: none;
+      pointer-events: auto;
+      cursor: pointer;
+      touch-action: manipulation;
       z-index: 1;
     }
 
@@ -2156,6 +2160,7 @@
 
       .ios-wheel-time .scene-time-ios .scene-time-trigger {
         display: flex;
+        pointer-events: auto;
       }
 
       .ios-wheel-time .scene-time-ios input[type="time"] {
@@ -2180,6 +2185,7 @@
     /* Вне @media: на широком экране селекты скрыты классом ios-wheel-time — кнопка времени должна быть видна */
     .ios-wheel-time .scene-time-ios .scene-time-trigger {
       display: flex;
+      pointer-events: auto;
     }
 
     .ios-wheel-time .scene-time-ios input[type="time"] {
@@ -2210,6 +2216,7 @@
       z-index: 20;
       margin-top: -18px;
       padding-top: 0;
+      pointer-events: none;
     }
 
     .line { margin-top: 8px; color: var(--label); }
@@ -4678,8 +4685,8 @@
        * Дублируйте те же поля в build-info.json — подпись внизу подгружает его с cache: no-store,
        * чтобы не залипала старая версия при закэшированном index.html.
        */
-      var APP_VERSION = 'v220';
-      var BUILD_TIME = '2026-05-03 10:17 MSK';
+      var APP_VERSION = 'v221';
+      var BUILD_TIME = '2026-05-03 12:05 MSK';
       var APP_BUILD = APP_VERSION + ' · ' + BUILD_TIME;
       var BUILD_INFO_FILE = 'build-info.json';
       var lastSceneTimeTriggerTouchAt = 0;
@@ -4697,7 +4704,7 @@
       var AUTO_PAGE_RELOAD_MS = 3 * 60 * 1000;
       /** Не перехватывать жесты pull/assist на интерактиве; иначе <summary> в <details> не раскрывается. */
       var PULL_SKIP_INTERACTIVE =
-        'input, textarea, select, button, summary, a, .logo-bg, .logo-controls, [contenteditable="true"]';
+        'input, textarea, select, button, summary, details, a, .logo-bg, .logo-controls, .time-leading, [contenteditable="true"]';
 
       /** Тап по пробелу между блоками даёт Text/node без .closest — жесты не включались. */
       function normalizeGestureTarget(el) {
@@ -8270,7 +8277,7 @@
         updateTopLogoScrollBlur();
       }
 
-      /** Вся полоса заголовка переключает раскрытие; на iOS у нативного summary иногда срабатывает только стрелка. */
+      /** Вся полоса заголовка переключает раскрытие; слушатель на <details>, чтобы тап по тексту в <summary> совпадал с ролью summary (и не терялся stopImmediatePropagation у span). */
       function wireDetailsSummaryRowToggle() {
         if (wireDetailsSummaryRowToggle._done) return;
         wireDetailsSummaryRowToggle._done = true;
@@ -8279,35 +8286,22 @@
           if (!det || det.tagName !== 'DETAILS') return;
           var sum = det.querySelector(':scope > summary');
           if (!sum) return;
-          sum.addEventListener(
+          det.addEventListener(
             'click',
             function (e) {
+              if (!sum.contains(e.target)) return;
+              if (e.target.closest && e.target.closest('a[href], button, input, select, textarea')) return;
               e.preventDefault();
               try {
                 e.stopPropagation();
               } catch (e1) {}
-              try {
-                e.stopImmediatePropagation();
-              } catch (e2) {}
               var nextOpen = !det.open;
-              /* Синхронный toggle + нативное поведение WebKit даёт двойной flip «через раз» — фиксируем после цикла и на кадре отрисовки. */
-              function fix() {
-                det.open = nextOpen;
+              det.open = nextOpen;
+              if (typeof requestAnimationFrame === 'function') {
+                requestAnimationFrame(function () {
+                  det.open = nextOpen;
+                });
               }
-              function fixSoon() {
-                if (typeof queueMicrotask === 'function') {
-                  queueMicrotask(function () {
-                    fix();
-                    if (typeof requestAnimationFrame === 'function') requestAnimationFrame(fix);
-                  });
-                } else {
-                  setTimeout(function () {
-                    fix();
-                    if (typeof requestAnimationFrame === 'function') requestAnimationFrame(fix);
-                  }, 0);
-                }
-              }
-              fixSoon();
             },
             true
           );
@@ -8732,7 +8726,13 @@
         'pointerdown',
         function (e) {
           var btn = e.target && e.target.closest && e.target.closest('.scene-time-trigger');
-          if (!btn) return;
+          var leading =
+            !btn &&
+            e.target &&
+            e.target.closest &&
+            e.target.closest('.scene-time-wrap .time-leading');
+          if (!btn && !leading) return;
+          if (leading && e.target.closest && e.target.closest('.scene-play-btn')) return;
           sceneTimeDialogPointerAnchor.x = e.clientX;
           sceneTimeDialogPointerAnchor.y = e.clientY;
         },
@@ -8742,13 +8742,21 @@
         'touchstart',
         function (e) {
           var btn = e.target && e.target.closest && e.target.closest('.scene-time-trigger');
-          if (!btn || !e.changedTouches || !e.changedTouches.length) return;
+          var leading =
+            !btn &&
+            e.target &&
+            e.target.closest &&
+            e.target.closest('.scene-time-wrap .time-leading');
+          if (!btn && !leading) return;
+          if (leading && e.target.closest && e.target.closest('.scene-play-btn')) return;
+          if (!e.changedTouches || !e.changedTouches.length) return;
           var t = e.changedTouches[0];
           sceneTimeFingerStart = {
             id: t.identifier,
             x: t.clientX,
             y: t.clientY,
-            btn: btn
+            btn: btn || null,
+            leading: leading || null
           };
         },
         { passive: true, capture: true }
@@ -8799,15 +8807,18 @@
           if (!te) return;
           sceneTimeFingerStart = null;
           var btn = e.target && e.target.closest && e.target.closest('.scene-time-trigger');
-          if (!btn || arm.btn !== btn) return;
+          var leadHit = e.target && e.target.closest && e.target.closest('.scene-time-wrap .time-leading');
+          var wrap = null;
+          if (arm.btn && btn && arm.btn === btn) wrap = btn.closest('.scene-time-wrap');
+          else if (arm.leading && leadHit && arm.leading === leadHit)
+            wrap = leadHit.closest('.scene-time-wrap');
+          if (!wrap) return;
           var dx = te.clientX - arm.x;
           var dy = te.clientY - arm.y;
           if (Math.hypot(dx, dy) > SCENE_TIME_TAP_MAX_PX) return;
           lastSceneTimeTriggerTouchAt = Date.now();
           e.preventDefault();
           e.stopPropagation();
-          var wrap = btn.closest('.scene-time-wrap');
-          if (!wrap) return;
           var ax = te.clientX;
           var ay = te.clientY;
           sceneTimeDialogPointerAnchor.x = NaN;
@@ -8821,10 +8832,16 @@
         function (e) {
           if (lastSceneTimeTriggerTouchAt && Date.now() - lastSceneTimeTriggerTouchAt < 700) return;
           var btn = e.target && e.target.closest && e.target.closest('.scene-time-trigger');
-          if (!btn) return;
+          var tl =
+            !btn &&
+            e.target &&
+            e.target.closest &&
+            e.target.closest('.scene-time-wrap .time-leading');
+          if (!btn && !tl) return;
+          if (tl && e.target.closest && e.target.closest('.scene-play-btn')) return;
           e.preventDefault();
           e.stopPropagation();
-          var wrap = btn.closest('.scene-time-wrap');
+          var wrap = btn ? btn.closest('.scene-time-wrap') : tl.closest('.scene-time-wrap');
           if (!wrap) return;
           var a = pickSceneTimeOpenAnchor(e);
           sceneTimeDialogPointerAnchor.x = NaN;
