@@ -28,6 +28,7 @@
       --script-font: "Pacifico", cursive;
       --brand-serif: "Roboto Slab", Georgia, "Times New Roman", serif;
       --shadow-lift: 0 20px 48px rgba(0, 0, 0, 0.55);
+      --portfolio-revision-dock-h: clamp(52px, 14vw, 64px);
     }
 
     *,
@@ -40,6 +41,10 @@
       background: var(--bg);
       min-height: 100%;
       overflow-x: hidden;
+      scroll-padding-bottom: calc(
+        var(--portfolio-revision-dock-h) + 22px +
+          env(safe-area-inset-bottom, 0px)
+      );
     }
 
     body {
@@ -112,7 +117,8 @@
       z-index: 1;
       max-width: 720px;
       margin: 0 auto;
-      padding: calc(1.1rem + env(safe-area-inset-top, 0px)) clamp(1.1rem, 4.2vw, 2rem) calc(3rem + env(safe-area-inset-bottom, 0px));
+      padding: calc(1.1rem + env(safe-area-inset-top, 0px)) clamp(1.1rem, 4.2vw, 2rem)
+        calc(3rem + var(--portfolio-revision-dock-h) + env(safe-area-inset-bottom, 0px));
     }
 
     /* Шапка раздела «Примеры работ»: заголовок и подпись */
@@ -137,23 +143,97 @@
       width: 100%;
     }
 
-    /* Символ студии над контентом (лампа / нота) */
+    /* Символ студии: чёткий PNG спереди, мягкий золотой ореол только сзади (без фильтров по контуру картинки) */
     .brand-symbol {
+      position: relative;
       display: flex;
       justify-content: center;
       align-items: center;
-      margin: 0 auto clamp(0.85rem, 3.2vw, 1.5rem);
-      max-width: min(200px, 52vw);
+      margin: 0 auto clamp(0.75rem, 3vw, 1.35rem);
+      max-width: min(170px, 46vw);
+      isolation: isolate;
+    }
+
+    /* Крупнее, размытее — только подложка; сам логотип не трогаем */
+    .brand-symbol::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 54%;
+      z-index: 0;
+      width: 240%;
+      height: 240%;
+      max-width: min(460px, 110vw);
+      max-height: min(460px, 110vw);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      border-radius: 50%;
+      background: radial-gradient(
+        ellipse 55% 58% at 50% 45%,
+        rgba(252, 230, 165, 0.34) 0%,
+        rgba(212, 175, 55, 0.22) 32%,
+        rgba(212, 175, 55, 0.07) 55%,
+        transparent 72%
+      );
+      filter: blur(26px);
+      -webkit-filter: blur(26px);
+      opacity: 0.9;
+    }
+
+    /* Шире рассеянный «рефлектор» сзади */
+    .brand-symbol::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 54%;
+      z-index: 0;
+      width: 320%;
+      height: 280%;
+      max-width: min(560px, 130vw);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      background: radial-gradient(
+        ellipse 50% 48% at 50% 50%,
+        rgba(212, 175, 55, 0.11) 0%,
+        transparent 68%
+      );
+      filter: blur(38px);
+      -webkit-filter: blur(38px);
+      opacity: 0.75;
     }
 
     .brand-symbol img {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: contain;
+      transform: translateZ(0);
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      /* узкая контактная тень вниз, без золотого ореола по контурам символа */
+      filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.55));
+      -webkit-filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.55));
+    }
+
+    /* Типографический знак под лампой (Logo v003 / descript) */
+    .brand-wordmark {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0 auto clamp(1rem, 3.5vw, 1.95rem);
+      max-width: min(300px, 90vw);
+    }
+
+    .brand-wordmark img {
       width: 100%;
       height: auto;
       display: block;
       object-fit: contain;
       filter:
-        drop-shadow(0 0 36px rgba(212, 175, 55, 0.28))
-        drop-shadow(0 12px 40px rgba(0, 0, 0, 0.82));
+        drop-shadow(0 0 26px rgba(212, 175, 55, 0.2))
+        drop-shadow(0 8px 32px rgba(0, 0, 0, 0.8));
     }
 
     header h1 {
@@ -232,6 +312,40 @@
       border-radius: 999px;
       background: rgba(0, 0, 0, 0.72);
       box-shadow: 0 1px 0 rgba(212, 175, 55, 0.08);
+    }
+
+    /* Анимация только у метки «Жанр» — заметное «что‑то происходит», без трогания остальных тегов */
+    .tag--genre-live {
+      display: inline-block;
+      will-change: box-shadow, color;
+      animation: tag-genre-live 2.35s ease-in-out infinite;
+    }
+
+    @keyframes tag-genre-live {
+      0%,
+      100% {
+        color: rgba(212, 175, 55, 0.56);
+        box-shadow:
+          0 1px 0 rgba(212, 175, 55, 0.08),
+          0 0 10px rgba(212, 175, 55, 0.05);
+      }
+
+      50% {
+        color: rgba(252, 235, 190, 0.98);
+        box-shadow:
+          0 1px 2px rgba(0, 0, 0, 0.35),
+          0 1px 0 rgba(248, 220, 150, 0.12),
+          0 0 28px rgba(212, 175, 55, 0.32),
+          inset 0 1px 0 rgba(252, 240, 200, 0.07);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tag--genre-live {
+        animation: none;
+        box-shadow: 0 1px 0 rgba(212, 175, 55, 0.08);
+        color: var(--gold-dim);
+      }
     }
 
     .card h2,
@@ -556,21 +670,21 @@
       left: calc(18px + (100% - 36px) * var(--pp, 0));
       top: 50%;
       transform: translate(-50%, -50%);
-      width: 44px;
-      height: 44px;
-      padding: 4px;
+      width: 34px;
+      height: 34px;
+      padding: 3px;
       box-sizing: border-box;
       margin: 0;
       border: none;
       background: transparent;
       cursor: grab;
       z-index: 2;
-      border-radius: 10px;
+      border-radius: 8px;
       display: grid;
       place-items: center;
       filter:
-        drop-shadow(0 2px 3px rgba(0, 0, 0, 0.8))
-        drop-shadow(0 0 14px rgba(212, 175, 55, 0.22));
+        drop-shadow(0 2px 2px rgba(0, 0, 0, 0.75))
+        drop-shadow(0 0 11px rgba(212, 175, 55, 0.2));
       touch-action: none;
       -webkit-tap-highlight-color: transparent;
     }
@@ -844,6 +958,23 @@
 
     .card--genre-anchor {
       scroll-margin-top: clamp(4.25rem, 12vw, 6.25rem);
+    }
+
+    /* Одна дорожка внутри жанра — кнопки «барабаны / вокал / гитары» подменяют блок на месте (без прокрутки) */
+    .genre-stem-deck > .card--stem-audio[data-stem] {
+      display: none;
+    }
+
+    .portfolio-genre[data-active-stem="drums"]
+      .genre-stem-deck
+      > .card--stem-audio[data-stem="drums"],
+    .portfolio-genre[data-active-stem="vocals"]
+      .genre-stem-deck
+      > .card--stem-audio[data-stem="vocals"],
+    .portfolio-genre[data-active-stem="guitars"]
+      .genre-stem-deck
+      > .card--stem-audio[data-stem="guitars"] {
+      display: block;
     }
 
     .stem-switch {
@@ -1284,21 +1415,38 @@
       color: rgba(235, 227, 214, 0.48);
     }
 
+    /* Плашка приложение · версия · метка времени — закреплена к низу экрана, видна при любом скролле */
     .site-footer__revision {
-      margin: 1rem auto 0;
-      display: inline-flex;
+      position: fixed;
+      left: 50%;
+      bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+      transform: translateX(-50%);
+      z-index: 9040;
+      margin: 0;
+      width: calc(100% - clamp(1.35rem, 5vw, 2.6rem));
+      max-width: min(688px, 100vw - 2rem);
+      display: flex;
       flex-wrap: wrap;
       align-items: center;
       justify-content: center;
       gap: 0.28rem 0.45rem;
-      padding: 0.45rem 0.7rem 0.48rem;
-      max-width: 100%;
+      padding: 0.38rem 0.65rem 0.42rem;
       border-radius: 11px;
       border: none;
-      background: linear-gradient(165deg, #050505, #000000);
+      background: rgba(6, 6, 6, 0.82);
+      backdrop-filter: blur(16px) saturate(118%);
+      -webkit-backdrop-filter: blur(16px) saturate(118%);
       box-shadow:
-        inset 0 1px 0 rgba(212, 175, 55, 0.05),
-        0 8px 24px rgba(0, 0, 0, 0.5);
+        inset 0 1px 0 rgba(212, 175, 55, 0.06),
+        0 4px 24px rgba(0, 0, 0, 0.58),
+        0 0 0 1px rgba(0, 0, 0, 0.45);
+      pointer-events: auto;
+    }
+
+    @supports not (backdrop-filter: blur(1px)) {
+      .site-footer__revision {
+        background: linear-gradient(165deg, #080808 0%, #000000 100%);
+      }
     }
 
     .site-footer__revision-line {
@@ -1356,6 +1504,10 @@
       <img src="portfolio-logo-symbol.png" alt="Sam Bruev Mix &amp; Recording — символ студии" width="833" height="1016" decoding="async" fetchpriority="high">
     </div>
 
+    <div class="brand-wordmark">
+      <img src="portfolio-logo-descript.png" alt="Sam Bruev — Mix &amp; Recording, музыкальный продакшн" width="3000" height="2178" decoding="async" fetchpriority="high">
+    </div>
+
     <article class="card card--greeting">
       <div class="tag-row">
         <span class="tag">Видео</span>
@@ -1386,19 +1538,20 @@
     <header class="brand-mark">
       <div>
         <h1>Примеры работ</h1>
-        <p class="subtitle">Жанровые блоки металл, рок, поп и панк: режим «Темы» — два плеера; под ними ползунок <strong>плавной смеси</strong> демо&nbsp;→&nbsp;мастер при одном времени воспроизведения или кнопка авто-перетекания. Клавиши <strong>Демо / Мастер</strong> режут до одной дорожки без смеси. Наверху жанра — переключение режима секции и прыжки к барабанам · вокал · гитарам.</p>
+        <p class="subtitle">Жанровые блоки — <strong>тяжёлый металл</strong>, <strong>рок-музыка</strong>, <strong>поп-звук</strong> и <strong>панк-рок</strong>. Режим «Темы» — два плеера; под ними ползунок <strong>плавной смеси</strong> демо&nbsp;→&nbsp;мастер при одном времени воспроизведения или кнопка авто-перетекания. Клавиши <strong>Демо / Мастер</strong> режут до одной дорожки без смеси. В каждом жанре <strong>барабаны · вокал · гитары</strong> меняют одну активную дорожку <strong>на месте</strong>, без переезда страницы; дальше можно спокойно листать к следующим разделам.</p>
       </div>
     </header>
 
     <article class="card card--about">
       <div class="tag-row">
         <span class="tag">Обо мне</span>
-        <span class="tag">Образование · опыт</span>
+        <span class="tag">Образование</span>
+        <span class="tag">Опыт</span>
       </div>
       <h2>Семён Бруев</h2>
       <p class="meta">Звук, сведение и продакшн — одна линия, по которой иду с подросткового возраста.</p>
       <div class="about-body">
-        <p>Меня зовут <strong>Семён Бруев</strong>. Высшее образование по музыкальной режиссуре получил в Москве, в <strong>ИСИ</strong>, в <strong>2018 году</strong>. Образование имеет значение, когда были сильные педагоги — у меня таких три: <strong>Софья Николаевна Кругликова</strong>, <strong>Мария Александровна Соболева</strong>, <strong>Андрей Александрович Левин</strong>.</p>
+        <p>Меня зовут <strong>Семён Бруев</strong>. <strong>Родился в 1989 году.</strong> Высшее образование по музыкальной режиссуре получил в Москве, в <strong>ИСИ</strong>, в <strong>2018 году</strong>. Образование имеет значение, когда были сильные педагоги — у меня таких три: <strong>Софья Николаевна Кругликова</strong>, <strong>Мария Александровна Соболева</strong>, <strong>Андрей Александрович Левин</strong>.</p>
         <p>С <strong>14 лет</strong> занимаюсь музыкой: это главное профессиональное дело в моей жизни — люблю работу, музыку и людей.</p>
         <p>После института учился в онлайн-программе <strong>Berklee College of Music</strong>, проходил практику в <strong>Европе</strong>. Работал на студиях звукозаписи, в том числе на <strong>Мосфильме</strong>, в <strong>Vintage Record</strong>, <strong>Cinelab</strong>, в студии <strong>Игоря Матвиенко</strong> и на других площадках.</p>
         <p>В каждой работе подробно расписываю, что конкретно делал — при выборе специалиста это действительно важно.</p>
@@ -1444,10 +1597,10 @@
       <p class="collab-warm">Здорово, что вы здесь, в этом небольшом приложении: в мои услуги входят помощь с аранжировкой, продюсирование и продакшн каждого инструмента — задачи до сведения мы можем проработать заранее.</p>
     </article>
 
-    <section class="portfolio-genre portfolio-genre--metal" data-genre="metal" aria-labelledby="genre-metal">
+    <section class="portfolio-genre portfolio-genre--metal" data-genre="metal" data-active-stem="drums" aria-labelledby="genre-metal">
       <header class="portfolio-genre-banner">
-        <span class="tag">Жанр</span>
-        <h2 class="portfolio-genre-title" id="genre-metal">Металл</h2>
+        <span class="tag tag--genre-live">Жанр</span>
+        <h2 class="portfolio-genre-title" id="genre-metal">Тяжёлый металл</h2>
       </header>
 
       <div class="genre-playback-bar">
@@ -1459,7 +1612,7 @@
           </div>
         </div>
         <div class="genre-playback-bar__row genre-playback-bar__tracks">
-          <div class="stem-switch stem-switch--genre stem-switch--tracks" role="group" aria-label="Переход к инструменту">
+          <div class="stem-switch stem-switch--genre stem-switch--tracks" role="group" aria-label="Какая дорожка: барабаны, вокал или гитары">
             <button type="button" class="stem-switch__btn stem-switch__btn--track" data-genre-scroll="drums">Барабаны</button>
             <button type="button" class="stem-switch__btn stem-switch__btn--track" data-genre-scroll="vocals">Вокал</button>
             <button type="button" class="stem-switch__btn stem-switch__btn--track" data-genre-scroll="guitars">Гитары</button>
@@ -1468,7 +1621,8 @@
       </div>
 
 
-      <article id="metal-drums" class="card card--stem-audio card--genre-anchor" data-compare-view="both">
+      <div class="genre-stem-deck">
+      <article id="metal-drums" class="card card--stem-audio card--genre-anchor" data-compare-view="both" data-stem="drums">
         <h3>Барабаны</h3>
         <p class="meta">Черновая лента и финал после компрессии и эквалайзера под плотный микс.</p>
         <div class="compare-pair">
@@ -1487,7 +1641,7 @@
         </div>
       </article>
 
-      <article id="metal-vocals" class="card card--stem-audio card--genre-anchor" data-compare-view="both">
+      <article id="metal-vocals" class="card card--stem-audio card--genre-anchor" data-compare-view="both" data-stem="vocals">
         <h3>Вокал</h3>
         <p class="meta">Сырой крик / чистый вокал: шумы, объём и агрессия в финале.</p>
         <div class="compare-pair">
@@ -1506,7 +1660,7 @@
         </div>
       </article>
 
-      <article id="metal-guitars" class="card card--stem-audio card--genre-anchor" data-compare-view="both">
+      <article id="metal-guitars" class="card card--stem-audio card--genre-anchor" data-compare-view="both" data-stem="guitars">
         <h3>Гитары</h3>
         <p class="meta">Удвоенные партии и пан: плотность, срезы и средние без каши.</p>
         <div class="compare-pair">
@@ -1524,12 +1678,13 @@
           </div>
         </div>
       </article>
+      </div>
     </section>
 
-    <section class="portfolio-genre portfolio-genre--rock" data-genre="rock" aria-labelledby="genre-rock">
+    <section class="portfolio-genre portfolio-genre--rock" data-genre="rock" data-active-stem="drums" aria-labelledby="genre-rock">
       <header class="portfolio-genre-banner">
-        <span class="tag">Жанр</span>
-        <h2 class="portfolio-genre-title" id="genre-rock">Рок</h2>
+        <span class="tag tag--genre-live">Жанр</span>
+        <h2 class="portfolio-genre-title" id="genre-rock">Рок-музыка</h2>
       </header>
 
       <div class="genre-playback-bar">
@@ -1541,7 +1696,7 @@
           </div>
         </div>
         <div class="genre-playback-bar__row genre-playback-bar__tracks">
-          <div class="stem-switch stem-switch--genre stem-switch--tracks" role="group" aria-label="Переход к инструменту">
+          <div class="stem-switch stem-switch--genre stem-switch--tracks" role="group" aria-label="Какая дорожка: барабаны, вокал или гитары">
             <button type="button" class="stem-switch__btn stem-switch__btn--track" data-genre-scroll="drums">Барабаны</button>
             <button type="button" class="stem-switch__btn stem-switch__btn--track" data-genre-scroll="vocals">Вокал</button>
             <button type="button" class="stem-switch__btn stem-switch__btn--track" data-genre-scroll="guitars">Гитары</button>
@@ -1550,7 +1705,8 @@
       </div>
 
 
-      <article id="rock-drums" class="card card--stem-audio card--genre-anchor" data-compare-view="both">
+      <div class="genre-stem-deck">
+      <article id="rock-drums" class="card card--stem-audio card--genre-anchor" data-compare-view="both" data-stem="drums">
         <h3>Барабаны</h3>
         <p class="meta">Живость и кач: баланс панорамы и ограничения по дайнамике под рок.</p>
         <div class="compare-pair">
@@ -1569,7 +1725,7 @@
         </div>
       </article>
 
-      <article id="rock-vocals" class="card card--stem-audio card--genre-anchor" data-compare-view="both">
+      <article id="rock-vocals" class="card card--stem-audio card--genre-anchor" data-compare-view="both" data-stem="vocals">
         <h3>Вокал</h3>
         <p class="meta">Телесность и текст: выравнивание дикции и место в миксе.</p>
         <div class="compare-pair">
@@ -1588,7 +1744,7 @@
         </div>
       </article>
 
-      <article id="rock-guitars" class="card card--stem-audio card--genre-anchor" data-compare-view="both">
+      <article id="rock-guitars" class="card card--stem-audio card--genre-anchor" data-compare-view="both" data-stem="guitars">
         <h3>Гитары</h3>
         <p class="meta">Ритм и соло-слои: ширина сцены без потери середины.</p>
         <div class="compare-pair">
@@ -1606,12 +1762,13 @@
           </div>
         </div>
       </article>
+      </div>
     </section>
 
-    <section class="portfolio-genre portfolio-genre--pop" data-genre="pop" aria-labelledby="genre-pop">
+    <section class="portfolio-genre portfolio-genre--pop" data-genre="pop" data-active-stem="drums" aria-labelledby="genre-pop">
       <header class="portfolio-genre-banner">
-        <span class="tag">Жанр</span>
-        <h2 class="portfolio-genre-title" id="genre-pop">Поп</h2>
+        <span class="tag tag--genre-live">Жанр</span>
+        <h2 class="portfolio-genre-title" id="genre-pop">Поп-звук</h2>
       </header>
 
       <div class="genre-playback-bar">
@@ -1623,7 +1780,7 @@
           </div>
         </div>
         <div class="genre-playback-bar__row genre-playback-bar__tracks">
-          <div class="stem-switch stem-switch--genre stem-switch--tracks" role="group" aria-label="Переход к инструменту">
+          <div class="stem-switch stem-switch--genre stem-switch--tracks" role="group" aria-label="Какая дорожка: барабаны, вокал или гитары">
             <button type="button" class="stem-switch__btn stem-switch__btn--track" data-genre-scroll="drums">Барабаны</button>
             <button type="button" class="stem-switch__btn stem-switch__btn--track" data-genre-scroll="vocals">Вокал</button>
             <button type="button" class="stem-switch__btn stem-switch__btn--track" data-genre-scroll="guitars">Гитары</button>
@@ -1632,7 +1789,8 @@
       </div>
 
 
-      <article id="pop-drums" class="card card--stem-audio card--genre-anchor" data-compare-view="both">
+      <div class="genre-stem-deck">
+      <article id="pop-drums" class="card card--stem-audio card--genre-anchor" data-compare-view="both" data-stem="drums">
         <h3>Барабаны</h3>
         <p class="meta">Строгая посадка в сетке, «воздух» и упругость удара.</p>
         <div class="compare-pair">
@@ -1651,7 +1809,7 @@
         </div>
       </article>
 
-      <article id="pop-vocals" class="card card--stem-audio card--genre-anchor" data-compare-view="both">
+      <article id="pop-vocals" class="card card--stem-audio card--genre-anchor" data-compare-view="both" data-stem="vocals">
         <h3>Вокал</h3>
         <p class="meta">Шейпы, даблы и аккуратное «переднее» звучание поп-группы.</p>
         <div class="compare-pair">
@@ -1670,7 +1828,7 @@
         </div>
       </article>
 
-      <article id="pop-guitars" class="card card--stem-audio card--genre-anchor" data-compare-view="both">
+      <article id="pop-guitars" class="card card--stem-audio card--genre-anchor" data-compare-view="both" data-stem="guitars">
         <h3>Гитары</h3>
         <p class="meta">Структурные падики и филь: ясность партий на радиофоне.</p>
         <div class="compare-pair">
@@ -1688,12 +1846,13 @@
           </div>
         </div>
       </article>
+      </div>
     </section>
 
-    <section class="portfolio-genre portfolio-genre--punk" data-genre="punk" aria-labelledby="genre-punk">
+    <section class="portfolio-genre portfolio-genre--punk" data-genre="punk" data-active-stem="drums" aria-labelledby="genre-punk">
       <header class="portfolio-genre-banner">
-        <span class="tag">Жанр</span>
-        <h2 class="portfolio-genre-title" id="genre-punk">Панк</h2>
+        <span class="tag tag--genre-live">Жанр</span>
+        <h2 class="portfolio-genre-title" id="genre-punk">Панк-рок</h2>
       </header>
 
       <div class="genre-playback-bar">
@@ -1705,7 +1864,7 @@
           </div>
         </div>
         <div class="genre-playback-bar__row genre-playback-bar__tracks">
-          <div class="stem-switch stem-switch--genre stem-switch--tracks" role="group" aria-label="Переход к инструменту">
+          <div class="stem-switch stem-switch--genre stem-switch--tracks" role="group" aria-label="Какая дорожка: барабаны, вокал или гитары">
             <button type="button" class="stem-switch__btn stem-switch__btn--track" data-genre-scroll="drums">Барабаны</button>
             <button type="button" class="stem-switch__btn stem-switch__btn--track" data-genre-scroll="vocals">Вокал</button>
             <button type="button" class="stem-switch__btn stem-switch__btn--track" data-genre-scroll="guitars">Гитары</button>
@@ -1714,7 +1873,8 @@
       </div>
 
 
-      <article id="punk-drums" class="card card--stem-audio card--genre-anchor" data-compare-view="both">
+      <div class="genre-stem-deck">
+      <article id="punk-drums" class="card card--stem-audio card--genre-anchor" data-compare-view="both" data-stem="drums">
         <h3>Барабаны</h3>
         <p class="meta">Ломаный темп и сырая энергия: быстро довести до читаемой «стены» звука.</p>
         <div class="compare-pair">
@@ -1733,7 +1893,7 @@
         </div>
       </article>
 
-      <article id="punk-vocals" class="card card--stem-audio card--genre-anchor" data-compare-view="both">
+      <article id="punk-vocals" class="card card--stem-audio card--genre-anchor" data-compare-view="both" data-stem="vocals">
         <h3>Вокал</h3>
         <p class="meta">Приближенный захват: шипение, дыхание и драйв без лишней грязи.</p>
         <div class="compare-pair">
@@ -1752,7 +1912,7 @@
         </div>
       </article>
 
-      <article id="punk-guitars" class="card card--stem-audio card--genre-anchor" data-compare-view="both">
+      <article id="punk-guitars" class="card card--stem-audio card--genre-anchor" data-compare-view="both" data-stem="guitars">
         <h3>Гитары</h3>
         <p class="meta">Царапающие риффы на одну ширину: грязно, но пробивает микс.</p>
         <div class="compare-pair">
@@ -1770,6 +1930,7 @@
           </div>
         </div>
       </article>
+      </div>
 
       <p class="note">Сейчас в плеерах заглушки (.m4a). Подложите дорожки в <code>portfolio-audio/</code> под именами <code>[metal|rock|pop|punk]-[drums|vocals|guitars]-[demo|master].m4a</code> или поменяйте пути.</p>
     </section>
@@ -1822,9 +1983,9 @@
       <span class="site-footer__mix">Mix &amp; Recording</span>
       <span class="site-footer__production">Music production</span>
       <div class="site-footer__revision" role="note">
-        <span class="site-footer__revision-line">приложение <strong>portfolio-showcase</strong>&nbsp;<span class="site-footer__rev-ver" title="Перед деплоем измените версию здесь в HTML">v2.3.2</span></span>
+        <span class="site-footer__revision-line">приложение <strong>portfolio-showcase</strong>&nbsp;<span class="site-footer__rev-ver" title="Перед деплоем измените версию здесь в HTML">v1.3.0</span></span>
         <span class="site-footer__revision-div" aria-hidden="true">/</span>
-        <span class="site-footer__revision-line">метка времени документа <time id="portfolio-html-stamp"></time></span>
+        <span class="site-footer__revision-line">метка времени документа <time id="portfolio-html-stamp" title="По возможности браузера: время последнего изменения этого HTML (Last-Modified), в вашей локальной зоне"></time></span>
       </div>
     </footer>
   </div>
@@ -1857,6 +2018,76 @@
         var m = Math.floor(sec / 60);
         var s = Math.floor(sec % 60);
         return m + ":" + (s < 10 ? "0" : "") + s;
+      }
+
+      var GENRE_STEMS = ["drums", "vocals", "guitars"];
+
+      function pauseGenreStemAudio(section) {
+        if (!section) return;
+        section.querySelectorAll(".genre-stem-deck audio").forEach(function (a) {
+          try {
+            a.pause();
+          } catch (ePause) {}
+        });
+      }
+
+      function syncGenreStem(section, stem) {
+        if (!section || GENRE_STEMS.indexOf(stem) < 0) return;
+        section.setAttribute("data-active-stem", stem);
+        section
+          .querySelectorAll(".stem-switch__btn--track[data-genre-scroll]")
+          .forEach(function (btn) {
+            var on = btn.getAttribute("data-genre-scroll") === stem;
+            btn.classList.toggle("is-active", on);
+            btn.setAttribute("aria-pressed", on ? "true" : "false");
+          });
+      }
+
+      function activateGenreStem(section, stem, skipPauseSame) {
+        if (!section || GENRE_STEMS.indexOf(stem) < 0) return;
+        var prev =
+          section.getAttribute("data-active-stem") || "drums";
+        if (!(skipPauseSame && prev === stem)) {
+          pauseGenreStemAudio(section);
+        }
+        syncGenreStem(section, stem);
+      }
+
+      function applyLocationHashStem() {
+        var h = (location.hash || "").replace(/^#/, "");
+        var m =
+          /^(metal|rock|pop|punk)-(drums|vocals|guitars)$/.exec(h);
+        if (!m) return;
+        var sec = document.querySelector(
+          '.portfolio-genre[data-genre="' + m[1] + '"]'
+        );
+        if (!sec) return;
+        activateGenreStem(sec, m[2], false);
+        var tgt = document.getElementById(m[1] + "-" + m[2]);
+        if (tgt && tgt.scrollIntoView) {
+          var reduceMotion = false;
+          try {
+            reduceMotion = window.matchMedia(
+              "(prefers-reduced-motion: reduce)"
+            ).matches;
+          } catch (eRm) {}
+          tgt.scrollIntoView({
+            behavior: reduceMotion ? "auto" : "smooth",
+            block: "nearest"
+          });
+        }
+      }
+
+      function initGenreStemDeck() {
+        document.querySelectorAll(".portfolio-genre[data-genre]").forEach(
+          function (section) {
+            var cur =
+              section.getAttribute("data-active-stem") || "drums";
+            activateGenreStem(section, cur, true);
+          }
+        );
+        window.addEventListener("hashchange", applyLocationHashStem);
+        window.requestAnimationFrame(applyLocationHashStem);
       }
 
       function wirePortfolioPlayer(box) {
@@ -2246,21 +2477,10 @@
         var jp = evt.target.closest("[data-genre-scroll]");
         if (jp && jp.closest(".genre-playback-bar")) {
           evt.preventDefault();
-          var sx = jp.closest(".portfolio-genre");
-          var gid = sx ? sx.getAttribute("data-genre") : "";
+          var section = jp.closest(".portfolio-genre");
           var inst = jp.getAttribute("data-genre-scroll");
-          if (!gid || !inst) return;
-          var tgt = document.getElementById(gid + "-" + inst);
-          if (!tgt || !tgt.scrollIntoView) return;
-          var reduceMotion = false;
-          try {
-            reduceMotion =
-              window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-          } catch (errRed) {}
-          tgt.scrollIntoView({
-            behavior: reduceMotion ? "auto" : "smooth",
-            block: "start"
-          });
+          if (!section || GENRE_STEMS.indexOf(inst) < 0) return;
+          activateGenreStem(section, inst, false);
           return;
         }
 
@@ -2300,6 +2520,7 @@
       function bootstrapPortfolioMedia() {
         initPortfolioPlayers();
         initStemFusionPairs();
+        initGenreStemDeck();
       }
 
       if (document.readyState === "loading") {
@@ -2343,21 +2564,44 @@
     (function () {
       var el = document.getElementById("portfolio-html-stamp");
       if (!el) return;
-      var ms = Date.parse(document.lastModified);
-      if (!isFinite(ms)) {
+
+      /** Время document.lastModified: без Date.parse (на части браузеров даёт часовой сдвиг). */
+      var d = new Date(document.lastModified);
+      if (!isFinite(d.getTime())) {
         el.textContent = "нет метки времени";
         return;
       }
-      var d = new Date(ms);
-      el.setAttribute("datetime", d.toISOString());
-      el.textContent = d.toLocaleString("ru-RU", {
-        day: "numeric",
-        month: "numeric",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit"
-      });
+
+      var tz =
+        Intl.DateTimeFormat(undefined, {}).resolvedOptions().timeZone;
+
+      try {
+        el.setAttribute("datetime", d.toISOString());
+      } catch (eIso) {}
+
+      try {
+        el.textContent = new Intl.DateTimeFormat("ru-RU", {
+          timeZone: tz,
+          day: "numeric",
+          month: "numeric",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false,
+          hourCycle: "h23"
+        }).format(d);
+      } catch (eFmt) {
+        el.textContent = d.toLocaleString("ru-RU", {
+          day: "numeric",
+          month: "numeric",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false
+        });
+      }
     })();
   </script>
 </body>
