@@ -1,16 +1,19 @@
 <!DOCTYPE html>
-<!-- v202: свайп вправо в списке ассистента (касание с правой части панели) — удаление сценария -->
+<!-- v214: удаление по намеренному тапу (не при скролле); шотлист/примечания; build-info -->
 <html lang="ru" style="--logo-x: 0px; --logo-y: 0px; --logo-scale: 2.00; --top-logo-blur: 0px;">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Sam Scenes">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Sam Scenes (v202)</title>
+  <title>Sam Scenes (v214)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="abakan-restore-critical">
     html {
@@ -150,6 +153,8 @@
       --ui-violet: var(--assistant-hint-violet);
       --ui-violet-glow: var(--assistant-hint-violet-glow);
       --ui-violet-soft: var(--assistant-hint-violet-soft);
+      /* Единый акцент форм (checkbox, range, пр.) — иначе Safari/iOS подставляет свой зелёный */
+      accent-color: var(--gold);
     }
 
     /* Фон: body::before fixed — одинаково на iPhone при скролле; слой лампы — data URI + градиенты (см. также top-lamp-bg у логотипа). */
@@ -159,6 +164,8 @@
       overflow-x: hidden;
       overscroll-behavior-x: none;
       overflow-anchor: none;
+      color-scheme: dark;
+      accent-color: var(--gold);
     }
 
     body {
@@ -174,6 +181,37 @@
       -webkit-overflow-scrolling: touch;
       overflow-x: hidden;
       overscroll-behavior-x: none;
+      accent-color: var(--gold);
+    }
+
+    input,
+    select,
+    textarea,
+    button,
+    progress {
+      accent-color: var(--gold);
+    }
+
+    input,
+    textarea {
+      caret-color: rgba(242, 215, 140, 0.92);
+    }
+
+    ::selection {
+      background: rgba(212, 175, 55, 0.42);
+      color: var(--cream);
+    }
+
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    textarea:-webkit-autofill,
+    select:-webkit-autofill {
+      -webkit-text-fill-color: var(--text) !important;
+      caret-color: rgba(242, 215, 140, 0.92);
+      box-shadow: 0 0 0 1000px #0c0b09 inset !important;
+      -webkit-box-shadow: 0 0 0 1000px #0c0b09 inset !important;
+      transition: background-color 99999s ease-out 0s;
     }
 
     body::before {
@@ -245,50 +283,6 @@
       will-change: filter;
     }
 
-    /* Левый край основного блока: узкая жёлтая «канавка» + мини-стрелка (не ловит тапы) */
-    .wrap::before {
-      content: '';
-      position: absolute;
-      left: max(11px, calc(env(safe-area-inset-left, 0px) + 3px));
-      top: 20%;
-      bottom: 20%;
-      width: 2px;
-      border-radius: 2px;
-      z-index: 13;
-      pointer-events: none;
-      background: linear-gradient(
-        180deg,
-        rgba(255, 238, 180, 0) 0%,
-        rgba(255, 226, 96, 0.82) 22%,
-        rgba(255, 214, 52, 0.98) 50%,
-        rgba(255, 226, 96, 0.82) 78%,
-        rgba(255, 238, 180, 0) 100%
-      );
-      box-shadow:
-        0 0 12px rgba(255, 210, 60, 0.28),
-        0 0 4px rgba(255, 228, 140, 0.45),
-        0 0 22px var(--assistant-hint-violet-soft);
-    }
-
-    .wrap::after {
-      content: '\203A';
-      position: absolute;
-      left: max(6px, calc(env(safe-area-inset-left, 0px) - 1px));
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 13;
-      pointer-events: none;
-      font-size: 11px;
-      font-weight: 800;
-      line-height: 1;
-      letter-spacing: -0.06em;
-      color: var(--ui-violet);
-      text-shadow:
-        0 0 10px var(--ui-violet-glow),
-        0 0 6px rgba(212, 175, 55, 0.38);
-      opacity: 0.95;
-    }
-
     /* Пока открыт ассистент — без подстраховки iOS всё ещё тянет страницу под blur; доп. блокировка в JS */
     html.assistant-drawer-open {
       overflow: hidden;
@@ -318,8 +312,9 @@
       left: var(--assistant-drawer-w);
       right: 0;
       z-index: 2147483638;
-      background: transparent;
-      touch-action: manipulation;
+      /* WebKit: полностью прозрачный слой иногда не получает touch target; горизонтальный свайп — в JS */
+      background: rgba(0, 0, 0, 0.04);
+      touch-action: none;
       -webkit-tap-highlight-color: transparent;
       cursor: pointer;
     }
@@ -420,16 +415,6 @@
       transition: opacity 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
     }
 
-    @keyframes assistant-strip-chevron-nudge {
-      0%,
-      100% {
-        transform: translate(-50%, -50%) translate3d(0, 0, 0);
-      }
-      50% {
-        transform: translate(-50%, -50%) translate3d(6px, 0, 0);
-      }
-    }
-
     .assistant-open-strip::before {
       content: '\203A';
       position: absolute;
@@ -445,8 +430,6 @@
       text-shadow:
         0 0 10px var(--assistant-hint-violet-glow),
         0 0 6px rgba(190, 170, 255, 0.45);
-      /* Подсказка: от края свайпните вправо — панель выезжает слева */
-      animation: assistant-strip-chevron-nudge 2.1s ease-in-out infinite;
     }
 
     .assistant-open-strip:active {
@@ -465,7 +448,6 @@
     }
 
     .assistant-open-strip:active::before {
-      animation: none;
       color: rgb(235, 228, 255);
       text-shadow:
         0 0 12px var(--assistant-hint-violet-glow),
@@ -475,12 +457,6 @@
     body.assistant-drawer-open .assistant-open-strip {
       opacity: 0;
       pointer-events: none;
-    }
-
-    @media (hover: hover) and (pointer: fine) {
-      .assistant-open-strip::before {
-        animation: none;
-      }
     }
 
     .assistant-drawer-host {
@@ -528,8 +504,8 @@
     }
 
     /*
-      Закрыть: та же узкая вертикальная полоска, что .assistant-open-strip (› слева),
-      зеркально у правого края панели — ‹, те же размеры и шрифт стрелки.
+      Закрыть: узкая полоска у правого края панели — как бывший scroll-axis: ▲ дорожка ▼,
+      бегунок = позиция прокрутки .assistant-drawer-scroll (см. updateAssistantDrawerScrollThumb).
     */
     .assistant-drawer-dismiss-chevron {
       position: absolute;
@@ -537,17 +513,22 @@
       top: 50%;
       transform: translateY(-50%);
       z-index: 6;
-      width: 8px;
-      min-width: 7px;
+      width: 11px;
+      min-width: 10px;
       height: min(168px, 46vh);
       min-height: 72px;
       margin: 0;
-      padding: 0;
+      padding: 5px 0;
       border: none;
       border-radius: 9px 0 0 9px;
       cursor: pointer;
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
       background: linear-gradient(
         90deg,
         rgba(212, 175, 55, 0.26) 0%,
@@ -563,21 +544,77 @@
       transition: opacity 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .assistant-drawer-dismiss-chevron::before {
-      content: '\2039';
-      position: absolute;
-      left: 46%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 15px;
-      font-weight: 500;
-      line-height: 1;
-      color: rgb(214, 202, 255);
+    .assistant-drawer-axis {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      flex: 1 1 auto;
+      width: 100%;
+      min-height: 0;
+      gap: 2px;
       pointer-events: none;
-      letter-spacing: -0.08em;
+    }
+
+    .assistant-drawer-axis-arrow {
+      font-size: 6.5px;
+      line-height: 1;
+      color: var(--ui-violet);
       text-shadow:
-        0 0 10px var(--assistant-hint-violet-glow),
-        0 0 6px rgba(190, 170, 255, 0.45);
+        0 0 8px var(--ui-violet-glow),
+        0 0 4px rgba(212, 175, 55, 0.14);
+      opacity: 0.82;
+      flex-shrink: 0;
+      user-select: none;
+    }
+
+    .assistant-drawer-axis-track {
+      position: relative;
+      flex: 1 1 auto;
+      align-self: stretch;
+      width: 4px;
+      margin: 0 auto;
+      min-height: 36px;
+      border-radius: 4px;
+      background: linear-gradient(
+        180deg,
+        rgba(212, 175, 55, 0.07) 0%,
+        var(--assistant-hint-violet-mid) 48%,
+        rgba(212, 175, 55, 0.11) 100%
+      );
+      box-shadow:
+        inset 0 0 6px rgba(0, 0, 0, 0.45),
+        0 0 10px var(--assistant-hint-violet-soft);
+    }
+
+    .assistant-drawer-axis-thumb {
+      position: absolute;
+      left: 50%;
+      width: 7px;
+      margin-left: -3.5px;
+      min-height: 14px;
+      border-radius: 3px;
+      top: 0;
+      height: 28px;
+      box-sizing: border-box;
+      background: linear-gradient(
+        180deg,
+        rgba(232, 224, 255, 0.65) 0%,
+        rgba(212, 175, 55, 0.42) 42%,
+        rgba(95, 72, 130, 0.42) 100%
+      );
+      box-shadow:
+        0 0 10px var(--ui-violet-glow),
+        0 0 6px rgba(212, 175, 55, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.28);
+      pointer-events: none;
+      transition: top 0.07s ease-out, height 0.07s ease-out;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .assistant-drawer-axis-thumb {
+        transition: none;
+      }
     }
 
     .assistant-drawer-dismiss-chevron:active {
@@ -593,13 +630,6 @@
         inset 1px 0 6px rgba(212, 175, 55, 0.14),
         -1px 0 12px rgba(0, 0, 0, 0.42),
         0 0 18px var(--assistant-hint-violet-glow);
-    }
-
-    .assistant-drawer-dismiss-chevron:active::before {
-      color: rgb(235, 228, 255);
-      text-shadow:
-        0 0 12px var(--assistant-hint-violet-glow),
-        0 0 8px rgba(200, 180, 255, 0.5);
     }
 
     .assistant-drawer-scroll {
@@ -1343,6 +1373,57 @@
       white-space: nowrap;
     }
 
+    /* Сценарии, план дня, подготовка — полупрозрачные карточки + явное фиолетовое свечение (как у остального UI) */
+    #scenario-hub.card,
+    #daily-plan.card,
+    .card.card-prep {
+      background: rgba(0, 0, 0, 0.48);
+      border-color: rgba(200, 185, 255, 0.38);
+      backdrop-filter: blur(16px) saturate(1.06);
+      -webkit-backdrop-filter: blur(16px) saturate(1.06);
+      box-shadow:
+        0 10px 28px rgba(0, 0, 0, 0.34),
+        inset 0 1px 0 rgba(255, 244, 220, 0.1),
+        inset 0 -1px 0 rgba(255, 228, 160, 0.08),
+        0 0 40px -10px rgba(165, 145, 235, 0.38),
+        0 0 64px -12px rgba(145, 120, 210, 0.32),
+        0 0 88px -20px rgba(130, 95, 200, 0.22);
+    }
+
+    .scenario-hub > summary,
+    .daily-plan > summary {
+      background: rgba(9, 9, 9, 0.48);
+      border-bottom-color: rgba(175, 155, 240, 0.42);
+      backdrop-filter: blur(12px) saturate(1.04);
+      -webkit-backdrop-filter: blur(12px) saturate(1.04);
+      box-shadow: inset 0 -1px 0 rgba(145, 120, 210, 0.2);
+    }
+
+    @media (prefers-reduced-transparency: reduce) {
+      #scenario-hub.card,
+      #daily-plan.card,
+      .card.card-prep {
+        background: #0a0a0a;
+        border-color: rgba(255, 228, 160, 0.22);
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        box-shadow:
+          0 10px 28px rgba(0, 0, 0, 0.34),
+          inset 0 1px 0 rgba(255, 244, 220, 0.1),
+          inset 0 -1px 0 rgba(255, 228, 160, 0.08),
+          0 0 36px -12px var(--ui-violet-soft);
+      }
+
+      .scenario-hub > summary,
+      .daily-plan > summary {
+        background: #090909;
+        border-bottom-color: rgba(255, 228, 160, 0.16);
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        box-shadow: none;
+      }
+    }
+
     .card > h2 {
       margin: 0 0 12px;
       font-size: 1.1rem;
@@ -1371,15 +1452,16 @@
       position: relative;
     }
 
-    /* Intro / Outro — тёплый янтарь (без sienna rgb(160,82,22): на P3 часто даёт «оливковый» коричневый) */
+    /* Intro / Outro — тёплый янтарь; слои плотнее, меньше «просвета» фона страницы */
     .scene-main.scene-role-intro,
     .scene-main.scene-role-outro {
       background: linear-gradient(
         165deg,
-        rgba(178, 76, 32, 0.34) 0%,
-        rgba(212, 175, 55, 0.2) 22%,
-        rgba(34, 18, 12, 0.94) 46%,
-        #000000 74%
+        rgba(178, 76, 32, 0.62) 0%,
+        rgba(212, 175, 55, 0.42) 18%,
+        rgba(42, 22, 14, 0.96) 38%,
+        rgba(12, 8, 6, 0.98) 58%,
+        #000000 82%
       );
       box-shadow:
         0 10px 28px rgba(0, 0, 0, 0.52),
@@ -1512,15 +1594,24 @@
       min-width: 4.25rem;
       max-width: 5rem;
       min-height: 44px;
-      padding: 8px 10px;
+      padding: 8px 26px 8px 10px;
       border-radius: 11px;
       font: inherit;
       font-size: 14px;
       font-weight: 600;
-      background: #000000;
+      appearance: none;
+      -webkit-appearance: none;
+      accent-color: var(--gold);
+      color-scheme: dark;
+      background-color: rgba(10, 10, 10, 0.72);
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath fill='%23e6cc8c' d='M1.4 1.3 6 6l4.6-4.7L12 2.7 6 8 0 2.7z'/%3E%3C/svg%3E"),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
+      background-repeat: no-repeat, no-repeat;
+      background-position: right 8px center, center;
+      background-size: 9px 6px, 100% 100%;
       border: 1px solid rgba(255, 228, 160, 0.28);
       color: var(--text);
-      color-scheme: dark;
       align-self: stretch;
       box-sizing: border-box;
     }
@@ -1637,12 +1728,13 @@
       font-weight: 800;
       font-size: clamp(34px, 9.5vw, 52px);
     }
+    /* INTRO / OUTRO — явный тёплый красно-коралловый (не золото сцен), чтобы не смешивать с «СЦЕНА n» */
     .scene-main[data-scene-role="intro"] .scene-time-wrap .time-leading {
-      color: var(--anna-gold-bright);
+      color: #f06856;
       text-shadow:
-        0 0 18px rgba(212, 175, 55, 0.42),
-        0 0 28px rgba(180, 130, 50, 0.22),
-        0 2px 3px rgba(12, 8, 4, 0.85);
+        0 0 22px rgba(240, 96, 76, 0.42),
+        0 0 34px rgba(200, 72, 58, 0.28),
+        0 2px 3px rgba(12, 8, 4, 0.88);
     }
 
     .scene-main[data-scene-role="intro"] .scene-time-wrap .time-leading,
@@ -1654,12 +1746,11 @@
     }
 
     .scene-main[data-scene-role="outro"] .scene-time-wrap .time-leading {
-      /* Цвет OUTRO — золото палитры */
-      color: var(--anna-gold);
+      color: #e85d52;
       text-shadow:
-        0 0 20px rgba(212, 175, 55, 0.35),
-        0 0 36px rgba(180, 120, 40, 0.22),
-        0 2px 2px rgba(20, 12, 4, 0.75);
+        0 0 22px rgba(232, 94, 82, 0.4),
+        0 0 38px rgba(190, 70, 58, 0.26),
+        0 2px 2px rgba(20, 12, 4, 0.78);
     }
 
     .scene-main[data-scene-role="outro"] .scene-time-wrap .time-leading {
@@ -2216,19 +2307,24 @@
       color: #f8eed1;
     }
 
+    /* Как у названия сцены и текста перебивки — пунктир снизу */
     .scene-main > .line-note .note-editable {
-      display: inline;
+      display: inline-block;
       min-height: 1.35em;
+      min-width: min(100%, 10ch);
+      max-width: 100%;
       outline: none;
       border-radius: 0;
-      padding: 0;
+      padding: 0 0 2px;
       margin: 0;
-      border-bottom: none;
+      vertical-align: bottom;
+      border-bottom: 1px dashed rgba(242, 215, 140, 0.38);
     }
 
     .scene-main > .line-note .note-editable:focus {
       background: transparent;
       box-shadow: none;
+      border-bottom-color: rgba(242, 215, 140, 0.52);
     }
 
     /* Фокус на примечании + клавиатура iPhone: запас для scrollIntoView / программного центрирования */
@@ -2445,8 +2541,19 @@
     }
 
     .intercut .intercut-text {
+      display: inline-block;
+      min-width: min(100%, 6ch);
+      max-width: 100%;
+      padding: 0 0 2px;
+      margin: 0;
+      vertical-align: bottom;
       color: rgba(245, 236, 220, 0.88);
       font-weight: 500;
+      border-bottom: 1px dashed rgba(242, 215, 140, 0.38);
+    }
+
+    .intercut .intercut-text:focus {
+      border-bottom-color: rgba(242, 215, 140, 0.52);
     }
 
     .loc-line { margin-top: 10px; color: var(--label); }
@@ -2813,10 +2920,6 @@
         animation: none !important;
       }
 
-      .assistant-open-strip::before {
-        animation: none;
-      }
-
       .scroll-axis-hint-thumb {
         animation: none !important;
         top: 42% !important;
@@ -2836,25 +2939,9 @@
       }
     }
 
+    /* Подсказка «листай вверх/вниз» у правого края — отключена (отвлекала) */
     .scroll-axis-hint {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      position: fixed;
-      right: max(14px, calc(env(safe-area-inset-right, 0px) + 8px));
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 95;
-      pointer-events: none;
-      opacity: 0.44;
-      transition: opacity 0.35s ease;
-    }
-
-    @media (hover: none), (pointer: coarse) {
-      .scroll-axis-hint {
-        display: flex;
-      }
+      display: none !important;
     }
 
     .scroll-axis-hint-arrow {
@@ -2909,8 +2996,7 @@
 
     body.assistant-drawer-open .scroll-axis-hint,
     body:has(.teleprompter-overlay.open) .scroll-axis-hint {
-      opacity: 0;
-      visibility: hidden;
+      display: none !important;
     }
 
     /* Локации шотлиста — как v90: мягкое «стекло» rgba(8,8,8), без inset-линий (они дали сдвиг оттенка) */
@@ -2956,13 +3042,30 @@
       border-bottom: 1px solid var(--border-strong);
     }
 
+    /* Локация — главный выбор (крупно); план — второстепенный, см. .shotlist-plan-select */
     .shotlist-loc-head .shotlist-loc-name {
-      flex: 1 1 12rem;
-      min-width: min(100%, 13rem);
+      flex: 1 1 18rem;
+      min-width: min(100%, 16rem);
       max-width: 100%;
-      font-size: 13px;
-      padding: 7px 10px;
-      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      padding: 12px 36px 12px 14px;
+      border-radius: 15px;
+    }
+
+    .shotlist-loc .line.scene-line-select-row .shotlist-plan-select {
+      flex: 0 1 10.5rem;
+      min-width: min(100%, 8rem);
+      max-width: 13rem;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 28px 6px 10px;
+      border-radius: 12px;
+    }
+
+    .shotlist-loc .line.scene-line-select-row:has(.shotlist-plan-select) > b {
+      font-size: 0.82rem;
+      min-width: 3.25rem;
     }
 
     .shotlist-loc .line {
@@ -3440,8 +3543,16 @@
       class="assistant-drawer-dismiss-chevron"
       id="assistant-drawer-close"
       aria-label="Закрыть меню"
-      title="Закрыть"></button>
-    <div class="assistant-drawer-scroll">
+      title="Закрыть · смахните влево · полоска показывает позицию в списке">
+      <span class="assistant-drawer-axis" aria-hidden="true">
+        <span class="assistant-drawer-axis-arrow">▲</span>
+        <span class="assistant-drawer-axis-track">
+          <span class="assistant-drawer-axis-thumb" id="assistant-drawer-axis-thumb"></span>
+        </span>
+        <span class="assistant-drawer-axis-arrow">▼</span>
+      </span>
+    </button>
+    <div class="assistant-drawer-scroll" id="assistant-drawer-scroll">
       <div class="assistant-drawer-inner">
         <div class="assistant-drawer-host">
           <span class="assistant-drawer-host-role">Ассистент — её поле</span>
@@ -3598,7 +3709,7 @@
       <h1 class="page-title"><span class="title-lead">Sam Scenes</span><span class="title-subject" contenteditable="true" spellcheck="true">ПОРА ПИЛИТЬ КОНТЕНТ</span></h1>
     </div>
 
-    <div class="card">
+    <div class="card card-prep">
       <h2>Подготовка</h2>
       <div class="meta">
         <div class="field"><b>Локация хука:</b>
@@ -4336,7 +4447,7 @@
               <option value="detail">Деталь</option>
             </select>
           </div>
-          <div class="line" contenteditable="true"><b>Перебивки здесь:</b> ________</div>
+          <div class="line" contenteditable="true"><b>Перебивки:</b> ________</div>
         </div>
 
         <div class="shotlist-loc">
@@ -4403,7 +4514,7 @@
               <option value="detail">Деталь</option>
             </select>
           </div>
-          <div class="line" contenteditable="true"><b>Перебивки здесь:</b> ________</div>
+          <div class="line" contenteditable="true"><b>Перебивки:</b> ________</div>
         </div>
 
         <div class="shotlist-loc">
@@ -4470,7 +4581,7 @@
               <option value="detail">Деталь</option>
             </select>
           </div>
-          <div class="line" contenteditable="true"><b>Перебивки здесь:</b> ________</div>
+          <div class="line" contenteditable="true"><b>Перебивки:</b> ________</div>
         </div>
 
 
@@ -4538,7 +4649,7 @@
               <option value="detail">Деталь</option>
             </select>
           </div>
-          <div class="line" contenteditable="true"><b>Перебивки здесь:</b> ________</div>
+          <div class="line" contenteditable="true"><b>Перебивки:</b> ________</div>
         </div>
       </div>
     </div>
@@ -4572,13 +4683,20 @@
         } catch (e) {}
       }
 
-      /** Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages). */
-      var APP_VERSION = 'v202';
-      var BUILD_TIME = '2026-05-03 12:15 MSK';
+      /**
+       * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
+       * Дублируйте те же поля в build-info.json — подпись внизу подгружает его с cache: no-store,
+       * чтобы не залипала старая версия при закэшированном index.html.
+       */
+      var APP_VERSION = 'v214';
+      var BUILD_TIME = '2026-05-03 09:03 MSK';
       var APP_BUILD = APP_VERSION + ' · ' + BUILD_TIME;
+      var BUILD_INFO_FILE = 'build-info.json';
       var lastSceneTimeTriggerTouchAt = 0;
       /** Открывать диалог времени только при коротком тапе; при скролле палец смещается сильнее. */
       var SCENE_TIME_TAP_MAX_PX = 18;
+      /** Макс. сдвиг пальца/курсора для «чистого» тапа по кнопкам удаления (не срабатывать при скролле). */
+      var INTENT_TAP_MAX_PX = 16;
       var sceneTimeFingerStart = null;
       var APP_BUILD_KEY = 'abakan-app-build';
       var STORAGE_KEY = 'abakan-main-abakan-layout-v15';
@@ -5088,6 +5206,11 @@
           empty.textContent =
             'Пока нет сценариев — создайте план формой «Новый план» выше или в «Настройки сценариев».';
           host.appendChild(empty);
+          requestAnimationFrame(function () {
+            try {
+              updateAssistantDrawerScrollThumb();
+            } catch (eU0) {}
+          });
           return;
         }
         items.sort(function (a, b) {
@@ -5132,6 +5255,64 @@
             host.appendChild(btn);
           });
         });
+        requestAnimationFrame(function () {
+          try {
+            updateAssistantDrawerScrollThumb();
+          } catch (eU) {}
+        });
+      }
+
+      /** Полоска справа у панели ассистента: позиция бегунка = прокрутка области списка/формы. */
+      function updateAssistantDrawerScrollThumb() {
+        var sc = document.getElementById('assistant-drawer-scroll');
+        var thumb = document.getElementById('assistant-drawer-axis-thumb');
+        var track = thumb ? thumb.parentElement : null;
+        if (!sc || !thumb || !track || track.clientHeight < 8) return;
+        var th = track.clientHeight;
+        var sh = sc.scrollHeight;
+        var ch = sc.clientHeight;
+        var st = sc.scrollTop;
+        if (sh <= ch + 2) {
+          thumb.style.height = th + 'px';
+          thumb.style.top = '0px';
+          return;
+        }
+        var ratio = ch / sh;
+        var thumbH = Math.max(14, Math.round(th * ratio));
+        var maxScroll = sh - ch;
+        var scrollRatio = maxScroll > 0 ? st / maxScroll : 0;
+        var travel = Math.max(0, th - thumbH);
+        thumb.style.height = thumbH + 'px';
+        thumb.style.top = Math.round(scrollRatio * travel) + 'px';
+      }
+
+      function wireAssistantDrawerScrollAxisThumb() {
+        if (wireAssistantDrawerScrollAxisThumb._done) return;
+        wireAssistantDrawerScrollAxisThumb._done = true;
+        var sc = document.getElementById('assistant-drawer-scroll');
+        if (!sc) return;
+        sc.addEventListener(
+          'scroll',
+          function () {
+            updateAssistantDrawerScrollThumb();
+          },
+          { passive: true }
+        );
+        window.addEventListener(
+          'resize',
+          function () {
+            if (document.body.classList.contains('assistant-drawer-open')) updateAssistantDrawerScrollThumb();
+          },
+          { passive: true }
+        );
+        if (window.ResizeObserver) {
+          try {
+            var ro = new ResizeObserver(function () {
+              if (document.body.classList.contains('assistant-drawer-open')) updateAssistantDrawerScrollThumb();
+            });
+            ro.observe(sc);
+          } catch (eR) {}
+        }
       }
 
       /** Скролл страницы под размытым слоем (особенно iOS): фиксируем body и восстанавливаем Y при закрытии. */
@@ -5189,6 +5370,14 @@
         requestAnimationFrame(function () {
           var c = document.getElementById('assistant-drawer-close');
           if (c) c.focus();
+          try {
+            updateAssistantDrawerScrollThumb();
+          } catch (eTh) {}
+          requestAnimationFrame(function () {
+            try {
+              updateAssistantDrawerScrollThumb();
+            } catch (eTh2) {}
+          });
         });
       }
 
@@ -5212,10 +5401,12 @@
         var RATIO = 0.62;
         var JITTER_MAX_DX = 36;
         var JITTER_VS_LEFT = 0.42;
+        var lastCloseSwipeAt = 0;
 
         function bindCloseSwipeSurface(surface) {
           if (!surface) return;
           var activePid = null;
+          var touchId = null;
           var sx = 0;
           var sy = 0;
           var minDx = 0;
@@ -5230,6 +5421,14 @@
             if (Math.abs(dy) > maxAbsDy) maxAbsDy = Math.abs(dy);
           }
 
+          function pickTouch(touches, id) {
+            if (!touches || touches.length === 0) return null;
+            for (var i = 0; i < touches.length; i++) {
+              if (touches[i].identifier === id) return touches[i];
+            }
+            return null;
+          }
+
           function endGesture(clientX, clientY) {
             if (!document.body.classList.contains('assistant-drawer-open')) return;
             var finDx = clientX - sx;
@@ -5237,10 +5436,19 @@
             if (leftMag < CLOSE_MIN) return;
             if (leftMag < maxAbsDy * RATIO) return;
             if (maxDx > JITTER_MAX_DX && maxDx > leftMag * JITTER_VS_LEFT) return;
+            var now = Date.now();
+            if (now - lastCloseSwipeAt < 140) return;
+            lastCloseSwipeAt = now;
             try {
               triggerHaptic('light');
             } catch (eH) {}
             closeAssistantDrawer();
+          }
+
+          function resetAccum() {
+            minDx = 0;
+            maxDx = 0;
+            maxAbsDy = 0;
           }
 
           surface.addEventListener(
@@ -5248,12 +5456,12 @@
             function (e) {
               if (!document.body.classList.contains('assistant-drawer-open')) return;
               if (e.pointerType === 'mouse' && e.button !== 0) return;
+              /** iOS: для касания используем Touch Events — иначе жест дублируется и pointer на прозрачном слое ненадёжен */
+              if (e.pointerType === 'touch') return;
               activePid = e.pointerId;
               sx = e.clientX;
               sy = e.clientY;
-              minDx = 0;
-              maxDx = 0;
-              maxAbsDy = 0;
+              resetAccum();
               try {
                 if (surface.setPointerCapture) surface.setPointerCapture(e.pointerId);
               } catch (eCap) {}
@@ -5278,7 +5486,7 @@
               trackMove(e.clientX, e.clientY);
               endGesture(e.clientX, e.clientY);
               activePid = null;
-              minDx = maxDx = maxAbsDy = 0;
+              resetAccum();
             },
             true
           );
@@ -5289,23 +5497,109 @@
             },
             true
           );
+
+          surface.addEventListener(
+            'touchstart',
+            function (e) {
+              if (!document.body.classList.contains('assistant-drawer-open')) return;
+              if (touchId != null) return;
+              if (!e.touches || e.touches.length !== 1) return;
+              var t = e.touches[0];
+              touchId = t.identifier;
+              sx = t.clientX;
+              sy = t.clientY;
+              resetAccum();
+            },
+            { passive: true, capture: true }
+          );
+          surface.addEventListener(
+            'touchmove',
+            function (e) {
+              if (touchId == null) return;
+              var t = pickTouch(e.touches, touchId);
+              if (!t) return;
+              trackMove(t.clientX, t.clientY);
+              var dx = t.clientX - sx;
+              var dy = t.clientY - sy;
+              if (dx < -14 && Math.abs(dx) > Math.abs(dy) * 0.82) {
+                try {
+                  e.preventDefault();
+                } catch (pe) {}
+              }
+            },
+            { passive: false, capture: true }
+          );
+          surface.addEventListener(
+            'touchend',
+            function (e) {
+              if (touchId == null) return;
+              var t = pickTouch(e.changedTouches, touchId);
+              touchId = null;
+              if (!t) {
+                resetAccum();
+                return;
+              }
+              trackMove(t.clientX, t.clientY);
+              endGesture(t.clientX, t.clientY);
+              resetAccum();
+            },
+            { passive: true, capture: true }
+          );
+          surface.addEventListener(
+            'touchcancel',
+            function () {
+              touchId = null;
+              resetAccum();
+            },
+            { passive: true, capture: true }
+          );
         }
 
         bindCloseSwipeSurface(document.getElementById('assistant-drawer'));
         bindCloseSwipeSurface(document.getElementById('assistant-drawer-backdrop'));
       }
 
+      function formatBuildStampFromJson(obj) {
+        if (!obj || typeof obj !== 'object') return '';
+        var v = obj.version != null ? String(obj.version) : '';
+        var t = obj.build != null ? String(obj.build) : '';
+        if (!v || !t) return '';
+        return v + ' · ' + t;
+      }
+
+      function applyBuildStampToUi(stamp) {
+        if (!stamp) return;
+        var deployTag = document.getElementById('deploy-build-tag');
+        var buildChip = document.getElementById('app-build-chip');
+        var buildTxt =
+          'Сборка: ' +
+          stamp +
+          ' — если время/версия не совпадают с последним деплоем, обновите страницу или подождите GitHub Pages.';
+        if (deployTag) deployTag.textContent = buildTxt;
+        if (buildChip) buildChip.textContent = stamp;
+      }
+
+      function fetchLiveBuildStampForChip() {
+        try {
+          var url = new URL(BUILD_INFO_FILE, window.location.href).href;
+          fetch(url, { cache: 'no-store', credentials: 'same-origin' })
+            .then(function (r) {
+              if (!r.ok) return null;
+              return r.json();
+            })
+            .then(function (data) {
+              var stamp = formatBuildStampFromJson(data);
+              if (stamp) applyBuildStampToUi(stamp);
+            })
+            .catch(function () {});
+        } catch (e) {}
+      }
+
       function wireAssistantDrawer() {
         if (wireAssistantDrawer._done) return;
         wireAssistantDrawer._done = true;
-        var deployTag = document.getElementById('deploy-build-tag');
-        var buildTxt =
-          'Сборка: ' +
-          APP_BUILD +
-          ' — если время/версия не совпадают с последним деплоем, обновите страницу или подождите GitHub Pages.';
-        if (deployTag) deployTag.textContent = buildTxt;
-        var buildChip = document.getElementById('app-build-chip');
-        if (buildChip) buildChip.textContent = APP_BUILD;
+        applyBuildStampToUi(APP_BUILD);
+        fetchLiveBuildStampForChip();
         var btnAssistHub = document.getElementById('btn-assistant-plan-open');
         if (btnAssistHub) {
           btnAssistHub.addEventListener('click', function (e) {
@@ -6929,7 +7223,108 @@
         }
       }
 
-      var lastSceneTouchAction = 0;
+      /**
+       * Действие только при осмысленном тапе: pointerdown/up на одном элементе, без заметного движения.
+       * Ветка click без suppress — активация с клавиатуры (Enter).
+       */
+      function wireIntentActionOnSelector(root, selector, onAction) {
+        if (!root || !selector || !onAction) return;
+        var start = null;
+        var suppressClick = false;
+        root.addEventListener(
+          'pointerdown',
+          function (e) {
+            var t = e.target && e.target.closest && e.target.closest(selector);
+            if (!t || !root.contains(t)) return;
+            if (e.pointerType === 'mouse' && e.button !== 0) return;
+            start = { el: t, x: e.clientX, y: e.clientY, id: e.pointerId };
+          },
+          true
+        );
+        root.addEventListener(
+          'pointerup',
+          function (e) {
+            if (!start || e.pointerId !== start.id) return;
+            var g = start;
+            start = null;
+            if (Math.hypot(e.clientX - g.x, e.clientY - g.y) > INTENT_TAP_MAX_PX) return;
+            var up = e.target && e.target.closest && e.target.closest(selector);
+            if (!up || up !== g.el) return;
+            e.preventDefault();
+            e.stopPropagation();
+            suppressClick = true;
+            onAction(e, g.el);
+          },
+          true
+        );
+        root.addEventListener(
+          'pointercancel',
+          function (e) {
+            if (start && e.pointerId === start.id) start = null;
+          },
+          true
+        );
+        root.addEventListener(
+          'click',
+          function (e) {
+            var t = e.target && e.target.closest && e.target.closest(selector);
+            if (!t || !root.contains(t)) return;
+            if (suppressClick) {
+              e.preventDefault();
+              e.stopPropagation();
+              suppressClick = false;
+              return;
+            }
+            onAction(e, t);
+          },
+          true
+        );
+      }
+
+      function bindIntentTap(el, handler) {
+        if (!el || !handler) return;
+        var start = null;
+        var suppressClick = false;
+        el.addEventListener(
+          'pointerdown',
+          function (e) {
+            if (e.pointerType === 'mouse' && e.button !== 0) return;
+            if (!el.contains(e.target)) return;
+            start = { x: e.clientX, y: e.clientY, id: e.pointerId };
+          },
+          { passive: true }
+        );
+        el.addEventListener(
+          'pointerup',
+          function (e) {
+            if (!start || e.pointerId !== start.id) return;
+            var g = start;
+            start = null;
+            if (Math.hypot(e.clientX - g.x, e.clientY - g.y) > INTENT_TAP_MAX_PX) return;
+            if (!el.contains(e.target)) return;
+            e.preventDefault();
+            suppressClick = true;
+            handler(e);
+          },
+          { passive: false }
+        );
+        el.addEventListener(
+          'pointercancel',
+          function (e) {
+            if (start && e.pointerId === start.id) start = null;
+          },
+          { passive: true }
+        );
+        el.addEventListener('click', function (e) {
+          if (suppressClick) {
+            e.preventDefault();
+            e.stopPropagation();
+            suppressClick = false;
+            return;
+          }
+          handler(e);
+        });
+      }
 
       function normalizePieceToken(v) {
         if (v === null || v === undefined) return '';
@@ -7104,9 +7499,7 @@
         var section = document.querySelector('.shotlist-section');
         if (!section || section.getAttribute('data-shotlist-remove-bound') === '1') return;
         section.setAttribute('data-shotlist-remove-bound', '1');
-        section.addEventListener('click', function (e) {
-          var btn = e.target && e.target.closest && e.target.closest('.shotlist-pieces-remove');
-          if (!btn || !section.contains(btn)) return;
+        wireIntentActionOnSelector(section, '.shotlist-pieces-remove', function (e, btn) {
           e.preventDefault();
           var row = btn.closest('.shotlist-pieces-row');
           var display = row && row.querySelector('.shotlist-pieces-display');
@@ -7449,6 +7842,45 @@
         var root = scenesBlock || sceneStack;
         if (!root) return;
 
+        var sceneRemoveTapStart = null;
+        var suppressNextSceneRemoveClick = false;
+
+        root.addEventListener(
+          'pointerdown',
+          function (e) {
+            var del = e.target && e.target.closest && e.target.closest('.scene-remove');
+            if (!del || !root.contains(del)) return;
+            if (e.pointerType === 'mouse' && e.button !== 0) return;
+            sceneRemoveTapStart = { el: del, x: e.clientX, y: e.clientY, id: e.pointerId };
+          },
+          true
+        );
+
+        root.addEventListener(
+          'pointerup',
+          function (e) {
+            if (!sceneRemoveTapStart || e.pointerId !== sceneRemoveTapStart.id) return;
+            var g = sceneRemoveTapStart;
+            sceneRemoveTapStart = null;
+            if (Math.hypot(e.clientX - g.x, e.clientY - g.y) > INTENT_TAP_MAX_PX) return;
+            var upDel = e.target && e.target.closest && e.target.closest('.scene-remove');
+            if (!upDel || upDel !== g.el) return;
+            e.preventDefault();
+            e.stopPropagation();
+            suppressNextSceneRemoveClick = true;
+            tryRemoveScene(g.el);
+          },
+          true
+        );
+
+        root.addEventListener(
+          'pointercancel',
+          function (e) {
+            if (sceneRemoveTapStart && e.pointerId === sceneRemoveTapStart.id) sceneRemoveTapStart = null;
+          },
+          true
+        );
+
         root.addEventListener('click', function (e) {
           var shotCb = e.target && e.target.closest && e.target.closest('.scene-shot-checkbox');
           if (shotCb) {
@@ -7458,21 +7890,15 @@
           }
           var del = e.target && e.target.closest && e.target.closest('.scene-remove');
           if (!del) return;
-          if (lastSceneTouchAction && Date.now() - lastSceneTouchAction < 650) {
+          if (suppressNextSceneRemoveClick) {
             e.preventDefault();
+            e.stopPropagation();
+            suppressNextSceneRemoveClick = false;
             return;
           }
           e.preventDefault();
           tryRemoveScene(del);
         }, false);
-
-        root.addEventListener('touchend', function (e) {
-          var del = e.target && e.target.closest && e.target.closest('.scene-remove');
-          if (!del) return;
-          e.preventDefault();
-          lastSceneTouchAction = Date.now();
-          tryRemoveScene(del);
-        }, { passive: false });
 
         root.addEventListener('input', function () {
           markDirty();
@@ -7708,20 +8134,6 @@
         if (scenarioShootBlock) scenarioShootBlock.addEventListener('input', function () { markDirty(); });
         if (scenarioShootBlock) scenarioShootBlock.addEventListener('change', function () { markDirty(); });
 
-        function bindTapAndClick(el, handler) {
-          if (!el || !handler) return;
-          var lastTouchTs = 0;
-          el.addEventListener('click', function (e) {
-            if (Date.now() - lastTouchTs < 450) return;
-            handler(e);
-          });
-          el.addEventListener('touchend', function (e) {
-            lastTouchTs = Date.now();
-            e.preventDefault();
-            handler(e);
-          }, { passive: false });
-        }
-
         if (scenarioSelect) {
           scenarioSelect.addEventListener('change', function () {
             persistToStorage('Сохранено');
@@ -7735,13 +8147,13 @@
         }
 
         if (btnScenarioNew) {
-          bindTapAndClick(btnScenarioNew, function () {
+          bindIntentTap(btnScenarioNew, function () {
             createNewScenarioTemplate();
           });
         }
 
         if (btnScenarioDelete) {
-          bindTapAndClick(btnScenarioDelete, function () {
+          bindIntentTap(btnScenarioDelete, function () {
             var bundle = readScenarioBundle();
             if (!bundle || !bundle.activeId) return;
             removeScenarioById(bundle.activeId);
@@ -8263,6 +8675,7 @@
       wireDetailsSummaryRowToggle();
       wirePullDownReload();
       wireAssistantDrawer();
+      wireAssistantDrawerScrollAxisThumb();
       wireAssistantDrawerCloseSwipe();
       wireAssistantDrawerOpenGestures();
       wirePeriodicPageReload();
