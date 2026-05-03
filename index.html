@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Сценарий видео / Sam Bruev (v145)</title>
+  <title>Сценарий видео / Sam Bruev (v146)</title>
   <!-- До отрисовки тела: восстановить скролл после reload без «прыжка» картинки/фона -->
   <script>
     (function () {
@@ -1323,7 +1323,7 @@
       flex: 1 1 auto;
       min-width: 0;
       width: 100%;
-      margin-top: -16px !important;
+      margin-top: -26px !important;
       overflow-x: auto;
       overflow-y: hidden;
       -webkit-overflow-scrolling: touch;
@@ -1434,7 +1434,7 @@
       width: 100%;
       max-width: 100%;
       margin: 0;
-      padding: 14px 22px;
+      padding: 10px 22px 12px;
       box-sizing: border-box;
       border-radius: 0;
       border: none;
@@ -1635,8 +1635,8 @@
       display: flex;
       position: relative;
       z-index: 20;
-      margin-top: -16px;
-      padding-top: 4px;
+      margin-top: -26px;
+      padding-top: 2px;
     }
 
     .line { margin-top: 8px; color: var(--label); }
@@ -2660,12 +2660,16 @@
       }
 
       .scene-time-wrap .time-pickers {
-        margin-top: -14px;
+        margin-top: -22px;
       }
 
       .scene-time-wrap .time-pickers {
         justify-content: center;
         width: 100%;
+      }
+
+      .ios-wheel-time .scene-time-wrap .scene-time-ios {
+        margin-top: -22px;
       }
 
       .scene-time-ios {
@@ -3773,8 +3777,8 @@
       }
 
       /** Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages). */
-      var APP_VERSION = 'v145';
-      var BUILD_TIME = '2026-05-03 04:43 MSK';
+      var APP_VERSION = 'v146';
+      var BUILD_TIME = '2026-05-03 04:45 MSK';
       var APP_BUILD = APP_VERSION + ' · ' + BUILD_TIME;
       var lastSceneTimeTriggerTouchAt = 0;
       var APP_BUILD_KEY = 'abakan-app-build';
