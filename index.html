@@ -373,6 +373,8 @@
       backdrop-filter: blur(22px) saturate(108%);
       -webkit-backdrop-filter: blur(22px) saturate(108%);
       border-right: 1px solid var(--ui-select-border);
+      border-top-right-radius: min(18px, 2.6vh);
+      border-bottom-right-radius: min(18px, 2.6vh);
       box-shadow: 10px 0 48px rgba(0, 0, 0, 0.2);
       transform: translateX(-102%);
       transition: transform 0.32s cubic-bezier(0.22, 0.9, 0.28, 1);
@@ -1546,6 +1548,63 @@
       display: block;
       padding: 0;
       overflow: hidden;
+    }
+
+    /*
+      Подсказка у левого края карточки «Настройки сценариев»: тот же ритм и цвет, что у полоски шторки,
+      без тапа — напоминает, что слева есть боковое меню «План съёмок».
+    */
+    .scenario-hub-side-menu-hint {
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 6;
+      width: 6px;
+      min-width: 5px;
+      height: min(168px, 46vh);
+      min-height: 72px;
+      margin: 0;
+      padding: 0;
+      border: none;
+      border-radius: 0 min(18px, 2.6vh) min(18px, 2.6vh) 0;
+      pointer-events: none;
+      background: linear-gradient(
+        90deg,
+        rgba(12, 10, 8, 0.76) 0%,
+        rgba(212, 175, 55, 0.11) 38%,
+        var(--assistant-hint-violet-mid) 62%,
+        rgba(212, 175, 55, 0.26) 100%
+      );
+      box-shadow:
+        inset -1px 0 7px var(--assistant-hint-violet-soft),
+        inset -1px 0 5px rgba(212, 175, 55, 0.1),
+        1px 0 10px rgba(0, 0, 0, 0.38),
+        0 0 16px var(--assistant-hint-violet-glow);
+      opacity: 0.95;
+      transition: opacity 0.2s ease;
+    }
+
+    .scenario-hub-side-menu-hint::before {
+      content: '\203A';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 1;
+      color: var(--ui-violet);
+      pointer-events: none;
+      letter-spacing: -0.08em;
+      opacity: 0.88;
+      text-shadow:
+        0 0 10px var(--ui-violet-glow),
+        0 0 4px rgba(255, 255, 255, 0.1);
+    }
+
+    body.assistant-drawer-open .scenario-hub-side-menu-hint {
+      opacity: 0;
     }
 
     .scenario-hub > summary {
@@ -4453,6 +4512,7 @@
 
     <details class="card scenario-hub" id="scenario-hub" open>
       <summary><span class="details-summary-label">Настройки сценариев</span></summary>
+      <span class="scenario-hub-side-menu-hint" aria-hidden="true"></span>
       <div class="scenario-hub-body">
         <div class="row">
           <label>Сценарий
