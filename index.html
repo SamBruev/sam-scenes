@@ -13,7 +13,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Sam Scenes (v230)</title>
+  <title>Sam Scenes (v231)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -3342,102 +3342,6 @@
         animation: none !important;
       }
 
-      .scroll-axis-hint {
-        animation: none !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
-      }
-
-      .scroll-axis-hint-thumb {
-        animation: none !important;
-        top: 50% !important;
-        margin-top: -7px !important;
-      }
-    }
-
-    /*
-      Вертикальная подсказка у правого края: без «ездящего» ползунка внутри дорожки —
-      ползунок статичен; слегка двигается вся подсказка (верх/низ вьюпорта).
-    */
-    @keyframes scroll-axis-hint-float {
-      0% {
-        transform: translateY(calc(-50% - 11px));
-      }
-      100% {
-        transform: translateY(calc(-50% + 11px));
-      }
-    }
-
-    .scroll-axis-hint {
-      position: fixed;
-      right: max(8px, env(safe-area-inset-right, 0px));
-      top: 50%;
-      z-index: 88;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      width: auto;
-      pointer-events: none;
-      transform: translateY(-50%);
-      animation: scroll-axis-hint-float 2.55s ease-in-out infinite alternate;
-    }
-
-    .scroll-axis-hint-arrow {
-      font-size: 8px;
-      line-height: 1;
-      color: var(--ui-violet);
-      text-shadow:
-        0 0 8px var(--ui-violet-glow),
-        0 0 5px rgba(255, 255, 255, 0.16);
-      opacity: 0.78;
-      letter-spacing: 0;
-      user-select: none;
-    }
-
-    .scroll-axis-hint-track {
-      position: relative;
-      width: 4px;
-      height: min(104px, 21vh);
-      min-height: 64px;
-      border-radius: 4px;
-      background: linear-gradient(
-        180deg,
-        rgba(255, 255, 255, 0.07) 0%,
-        var(--assistant-hint-violet-mid) 48%,
-        rgba(255, 255, 255, 0.11) 100%
-      );
-      box-shadow:
-        inset 0 0 6px rgba(0, 0, 0, 0.45),
-        0 0 12px var(--assistant-hint-violet-soft);
-    }
-
-    .scroll-axis-hint-thumb {
-      position: absolute;
-      left: 50%;
-      width: 8px;
-      height: 14px;
-      margin-left: -4px;
-      margin-top: -7px;
-      top: 50%;
-      border-radius: 4px;
-      background: linear-gradient(
-        180deg,
-        rgba(232, 224, 255, 0.65) 0%,
-        rgba(255, 255, 255, 0.42) 42%,
-        rgba(95, 72, 130, 0.42) 100%
-      );
-      box-shadow:
-        0 0 12px var(--ui-violet-glow),
-        0 0 8px rgba(255, 255, 255, 0.22),
-        inset 0 1px 0 rgba(255, 255, 255, 0.32);
-    }
-
-    body.assistant-drawer-open .scroll-axis-hint,
-    body:has(.teleprompter-overlay.open) .scroll-axis-hint {
-      visibility: hidden !important;
-      animation: none !important;
     }
 
     /* Локации шотлиста — как v90: мягкое «стекло» rgba(8,8,8), без inset-линий (они дали сдвиг оттенка) */
@@ -4225,11 +4129,6 @@
       draggable="false" />
   </div>
   <div id="pull-swipe-hint" class="pull-swipe-hint" aria-hidden="true"></div>
-  <div id="scroll-axis-hint" class="scroll-axis-hint" aria-hidden="true">
-    <span class="scroll-axis-hint-arrow" aria-hidden="true">▲</span>
-    <span class="scroll-axis-hint-track" aria-hidden="true"><span class="scroll-axis-hint-thumb"></span></span>
-    <span class="scroll-axis-hint-arrow" aria-hidden="true">▼</span>
-  </div>
   <div id="pull-reload-flash" class="pull-reload-flash" aria-hidden="true"></div>
   <div
     class="app-build-chip"
@@ -5344,8 +5243,8 @@
        * Дублируйте те же поля в build-info.json — подпись внизу подгружает его с cache: no-store,
        * чтобы не залипала старая версия при закэшированном index.html.
        */
-      var APP_VERSION = 'v230';
-      var BUILD_TIME = '2026-05-03 20:32 MSK';
+      var APP_VERSION = 'v231';
+      var BUILD_TIME = '2026-05-03 20:36 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
