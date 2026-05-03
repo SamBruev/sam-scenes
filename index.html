@@ -6712,16 +6712,24 @@
       /** После горизонтального жеста на строке списка — не открывать сценарий по synthetic click. */
       var assistantDrawerSuppressClickUntil = 0;
       var assistantDrawerCloseEndHandler = null;
+      var assistantDrawerCloseWrapEndHandler = null;
       var assistantDrawerCloseSafetyTimer = null;
 
       function clearAssistantDrawerCloseListeners() {
         var el = document.getElementById('assistant-drawer');
+        var wrapEl = document.querySelector('body > .wrap');
         if (el && assistantDrawerCloseEndHandler) {
           try {
             el.removeEventListener('transitionend', assistantDrawerCloseEndHandler);
           } catch (eRm) {}
         }
+        if (wrapEl && assistantDrawerCloseWrapEndHandler) {
+          try {
+            wrapEl.removeEventListener('transitionend', assistantDrawerCloseWrapEndHandler);
+          } catch (eRmW) {}
+        }
         assistantDrawerCloseEndHandler = null;
+        assistantDrawerCloseWrapEndHandler = null;
         if (assistantDrawerCloseSafetyTimer) {
           clearTimeout(assistantDrawerCloseSafetyTimer);
           assistantDrawerCloseSafetyTimer = null;
@@ -6745,6 +6753,8 @@
       }
 
       function unlockAssistantDrawerMainScroll() {
+        var y = assistantDrawerLockScrollY;
+        if (typeof y !== 'number' || !isFinite(y) || y < 0) y = 0;
         document.documentElement.style.overflow = '';
         document.body.style.overflow = '';
         document.body.style.position = '';
@@ -6752,7 +6762,13 @@
         document.body.style.left = '';
         document.body.style.right = '';
         document.body.style.width = '';
-        window.scrollTo(0, assistantDrawerLockScrollY);
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            try {
+              window.scrollTo(0, y);
+            } catch (eSc) {}
+          });
+        });
       }
 
       function assistantDrawerReducedMotion() {
@@ -6782,9 +6798,9 @@
         if (!wrap) return;
         var p = Math.max(0, Math.min(1, progress));
         if (p <= 0.001) {
-          wrap.style.filter = '';
-          wrap.style.webkitFilter = '';
-          wrap.style.transition = '';
+          /* Не сбрасываем transition — иначе snap-close не анимирует filter и висит на таймауте. */
+          wrap.style.filter = 'blur(0px) saturate(100%)';
+          wrap.style.webkitFilter = 'blur(0px) saturate(100%)';
           return;
         }
         var blur = 11 * p;
@@ -6977,12 +6993,17 @@
             setAssistantDrawerBackdropVisual(0, bk);
             setAssistantDrawerWrapBlurProgress(0);
             var doneCalled = false;
+            var gotShutT = false;
+            var gotShutF = !wrap;
             function done() {
               if (doneCalled) return;
               doneCalled = true;
               try {
-                d.removeEventListener('transitionend', onEnd);
+                d.removeEventListener('transitionend', onShutDrawerEnd);
               } catch (eRm3) {}
+              try {
+                if (wrap) wrap.removeEventListener('transitionend', onShutWrapEnd);
+              } catch (eRm3b) {}
               document.documentElement.classList.remove('assistant-drawer-open');
               document.body.classList.remove('assistant-drawer-open');
               document.body.removeAttribute('data-assistant-drawer-open');
@@ -6993,12 +7014,28 @@
               endAssistantDrawerTracking();
               unlockAssistantDrawerMainScroll();
             }
-            function onEnd(e) {
-              if (e.target !== d || e.propertyName !== 'transform') return;
+            function tryShutDone() {
+              if (doneCalled) return;
+              if (!gotShutT || !gotShutF) return;
               done();
             }
-            d.addEventListener('transitionend', onEnd);
-            setTimeout(done, dur + 140);
+            function onShutDrawerEnd(e) {
+              if (e.target !== d) return;
+              var pn = e.propertyName || '';
+              if (pn !== 'transform' && pn !== '-webkit-transform') return;
+              gotShutT = true;
+              tryShutDone();
+            }
+            function onShutWrapEnd(e) {
+              if (!wrap || e.target !== wrap) return;
+              var pn = e.propertyName || '';
+              if (pn !== 'filter' && pn !== '-webkit-filter') return;
+              gotShutF = true;
+              tryShutDone();
+            }
+            d.addEventListener('transitionend', onShutDrawerEnd);
+            if (wrap) wrap.addEventListener('transitionend', onShutWrapEnd);
+            setTimeout(done, dur + 160);
           });
         });
       }
@@ -7060,6 +7097,7 @@
         clearAssistantDrawerCloseListeners();
         var d = document.getElementById('assistant-drawer');
         var bk = document.getElementById('assistant-drawer-backdrop');
+        var wrap = document.querySelector('body > .wrap');
         var finished = false;
 
         function complete() {
@@ -7077,12 +7115,6 @@
           unlockAssistantDrawerMainScroll();
         }
 
-        function onEnd(e) {
-          if (!d || e.target !== d) return;
-          if (e.propertyName !== 'transform') return;
-          complete();
-        }
-
         document.body.setAttribute('data-assistant-drawer-closing', '1');
         document.documentElement.classList.remove('assistant-drawer-open');
         document.body.classList.remove('assistant-drawer-open');
@@ -7094,10 +7126,43 @@
           complete();
           return;
         }
-        assistantDrawerCloseEndHandler = onEnd;
-        d.addEventListener('transitionend', onEnd);
-        /* prefers-reduced-motion: transition отключён — transitionend не придёт; дублируем таймаутом */
-        assistantDrawerCloseSafetyTimer = setTimeout(complete, 500);
+
+        if (assistantDrawerReducedMotion()) {
+          assistantDrawerCloseSafetyTimer = setTimeout(complete, 0);
+          return;
+        }
+
+        var gotTransform = false;
+        var gotFilter = !wrap;
+
+        function tryDone() {
+          if (finished) return;
+          if (!gotTransform || !gotFilter) return;
+          complete();
+        }
+
+        function onDrawerTransitionEnd(e) {
+          if (!d || e.target !== d) return;
+          var pn = e.propertyName || '';
+          if (pn !== 'transform' && pn !== '-webkit-transform') return;
+          gotTransform = true;
+          tryDone();
+        }
+
+        function onWrapTransitionEnd(e) {
+          if (!wrap || e.target !== wrap) return;
+          var pn = e.propertyName || '';
+          if (pn !== 'filter' && pn !== '-webkit-filter') return;
+          gotFilter = true;
+          tryDone();
+        }
+
+        assistantDrawerCloseEndHandler = onDrawerTransitionEnd;
+        assistantDrawerCloseWrapEndHandler = onWrapTransitionEnd;
+        d.addEventListener('transitionend', onDrawerTransitionEnd);
+        if (wrap) wrap.addEventListener('transitionend', onWrapTransitionEnd);
+        /** Ждём и панель, и снятие blur с .wrap — иначе scroll-lock снимается раньше анимации и даёт рывок. Запас по таймауту чуть длиннее CSS 0.32s. */
+        assistantDrawerCloseSafetyTimer = setTimeout(complete, 420);
       }
 
       /** Свайп влево — закрыть: и по панели меню, и по правой зоне (backdrop), как у нативного sheet. */
