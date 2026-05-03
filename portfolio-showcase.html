@@ -276,6 +276,37 @@
       border-radius: 10px;
     }
 
+    /* Демо ↔ мастер: две дорожки в ряд на широком экране */
+    .compare-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.7rem;
+      align-items: stretch;
+    }
+
+    @media (max-width: 520px) {
+      .compare-pair {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .compare-label {
+      display: block;
+      font-size: 0.62rem;
+      font-weight: 800;
+      letter-spacing: 0.17em;
+      text-transform: uppercase;
+      margin-bottom: 0.42rem;
+    }
+
+    .compare-label--demo {
+      color: rgba(235, 200, 120, 0.62);
+    }
+
+    .compare-label--master {
+      color: rgba(232, 201, 104, 0.92);
+    }
+
     audio {
       height: 48px;
     }
@@ -360,24 +391,64 @@
       <div class="brand-mark__lamp-stem" aria-hidden="true"></div>
       <div>
         <h1>Примеры работ</h1>
-        <p class="subtitle">Подборка в фирменном стиле: лампа и золото из вашего логотипа, стеклянные панели как в сценарном приложении.</p>
+        <p class="subtitle">Сравнение демо и мастера по дорожкам — барабаны, вокал, гитары. Положите свои файлы в <code>portfolio-audio/</code> с теми же именами.</p>
       </div>
     </header>
 
     <article class="card">
       <div class="tag-row">
-        <span class="tag">Звук</span>
-        <span class="tag">Демо</span>
+        <span class="tag">Стемы</span>
+        <span class="tag">Демо · мастер</span>
       </div>
-      <h2>Аудио</h2>
-      <p class="meta">Замените <code>src</code> на свой файл (.mp3, .ogg, .wav).</p>
-      <div class="media-shell">
-        <audio controls preload="metadata"
-          src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3">
-          Ваш браузер не поддерживает воспроизведение аудио.
-        </audio>
+      <h2>Барабаны</h2>
+      <p class="meta">Черновая лента и финал после компрессии, эквализации и сборки под микс.</p>
+      <div class="compare-pair">
+        <div class="media-shell">
+          <span class="compare-label compare-label--demo">Демо</span>
+          <audio controls preload="metadata" src="portfolio-audio/drums-demo.m4a"></audio>
+        </div>
+        <div class="media-shell">
+          <span class="compare-label compare-label--master">Мастер</span>
+          <audio controls preload="metadata" src="portfolio-audio/drums-master.m4a"></audio>
+        </div>
       </div>
-      <p class="note">Локально: положите <code>audio.mp3</code> рядом с HTML → <code>src="audio.mp3"</code>.</p>
+    </article>
+
+    <article class="card">
+      <div class="tag-row">
+        <span class="tag">Стемы</span>
+      </div>
+      <h2>Вокал</h2>
+      <p class="meta">От сырой записи к обработке: монтаж шумов, тональный баланс, пространство.</p>
+      <div class="compare-pair">
+        <div class="media-shell">
+          <span class="compare-label compare-label--demo">Демо</span>
+          <audio controls preload="metadata" src="portfolio-audio/vocals-demo.m4a"></audio>
+        </div>
+        <div class="media-shell">
+          <span class="compare-label compare-label--master">Мастер</span>
+          <audio controls preload="metadata" src="portfolio-audio/vocals-master.m4a"></audio>
+        </div>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="tag-row">
+        <span class="tag">Стемы</span>
+      </div>
+      <h2>Гитары</h2>
+      <p class="meta">Ритм-партии и акценты: панорама и цвет против исходного дублей.</p>
+      <div class="compare-pair">
+        <div class="media-shell">
+          <span class="compare-label compare-label--demo">Демо</span>
+          <audio controls preload="metadata" src="portfolio-audio/guitars-demo.m4a"></audio>
+        </div>
+        <div class="media-shell">
+          <span class="compare-label compare-label--master">Мастер</span>
+          <audio controls preload="metadata" src="portfolio-audio/guitars-master.m4a"></audio>
+        </div>
+      </div>
+      <p class="note">Сейчас в плеерах заглушки (короткая тишина, .m4a). Замените файлы в <code>portfolio-audio/</code> на свои дорожки, сохранив имена или поменяв пути в HTML. Поддерживаются и <code>.mp3</code>, и <code>.wav</code> — просто переименуйте <code>src</code>.</p>
     </article>
 
     <article class="card">
@@ -394,19 +465,6 @@
         </video>
       </div>
       <p class="note">Свой ролик: <code>&lt;source src=&quot;moj-rolik.mp4&quot; type=&quot;video/mp4&quot;&gt;</code>. Дублируйте блоки <code>.card</code> для новых работ.</p>
-    </article>
-
-    <article class="card">
-      <div class="tag-row">
-        <span class="tag">Звук</span>
-      </div>
-      <h2>Вторая дорожка</h2>
-      <p class="meta">Шаблон — скопируйте блок и укажите свой <code>src</code>.</p>
-      <div class="media-shell">
-        <audio controls preload="none" src="">
-          Укажите путь в атрибуте <code>src</code>.
-        </audio>
-      </div>
     </article>
 
     <footer>
