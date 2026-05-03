@@ -10,7 +10,49 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Сценарий видео / Sam Bruev (v127)</title>
+  <title>Сценарий видео / Sam Bruev (v141)</title>
+  <!-- До отрисовки тела: восстановить скролл после reload без «прыжка» картинки/фона -->
+  <script>
+    (function () {
+      var K = 'abakan-restore-scroll-y';
+      try {
+        var raw = sessionStorage.getItem(K);
+        if (raw == null) return;
+        sessionStorage.removeItem(K);
+        var y = Math.max(0, parseInt(raw, 10) || 0);
+        if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+        function apply() {
+          window.scrollTo(0, y);
+          var r = document.documentElement;
+          if (r) r.scrollTop = y;
+          if (document.body) document.body.scrollTop = y;
+        }
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', function () {
+            apply();
+            requestAnimationFrame(apply);
+            requestAnimationFrame(function () {
+              requestAnimationFrame(apply);
+            });
+          });
+        } else {
+          apply();
+          requestAnimationFrame(apply);
+          requestAnimationFrame(function () {
+            requestAnimationFrame(apply);
+          });
+        }
+        window.addEventListener(
+          'load',
+          function () {
+            apply();
+            requestAnimationFrame(apply);
+          },
+          { passive: true }
+        );
+      } catch (e) {}
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bad+Script&family=Pacifico&family=Roboto+Slab:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -36,6 +78,7 @@
       --script-font: "Pacifico", cursive;
       --brand-serif: "Roboto Slab", Georgia, "Times New Roman", serif;
       --top-logo-space: 34vh;
+      --assistant-drawer-w: min(50vw, 380px);
     }
 
     /* Фон: слой ::before position:fixed — одинаково на iPhone при скролле. Картинка lamp-corpus-bg.png — рядом с файлом. Низ и края дожимаем градиентами под текст */
@@ -44,6 +87,7 @@
       height: 100%;
       overflow-x: hidden;
       overscroll-behavior-x: none;
+      overflow-anchor: none;
     }
 
     body {
@@ -124,10 +168,328 @@
       display: flex;
       flex-direction: column;
       position: relative;
+      z-index: 12;
+      will-change: transform, filter;
+    }
+
+    body.assistant-drawer-open .wrap {
+      transform: translateX(var(--assistant-drawer-w));
+      pointer-events: none;
+      user-select: none;
+      transition: transform 0.38s cubic-bezier(0.25, 0.85, 0.32, 1), filter 0.38s cubic-bezier(0.25, 0.85, 0.32, 1);
+      filter: blur(11px) saturate(118%);
+      -webkit-filter: blur(11px) saturate(118%);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      body.assistant-drawer-open .wrap {
+        transition: none;
+      }
+    }
+
+    .assistant-drawer-backdrop {
+      display: none;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: var(--assistant-drawer-w);
+      right: 0;
+      z-index: 2147483638;
+      background: transparent;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      cursor: pointer;
+    }
+
+    body.assistant-drawer-open .assistant-drawer-backdrop {
+      display: block;
+    }
+
+    .assistant-drawer {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: var(--assistant-drawer-w);
+      max-width: 88vw;
+      z-index: 2147483639;
+      box-sizing: border-box;
+      margin: 0;
+      padding: calc(12px + env(safe-area-inset-top, 0px)) 14px calc(24px + env(safe-area-inset-bottom, 0px))
+        calc(14px + env(safe-area-inset-left, 0px));
+      background: linear-gradient(
+        180deg,
+        rgba(12, 10, 8, 0.97),
+        rgba(4, 3, 2, 0.98)
+      );
+      border-right: 1px solid rgba(255, 228, 160, 0.2);
+      box-shadow: 10px 0 40px rgba(0, 0, 0, 0.45);
+      transform: translateX(-102%);
+      transition: transform 0.38s cubic-bezier(0.25, 0.85, 0.32, 1);
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      color: var(--text);
+      pointer-events: auto;
+      visibility: hidden;
+    }
+
+    body.assistant-drawer-open .assistant-drawer {
+      transform: translateX(0);
+      visibility: visible;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .assistant-drawer {
+        transition: none;
+      }
+    }
+
+    /* Узкая зона: не перекрывает блок времени и контент (z ниже .wrap) */
+    .assistant-open-strip {
+      position: fixed;
+      left: env(safe-area-inset-left, 0px);
+      top: 50%;
+      transform: translateY(-50%);
+      width: 14px;
+      min-width: 12px;
+      height: min(160px, 42vh);
+      margin: 0;
+      padding: 0;
+      border: none;
+      border-radius: 0 12px 12px 0;
+      background: rgba(212, 175, 55, 0.2);
+      box-shadow: inset -1px 0 0 rgba(255, 228, 160, 0.18);
+      z-index: 8;
+      cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      transition: opacity 0.2s ease, background 0.2s ease;
+    }
+
+    .assistant-open-strip:active {
+      background: rgba(212, 175, 55, 0.35);
+    }
+
+    body.assistant-drawer-open .assistant-open-strip {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Всегда на экране: план ассистента (не нужно искать в «Настройках») */
+    .assistant-fab {
+      position: fixed;
+      right: max(14px, env(safe-area-inset-right));
+      bottom: max(18px, env(safe-area-inset-bottom));
+      width: 56px;
+      height: 56px;
+      border-radius: 999px;
+      z-index: 2147483644;
+      margin: 0;
+      padding: 0;
+      border: 3px solid rgba(255, 224, 150, 0.95);
+      background: linear-gradient(165deg, #e8c04a, #8a6a1e);
+      color: #140f08;
+      font-size: 28px;
+      font-weight: 900;
+      font-family: var(--brand-serif), Georgia, serif;
+      line-height: 54px;
+      text-align: center;
+      cursor: pointer;
+      box-shadow:
+        0 8px 26px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 250, 230, 0.35);
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .assistant-fab:active {
+      transform: scale(0.96);
+      filter: brightness(1.08);
+    }
+
+    body.assistant-drawer-open .assistant-fab {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.22s ease;
+    }
+
+    body.assistant-drawer-open #assistant-entry-banner {
+      opacity: 0;
+      pointer-events: none;
+      visibility: hidden;
+      transition: opacity 0.2s ease;
+    }
+
+    .assistant-drawer-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .assistant-drawer-title {
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-size: 13px;
+      color: var(--cream);
+      line-height: 1.3;
+      margin: 0;
+    }
+
+    .assistant-drawer-close {
+      flex-shrink: 0;
+      width: 2.25rem;
+      height: 2.25rem;
+      padding: 0;
+      margin: -4px -6px 0 0;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 228, 160, 0.28);
+      background: rgba(0, 0, 0, 0.5);
+      color: var(--cream);
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .assistant-drawer-close:active {
+      background: rgba(255, 228, 160, 0.08);
+    }
+
+    .assistant-drawer-intro {
+      font-size: 12px;
+      line-height: 1.35;
+      color: var(--muted);
+      margin: 0 0 14px;
+    }
+
+    .assistant-drawer-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .assistant-drawer-date {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(212, 175, 55, 0.55);
+      margin: 0 0 6px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid rgba(255, 228, 160, 0.12);
+    }
+
+    .assistant-drawer-item {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 4px;
+      width: 100%;
+      text-align: left;
+      padding: 10px 12px;
+      margin: 0;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 228, 160, 0.18);
+      background: rgba(0, 0, 0, 0.55);
+      color: var(--text);
+      font: inherit;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      box-sizing: border-box;
+    }
+
+    .assistant-drawer-item:active {
+      background: rgba(255, 228, 160, 0.06);
+    }
+
+    .assistant-drawer-item.is-active {
+      border-color: rgba(212, 175, 55, 0.45);
+      box-shadow: 0 0 0 1px rgba(212, 175, 55, 0.12);
+    }
+
+    .assistant-drawer-item-title {
+      font-weight: 800;
+      font-size: 14px;
+      line-height: 1.25;
+      color: var(--cream);
+    }
+
+    .assistant-drawer-item-meta {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.3;
+    }
+
+    .assistant-drawer-empty {
+      font-size: 13px;
+      color: var(--muted);
+      margin: 0;
     }
 
     .wrap > * { order: 10; }
     .wrap > *:not(#top-logo-block) { position: relative; z-index: 2; }
+
+    /* Плашка ассистента ВНЕ .wrap — иначе на телефоне она уезжает ниже ~30vh отступа и не видна без скролла */
+    .assistant-entry-outer {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 0 max(14px, env(safe-area-inset-left)) 10px max(14px, env(safe-area-inset-right));
+      box-sizing: border-box;
+      width: 100%;
+      position: relative;
+      z-index: 14;
+    }
+
+    #assistant-entry-banner {
+      width: 100%;
+      box-sizing: border-box;
+      margin: 0;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 3px solid rgba(255, 210, 90, 0.95);
+      background: linear-gradient(180deg, rgba(255, 200, 60, 0.35), rgba(120, 85, 20, 0.55));
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 250, 230, 0.2);
+    }
+
+    .assistant-entry-btn {
+      display: block;
+      width: 100%;
+      margin: 0 0 8px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 2px solid rgba(40, 30, 10, 0.9);
+      background: linear-gradient(180deg, #f5d875, #c9a030);
+      color: #120c04;
+      font: inherit;
+      font-weight: 900;
+      font-size: 15px;
+      letter-spacing: 0.04em;
+      line-height: 1.35;
+      text-align: center;
+      cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: rgba(0, 0, 0, 0.15);
+    }
+
+    .assistant-entry-btn:active {
+      filter: brightness(1.05);
+      transform: scale(0.99);
+    }
+
+    .assistant-entry-hint {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: rgba(255, 248, 225, 0.95);
+      text-align: center;
+      line-height: 1.4;
+    }
+
     #top-logo-block { order: 0; }
     #scenario-hub { order: 1; }
     #daily-plan { order: 2; }
@@ -421,6 +783,52 @@
       gap: 12px;
       align-items: end;
       padding: 14px 18px 16px;
+    }
+
+    .scenario-hub-assist-row {
+      grid-column: 1 / -1;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px 16px;
+      padding: 12px 14px;
+      margin-bottom: 4px;
+      border-radius: 14px;
+      border: 2px solid rgba(212, 175, 55, 0.65);
+      background: rgba(40, 32, 12, 0.65);
+      box-shadow: 0 0 0 1px rgba(255, 220, 140, 0.12), inset 0 1px 0 rgba(255, 248, 230, 0.06);
+    }
+
+    .btn-assistant-plan {
+      flex: 1 1 220px;
+      min-height: 52px;
+      padding: 12px 18px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 13px;
+      border-radius: 14px;
+      border: 2px solid rgba(255, 214, 120, 0.85);
+      background: linear-gradient(180deg, rgba(212, 175, 55, 0.35), rgba(90, 72, 24, 0.45));
+      color: #fff8e8;
+      cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: rgba(212, 175, 55, 0.35);
+    }
+
+    .btn-assistant-plan:active {
+      transform: translateY(1px);
+      filter: brightness(1.06);
+    }
+
+    .deploy-build-tag {
+      flex: 1 1 140px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: rgba(255, 236, 200, 0.92);
+      font-variant-numeric: tabular-nums;
+      line-height: 1.35;
     }
 
     .scenario-hub .row {
@@ -838,7 +1246,11 @@
       font-weight: 800;
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: #ff4d4d;
+      color: #ff2424;
+    }
+
+    .scene-main[data-scene-role="intro"] .scene-time-wrap .time-leading {
+      text-shadow: 0 0 18px rgba(255, 40, 40, 0.45), 0 0 42px rgba(180, 20, 30, 0.22);
     }
 
     .scene-main[data-scene-role="outro"] .scene-time-wrap .time-leading {
@@ -1248,12 +1660,37 @@
       }
     }
 
+    /* Вне @media: на широком экране селекты скрыты классом ios-wheel-time — кнопка времени должна быть видна */
+    .ios-wheel-time .scene-time-ios .scene-time-trigger {
+      display: flex;
+    }
+
+    .ios-wheel-time .scene-time-ios input[type="time"] {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      margin: -1px !important;
+      padding: 0 !important;
+      border: 0 !important;
+      clip: rect(0 0 0 0) !important;
+      clip-path: inset(50%) !important;
+      overflow: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+
+    .ios-wheel-time .scene-time-ios .sep {
+      display: none;
+    }
+
     .ios-wheel-time .scene-time-wrap .time-pickers {
       display: none;
     }
 
     .ios-wheel-time .scene-time-wrap .scene-time-ios {
       display: flex;
+      position: relative;
+      z-index: 20;
       margin-top: -16px;
       padding-top: 4px;
     }
@@ -1711,17 +2148,28 @@
       box-shadow: 0 0 0 1px rgba(255, 220, 160, 0.34), 0 4px 14px rgba(212, 175, 55, 0.2);
       opacity: 0;
       pointer-events: none;
-      transform: translateY(-16px) scale(0.85);
-      transition: opacity 0.2s ease, transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+      /* Одна формула transform: без inline style и без анимации translate — иначе точка дёргается */
+      transform: translateY(calc(-16px + var(--pull-dot-y, 0px))) scale(var(--pull-dot-s, 0.85));
+      transition: opacity 0.22s ease, transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), filter 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .pull-reload-hint.pull-reload-hint--dragging {
+      transition: opacity 0.14s ease-out, filter 0.2s ease, box-shadow 0.2s ease;
     }
 
     .pull-reload-hint.pull-reload-hint--ready {
-      animation: pullReloadDotPulse 0.95s ease-in-out infinite alternate;
+      animation: pullReloadDotPulse 1.05s ease-in-out infinite alternate;
     }
 
     @keyframes pullReloadDotPulse {
-      from { transform: translateY(var(--pull-dot-y, 0px)) scale(1); box-shadow: 0 0 0 1px rgba(255, 220, 160, 0.3), 0 5px 14px rgba(212, 175, 55, 0.18); }
-      to { transform: translateY(var(--pull-dot-y, 0px)) scale(1.1); box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.24), 0 8px 20px rgba(212, 175, 55, 0.24); }
+      from {
+        filter: brightness(1);
+        box-shadow: 0 0 0 1px rgba(255, 220, 160, 0.34), 0 5px 16px rgba(212, 175, 55, 0.22);
+      }
+      to {
+        filter: brightness(1.14);
+        box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.28), 0 9px 22px rgba(212, 175, 55, 0.28);
+      }
     }
 
     .pull-reload-flash {
@@ -2075,12 +2523,44 @@
 
     @media (max-width: 700px) {
       :root {
-        --top-logo-space: 30vh;
+        --top-logo-space: 14vh;
+      }
+
+      /* Выше .wrap (12) и FAB (3644): iOS иногда «теряет» fixed внутри раннего узла */
+      .assistant-entry-outer {
+        padding: 0;
+        max-width: none;
+        position: relative;
+        z-index: 2147483645;
+        pointer-events: none;
+      }
+
+      /* Закреплено под вырезом — всегда видно без прокрутки */
+      #assistant-entry-banner {
+        position: fixed;
+        top: env(safe-area-inset-top, 0px);
+        left: 0;
+        right: 0;
+        width: 100%;
+        margin: 0;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        border-top: none;
+        padding: 12px max(14px, env(safe-area-inset-left)) 10px max(14px, env(safe-area-inset-right));
+        z-index: 2147483645;
+        pointer-events: auto;
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+        backface-visibility: hidden;
+        box-shadow: 0 6px 28px rgba(0, 0, 0, 0.55);
       }
 
       .wrap {
         padding-left: max(14px, env(safe-area-inset-left));
         padding-right: max(14px, env(safe-area-inset-right));
+        /* место под фиксированную плашку (~88px + safe), затем воздух под логотип */
+        padding-top: calc(env(safe-area-inset-top) + 92px + var(--top-logo-space));
       }
 
       .top-logo {
@@ -2295,6 +2775,53 @@
   </style>
 </head>
 <body>
+  <button
+    type="button"
+    class="assistant-open-strip"
+    id="assistant-open-strip"
+    aria-label="Открыть план съёмок"
+    title="План съёмок — свайп вправо по тексту или нажми"></button>
+  <div
+    class="assistant-drawer-backdrop"
+    id="assistant-drawer-backdrop"
+    aria-hidden="true"
+    role="presentation"></div>
+  <aside
+    class="assistant-drawer"
+    id="assistant-drawer"
+    aria-hidden="true"
+    aria-modal="true"
+    role="dialog"
+    aria-labelledby="assistant-drawer-title">
+    <div class="assistant-drawer-inner">
+      <div class="assistant-drawer-head">
+        <h2 class="assistant-drawer-title" id="assistant-drawer-title">План съёмок</h2>
+        <button type="button" class="assistant-drawer-close" id="assistant-drawer-close" aria-label="Закрыть меню">
+          ×
+        </button>
+      </div>
+      <p class="assistant-drawer-intro">
+        Сценарии по датам и блоку — нажми, чтобы открыть и перезагрузить лист как с выпадающего списка.
+      </p>
+      <div id="assistant-drawer-list" class="assistant-drawer-list"></div>
+    </div>
+  </aside>
+  <button
+    type="button"
+    class="assistant-fab"
+    id="assistant-fab-help"
+    aria-label="План съёмок для ассистента"
+    title="План съёмок — список сценариев по датам">
+    ?
+  </button>
+  <div class="assistant-entry-outer" id="assistant-entry-outer">
+    <div class="assistant-entry-banner" id="assistant-entry-banner">
+      <button type="button" class="assistant-entry-btn" id="assistant-entry-btn">
+        ▶ План съёмок для ассистента — нажми здесь
+      </button>
+      <span class="assistant-entry-hint" id="assistant-entry-build"></span>
+    </div>
+  </div>
   <div id="pull-reload-hint" class="pull-reload-hint" aria-hidden="true"></div>
   <div id="pull-swipe-hint" class="pull-swipe-hint" aria-hidden="true"></div>
   <div id="pull-reload-flash" class="pull-reload-flash" aria-hidden="true"></div>
@@ -2313,6 +2840,12 @@
     <details class="card scenario-hub" id="scenario-hub" open>
       <summary>Настройки сценариев</summary>
       <div class="scenario-hub-body">
+        <div class="scenario-hub-assist-row">
+          <button type="button" class="btn-assistant-plan" id="btn-assistant-plan-open">
+            Открыть план для ассистента
+          </button>
+          <span class="deploy-build-tag" id="deploy-build-tag"></span>
+        </div>
         <div class="row">
           <label>Сценарий
             <select id="scenario-select"></select>
@@ -3326,18 +3859,31 @@
   <script>
     (function () {
       var PULL_RELOAD_FLAG = 'abakan-pull-reload-flag';
-      var PULL_RELOAD_SCROLL_KEY = 'abakan-pull-reload-scroll-y';
+      var ABAKAN_RESTORE_SCROLL_KEY = 'abakan-restore-scroll-y';
       try {
         if (sessionStorage.getItem(PULL_RELOAD_FLAG)) sessionStorage.removeItem(PULL_RELOAD_FLAG);
-        sessionStorage.removeItem(PULL_RELOAD_SCROLL_KEY);
       } catch (ePullFlag) {}
 
-      var APP_BUILD = 'v127-pull-reload-stable-view';
+      function saveScrollForNextLoad() {
+        try {
+          var y =
+            window.pageYOffset ||
+            (document.documentElement && document.documentElement.scrollTop) ||
+            (document.body && document.body.scrollTop) ||
+            0;
+          sessionStorage.setItem(ABAKAN_RESTORE_SCROLL_KEY, String(Math.max(0, Math.round(y))));
+        } catch (e) {}
+      }
+
+      var APP_BUILD = 'v141-scene-time-desktop-modal';
+      var lastSceneTimeTriggerTouchAt = 0;
       var APP_BUILD_KEY = 'abakan-app-build';
       var STORAGE_KEY = 'abakan-main-abakan-layout-v15';
       var LEGACY_STORAGE_KEYS = ['abakan-main-abakan-layout-v14', 'abakan-main-abakan-layout-v13', 'abakan-main-abakan-layout-v12', 'abakan-main-abakan-layout-v10', 'abakan-main-abakan-layout-v9', 'abakan-main-abakan-layout-v8'];
       var SCENARIO_STORAGE_KEY = 'abakan-scenarios-v2';
       var LEGACY_SCENARIO_KEYS = ['abakan-scenarios-v1'];
+      /** Авто-перезагрузка страницы: подтягивает свежую версию с сервера; данные сценариев — из localStorage этой же вкладки. */
+      var AUTO_PAGE_RELOAD_MS = 3 * 60 * 1000;
 
       // Анти-кэш разметки: при новой сборке чистим только слой «интерфейса», но НЕ abakan-scenarios-v2 —
       // там все сценарии пользователя; иначе после каждого деплоя всё обнулялось.
@@ -3551,6 +4097,7 @@
           }
         } catch (e) {}
         triggerHaptic('medium');
+        saveScrollForNextLoad();
         location.reload();
       }
 
@@ -3745,6 +4292,167 @@
           scenarioSelect.value = scenarioSelect.options[0].value;
         }
         if (!scenarioSelect.options.length) syncTitleSubject('');
+        try {
+          renderAssistantDrawerList();
+        } catch (eDrawerList) {}
+      }
+
+      function renderAssistantDrawerList() {
+        var host = document.getElementById('assistant-drawer-list');
+        if (!host) return;
+        host.innerHTML = '';
+        var bundle = readScenarioBundle();
+        var items = bundle && bundle.items ? bundle.items.slice() : [];
+        var activeId = bundle && bundle.activeId ? bundle.activeId : '';
+        if (!items.length) {
+          var empty = document.createElement('p');
+          empty.className = 'assistant-drawer-empty';
+          empty.textContent = 'Пока нет сценариев — создай шаблон в «Настройки сценариев».';
+          host.appendChild(empty);
+          return;
+        }
+        items.sort(function (a, b) {
+          var da = a.date || '9999-99-99';
+          var db = b.date || '9999-99-99';
+          if (da !== db) return da < db ? -1 : 1;
+          return (a.name || '').localeCompare(b.name || '', 'ru');
+        });
+        var byDate = {};
+        items.forEach(function (it) {
+          var k = it.date || 'Без даты';
+          if (!byDate[k]) byDate[k] = [];
+          byDate[k].push(it);
+        });
+        var dates = Object.keys(byDate).sort();
+        var stLabel = { draft: 'Черновик', ready: 'Готово', shot: 'Снято' };
+        dates.forEach(function (dkey) {
+          var h = document.createElement('div');
+          h.className = 'assistant-drawer-date';
+          h.textContent = dkey;
+          host.appendChild(h);
+          byDate[dkey].forEach(function (it) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'assistant-drawer-item';
+            if (it.id === activeId) btn.classList.add('is-active');
+            btn.setAttribute('data-scenario-id', it.id);
+            var title = document.createElement('span');
+            title.className = 'assistant-drawer-item-title';
+            title.textContent = it.name || 'Без названия';
+            var meta = document.createElement('span');
+            meta.className = 'assistant-drawer-item-meta';
+            var parts = [];
+            if (it.targetCount) parts.push(String(it.targetCount) + ' видео');
+            else parts.push('видео не задано');
+            var blk = normalizedShootBlock(it);
+            if (blk) parts.push(blk);
+            parts.push(stLabel[it.status] || it.status || '—');
+            meta.textContent = parts.join(' · ');
+            btn.appendChild(title);
+            btn.appendChild(meta);
+            host.appendChild(btn);
+          });
+        });
+      }
+
+      function openAssistantDrawer() {
+        if (document.body.classList.contains('assistant-drawer-open')) return;
+        renderAssistantDrawerList();
+        document.body.classList.add('assistant-drawer-open');
+        document.body.setAttribute('data-assistant-drawer-open', '1');
+        var d = document.getElementById('assistant-drawer');
+        var bk = document.getElementById('assistant-drawer-backdrop');
+        if (d) d.setAttribute('aria-hidden', 'false');
+        if (bk) bk.setAttribute('aria-hidden', 'false');
+        try {
+          triggerHaptic('light');
+        } catch (eH) {}
+        requestAnimationFrame(function () {
+          var c = document.getElementById('assistant-drawer-close');
+          if (c) c.focus();
+        });
+      }
+
+      function closeAssistantDrawer() {
+        if (!document.body.classList.contains('assistant-drawer-open')) return;
+        document.body.classList.remove('assistant-drawer-open');
+        document.body.removeAttribute('data-assistant-drawer-open');
+        var d = document.getElementById('assistant-drawer');
+        var bk = document.getElementById('assistant-drawer-backdrop');
+        if (d) d.setAttribute('aria-hidden', 'true');
+        if (bk) bk.setAttribute('aria-hidden', 'true');
+      }
+
+      function wireAssistantDrawer() {
+        if (wireAssistantDrawer._done) return;
+        wireAssistantDrawer._done = true;
+        var deployTag = document.getElementById('deploy-build-tag');
+        var buildTxt = 'Сборка: ' + APP_BUILD + ' — если эта строка старая, сайт не обновился.';
+        if (deployTag) deployTag.textContent = buildTxt;
+        var entryBuild = document.getElementById('assistant-entry-build');
+        if (entryBuild) entryBuild.textContent = buildTxt;
+        var entryBtn = document.getElementById('assistant-entry-btn');
+        if (entryBtn) {
+          entryBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            openAssistantDrawer();
+          });
+        }
+        var btnAssistHub = document.getElementById('btn-assistant-plan-open');
+        if (btnAssistHub) {
+          btnAssistHub.addEventListener('click', function (e) {
+            e.preventDefault();
+            openAssistantDrawer();
+          });
+        }
+        var fabHelp = document.getElementById('assistant-fab-help');
+        if (fabHelp) {
+          fabHelp.addEventListener('click', function (e) {
+            e.preventDefault();
+            openAssistantDrawer();
+          });
+        }
+        var bd = document.getElementById('assistant-drawer-backdrop');
+        var closeBtn = document.getElementById('assistant-drawer-close');
+        var list = document.getElementById('assistant-drawer-list');
+        if (bd) {
+          bd.addEventListener(
+            'click',
+            function () {
+              closeAssistantDrawer();
+            },
+            { passive: true }
+          );
+        }
+        if (closeBtn) {
+          closeBtn.addEventListener('click', function () {
+            closeAssistantDrawer();
+          });
+        }
+        document.addEventListener(
+          'keydown',
+          function (e) {
+            if (!document.body.classList.contains('assistant-drawer-open')) return;
+            if (e.key === 'Escape' || e.key === 'Esc') {
+              e.preventDefault();
+              closeAssistantDrawer();
+            }
+          },
+          true
+        );
+        if (list) {
+          list.addEventListener('click', function (e) {
+            var btn = e.target && e.target.closest ? e.target.closest('[data-scenario-id]') : null;
+            if (!btn || !scenarioSelect) return;
+            var id = btn.getAttribute('data-scenario-id');
+            if (!id) return;
+            closeAssistantDrawer();
+            scenarioSelect.value = id;
+            try {
+              scenarioSelect.dispatchEvent(new Event('change', { bubbles: true }));
+            } catch (eCh) {}
+          });
+        }
       }
 
       function persistToStorage(statusText) {
@@ -4005,6 +4713,7 @@
         if (span) span.textContent = formatSceneTimeTriggerLabel(wrap);
       }
 
+      /** Только раскладка диалога: по центру на узком экране, у якоря на широком. Клик по времени обрабатывается всегда (ios-wheel-time скрывает select). */
       function useSceneTimeCenterModal() {
         return typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 932px)').matches;
       }
@@ -5683,6 +6392,7 @@
             if (!bundle) return;
             bundle.activeId = scenarioSelect.value;
             writeScenarioBundle(bundle);
+            saveScrollForNextLoad();
             location.reload();
           });
         }
@@ -5711,6 +6421,7 @@
               alert('Не удалось создать шаблон. Освободите память сайта (кэш/данные) и попробуйте снова.');
               return;
             }
+            saveScrollForNextLoad();
             location.reload();
           });
         }
@@ -5729,6 +6440,7 @@
               alert('Не удалось удалить сценарий. Освободите память сайта (кэш/данные) и попробуйте снова.');
               return;
             }
+            saveScrollForNextLoad();
             location.reload();
           });
         }
@@ -5813,17 +6525,37 @@
         var swipeCancelled = false;
         var pullMaxDy = 0;
         var swipeMinDx = 0;
+        var swipeMaxDx = 0;
+        var swipeIntentHorizontal = false;
         var TOP_EPS = 10;
         var PULL_MIN = 76;
-        var SWIPE_MIN = 72;
+        /** Свайп влево — перезагрузка */
+        var SWIPE_MIN = 54;
+        /** Свайп вправо — меню ассистента (ниже порог: отдельно от reload) */
+        var ASSIST_SWIPE_MIN = 38;
         var pullReloadedAt = 0;
 
-        function skip(el) {
+        /** Для pull-to-reload от верха — не начинаем на контролах */
+        function skipPull(el) {
           if (!el || !el.closest) return true;
+          if (document.body.classList.contains('assistant-drawer-open')) return true;
           if (el.closest('dialog[open]')) return true;
-          if (el.closest('.teleprompter-overlay')) return true;
+          if (el.closest('.teleprompter-overlay.open')) return true;
+          if (el.closest('.assistant-drawer')) return true;
           if (el.closest('input, textarea, select, button, .logo-bg, .logo-controls, [contenteditable="true"]'))
             return true;
+          return false;
+        }
+
+        /** Для горизонтального свайпа — только модалки; иначе select/button блокировали любой жест */
+        function skipHorizontalSwipe(el) {
+          if (!el || !el.closest) return true;
+          if (document.body.classList.contains('assistant-drawer-open')) return true;
+          if (el.closest('dialog[open]')) return true;
+          var tp = document.getElementById('teleprompter-overlay');
+          if (tp && tp.classList.contains('open') && el.closest('.teleprompter-overlay')) return true;
+          if (el.closest('.assistant-drawer')) return true;
+          if (el.closest('[contenteditable="true"]')) return true;
           return false;
         }
 
@@ -5847,10 +6579,10 @@
         function resetPullHint() {
           var hint = pullHintEl();
           if (!hint) return;
+          hint.classList.remove('pull-reload-hint--dragging', 'pull-reload-hint--ready');
+          hint.style.removeProperty('--pull-dot-y');
+          hint.style.removeProperty('--pull-dot-s');
           hint.style.opacity = '';
-          hint.style.setProperty('--pull-dot-y', '0px');
-          hint.style.transform = '';
-          hint.classList.remove('pull-reload-hint--ready');
         }
 
         function resetSwipeHint() {
@@ -5863,7 +6595,6 @@
 
         function scheduleReloadAfterPullGesture(opts) {
           opts = opts || {};
-          var fromSwipe = !!opts.fromSwipe;
           var now = Date.now();
           if (now - pullReloadedAt < 1300) return;
           pullReloadedAt = now;
@@ -5876,18 +6607,11 @@
           try {
             triggerHaptic('medium');
           } catch (e2) {}
-          resetPullHint();
           resetSwipeHint();
-          var flash = document.getElementById('pull-reload-flash');
-          if (flash) {
-            flash.classList.toggle('pull-reload-flash--from-edge', fromSwipe);
-            flash.classList.add('pull-reload-flash--show');
-            flash.setAttribute('aria-hidden', 'false');
-          }
-          var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-          setTimeout(function () {
+          saveScrollForNextLoad();
+          requestAnimationFrame(function () {
             location.reload();
-          }, reduced ? 70 : 210);
+          });
         }
 
         document.addEventListener(
@@ -5896,18 +6620,25 @@
             resetPullHint();
             resetSwipeHint();
             swipeCancelled = false;
-            if (skip(e.target)) {
+            swipeIntentHorizontal = false;
+            var tgt = e.target;
+            if (skipHorizontalSwipe(tgt)) {
               pullArmed = false;
               swipeArmed = false;
               return;
             }
+            if (skipPull(tgt)) {
+              pullArmed = false;
+            } else {
+              pullArmed = scrollTopNow() <= TOP_EPS;
+            }
+            swipeArmed = true;
             var t0 = e.touches[0];
             startX = t0.clientX;
             startY = t0.clientY;
             pullMaxDy = 0;
             swipeMinDx = 0;
-            pullArmed = scrollTopNow() <= TOP_EPS;
-            swipeArmed = true;
+            swipeMaxDx = 0;
           },
           { passive: true }
         );
@@ -5925,11 +6656,14 @@
                 if (dy > pullMaxDy) pullMaxDy = dy;
                 var hint = pullHintEl();
                 if (hint && dy > 16) {
-                  var yShift = Math.min(30, dy * 0.22);
+                  hint.classList.add('pull-reload-hint--dragging');
+                  var yShift = Math.min(36, dy * 0.26);
+                  var pullProg = Math.min(1, Math.max(0, (dy - 16) / (PULL_MIN - 16)));
+                  var s = 0.85 + pullProg * 0.15;
                   hint.style.setProperty('--pull-dot-y', yShift + 'px');
-                  hint.style.opacity = String(Math.min(1, 0.22 + (dy / PULL_MIN) * 0.78));
-                  hint.style.transform = 'translateY(' + yShift + 'px)';
-                  hint.classList.toggle('pull-reload-hint--ready', dy >= PULL_MIN * 0.9);
+                  hint.style.setProperty('--pull-dot-s', String(s));
+                  hint.style.opacity = String(Math.min(1, 0.16 + pullProg * 0.84));
+                  hint.classList.toggle('pull-reload-hint--ready', dy >= PULL_MIN * 0.88);
                 }
               } else {
                 pullArmed = false;
@@ -5938,12 +6672,19 @@
             }
 
             if (swipeArmed && !swipeCancelled) {
-              if (Math.abs(dy) > 36 && Math.abs(dy) > Math.abs(dx) * 1.28) {
+              if (dx > swipeMaxDx) swipeMaxDx = dx;
+              if (dx < swipeMinDx) swipeMinDx = dx;
+              if (dx > 10 && dx >= Math.abs(dy) * 0.65) swipeIntentHorizontal = true;
+              var vetoVertical =
+                !swipeIntentHorizontal &&
+                swipeMaxDx < 32 &&
+                Math.abs(dy) > 44 &&
+                Math.abs(dy) > Math.abs(dx) * 1.4;
+              if (vetoVertical) {
                 swipeCancelled = true;
                 swipeArmed = false;
                 resetSwipeHint();
               } else {
-                if (dx < swipeMinDx) swipeMinDx = dx;
                 var sh = swipeHintEl();
                 if (sh && dx < -8) {
                   var prog = Math.min(1, Math.abs(swipeMinDx) / SWIPE_MIN);
@@ -5962,17 +6703,29 @@
           'touchend',
           function () {
             var didPull = pullArmed && scrollTopNow() <= TOP_EPS && pullMaxDy >= PULL_MIN;
-            var didSwipe = swipeArmed && !swipeCancelled && swipeMinDx <= -SWIPE_MIN;
+            var didSwipeLeft = swipeArmed && !swipeCancelled && swipeMinDx <= -SWIPE_MIN;
+            var didSwipeRight =
+              swipeArmed &&
+              !swipeCancelled &&
+              swipeMaxDx >= ASSIST_SWIPE_MIN &&
+              swipeMaxDx + 4 >= Math.abs(swipeMinDx);
+            var didSwipeLeftDom =
+              didSwipeLeft && !didSwipeRight && Math.abs(swipeMinDx) > swipeMaxDx + 6;
             pullArmed = false;
             swipeArmed = false;
             if (didPull) scheduleReloadAfterPullGesture({ fromSwipe: false });
-            else if (didSwipe) scheduleReloadAfterPullGesture({ fromSwipe: true });
+            else if (didSwipeRight) {
+              resetPullHint();
+              resetSwipeHint();
+              openAssistantDrawer();
+            } else if (didSwipeLeftDom) scheduleReloadAfterPullGesture({ fromSwipe: true });
             else {
               resetPullHint();
               resetSwipeHint();
             }
             pullMaxDy = 0;
             swipeMinDx = 0;
+            swipeMaxDx = 0;
           },
           { passive: true }
         );
@@ -5985,6 +6738,7 @@
             swipeCancelled = true;
             pullMaxDy = 0;
             swipeMinDx = 0;
+            swipeMaxDx = 0;
             resetPullHint();
             resetSwipeHint();
           },
@@ -5992,9 +6746,115 @@
         );
       }
 
+      /** Свайп вправо: Pointer Events (iOS/Safari надёжнее document-touch). Без Pointer API остаётся жест в wirePullDownReload. */
+      function wireAssistantDrawerOpenGestures() {
+        if (wireAssistantDrawerOpenGestures._done) return;
+        wireAssistantDrawerOpenGestures._done = true;
+        var strip = document.getElementById('assistant-open-strip');
+        if (strip) {
+          strip.addEventListener(
+            'click',
+            function (e) {
+              e.preventDefault();
+              openAssistantDrawer();
+            },
+            { passive: false }
+          );
+        }
+        var activePid = null;
+        var sx = 0;
+        var sy = 0;
+        var maxDx = 0;
+        var minDx = 0;
+        var maxAbsDy = 0;
+        var OPEN_MIN = 40;
+
+        function ignorePtrTarget(el) {
+          if (!el || !el.closest) return true;
+          if (document.body.classList.contains('assistant-drawer-open')) return true;
+          if (el.closest('dialog[open]')) return true;
+          if (el.closest('.assistant-drawer')) return true;
+          var tpOv = document.getElementById('teleprompter-overlay');
+          if (tpOv && tpOv.classList.contains('open') && el.closest('.teleprompter-overlay')) return true;
+          if (el.closest('input, textarea, select, button, .logo-bg, .logo-controls, [contenteditable="true"]'))
+            return true;
+          if (el.closest('.assistant-open-strip')) return true;
+          return false;
+        }
+
+        function onPointerDown(e) {
+          if (activePid !== null) return;
+          if (e.pointerType === 'mouse' && e.button !== 0) return;
+          if (ignorePtrTarget(e.target)) return;
+          activePid = e.pointerId;
+          sx = e.clientX;
+          sy = e.clientY;
+          maxDx = 0;
+          minDx = 0;
+          maxAbsDy = 0;
+          try {
+            if (e.target && e.target.setPointerCapture) e.target.setPointerCapture(e.pointerId);
+          } catch (eCap) {}
+        }
+
+        function onPointerMove(e) {
+          if (activePid !== e.pointerId) return;
+          var dx = e.clientX - sx;
+          var dy = e.clientY - sy;
+          if (dx > maxDx) maxDx = dx;
+          if (dx < minDx) minDx = dx;
+          if (Math.abs(dy) > maxAbsDy) maxAbsDy = Math.abs(dy);
+        }
+
+        function onPointerEnd(e) {
+          if (activePid !== e.pointerId) return;
+          activePid = null;
+          var finDx = e.clientX - sx;
+          var finDy = Math.abs(e.clientY - sy);
+          var useDx = Math.max(maxDx, finDx);
+          var useDy = Math.max(maxAbsDy, finDy);
+          if (useDx >= OPEN_MIN && useDx + 8 >= Math.abs(minDx) && useDx >= useDy * 0.82) {
+            openAssistantDrawer();
+          }
+        }
+
+        document.addEventListener('pointerdown', onPointerDown, { passive: true, capture: true });
+        document.addEventListener('pointermove', onPointerMove, { passive: true, capture: true });
+        document.addEventListener('pointerup', onPointerEnd, { passive: true, capture: true });
+        document.addEventListener(
+          'pointercancel',
+          function (e) {
+            if (activePid === e.pointerId) activePid = null;
+          },
+          { passive: true, capture: true }
+        );
+      }
+
+      function wirePeriodicPageReload() {
+        if (wirePeriodicPageReload._done) return;
+        wirePeriodicPageReload._done = true;
+        setInterval(function () {
+          if (document.hidden) return;
+          if (document.body.classList.contains('assistant-drawer-open')) return;
+          var tpOv = document.getElementById('teleprompter-overlay');
+          if (tpOv && tpOv.classList.contains('open')) return;
+          if (document.querySelector('dialog[open]')) return;
+          try {
+            flushSave();
+          } catch (eFlush) {}
+          saveScrollForNextLoad();
+          requestAnimationFrame(function () {
+            location.reload();
+          });
+        }, AUTO_PAGE_RELOAD_MS);
+      }
+
       loadFromStorage();
       wireTopLogoScrollBlur();
       wirePullDownReload();
+      wireAssistantDrawer();
+      wireAssistantDrawerOpenGestures();
+      wirePeriodicPageReload();
       initBottomLogoFromTop();
       migrateLegacySceneTimes();
       hydrateDatumSceneTimes();
@@ -6005,7 +6865,6 @@
       document.addEventListener(
         'pointerdown',
         function (e) {
-          if (!useSceneTimeCenterModal()) return;
           var btn = e.target && e.target.closest && e.target.closest('.scene-time-trigger');
           if (!btn) return;
           sceneTimeDialogPointerAnchor.x = e.clientX;
@@ -6014,9 +6873,31 @@
         true
       );
       document.addEventListener(
+        'touchend',
+        function (e) {
+          var btn = e.target && e.target.closest && e.target.closest('.scene-time-trigger');
+          if (!btn) return;
+          lastSceneTimeTriggerTouchAt = Date.now();
+          e.preventDefault();
+          e.stopPropagation();
+          var wrap = btn.closest('.scene-time-wrap');
+          if (!wrap) return;
+          var ax = NaN;
+          var ay = NaN;
+          if (e.changedTouches && e.changedTouches[0]) {
+            ax = e.changedTouches[0].clientX;
+            ay = e.changedTouches[0].clientY;
+          }
+          sceneTimeDialogPointerAnchor.x = NaN;
+          sceneTimeDialogPointerAnchor.y = NaN;
+          openSceneTimeCenterDialog(wrap, ax, ay);
+        },
+        { passive: false, capture: true }
+      );
+      document.addEventListener(
         'click',
         function (e) {
-          if (!useSceneTimeCenterModal()) return;
+          if (lastSceneTimeTriggerTouchAt && Date.now() - lastSceneTimeTriggerTouchAt < 700) return;
           var btn = e.target && e.target.closest && e.target.closest('.scene-time-trigger');
           if (!btn) return;
           e.preventDefault();
@@ -6060,6 +6941,11 @@
       renumberScenes();
       rememberUndoState();
       setStatus('Готово (автосохранение)', false);
+      requestAnimationFrame(function () {
+        try {
+          window.dispatchEvent(new Event('scroll'));
+        } catch (eSyncScroll) {}
+      });
     })();
   </script>
 
