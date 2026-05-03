@@ -391,139 +391,6 @@
       box-shadow: 0 1px 0 rgba(212, 175, 55, 0.08);
     }
 
-    /* Плашки над названием блока жанра: слово вместо «Жанр», своё свечение */
-    .tag.genre-pill {
-      display: inline-block;
-      font-family: var(--genre-display-font);
-      font-weight: 400;
-      will-change: color, box-shadow, text-shadow;
-      letter-spacing: 0.2em;
-    }
-
-    @keyframes genre-pill-metal {
-      0%,
-      100% {
-        color: rgba(255, 186, 120, 0.82);
-        text-shadow:
-          0 0 10px rgba(255, 120, 40, 0.45),
-          0 0 22px rgba(255, 150, 50, 0.22);
-        box-shadow:
-          0 1px 0 rgba(255, 140, 60, 0.25),
-          0 0 14px rgba(255, 100, 30, 0.18),
-          inset 0 1px 0 rgba(255, 200, 120, 0.06);
-      }
-
-      50% {
-        color: rgba(255, 236, 200, 0.98);
-        text-shadow:
-          0 0 18px rgba(255, 160, 50, 0.65),
-          0 0 36px rgba(255, 210, 90, 0.4),
-          0 0 8px rgba(255, 240, 180, 0.55);
-        box-shadow:
-          0 1px 2px rgba(0, 0, 0, 0.35),
-          0 1px 0 rgba(255, 200, 100, 0.35),
-          0 0 28px rgba(255, 130, 40, 0.42),
-          inset 0 1px 0 rgba(255, 230, 190, 0.12);
-      }
-    }
-
-    @keyframes genre-pill-rock {
-      0%,
-      100% {
-        color: rgba(255, 210, 130, 0.85);
-        text-shadow:
-          0 0 10px rgba(255, 150, 40, 0.48),
-          0 0 24px rgba(255, 190, 60, 0.28);
-        box-shadow:
-          0 1px 0 rgba(255, 170, 70, 0.28),
-          0 0 16px rgba(255, 130, 25, 0.22),
-          inset 0 1px 0 rgba(255, 220, 140, 0.08);
-      }
-
-      50% {
-        color: rgba(255, 248, 210, 0.99);
-        text-shadow:
-          0 0 20px rgba(255, 175, 55, 0.62),
-          0 0 40px rgba(255, 220, 100, 0.38),
-          0 0 10px rgba(255, 250, 200, 0.5);
-        box-shadow:
-          0 1px 2px rgba(0, 0, 0, 0.35),
-          0 1px 0 rgba(255, 215, 120, 0.38),
-          0 0 30px rgba(255, 145, 35, 0.45),
-          inset 0 1px 0 rgba(255, 240, 200, 0.14);
-      }
-    }
-
-    @keyframes genre-pill-pop {
-      0%,
-      100% {
-        color: rgba(150, 220, 255, 0.88);
-        text-shadow:
-          0 0 10px rgba(70, 170, 255, 0.5),
-          0 0 22px rgba(100, 200, 255, 0.28);
-        box-shadow:
-          0 1px 0 rgba(100, 190, 255, 0.32),
-          0 0 14px rgba(60, 160, 255, 0.26),
-          inset 0 1px 0 rgba(200, 240, 255, 0.1);
-      }
-
-      50% {
-        color: rgba(220, 248, 255, 0.99);
-        text-shadow:
-          0 0 18px rgba(120, 210, 255, 0.72),
-          0 0 38px rgba(160, 230, 255, 0.45),
-          0 0 10px rgba(230, 252, 255, 0.55);
-        box-shadow:
-          0 1px 2px rgba(0, 0, 0, 0.35),
-          0 1px 0 rgba(160, 220, 255, 0.42),
-          0 0 28px rgba(80, 180, 255, 0.48),
-          inset 0 1px 0 rgba(220, 245, 255, 0.16);
-      }
-    }
-
-    @keyframes genre-pill-punk {
-      0%,
-      100% {
-        color: rgba(255, 145, 200, 0.88);
-        text-shadow:
-          0 0 10px rgba(255, 80, 160, 0.52),
-          0 0 22px rgba(255, 100, 180, 0.3);
-        box-shadow:
-          0 1px 0 rgba(255, 120, 190, 0.32),
-          0 0 14px rgba(255, 70, 150, 0.28),
-          inset 0 1px 0 rgba(255, 210, 235, 0.08);
-      }
-
-      50% {
-        color: rgba(255, 228, 245, 0.99);
-        text-shadow:
-          0 0 18px rgba(255, 110, 190, 0.68),
-          0 0 36px rgba(255, 160, 210, 0.42),
-          0 0 10px rgba(255, 240, 250, 0.55);
-        box-shadow:
-          0 1px 2px rgba(0, 0, 0, 0.35),
-          0 1px 0 rgba(255, 180, 220, 0.4),
-          0 0 28px rgba(255, 90, 170, 0.48),
-          inset 0 1px 0 rgba(255, 230, 245, 0.14);
-      }
-    }
-
-    .portfolio-genre--metal .tag.genre-pill--metal {
-      animation: genre-pill-metal 2.45s ease-in-out infinite;
-    }
-
-    .portfolio-genre--rock .tag.genre-pill--rock {
-      animation: genre-pill-rock 2.45s ease-in-out infinite;
-    }
-
-    .portfolio-genre--pop .tag.genre-pill--pop {
-      animation: genre-pill-pop 2.45s ease-in-out infinite;
-    }
-
-    .portfolio-genre--punk .tag.genre-pill--punk {
-      animation: genre-pill-punk 2.45s ease-in-out infinite;
-    }
-
     /* То же ритм 2.35s что у «Жанр»: слабый филамент, луч вниз, акцент внизу у знака */
     @keyframes brand-lamp-filament {
       0%,
@@ -637,40 +504,14 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .tag.genre-pill {
+      .portfolio-genre-title {
         animation: none;
-      }
-
-      .portfolio-genre--metal .tag.genre-pill--metal {
-        color: rgba(255, 205, 150, 0.92);
-        text-shadow: 0 0 14px rgba(255, 130, 50, 0.35);
-        box-shadow:
-          0 1px 0 rgba(255, 140, 60, 0.22),
-          0 0 16px rgba(255, 100, 35, 0.2);
-      }
-
-      .portfolio-genre--rock .tag.genre-pill--rock {
-        color: rgba(255, 225, 170, 0.93);
-        text-shadow: 0 0 14px rgba(255, 155, 50, 0.38);
-        box-shadow:
-          0 1px 0 rgba(255, 170, 70, 0.24),
-          0 0 16px rgba(255, 125, 30, 0.22);
-      }
-
-      .portfolio-genre--pop .tag.genre-pill--pop {
-        color: rgba(175, 230, 255, 0.94);
-        text-shadow: 0 0 14px rgba(80, 180, 255, 0.4);
-        box-shadow:
-          0 1px 0 rgba(120, 200, 255, 0.28),
-          0 0 16px rgba(70, 160, 255, 0.26);
-      }
-
-      .portfolio-genre--punk .tag.genre-pill--punk {
-        color: rgba(255, 175, 215, 0.94);
-        text-shadow: 0 0 14px rgba(255, 90, 165, 0.42);
-        box-shadow:
-          0 1px 0 rgba(255, 130, 195, 0.28),
-          0 0 16px rgba(255, 75, 155, 0.26);
+        color: rgba(255, 150, 240, 0.99);
+        text-shadow:
+          0 2px 1px rgba(0, 0, 0, 1),
+          0 4px 0 rgba(0, 0, 0, 0.82),
+          0 0 32px rgba(255, 0, 180, 0.85),
+          0 0 64px rgba(255, 40, 200, 0.5);
       }
 
       .brand-stack::before {
@@ -1461,7 +1302,7 @@
       color: rgba(232, 201, 104, 0.92);
     }
 
-    /* Секции жанра — на всю ширину экрана, содержимое к левому краю как у общей колонки */
+    /* Секции жанра — на всю ширину экрана; название по центру */
     section.portfolio-genre {
       position: relative;
       width: 100vw;
@@ -1484,10 +1325,11 @@
     .portfolio-genre-banner {
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
-      margin: 1.65rem 0 1.05rem;
+      align-items: center;
+      margin: 1.65rem auto 1.05rem;
       padding: 0 0 0.85rem;
-      text-align: left;
+      width: 100%;
+      text-align: center;
       border-bottom: none;
     }
 
@@ -1495,24 +1337,44 @@
       margin-top: 0.35rem;
     }
 
-    .portfolio-genre-banner .tag {
-      margin-bottom: 0.42rem;
+    @keyframes genre-title-neon-pink {
+      0%,
+      100% {
+        color: rgba(255, 90, 200, 0.98);
+        text-shadow:
+          0 2px 1px rgba(0, 0, 0, 1),
+          0 4px 0 rgba(0, 0, 0, 0.82),
+          0 0 28px rgba(255, 0, 165, 0.95),
+          0 0 58px rgba(255, 0, 145, 0.72),
+          0 0 104px rgba(255, 60, 200, 0.45),
+          0 18px 42px rgba(0, 0, 0, 0.78);
+      }
+
+      50% {
+        color: rgba(255, 245, 255, 1);
+        text-shadow:
+          0 2px 1px rgba(0, 0, 0, 1),
+          0 4px 0 rgba(0, 0, 0, 0.82),
+          0 0 42px rgba(255, 80, 230, 1),
+          0 0 86px rgba(255, 20, 180, 0.88),
+          0 0 128px rgba(255, 140, 255, 0.55),
+          0 22px 48px rgba(0, 0, 0, 0.82);
+      }
     }
 
     .portfolio-genre-title {
-      margin: 0;
+      margin: 0 auto;
+      width: 100%;
+      max-width: min(720px, 100%);
       font-family: var(--genre-display-font);
       font-weight: 400;
       font-size: clamp(2.12rem, 7vw, 2.92rem);
       letter-spacing: clamp(0.16em, 1.55vw, 0.26em);
       text-transform: uppercase;
-      color: rgba(242, 218, 135, 0.99);
-      text-shadow:
-        0 2px 1px rgba(0, 0, 0, 1),
-        0 4px 0 rgba(0, 0, 0, 0.82),
-        0 22px 40px rgba(0, 0, 0, 0.88),
-        0 0 28px rgba(212, 175, 55, 0.2);
+      text-align: center;
       line-height: 1.03;
+      will-change: color, text-shadow;
+      animation: genre-title-neon-pink 2.85s ease-in-out infinite;
     }
     .portfolio-genre > .note:last-child {
       margin-top: 0.15rem;
@@ -2221,7 +2083,6 @@
 
     <section class="portfolio-genre portfolio-genre--metal" data-genre="metal" data-active-stem="drums" aria-labelledby="genre-metal">
       <header class="portfolio-genre-banner">
-        <span class="tag genre-pill genre-pill--metal" aria-hidden="true">METAL</span>
         <h2 class="portfolio-genre-title" id="genre-metal">METAL</h2>
       </header>
 
@@ -2305,7 +2166,6 @@
 
     <section class="portfolio-genre portfolio-genre--rock" data-genre="rock" data-active-stem="drums" aria-labelledby="genre-rock">
       <header class="portfolio-genre-banner">
-        <span class="tag genre-pill genre-pill--rock" aria-hidden="true">ROCK</span>
         <h2 class="portfolio-genre-title" id="genre-rock">ROCK</h2>
       </header>
 
@@ -2389,7 +2249,6 @@
 
     <section class="portfolio-genre portfolio-genre--pop" data-genre="pop" data-active-stem="drums" aria-labelledby="genre-pop">
       <header class="portfolio-genre-banner">
-        <span class="tag genre-pill genre-pill--pop" aria-hidden="true">POP</span>
         <h2 class="portfolio-genre-title" id="genre-pop">POP</h2>
       </header>
 
@@ -2473,7 +2332,6 @@
 
     <section class="portfolio-genre portfolio-genre--punk" data-genre="punk" data-active-stem="drums" aria-labelledby="genre-punk">
       <header class="portfolio-genre-banner">
-        <span class="tag genre-pill genre-pill--punk" aria-hidden="true">PUNK</span>
         <h2 class="portfolio-genre-title" id="genre-punk">PUNK</h2>
       </header>
 
