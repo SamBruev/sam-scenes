@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="refresh" content="180">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Примеры работ / Sam Bruev</title>
@@ -468,6 +467,102 @@
       font-weight: 700;
     }
 
+    /* Прокрутили страницу вверх до конца после чтения снизу — золотая полоска и reload */
+    .refresh-strip {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      z-index: 10050;
+      pointer-events: none;
+      opacity: 0;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(212, 175, 55, 0.35) 25%,
+        rgba(250, 220, 150, 0.92) 50%,
+        rgba(212, 175, 55, 0.35) 75%,
+        transparent 100%
+      );
+      background-size: 220% 100%;
+      transition: opacity 0.2s ease;
+    }
+
+    .refresh-spark {
+      position: fixed;
+      top: max(12px, env(safe-area-inset-top));
+      left: 50%;
+      z-index: 10051;
+      pointer-events: none;
+      opacity: 0;
+      transform: translate(-50%, 0);
+      font-family: var(--brand-serif);
+      font-size: 0.625rem;
+      font-weight: 800;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(232, 201, 104, 0.88);
+      text-shadow: 0 1px 12px rgba(0, 0, 0, 0.8);
+      white-space: nowrap;
+    }
+
+    html.refresh-at-top .refresh-strip {
+      opacity: 1;
+      animation: refresh-strip-glide 0.72s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    html.refresh-at-top .refresh-spark {
+      opacity: 1;
+      animation: refresh-label-pulse 0.72s ease-out forwards;
+    }
+
+    @keyframes refresh-strip-glide {
+      0% {
+        background-position: 110% 0;
+        opacity: 0.25;
+      }
+
+      55% {
+        opacity: 1;
+      }
+
+      100% {
+        background-position: -10% 0;
+        opacity: 1;
+      }
+    }
+
+    @keyframes refresh-label-pulse {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, 6px);
+      }
+
+      28% {
+        opacity: 0.95;
+        transform: translate(-50%, 0);
+      }
+
+      100% {
+        opacity: 1;
+        transform: translate(-50%, -1px);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html.refresh-at-top .refresh-strip {
+        animation: none;
+        opacity: 1;
+      }
+
+      html.refresh-at-top .refresh-spark {
+        animation: none;
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+    }
+
     footer {
       margin-top: 2.85rem;
       text-align: center;
@@ -506,6 +601,8 @@
   </style>
 </head>
 <body>
+  <div class="refresh-strip" aria-hidden="true"></div>
+  <div class="refresh-spark" aria-hidden="true">Обновление</div>
   <div class="ambient" aria-hidden="true">
     <div class="ambient__glow"></div>
     <div class="ambient__logo">
@@ -659,5 +756,35 @@
       <span class="site-footer__production">Music production</span>
     </footer>
   </div>
+  <script>
+    (function () {
+      var minDownPx = 100;
+      var topPx = 8;
+      var delayMs = 720;
+      var hasScrolledDown = false;
+      var reloading = false;
+      var prevY = window.scrollY || document.documentElement.scrollTop || 0;
+
+      function onScroll() {
+        if (reloading) return;
+        var y = window.scrollY || document.documentElement.scrollTop || 0;
+        if (y > minDownPx) hasScrolledDown = true;
+        var fromAbove =
+          hasScrolledDown && prevY > topPx && y <= topPx;
+        prevY = y;
+        if (!fromAbove) return;
+        reloading = true;
+        document.documentElement.classList.add("refresh-at-top");
+        var mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+        var wait =
+          mq && mq.matches ? Math.min(delayMs, 120) : delayMs;
+        window.setTimeout(function () {
+          window.location.reload();
+        }, wait);
+      }
+
+      window.addEventListener("scroll", onScroll, { passive: true });
+    })();
+  </script>
 </body>
 </html>
