@@ -1758,6 +1758,42 @@
       border-radius: 4px;
     }
 
+    .site-footer__mail-line {
+      margin: clamp(0.55rem, 2.2vw, 0.85rem) auto 0;
+      padding: 0 0.5rem;
+      text-align: center;
+      max-width: min(24rem, 100%);
+    }
+
+    .site-footer__mail-link {
+      font-family: var(--brand-serif);
+      font-size: clamp(0.64rem, 2.05vw, 0.74rem);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: none;
+      font-variant-numeric: tabular-nums;
+      color: rgba(222, 200, 120, 0.88);
+      text-decoration: none;
+      transition: color 0.18s ease, text-shadow 0.18s ease;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+      word-break: break-word;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .site-footer__mail-link:hover {
+      color: rgba(252, 232, 180, 0.98);
+    }
+
+    .site-footer__mail-link:focus {
+      outline: none;
+    }
+
+    .site-footer__mail-link:focus-visible {
+      outline: 2px solid rgba(232, 201, 104, 0.45);
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+
     /* Плашка приложение · версия · метка времени — закреплена к низу экрана, видна при любом скролле */
     .site-footer__revision {
       position: fixed;
@@ -2328,7 +2364,7 @@
       <span class="site-footer__sam">Sam Bruev</span>
       <span class="site-footer__mix">Mix &amp; Recording</span>
       <span class="site-footer__production">Music production</span>
-      <nav class="site-footer__social" aria-label="Профили в соцсетях — везде @sam_bruev">
+      <nav class="site-footer__social" aria-label="Профили в соцсетях (@sam_bruev)">
         <ul class="site-footer__social-list">
           <li>
             <a
@@ -2360,6 +2396,12 @@
           </li>
         </ul>
       </nav>
+      <p class="site-footer__mail-line">
+        <a
+          class="site-footer__mail-link"
+          href="mailto:sambruev@gmail.com"
+          rel="me">sambruev@gmail.com</a>
+      </p>
       <div class="site-footer__revision" role="note">
         <span class="site-footer__revision-line">приложение <strong>portfolio-showcase</strong>&nbsp;<span class="site-footer__rev-ver" title="Перед деплоем измените версию здесь в HTML">v1.3.0</span></span>
         <span class="site-footer__revision-div" aria-hidden="true">/</span>
