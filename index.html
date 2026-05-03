@@ -1625,6 +1625,7 @@
       border-bottom: 1px solid rgba(255, 255, 255, 0.09);
       background: var(--ui-popup-bg);
       -webkit-tap-highlight-color: rgba(255, 255, 255, 0.2);
+      touch-action: manipulation;
     }
 
     .scenario-hub > summary .details-summary-label {
@@ -1824,6 +1825,7 @@
       border-bottom: 1px solid rgba(255, 255, 255, 0.09);
       background: var(--ui-popup-bg);
       -webkit-tap-highlight-color: rgba(255, 255, 255, 0.2);
+      touch-action: manipulation;
     }
 
     .daily-plan > summary .details-summary-label {
@@ -4541,7 +4543,6 @@
 
     <details class="card scenario-hub" id="scenario-hub" open>
       <summary><span class="details-summary-label">Настройки сценариев</span></summary>
-      <span class="scenario-hub-side-menu-hint" aria-hidden="true"></span>
       <div class="scenario-hub-body">
         <div class="row">
           <label>Сценарий
@@ -4599,6 +4600,7 @@
           <button class="btn btn-danger" id="btn-scenario-delete" type="button">Удалить</button>
         </div>
       </div>
+      <span class="scenario-hub-side-menu-hint" aria-hidden="true"></span>
     </details>
 
     <details class="card daily-plan" id="daily-plan" open>
@@ -10957,7 +10959,9 @@
         document.addEventListener(
           'click',
           function (e) {
-            if (Date.now() - detailsToggleLastMs < 450) {
+            var hit = resolveDetailsToggleHit(e.target);
+            /* Раньше гасили любой click 450 ms — ломало остальной UI; только дубликат после pointerup по summary. */
+            if (hit && Date.now() - detailsToggleLastMs < 450) {
               try {
                 e.preventDefault();
               } catch (p1) {}
@@ -10966,7 +10970,6 @@
               } catch (s1) {}
               return;
             }
-            var hit = resolveDetailsToggleHit(e.target);
             if (!hit) return;
             try {
               e.preventDefault();
