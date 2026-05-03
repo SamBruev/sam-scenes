@@ -13,7 +13,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Sam Scenes (v233)</title>
+  <title>Sam Scenes (v234)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -681,7 +681,7 @@
     .assistant-drawer-field--row {
       flex-direction: row;
       flex-wrap: wrap;
-      align-items: flex-end;
+      align-items: center;
       gap: 10px 12px;
     }
 
@@ -692,12 +692,22 @@
     }
 
     .assistant-drawer-field--row .assistant-drawer-field--count {
-      flex: 0 0 6.5rem;
+      flex: 0 0 auto;
+      min-width: 5.75rem;
       margin-bottom: 0;
+      align-items: center;
+      text-align: center;
     }
 
     .assistant-drawer-field--row .assistant-drawer-input--short {
+      width: 100%;
       max-width: 7.5rem;
+      box-sizing: border-box;
+    }
+
+    /* Одинаковая высота полей в строке «Дата / Роликов», чтобы колонки не «плясали» на разных движках */
+    .assistant-drawer-field--row .assistant-drawer-input {
+      min-height: 44px;
     }
 
     .assistant-drawer-input {
@@ -879,51 +889,19 @@
       display: flex;
       flex-direction: row;
       align-items: stretch;
-      gap: 8px;
+      gap: 0;
       min-width: 0;
     }
 
-    .assistant-drawer-item-reorder {
-      flex: 0 0 auto;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: 4px;
-      padding: 2px 0;
+    .assistant-drawer-item-row--drag-lift {
+      position: relative;
+      z-index: 6;
     }
 
-    .assistant-drawer-item-move {
-      flex: 0 0 auto;
-      width: 30px;
-      min-height: 26px;
-      margin: 0;
-      padding: 0;
-      border-radius: 8px;
-      border: 1px solid rgba(255, 120, 40, 0.42);
-      background: #000000;
-      color: rgba(255, 140, 60, 0.92);
-      font-size: 13px;
-      font-weight: 800;
-      line-height: 1;
-      cursor: pointer;
-      touch-action: manipulation;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .assistant-drawer-item-move:hover:not(:disabled) {
-      border-color: rgba(255, 140, 70, 0.72);
-      color: rgba(255, 170, 100, 0.98);
-    }
-
-    .assistant-drawer-item-move:active:not(:disabled) {
-      background: rgba(255, 100, 30, 0.14);
-    }
-
-    .assistant-drawer-item-move:disabled {
-      opacity: 0.28;
-      cursor: default;
-      border-color: rgba(255, 255, 255, 0.1);
-      color: var(--muted);
+    .assistant-drawer-item-row--drag-lift .assistant-drawer-item {
+      touch-action: none;
+      box-shadow: 0 14px 32px rgba(0, 0, 0, 0.48);
+      border-color: rgba(255, 255, 255, 0.22);
     }
 
     .assistant-drawer-item-row .assistant-drawer-item {
@@ -5219,8 +5197,8 @@
        * Дублируйте те же поля в build-info.json — подпись внизу подгружает его с cache: no-store,
        * чтобы не залипала старая версия при закэшированном index.html.
        */
-      var APP_VERSION = 'v233';
-      var BUILD_TIME = '2026-05-03 20:44 MSK';
+      var APP_VERSION = 'v234';
+      var BUILD_TIME = '2026-05-03 20:52 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -5520,18 +5498,35 @@
         bundle.assistantOrderIds = arr;
       }
 
-      function moveAssistantDrawerScenario(bundle, scenarioId, delta) {
-        if (!bundle || !scenarioId) return false;
-        ensureAssistantOrderIds(bundle);
-        var arr = bundle.assistantOrderIds;
-        var idx = arr.indexOf(scenarioId);
-        if (idx < 0) return false;
-        var ni = idx + delta;
-        if (ni < 0 || ni >= arr.length) return false;
-        var t = arr[idx];
-        arr[idx] = arr[ni];
-        arr[ni] = t;
-        return true;
+      /** Перестановка по позиции пальца при перетаскивании строки (долгое нажатие → вверх/вниз). */
+      function applyAssistantDrawerReorderAtPointerY(scenarioId, pointerClientY) {
+        var list = document.getElementById('assistant-drawer-list');
+        if (!list || !scenarioId) return false;
+        var rows = Array.prototype.slice.call(list.querySelectorAll('.assistant-drawer-item-row'));
+        if (!rows.length) return false;
+        var rawTo = rows.length;
+        for (var i = 0; i < rows.length; i++) {
+          var rect = rows[i].getBoundingClientRect();
+          if (pointerClientY < rect.top + rect.height / 2) {
+            rawTo = i;
+            break;
+          }
+        }
+        var b = readScenarioBundle();
+        if (!b) return false;
+        ensureAssistantOrderIds(b);
+        var prev = b.assistantOrderIds.join('\u0001');
+        var arr = b.assistantOrderIds.slice();
+        var from = arr.indexOf(scenarioId);
+        if (from < 0) return false;
+        arr.splice(from, 1);
+        var to = rawTo > from ? rawTo - 1 : rawTo;
+        if (to < 0) to = 0;
+        if (to > arr.length) to = arr.length;
+        arr.splice(to, 0, scenarioId);
+        if (arr.join('\u0001') === prev) return false;
+        b.assistantOrderIds = arr;
+        return writeScenarioBundle(b);
       }
 
       function writeScenarioBundle(bundle) {
@@ -6149,7 +6144,6 @@
           }
         });
         var stLabel = { draft: 'Черновик', ready: 'Готово', shot: 'Снято' };
-        var orderArr = bundle.assistantOrderIds;
         segments.forEach(function (seg) {
           var grp = document.createElement('div');
           grp.className = 'assistant-drawer-date-group';
@@ -6163,41 +6157,17 @@
           grp.appendChild(summary);
           host.appendChild(grp);
           seg.items.forEach(function (it) {
-            var globalIdx = orderArr.indexOf(it.id);
             var row = document.createElement('div');
             row.className = 'assistant-drawer-item-row';
-            var reorder = document.createElement('div');
-            reorder.className = 'assistant-drawer-item-reorder';
-            reorder.setAttribute('aria-hidden', 'true');
-            var btnUp = document.createElement('button');
-            btnUp.type = 'button';
-            btnUp.className = 'assistant-drawer-item-move';
-            btnUp.setAttribute('data-assistant-scenario-move', 'up');
-            btnUp.setAttribute('data-assistant-move-for', it.id);
-            btnUp.setAttribute('aria-label', 'Выше в списке ассистента');
-            btnUp.textContent = '↑';
-            if (globalIdx <= 0) {
-              btnUp.disabled = true;
-              btnUp.setAttribute('aria-disabled', 'true');
-            }
-            var btnDown = document.createElement('button');
-            btnDown.type = 'button';
-            btnDown.className = 'assistant-drawer-item-move';
-            btnDown.setAttribute('data-assistant-scenario-move', 'down');
-            btnDown.setAttribute('data-assistant-move-for', it.id);
-            btnDown.setAttribute('aria-label', 'Ниже в списке ассистента');
-            btnDown.textContent = '↓';
-            if (globalIdx < 0 || globalIdx >= orderArr.length - 1) {
-              btnDown.disabled = true;
-              btnDown.setAttribute('aria-disabled', 'true');
-            }
-            reorder.appendChild(btnUp);
-            reorder.appendChild(btnDown);
             var btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'assistant-drawer-item';
             if (it.id === activeId) btn.classList.add('is-active');
             btn.setAttribute('data-scenario-id', it.id);
+            btn.setAttribute(
+              'aria-label',
+              (it.name || 'Сценарий') + '. Долгое нажатие — перетащить вверх или вниз; без движения — меню.'
+            );
             var title = document.createElement('span');
             title.className = 'assistant-drawer-item-title';
             title.textContent = it.name || 'Без названия';
@@ -6212,7 +6182,6 @@
             meta.textContent = parts.join(' · ');
             btn.appendChild(title);
             btn.appendChild(meta);
-            row.appendChild(reorder);
             row.appendChild(btn);
             grp.appendChild(row);
           });
@@ -6948,9 +6917,9 @@
 
       var assistantScenarioActionSheetEl = null;
       var assistantScenarioActionPendingId = null;
-      var assistantScenarioLP = { timer: null, btn: null, x: 0, y: 0 };
       var ASSISTANT_SCENARIO_LONGPRESS_MS = 520;
       var ASSISTANT_SCENARIO_LONGPRESS_MOVE_PX = 14;
+      var ASSISTANT_SCENARIO_LONGPRESS_DRAG_PX = 10;
 
       function assistantScenarioActionSheetOnKey(e) {
         if (e.key !== 'Escape' && e.key !== 'Esc') return;
@@ -7076,33 +7045,71 @@
           true
         );
         if (list) {
+          var assistantDrawerItemLP = {
+            timer: null,
+            down: false,
+            btn: null,
+            row: null,
+            scenarioId: null,
+            pointerId: null,
+            startX: 0,
+            startY: 0,
+            active: false,
+            dragging: false,
+          };
+          function assistantDrawerItemLPClear(releaseCapture) {
+            if (assistantDrawerItemLP.timer) {
+              clearTimeout(assistantDrawerItemLP.timer);
+              assistantDrawerItemLP.timer = null;
+            }
+            if (releaseCapture !== false && assistantDrawerItemLP.row != null && assistantDrawerItemLP.pointerId != null) {
+              try {
+                assistantDrawerItemLP.row.releasePointerCapture(assistantDrawerItemLP.pointerId);
+              } catch (eRel) {}
+            }
+            assistantDrawerItemLP.down = false;
+            assistantDrawerItemLP.btn = null;
+            assistantDrawerItemLP.row = null;
+            assistantDrawerItemLP.scenarioId = null;
+            assistantDrawerItemLP.pointerId = null;
+            assistantDrawerItemLP.active = false;
+            assistantDrawerItemLP.dragging = false;
+          }
+          function assistantDrawerAutoScrollWhileReorder(clientY) {
+            var sc = document.getElementById('assistant-drawer-scroll');
+            if (!sc) return;
+            var r = sc.getBoundingClientRect();
+            var zone = 52;
+            var step = 14;
+            if (clientY < r.top + zone) {
+              sc.scrollTop -= step;
+            } else if (clientY > r.bottom - zone) {
+              sc.scrollTop += step;
+            }
+          }
+          var swipeDel = {
+            active: false,
+            startX: 0,
+            startY: 0,
+            item: null,
+          };
+          var DELETE_SWIPE_MIN_DX = 56;
+          function swipeDelReset() {
+            swipeDel.active = false;
+            swipeDel.item = null;
+          }
+          function assistantDrawerTouchStartsInRightZone(clientX) {
+            var drawer = document.getElementById('assistant-drawer');
+            if (!drawer) return false;
+            var r = drawer.getBoundingClientRect();
+            if (clientX < r.left || clientX > r.right) return false;
+            var rel = (clientX - r.left) / Math.max(12, r.width);
+            return rel >= 0.55;
+          }
           list.addEventListener('click', function (e) {
             if (Date.now() < assistantDrawerSuppressClickUntil) {
               e.preventDefault();
               e.stopPropagation();
-              return;
-            }
-            var moveBtn =
-              e.target && e.target.closest
-                ? e.target.closest('[data-assistant-scenario-move][data-assistant-move-for]')
-                : null;
-            if (moveBtn) {
-              e.preventDefault();
-              e.stopPropagation();
-              assistantDrawerSuppressClickUntil = Date.now() + 380;
-              var sid = moveBtn.getAttribute('data-assistant-move-for');
-              var dir = moveBtn.getAttribute('data-assistant-scenario-move') === 'up' ? -1 : 1;
-              if (!sid) return;
-              var b = readScenarioBundle();
-              if (!b) return;
-              if (!moveAssistantDrawerScenario(b, sid, dir)) return;
-              try {
-                triggerHaptic('micro');
-              } catch (eHmv) {}
-              if (!writeScenarioBundle(b)) return;
-              try {
-                renderAssistantDrawerList();
-              } catch (eR) {}
               return;
             }
             var btn =
@@ -7118,13 +7125,6 @@
               scenarioSelect.dispatchEvent(new Event('change', { bubbles: true }));
             } catch (eCh) {}
           });
-          function assistantScenarioLPClear() {
-            if (assistantScenarioLP.timer) {
-              clearTimeout(assistantScenarioLP.timer);
-              assistantScenarioLP.timer = null;
-            }
-            assistantScenarioLP.btn = null;
-          }
           list.addEventListener(
             'pointerdown',
             function (e) {
@@ -7135,20 +7135,33 @@
                   : null;
               if (!btn) return;
               if (e.pointerType === 'mouse' && e.button !== 0) return;
-              assistantScenarioLPClear();
-              assistantScenarioLP.btn = btn;
-              assistantScenarioLP.x = e.clientX;
-              assistantScenarioLP.y = e.clientY;
+              assistantDrawerItemLPClear(true);
+              var row = btn.closest('.assistant-drawer-item-row');
               var sid = btn.getAttribute('data-scenario-id');
-              if (!sid) return;
-              assistantScenarioLP.timer = setTimeout(function () {
-                assistantScenarioLP.timer = null;
-                assistantScenarioLP.btn = null;
+              if (!row || !sid) return;
+              assistantDrawerItemLP.down = true;
+              assistantDrawerItemLP.btn = btn;
+              assistantDrawerItemLP.row = row;
+              assistantDrawerItemLP.scenarioId = sid;
+              assistantDrawerItemLP.pointerId = e.pointerId;
+              assistantDrawerItemLP.startX = e.clientX;
+              assistantDrawerItemLP.startY = e.clientY;
+              assistantDrawerItemLP.active = false;
+              assistantDrawerItemLP.dragging = false;
+              var pid = e.pointerId;
+              assistantDrawerItemLP.timer = setTimeout(function () {
+                assistantDrawerItemLP.timer = null;
+                if (!assistantDrawerItemLP.down || assistantDrawerItemLP.pointerId !== pid) return;
+                assistantDrawerItemLP.active = true;
+                try {
+                  assistantDrawerItemLP.row.setPointerCapture(pid);
+                } catch (eCap) {}
+                assistantDrawerItemLP.row.classList.add('assistant-drawer-item-row--drag-lift');
+                swipeDelReset();
                 try {
                   triggerHaptic('medium');
                 } catch (eH) {}
-                assistantDrawerSuppressClickUntil = Date.now() + 700;
-                showAssistantScenarioActionSheet(sid);
+                assistantDrawerSuppressClickUntil = Date.now() + 950;
               }, ASSISTANT_SCENARIO_LONGPRESS_MS);
             },
             true
@@ -7156,15 +7169,74 @@
           list.addEventListener(
             'pointermove',
             function (e) {
-              if (!assistantScenarioLP.timer || !assistantScenarioLP.btn) return;
-              var dx = e.clientX - assistantScenarioLP.x;
-              var dy = e.clientY - assistantScenarioLP.y;
-              if (Math.hypot(dx, dy) > ASSISTANT_SCENARIO_LONGPRESS_MOVE_PX) assistantScenarioLPClear();
+              if (!assistantDrawerItemLP.down || e.pointerId !== assistantDrawerItemLP.pointerId) return;
+              if (assistantDrawerItemLP.timer) {
+                var dx = e.clientX - assistantDrawerItemLP.startX;
+                var dy = e.clientY - assistantDrawerItemLP.startY;
+                if (Math.hypot(dx, dy) > ASSISTANT_SCENARIO_LONGPRESS_MOVE_PX) assistantDrawerItemLPClear(true);
+                return;
+              }
+              if (assistantDrawerItemLP.active && assistantDrawerItemLP.row) {
+                var dy2 = e.clientY - assistantDrawerItemLP.startY;
+                if (!assistantDrawerItemLP.dragging && Math.abs(dy2) > ASSISTANT_SCENARIO_LONGPRESS_DRAG_PX) {
+                  assistantDrawerItemLP.dragging = true;
+                  swipeDelReset();
+                }
+                if (assistantDrawerItemLP.dragging) {
+                  try {
+                    e.preventDefault();
+                  } catch (ex) {}
+                  assistantDrawerItemLP.row.style.transform = 'translateY(' + dy2 + 'px)';
+                  assistantDrawerAutoScrollWhileReorder(e.clientY);
+                }
+              }
             },
             true
           );
-          list.addEventListener('pointerup', assistantScenarioLPClear, true);
-          list.addEventListener('pointercancel', assistantScenarioLPClear, true);
+          list.addEventListener(
+            'pointerup',
+            function (e) {
+              if (!assistantDrawerItemLP.down || e.pointerId !== assistantDrawerItemLP.pointerId) return;
+              var wasActive = assistantDrawerItemLP.active;
+              var wasDragging = assistantDrawerItemLP.dragging;
+              var sid = assistantDrawerItemLP.scenarioId;
+              var row = assistantDrawerItemLP.row;
+              assistantDrawerItemLPClear(true);
+              if (row) {
+                row.classList.remove('assistant-drawer-item-row--drag-lift');
+                row.style.transform = '';
+              }
+              if (wasActive && sid) {
+                if (wasDragging) {
+                  if (applyAssistantDrawerReorderAtPointerY(sid, e.clientY)) {
+                    try {
+                      triggerHaptic('light');
+                    } catch (eHa) {}
+                    try {
+                      renderAssistantDrawerList();
+                    } catch (eRl) {}
+                  }
+                } else {
+                  assistantDrawerSuppressClickUntil = Date.now() + 700;
+                  showAssistantScenarioActionSheet(sid);
+                }
+              }
+            },
+            true
+          );
+          list.addEventListener(
+            'pointercancel',
+            function (e) {
+              if (!assistantDrawerItemLP.down || e.pointerId !== assistantDrawerItemLP.pointerId) return;
+              var row = assistantDrawerItemLP.row;
+              assistantDrawerItemLPClear(true);
+              if (row) {
+                row.classList.remove('assistant-drawer-item-row--drag-lift');
+                row.style.transform = '';
+              }
+            },
+            true
+          );
           list.addEventListener(
             'contextmenu',
             function (e) {
@@ -7181,25 +7253,6 @@
             },
             true
           );
-          var swipeDel = {
-            active: false,
-            startX: 0,
-            startY: 0,
-            item: null
-          };
-          var DELETE_SWIPE_MIN_DX = 56;
-          function swipeDelReset() {
-            swipeDel.active = false;
-            swipeDel.item = null;
-          }
-          function assistantDrawerTouchStartsInRightZone(clientX) {
-            var drawer = document.getElementById('assistant-drawer');
-            if (!drawer) return false;
-            var r = drawer.getBoundingClientRect();
-            if (clientX < r.left || clientX > r.right) return false;
-            var rel = (clientX - r.left) / Math.max(12, r.width);
-            return rel >= 0.55;
-          }
           list.addEventListener(
             'touchstart',
             function (e) {
