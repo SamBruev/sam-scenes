@@ -427,6 +427,20 @@
         box-shadow: 10px 0 40px rgba(0, 0, 0, 0.38);
       }
 
+      .assistant-drawer-tools {
+        background: rgba(18, 16, 14, 0.88);
+      }
+
+      .assistant-drawer-input {
+        background: rgba(12, 11, 10, 0.92);
+      }
+
+      .assistant-drawer-tools .btn-assistant-create,
+      .assistant-drawer-tools .btn-assistant-create:hover,
+      .assistant-drawer-tools .btn-assistant-create:active {
+        background: rgba(12, 11, 10, 0.92);
+      }
+
       .scene-main.scene-role-intro,
       .scene-main.scene-role-outro {
         backdrop-filter: none;
@@ -765,8 +779,8 @@
       padding: 12px 12px 14px;
       border-radius: 16px;
       border: none;
-      background: #000000;
-      box-shadow: none;
+      background: rgba(8, 7, 6, 0.42);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
     }
 
     .assistant-drawer-tools-label {
@@ -847,7 +861,7 @@
       padding: 8px 10px;
       border-radius: 10px;
       border: 1px solid var(--ui-select-border);
-      background: #000;
+      background: rgba(0, 0, 0, 0.32);
       color: var(--text);
       font: inherit;
       font-size: 15px;
@@ -887,6 +901,15 @@
     .assistant-drawer-tools .btn-assistant-create {
       display: block;
       width: 100%;
+      background: rgba(0, 0, 0, 0.32);
+    }
+
+    .assistant-drawer-tools .btn-assistant-create:hover {
+      background: rgba(0, 0, 0, 0.44);
+    }
+
+    .assistant-drawer-tools .btn-assistant-create:active {
+      background: rgba(0, 0, 0, 0.4);
     }
 
     .btn-assistant-create:hover {
