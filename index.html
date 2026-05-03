@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Сценарий видео / Sam Bruev (v161)</title>
+  <title>Сценарий видео / Sam Bruev (v162)</title>
   <!-- До отрисовки тела: восстановить скролл после reload без «прыжка» картинки/фона -->
   <script>
     (function () {
@@ -1873,6 +1873,17 @@
     .scene-main > .line-note .note-editable:focus {
       background: transparent;
       box-shadow: none;
+    }
+
+    /* Фокус на примечании + клавиатура iPhone: запас для scrollIntoView / программного центрирования */
+    .scene-main > .line-note {
+      scroll-margin-top: 30vh;
+      scroll-margin-bottom: 42vh;
+    }
+
+    #prep-note {
+      scroll-margin-top: 28vh;
+      scroll-margin-bottom: 42vh;
     }
 
     .teleprompter-overlay {
@@ -3963,8 +3974,8 @@
       }
 
       /** Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages). */
-      var APP_VERSION = 'v161';
-      var BUILD_TIME = '2026-05-03 11:20 MSK';
+      var APP_VERSION = 'v162';
+      var BUILD_TIME = '2026-05-03 11:55 MSK';
       var APP_BUILD = APP_VERSION + ' · ' + BUILD_TIME;
       var lastSceneTimeTriggerTouchAt = 0;
       var APP_BUILD_KEY = 'abakan-app-build';
@@ -6327,6 +6338,74 @@
         }
       }
 
+      /** Примечание в сцене / prep: при фокусе держим блок в центре видимой области (учёт клавиатуры visualViewport). */
+      function scrollTargetToVisualViewportCenter(el) {
+        if (!el || !el.getBoundingClientRect) return;
+        function step() {
+          var rect = el.getBoundingClientRect();
+          if (rect.height < 2 && el.classList && el.classList.contains('note-editable')) {
+            var row = el.closest('.line-note');
+            if (row) el = row;
+            rect = el.getBoundingClientRect();
+          }
+          var vv = window.visualViewport;
+          var elMid = rect.top + rect.height / 2;
+          var dy;
+          if (vv && typeof vv.height === 'number' && vv.height > 40) {
+            dy = elMid - (vv.offsetTop + vv.height / 2);
+          } else {
+            dy = elMid - window.innerHeight / 2;
+          }
+          if (Math.abs(dy) < 3) return;
+          window.scrollBy({ top: dy, left: 0, behavior: 'smooth' });
+        }
+        requestAnimationFrame(function () {
+          requestAnimationFrame(step);
+        });
+        setTimeout(step, 100);
+        setTimeout(step, 350);
+        setTimeout(step, 600);
+      }
+
+      function wireNoteFocusViewportCenter() {
+        if (wireNoteFocusViewportCenter._done) return;
+        wireNoteFocusViewportCenter._done = true;
+        document.addEventListener(
+          'focusin',
+          function (e) {
+            var t = e.target;
+            if (!t) return;
+            if (t.classList && t.classList.contains('note-editable')) {
+              scrollTargetToVisualViewportCenter(t);
+              return;
+            }
+            if (t.id === 'prep-note') {
+              scrollTargetToVisualViewportCenter(t);
+            }
+          },
+          true
+        );
+        if (window.visualViewport) {
+          var vvResizeTimer = null;
+          window.visualViewport.addEventListener(
+            'resize',
+            function () {
+              clearTimeout(vvResizeTimer);
+              vvResizeTimer = setTimeout(function () {
+                var ae = document.activeElement;
+                if (!ae) return;
+                if (ae.classList && ae.classList.contains('note-editable')) {
+                  scrollTargetToVisualViewportCenter(ae);
+                } else if (ae.id === 'prep-note') {
+                  scrollTargetToVisualViewportCenter(ae);
+                }
+              }, 120);
+            },
+            { passive: true }
+          );
+        }
+      }
+
       function wireIntercutUnderscoreStrip() {
         function stripUnderscores(el) {
           if (!el || !el.classList.contains('intercut-text')) return;
@@ -7280,6 +7359,7 @@
       migrateShotlistPiecesMarkup(document);
       ensureShotlistPieceSelectOptions(document);
       wireIntercutUnderscoreStrip();
+      wireNoteFocusViewportCenter();
       wireShotlistPiecePickers();
       wireShotlistPiecesManualInput();
       wireShotlistPiecesRemove();
