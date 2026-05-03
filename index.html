@@ -13,7 +13,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Sam Scenes (v227)</title>
+  <title>Sam Scenes (v230)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -1155,6 +1155,13 @@
     #scenario-hub { order: 1; }
     #daily-plan { order: 2; }
     .title-row { order: 3; }
+
+    /* Выше фиксированной шапки (.top-logo / .logo-bg до z-index 10), иначе тапы по заголовку улетают в логотип */
+    #scenario-hub,
+    #daily-plan {
+      position: relative;
+      z-index: 18;
+    }
 
     .top-logo {
       display: flex;
@@ -5337,8 +5344,8 @@
        * Дублируйте те же поля в build-info.json — подпись внизу подгружает его с cache: no-store,
        * чтобы не залипала старая версия при закэшированном index.html.
        */
-      var APP_VERSION = 'v229';
-      var BUILD_TIME = '2026-05-03 20:26 MSK';
+      var APP_VERSION = 'v230';
+      var BUILD_TIME = '2026-05-03 20:32 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -10234,32 +10241,112 @@
         updateTopLogoScrollBlur();
       }
 
-      /** Вся полоса заголовка переключает раскрытие. Делегирование на document — после замены wrap.innerHTML блоки пересоздаются, привязка к старым узлам срывалась бы тап по тексту «Настройки сценариев». */
+      /** Вся полоса заголовка переключает раскрытие. Делегирование на document + pointer: после замены DOM блоки новые; на iOS один только click иногда не приходит; z-index карточек выше шапки. */
       function wireDetailsSummaryRowToggle() {
         if (wireDetailsSummaryRowToggle._done) return;
         wireDetailsSummaryRowToggle._done = true;
+
+        var TAP_MAX_PX = 20;
+        var detailsToggleArm = null;
+        var detailsToggleLastMs = 0;
+
+        function hitInteractiveInsideSummary(el) {
+          return !!(el && el.closest && el.closest('a[href], button, input, select, textarea'));
+        }
+
+        function resolveDetailsToggleHit(raw) {
+          var el = raw && raw.nodeType === 1 ? raw : raw && raw.parentElement;
+          if (!el || !el.closest) return null;
+          var det = el.closest('#scenario-hub, #daily-plan');
+          if (!det || det.tagName !== 'DETAILS') return null;
+          var sum = det.querySelector(':scope > summary');
+          if (!sum || !sum.contains(el)) return null;
+          if (hitInteractiveInsideSummary(el)) return null;
+          return { det: det, sum: sum };
+        }
+
+        function applyToggle(det, nextOpen) {
+          det.open = nextOpen;
+          if (typeof requestAnimationFrame === 'function') {
+            requestAnimationFrame(function () {
+              det.open = nextOpen;
+            });
+          }
+          detailsToggleLastMs = Date.now();
+        }
+
+        document.addEventListener(
+          'pointerdown',
+          function (e) {
+            if (e.pointerType === 'mouse' && e.button !== 0) return;
+            var hit = resolveDetailsToggleHit(e.target);
+            if (!hit) return;
+            detailsToggleArm = {
+              pid: e.pointerId,
+              x: e.clientX,
+              y: e.clientY,
+              det: hit.det,
+              sum: hit.sum
+            };
+          },
+          true
+        );
+
+        document.addEventListener(
+          'pointerup',
+          function (e) {
+            if (!detailsToggleArm || detailsToggleArm.pid !== e.pointerId) return;
+            var sx = detailsToggleArm.x;
+            var sy = detailsToggleArm.y;
+            var det = detailsToggleArm.det;
+            var sum = detailsToggleArm.sum;
+            detailsToggleArm = null;
+            if (Math.hypot(e.clientX - sx, e.clientY - sy) > TAP_MAX_PX) return;
+            var under = null;
+            try {
+              under = document.elementFromPoint(e.clientX, e.clientY);
+            } catch (efp) {}
+            if (!under || !sum.contains(under)) return;
+            try {
+              e.preventDefault();
+            } catch (pe) {}
+            try {
+              e.stopPropagation();
+            } catch (se) {}
+            applyToggle(det, !det.open);
+          },
+          true
+        );
+
+        document.addEventListener(
+          'pointercancel',
+          function (e) {
+            if (detailsToggleArm && detailsToggleArm.pid === e.pointerId) detailsToggleArm = null;
+          },
+          true
+        );
+
         document.addEventListener(
           'click',
           function (e) {
-            var raw = e.target;
-            var el = raw && raw.nodeType === 1 ? raw : raw && raw.parentElement;
-            if (!el || !el.closest) return;
-            var det = el.closest('#scenario-hub, #daily-plan');
-            if (!det || det.tagName !== 'DETAILS') return;
-            var sum = det.querySelector(':scope > summary');
-            if (!sum || !sum.contains(el)) return;
-            if (el.closest && el.closest('a[href], button, input, select, textarea')) return;
-            e.preventDefault();
+            if (Date.now() - detailsToggleLastMs < 450) {
+              try {
+                e.preventDefault();
+              } catch (p1) {}
+              try {
+                e.stopPropagation();
+              } catch (s1) {}
+              return;
+            }
+            var hit = resolveDetailsToggleHit(e.target);
+            if (!hit) return;
+            try {
+              e.preventDefault();
+            } catch (p2) {}
             try {
               e.stopPropagation();
-            } catch (e1) {}
-            var nextOpen = !det.open;
-            det.open = nextOpen;
-            if (typeof requestAnimationFrame === 'function') {
-              requestAnimationFrame(function () {
-                det.open = nextOpen;
-              });
-            }
+            } catch (s2) {}
+            applyToggle(hit.det, !hit.det.open);
           },
           true
         );
