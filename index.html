@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Сценарий видео / Sam Bruev (v159)</title>
+  <title>Сценарий видео / Sam Bruev (v160)</title>
   <!-- До отрисовки тела: восстановить скролл после reload без «прыжка» картинки/фона -->
   <script>
     (function () {
@@ -2213,41 +2213,50 @@
       margin-top: 0.2em;
     }
 
-    /* Свайп вниз от верха (в т.ч. PWA на главном экране iPhone): подсказка + вспышка и вход после reload */
+    /* Свайп вниз от верха: анимация символа лампы (видео) + вспышка и reload */
     .pull-reload-hint {
       position: fixed;
       left: 50%;
       top: calc(10px + env(safe-area-inset-top, 0px));
       z-index: 2147483000;
-      width: 12px;
-      height: 12px;
-      margin-left: -6px;
-      border-radius: 999px;
-      background: radial-gradient(circle at 30% 30%, #fff6dc, rgba(212, 175, 55, 0.82) 52%, #7a6322);
-      box-shadow: 0 0 0 1px rgba(255, 220, 160, 0.34), 0 4px 14px rgba(212, 175, 55, 0.2);
+      width: 28px;
+      height: 28px;
+      margin-left: -14px;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
       opacity: 0;
       pointer-events: none;
-      /* Одна формула transform: без inline style и без анимации translate — иначе точка дёргается */
+      overflow: visible;
+      /* Одна формула transform: без inline-анимации translate — иначе дёргается */
       transform: translateY(calc(-16px + var(--pull-dot-y, 0px))) scale(var(--pull-dot-s, 0.85));
-      transition: opacity 0.22s ease, transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), filter 0.25s ease, box-shadow 0.25s ease;
+      transition: opacity 0.22s ease, transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), filter 0.25s ease;
+    }
+
+    .pull-reload-hint-video {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+      vertical-align: middle;
+      filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.38));
     }
 
     .pull-reload-hint.pull-reload-hint--dragging {
-      transition: opacity 0.14s ease-out, filter 0.2s ease, box-shadow 0.2s ease;
+      transition: opacity 0.14s ease-out, filter 0.2s ease;
     }
 
     .pull-reload-hint.pull-reload-hint--ready {
-      animation: pullReloadDotPulse 1.05s ease-in-out infinite alternate;
+      animation: pullReloadLampPulse 1.05s ease-in-out infinite alternate;
     }
 
-    @keyframes pullReloadDotPulse {
+    @keyframes pullReloadLampPulse {
       from {
-        filter: brightness(1);
-        box-shadow: 0 0 0 1px rgba(255, 220, 160, 0.34), 0 5px 16px rgba(212, 175, 55, 0.22);
+        filter: brightness(1) drop-shadow(0 0 5px rgba(212, 175, 55, 0.38));
       }
       to {
-        filter: brightness(1.14);
-        box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.28), 0 9px 22px rgba(212, 175, 55, 0.28);
+        filter: brightness(1.18) drop-shadow(0 0 10px rgba(212, 175, 55, 0.48));
       }
     }
 
@@ -2861,7 +2870,22 @@
       <div id="assistant-drawer-list" class="assistant-drawer-list"></div>
     </div>
   </aside>
-  <div id="pull-reload-hint" class="pull-reload-hint" aria-hidden="true"></div>
+  <div id="pull-reload-hint" class="pull-reload-hint" aria-hidden="true">
+    <video
+      class="pull-reload-hint-video"
+      muted
+      playsinline
+      webkit-playsinline
+      disablepictureinpicture
+      loop
+      preload="metadata"
+      poster="lamp-icon.png"
+      width="80"
+      height="80">
+      <source src="media/pull-reload-lamp.webm" type="video/webm" />
+      <source src="media/pull-reload-lamp.mp4" type="video/mp4" />
+    </video>
+  </div>
   <div id="pull-swipe-hint" class="pull-swipe-hint" aria-hidden="true"></div>
   <div id="pull-reload-flash" class="pull-reload-flash" aria-hidden="true"></div>
   <div
@@ -3920,8 +3944,8 @@
       }
 
       /** Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages). */
-      var APP_VERSION = 'v159';
-      var BUILD_TIME = '2026-05-03 10:15 MSK';
+      var APP_VERSION = 'v160';
+      var BUILD_TIME = '2026-05-03 10:45 MSK';
       var APP_BUILD = APP_VERSION + ' · ' + BUILD_TIME;
       var lastSceneTimeTriggerTouchAt = 0;
       var APP_BUILD_KEY = 'abakan-app-build';
@@ -6827,9 +6851,19 @@
           return document.getElementById('pull-swipe-hint');
         }
 
+        function pausePullHintLamp(hint) {
+          var v = hint && hint.querySelector && hint.querySelector('.pull-reload-hint-video');
+          if (!v) return;
+          try {
+            v.pause();
+            v.currentTime = 0;
+          } catch (eV) {}
+        }
+
         function resetPullHint() {
           var hint = pullHintEl();
           if (!hint) return;
+          pausePullHintLamp(hint);
           hint.classList.remove('pull-reload-hint--dragging', 'pull-reload-hint--ready');
           hint.style.removeProperty('--pull-dot-y');
           hint.style.removeProperty('--pull-dot-s');
@@ -6934,6 +6968,12 @@
                 var hint = pullHintEl();
                 if (hint && dy > 16) {
                   hint.classList.add('pull-reload-hint--dragging');
+                  var lamp = hint.querySelector('.pull-reload-hint-video');
+                  if (lamp && lamp.paused) {
+                    try {
+                      lamp.play().catch(function () {});
+                    } catch (eP) {}
+                  }
                   var yShift = Math.min(36, dy * 0.26);
                   var pullProg = Math.min(1, Math.max(0, (dy - 16) / (PULL_MIN - 16)));
                   var s = 0.85 + pullProg * 0.15;
