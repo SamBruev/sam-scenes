@@ -13,7 +13,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Sam Scenes (v225)</title>
+  <title>Sam Scenes (v226)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -3345,6 +3345,21 @@
       border-radius: 999px;
     }
 
+    /* «Снято» в одной строке с «Удалить»: та же высота и вертикальные отступы */
+    .scene-main > .scene-toolbar .mini.scene-remove,
+    .scene-main > .scene-toolbar .scene-done-label.scene-done-checkbox-only {
+      min-height: 38px;
+      padding: 8px 14px;
+      box-sizing: border-box;
+    }
+
+    .scene-main > .scene-toolbar .scene-done-label.scene-done-checkbox-only {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+    }
+
     .btn,
     #btn-add-scene,
     #btn-save {
@@ -4792,8 +4807,8 @@
        * Дублируйте те же поля в build-info.json — подпись внизу подгружает его с cache: no-store,
        * чтобы не залипала старая версия при закэшированном index.html.
        */
-      var APP_VERSION = 'v225';
-      var BUILD_TIME = '2026-05-03 16:35 MSK';
+      var APP_VERSION = 'v226';
+      var BUILD_TIME = '2026-05-03 17:02 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
