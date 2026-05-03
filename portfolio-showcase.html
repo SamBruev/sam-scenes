@@ -316,6 +316,19 @@
       background: #000;
     }
 
+    /* Первое на странице: обращение к зрителю */
+    .card--greeting {
+      margin-top: 0;
+    }
+
+    .card--greeting video {
+      max-height: min(78vh, 520px);
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: contain;
+      background: radial-gradient(ellipse at center 30%, rgba(30, 28, 24, 0.9), #000000 75%);
+    }
+
     /* Тёмные панели контролов — убираем «зелёный» дефолт где возможно */
     audio::-webkit-media-controls-panel,
     video::-webkit-media-controls-panel {
@@ -426,6 +439,24 @@
   </div>
 
   <div class="wrap">
+    <article class="card card--greeting">
+      <div class="tag-row">
+        <span class="tag">Видео</span>
+        <span class="tag">Приветствие</span>
+      </div>
+      <h2>Видеообращение</h2>
+      <p class="meta">Короткое знакомство — кто делает записи и сведение, чем могу быть полезен.</p>
+      <div class="media-shell">
+        <video controls playsinline preload="metadata">
+          <!-- Своё видео: положите MP4 рядом с этой страницей в portfolio-video/obraschenie.mp4 -->
+          <source src="portfolio-video/obraschenie.mp4" type="video/mp4">
+          <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4">
+          Ваш браузер не поддерживает воспроизведение видео.
+        </video>
+      </div>
+      <p class="note">Подмените файл <code>portfolio-video/obraschenie.mp4</code> на свой ролик; второй источник в коде — только запасной пример до загрузки.</p>
+    </article>
+
     <header class="brand-mark">
       <div class="brand-mark__hero">
         <img src="portfolio-logo-brand.svg" alt="Sam Bruev Mix &amp; Recording — Music production" width="5000" height="3630" decoding="async">
@@ -433,7 +464,7 @@
       <div class="brand-mark__lamp-stem" aria-hidden="true"></div>
       <div>
         <h1>Примеры работ</h1>
-        <p class="subtitle">Ниже — что входило в работу по проектам и примеры сравнения демо / мастер по дорожкам. Аудио подставляйте в <code>portfolio-audio/</code>.</p>
+        <p class="subtitle">Сначала — короткое видеообращение, далее логотип, список работ и примеры демо / мастер. Аудио — в <code>portfolio-audio/</code>.</p>
       </div>
     </header>
 
@@ -518,10 +549,10 @@
     <article class="card">
       <div class="tag-row">
         <span class="tag">Видео</span>
-        <span class="tag">Кейс</span>
+        <span class="tag">Референс</span>
       </div>
-      <h2>Видео</h2>
-      <p class="meta">Ниже — тестовый ролик; для портфолио подставьте свой файл или ссылку.</p>
+      <h2>Дополнительное видео</h2>
+      <p class="meta">Сюда можно вложить второй материал: клип, бэкстейдж или запись сессии.</p>
       <div class="media-shell">
         <video controls playsinline preload="metadata">
           <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4">
