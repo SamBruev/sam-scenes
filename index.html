@@ -411,6 +411,14 @@
         background: linear-gradient(180deg, rgba(0, 0, 0, 0.88), rgba(0, 0, 0, 0.94));
         box-shadow: 10px 0 40px rgba(0, 0, 0, 0.38);
       }
+
+      .scene-main.scene-role-intro,
+      .scene-main.scene-role-outro {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background: rgba(0, 0, 0, 0.82);
+        border-color: rgba(255, 255, 255, 0.07);
+      }
     }
 
     /* Подсказка у левого края — тот же неоновый акцент, что у ▲▼ на полоске закрытия панели */
@@ -604,7 +612,7 @@
       align-items: center;
       justify-content: center;
       pointer-events: none;
-      transition: top 0.07s ease-out;
+      transition: none;
       color: var(--ui-violet);
       opacity: 0.82;
       font-size: 14px;
@@ -621,12 +629,6 @@
       content: '\203A';
       display: block;
       line-height: 1;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .assistant-drawer-scroll-arrow {
-        transition: none;
-      }
     }
 
     .assistant-drawer-dismiss-chevron:active {
@@ -736,14 +738,15 @@
       color: rgba(255, 244, 220, 0.35);
     }
 
+    /* Первичное действие «новый сценарий»: без градиента и без золота/violet — как поля панели, только контур и чёрный фон */
     .btn-assistant-create {
-      display: block;
-      width: 100%;
+      appearance: none;
       margin: 0;
-      padding: 11px 14px;
+      padding: 12px 16px;
       border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.22);
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(0, 0, 0, 0.5));
+      box-sizing: border-box;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: #080808;
       color: var(--cream);
       font: inherit;
       font-size: 13px;
@@ -752,11 +755,32 @@
       text-transform: uppercase;
       cursor: pointer;
       touch-action: manipulation;
-      -webkit-tap-highlight-color: rgba(255, 255, 255, 0.3);
+      -webkit-tap-highlight-color: rgba(255, 255, 255, 0.12);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045);
+      transition:
+        border-color 0.15s ease,
+        background 0.15s ease,
+        transform 0.08s ease;
+    }
+
+    .assistant-drawer-tools .btn-assistant-create {
+      display: block;
+      width: 100%;
+    }
+
+    .btn-assistant-create:hover {
+      border-color: rgba(255, 255, 255, 0.22);
+      background: #0c0c0c;
     }
 
     .btn-assistant-create:active {
-      filter: brightness(1.05);
+      transform: translateY(1px);
+      background: #050505;
+    }
+
+    .btn-assistant-create:focus-visible {
+      outline: 2px solid rgba(255, 255, 255, 0.35);
+      outline-offset: 2px;
     }
 
     .assistant-drawer-tools-hint {
@@ -1413,7 +1437,8 @@
       flex: 1;
       min-width: 0;
       text-align: left;
-      pointer-events: none;
+      cursor: pointer;
+      -webkit-tap-highlight-color: rgba(255, 255, 255, 0.12);
     }
 
     .scenario-hub > summary::-webkit-details-marker {
@@ -1617,7 +1642,8 @@
       flex: 1;
       min-width: 0;
       text-align: left;
-      pointer-events: none;
+      cursor: pointer;
+      -webkit-tap-highlight-color: rgba(255, 255, 255, 0.12);
     }
 
     .daily-plan > summary::-webkit-details-marker {
@@ -1708,21 +1734,14 @@
       position: relative;
     }
 
-    /* Intro / Outro — чёрные стёкла, те же альфа по стопам, что раньше у «тёплого» градиента */
+    /* Intro / Outro — ровное чёрное полупрозрачное стекло (без «пепельной» каймы и градиента в другой цвет) */
     .scene-main.scene-role-intro,
     .scene-main.scene-role-outro {
-      background: linear-gradient(
-        165deg,
-        rgba(0, 0, 0, 0.38) 0%,
-        rgba(0, 0, 0, 0.82) 14%,
-        rgba(0, 0, 0, 0.97) 34%,
-        rgba(0, 0, 0, 0.99) 52%,
-        #000000 72%
-      );
-      box-shadow:
-        0 10px 28px rgba(0, 0, 0, 0.58),
-        0 0 0 1px rgba(255, 255, 255, 0.28),
-        inset 0 1px 0 rgba(255, 255, 255, 0.055);
+      background: rgba(0, 0, 0, 0.48);
+      backdrop-filter: blur(16px) saturate(105%);
+      -webkit-backdrop-filter: blur(16px) saturate(105%);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     /*
@@ -1749,11 +1768,11 @@
       z-index: 2;
       background: linear-gradient(
         90deg,
-        rgba(255, 255, 255, 0.08) 0%,
-        rgba(160, 158, 155, 0.42) 50%,
-        rgba(255, 255, 255, 0.08) 100%
+        transparent 6%,
+        rgba(255, 255, 255, 0.09) 50%,
+        transparent 94%
       );
-      box-shadow: 0 0 12px rgba(255, 255, 255, 0.12);
+      box-shadow: none;
     }
 
     @media (max-width: 700px) {
@@ -1976,7 +1995,7 @@
       top: calc(var(--scene-play-corner-pad, 10px) + var(--scene-play-size) / 2);
       transform: translateY(-50%);
       margin: 0;
-      padding: 0 calc(var(--scene-play-corner-pad) + var(--scene-play-size) + 12px);
+      padding: 0 calc(var(--scene-play-corner-pad) + var(--scene-play-size) + 14px);
       box-sizing: border-box;
       text-align: center;
       font-weight: 700;
@@ -2038,8 +2057,8 @@
     }
 
     .scene-time-wrap .time-heading {
-      --scene-play-size: 2.68rem;
-      --scene-play-corner-pad: 8px;
+      --scene-play-size: 3.28rem;
+      --scene-play-corner-pad: 4px;
       display: grid;
       grid-template-columns: minmax(0, 1fr);
       grid-template-rows: auto;
@@ -2051,9 +2070,8 @@
       grid-column: 1 / -1;
       position: relative;
       box-sizing: border-box;
-      /* Было min(5.5rem, 20vw) — слишком высоко; оставляем запас под ▶ и заголовок */
       min-height: calc(
-        var(--scene-play-corner-pad) * 2 + max(var(--scene-play-size), min(3.05rem, 12vw))
+        var(--scene-play-corner-pad) * 2 + max(var(--scene-play-size), min(3.35rem, 14vw))
       );
     }
 
@@ -2095,14 +2113,14 @@
     }
 
     .scene-time-wrap .scene-play-btn svg.scene-play-icon {
-      width: calc(var(--scene-play-size) * 0.46);
-      height: calc(var(--scene-play-size) * 0.46);
+      width: calc(var(--scene-play-size) * 0.44);
+      height: calc(var(--scene-play-size) * 0.44);
       display: block;
       flex-shrink: 0;
     }
 
     .scene-time-wrap .scene-play-btn:active {
-      transform: translateY(1px) scale(0.98);
+      transform: scale(0.97);
     }
 
     .scene-time-wrap .scene-done-label.scene-done-checkbox-only {
@@ -3317,28 +3335,46 @@
         animation: none !important;
       }
 
+      .scroll-axis-hint {
+        animation: none !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+      }
+
       .scroll-axis-hint-thumb {
         animation: none !important;
-        top: 42% !important;
+        top: 50% !important;
+        margin-top: -7px !important;
       }
     }
 
     /*
-      Вертикальный «ползунок» у правого края: подсказка листать страницу (вверх/вниз);
-      вверху страницы тот же жест тянет обновление — см. лампу pull-to-reload.
+      Вертикальная подсказка у правого края: без «ездящего» ползунка внутри дорожки —
+      ползунок статичен; слегка двигается вся подсказка (верх/низ вьюпорта).
     */
-    @keyframes scroll-axis-thumb-slide {
+    @keyframes scroll-axis-hint-float {
       0% {
-        top: 10%;
+        transform: translateY(calc(-50% - 11px));
       }
       100% {
-        top: 74%;
+        transform: translateY(calc(-50% + 11px));
       }
     }
 
-    /* Подсказка «листай вверх/вниз» у правого края — отключена (отвлекала) */
     .scroll-axis-hint {
-      display: none !important;
+      position: fixed;
+      right: max(8px, env(safe-area-inset-right, 0px));
+      top: 50%;
+      z-index: 88;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: auto;
+      pointer-events: none;
+      transform: translateY(-50%);
+      animation: scroll-axis-hint-float 2.55s ease-in-out infinite alternate;
     }
 
     .scroll-axis-hint-arrow {
@@ -3376,8 +3412,9 @@
       width: 8px;
       height: 14px;
       margin-left: -4px;
+      margin-top: -7px;
+      top: 50%;
       border-radius: 4px;
-      top: 14%;
       background: linear-gradient(
         180deg,
         rgba(232, 224, 255, 0.65) 0%,
@@ -3388,12 +3425,12 @@
         0 0 12px var(--ui-violet-glow),
         0 0 8px rgba(255, 255, 255, 0.22),
         inset 0 1px 0 rgba(255, 255, 255, 0.32);
-      animation: scroll-axis-thumb-slide 2.55s ease-in-out infinite alternate;
     }
 
     body.assistant-drawer-open .scroll-axis-hint,
     body:has(.teleprompter-overlay.open) .scroll-axis-hint {
-      display: none !important;
+      visibility: hidden !important;
+      animation: none !important;
     }
 
     /* Локации шотлиста — как v90: мягкое «стекло» rgba(8,8,8), без inset-линий (они дали сдвиг оттенка) */
@@ -3666,20 +3703,33 @@
       border-radius: 999px;
     }
 
-    /* «Снято» в одной строке с «Удалить»: та же высота и вертикальные отступы */
-    .scene-main > .scene-toolbar .mini.scene-remove,
-    .scene-main > .scene-toolbar .scene-done-label.scene-done-checkbox-only {
+    .scene-main > .scene-toolbar .mini.scene-remove {
       min-height: 38px;
       padding: 8px 14px;
       box-sizing: border-box;
     }
 
+    /* «Снято» — отдельная круглая оправа объектива (не капсула как у «Удалить») */
     .scene-main > .scene-toolbar .scene-done-label.scene-done-checkbox-only {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 0;
       position: relative;
+      min-height: 42px;
+      min-width: 42px;
+      width: 42px;
+      height: 42px;
+      padding: 0;
+      box-sizing: border-box;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      background:
+        radial-gradient(circle at 32% 26%, rgba(88, 82, 74, 0.45), rgba(18, 17, 16, 0.92) 48%, #060606 100%);
+      box-shadow:
+        0 3px 14px rgba(0, 0, 0, 0.52),
+        inset 0 1px 0 rgba(255, 255, 255, 0.09),
+        inset 0 -5px 16px rgba(0, 0, 0, 0.72);
     }
 
     /* «Снято» — иконка объектива; клик по label, нативный чекбокс накрывает зону */
@@ -3704,8 +3754,8 @@
 
     .scene-main > .scene-toolbar .camera-lens-shutter {
       position: relative;
-      width: 32px;
-      height: 32px;
+      width: 34px;
+      height: 34px;
       flex-shrink: 0;
       pointer-events: none;
       z-index: 1;
@@ -3727,9 +3777,9 @@
       position: absolute;
       left: 50%;
       top: 50%;
-      width: 17px;
-      height: 17px;
-      margin: -8.5px 0 0 -8.5px;
+      width: 18px;
+      height: 18px;
+      margin: -9px 0 0 -9px;
       border-radius: 50%;
       overflow: hidden;
       background: radial-gradient(circle at 38% 32%, rgba(22, 24, 28, 0.95), #020203);
@@ -3742,7 +3792,7 @@
       right: 0;
       height: 50%;
       background: linear-gradient(180deg, #121212 0%, #000 100%);
-      transition: transform 0.42s cubic-bezier(0.33, 1.08, 0.42, 1);
+      transition: transform 0.38s cubic-bezier(0.34, 1.22, 0.36, 1);
       will-change: transform;
     }
 
@@ -3772,10 +3822,10 @@
 
     .scene-main > .scene-toolbar .lens-reflection {
       position: absolute;
-      left: 6px;
-      top: 5px;
-      width: 11px;
-      height: 6px;
+      left: 7px;
+      top: 6px;
+      width: 12px;
+      height: 7px;
       border-radius: 50%;
       background: linear-gradient(145deg, rgba(255, 250, 235, 0.22), transparent 68%);
       pointer-events: none;
@@ -3787,8 +3837,8 @@
       0% {
         filter: brightness(1);
       }
-      40% {
-        filter: brightness(1.28) drop-shadow(0 0 8px rgba(255, 255, 255, 0.42));
+      22% {
+        filter: brightness(1.45) drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
       }
       100% {
         filter: brightness(1);
@@ -3926,7 +3976,8 @@
         flex-direction: row;
       }
 
-      .scenario-hub .actions .btn {
+      .scenario-hub .actions .btn,
+      .scenario-hub .actions .btn-assistant-create {
         flex: 1 1 0;
         min-width: 0;
         padding: 9px 10px;
@@ -3998,15 +4049,16 @@
         background-position: center center;
       }
     @media (max-width: 520px) {
+      /* Play не уменьшаем на узком экране: Intro / Outro / сцены — одинаковая крупная кнопка у края */
       .scene-time-wrap .time-heading {
-        --scene-play-size: 2.38rem;
-        --scene-play-corner-pad: 7px;
+        --scene-play-size: min(3.22rem, 16vw);
+        --scene-play-corner-pad: 4px;
       }
 
       .scene-time-wrap .time-leading {
         font-size: clamp(24px, 6.5vw, 32px);
         letter-spacing: 0.02em;
-        padding: 0 calc(var(--scene-play-corner-pad) + var(--scene-play-size) + 10px);
+        padding: 0 calc(var(--scene-play-corner-pad) + var(--scene-play-size) + 12px);
       }
 
       .scene-main[data-scene-role="body"] .scene-time-wrap .time-leading {
@@ -4235,7 +4287,7 @@
           </label>
         </div>
         <div class="actions">
-          <button class="btn" id="btn-scenario-new" type="button">+ Новый шаблон</button>
+          <button type="button" class="btn-assistant-create" id="btn-scenario-new">+ Новый шаблон</button>
           <button class="btn btn-danger" id="btn-scenario-delete" type="button">Удалить</button>
         </div>
       </div>
@@ -5453,6 +5505,10 @@
         try {
           wirePrepDateUiHint();
           wireShootDateToCalendar();
+          migrateShotCheckboxToTimeHeading();
+          ensureShotCheckboxInHeading();
+          migrateShotCheckboxLensMarkup(document);
+          syncAllShotClasses();
         } catch (ePrepDateWire) {}
       }
 
@@ -7354,8 +7410,16 @@
         }
         var btnAssistNew = document.getElementById('btn-assistant-new-scenario');
         if (btnAssistNew) {
-          var assistNewLastTouch = 0;
+          var ASSIST_NEW_TAP_MAX_PX = 14;
+          var ASSIST_NEW_SWIPE_DX_MIN = 40;
+          var ASSIST_NEW_SWIPE_DOM_RATIO = 0.82;
+          var assistNewPointerArm = null;
+          var assistNewLastPointerOkMs = 0;
+
           function runAssistantCreate() {
+            var now = Date.now();
+            if (now - runAssistantCreate._debounce < 720) return;
+            runAssistantCreate._debounce = now;
             var n = document.getElementById('assistant-new-name');
             var b = document.getElementById('assistant-new-block');
             var d = document.getElementById('assistant-new-date');
@@ -7367,20 +7431,75 @@
               targetCount: c && c.value !== '' && c.value != null ? c.value : ''
             });
           }
+          runAssistantCreate._debounce = 0;
+
+          function assistNewTryCommitTap(e) {
+            if (!assistNewPointerArm || assistNewPointerArm.pid !== e.pointerId) return;
+            if (!document.body.classList.contains('assistant-drawer-open')) {
+              assistNewPointerArm = null;
+              return;
+            }
+            var sx = assistNewPointerArm.x;
+            var sy = assistNewPointerArm.y;
+            assistNewPointerArm = null;
+            var dx = e.clientX - sx;
+            var dy = e.clientY - sy;
+            if (Math.abs(dx) >= ASSIST_NEW_SWIPE_DX_MIN && Math.abs(dx) > Math.abs(dy) / ASSIST_NEW_SWIPE_DOM_RATIO) {
+              return;
+            }
+            if (Math.hypot(dx, dy) > ASSIST_NEW_TAP_MAX_PX) return;
+            var hit = null;
+            try {
+              hit = document.elementFromPoint(e.clientX, e.clientY);
+            } catch (efp) {}
+            if (!hit || !btnAssistNew.contains(hit)) return;
+            try {
+              e.preventDefault();
+            } catch (pe) {}
+            try {
+              e.stopPropagation();
+            } catch (se) {}
+            assistNewLastPointerOkMs = Date.now();
+            try {
+              triggerHaptic('light');
+            } catch (eH) {}
+            runAssistantCreate();
+          }
+
+          btnAssistNew.addEventListener(
+            'pointerdown',
+            function (e) {
+              if (!document.body.classList.contains('assistant-drawer-open')) return;
+              if (e.pointerType === 'mouse' && e.button !== 0) return;
+              assistNewPointerArm = { pid: e.pointerId, x: e.clientX, y: e.clientY };
+            },
+            true
+          );
+
+          document.addEventListener(
+            'pointerup',
+            function (e) {
+              assistNewTryCommitTap(e);
+            },
+            true
+          );
+          document.addEventListener(
+            'pointercancel',
+            function (e) {
+              if (assistNewPointerArm && assistNewPointerArm.pid === e.pointerId) assistNewPointerArm = null;
+            },
+            true
+          );
+
           btnAssistNew.addEventListener('click', function (e) {
-            if (Date.now() - assistNewLastTouch < 450) return;
+            if (Date.now() - assistNewLastPointerOkMs < 500) {
+              e.preventDefault();
+              e.stopPropagation();
+              return;
+            }
             e.preventDefault();
             runAssistantCreate();
           });
-          btnAssistNew.addEventListener(
-            'touchend',
-            function (e) {
-              assistNewLastTouch = Date.now();
-              e.preventDefault();
-              runAssistantCreate();
-            },
-            { passive: false }
-          );
         }
       }
 
@@ -8903,9 +9022,13 @@
             btn.setAttribute('aria-label', 'Открыть телесуфлер');
             spacer.insertBefore(btn, spacer.firstChild);
           }
-          if (!btn.querySelector('svg.scene-play-icon')) {
+          var svgIc = btn.querySelector('svg.scene-play-icon');
+          if (!svgIc) {
             btn.innerHTML =
-              '<svg class="scene-play-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10 7v10l8.5-5L10 7z"/></svg>';
+              '<svg class="scene-play-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 8 L9 16 L18 12 Z"/></svg>';
+          } else {
+            var pth = svgIc.querySelector('path');
+            if (pth) pth.setAttribute('d', 'M9 8 L9 16 L18 12 Z');
           }
         });
       }
@@ -9830,7 +9953,7 @@
         if (btnSave) btnSave.addEventListener('click', function () { saveToStorage(); });
 
         document.addEventListener('click', function (e) {
-          var genericBtn = e.target && e.target.closest ? e.target.closest('button.btn, .scene-play-btn') : null;
+          var genericBtn = e.target && e.target.closest ? e.target.closest('button.btn, button.btn-assistant-create, .scene-play-btn') : null;
           if (genericBtn) triggerHaptic('light');
           var replaceBtn = e.target && e.target.closest ? e.target.closest('.say-replace-btn') : null;
           if (replaceBtn) {
@@ -10111,35 +10234,35 @@
         updateTopLogoScrollBlur();
       }
 
-      /** Вся полоса заголовка переключает раскрытие; слушатель на <details>, чтобы тап по тексту в <summary> совпадал с ролью summary (и не терялся stopImmediatePropagation у span). */
+      /** Вся полоса заголовка переключает раскрытие. Делегирование на document — после замены wrap.innerHTML блоки пересоздаются, привязка к старым узлам срывалась бы тап по тексту «Настройки сценариев». */
       function wireDetailsSummaryRowToggle() {
         if (wireDetailsSummaryRowToggle._done) return;
         wireDetailsSummaryRowToggle._done = true;
-        ['scenario-hub', 'daily-plan'].forEach(function (id) {
-          var det = document.getElementById(id);
-          if (!det || det.tagName !== 'DETAILS') return;
-          var sum = det.querySelector(':scope > summary');
-          if (!sum) return;
-          det.addEventListener(
-            'click',
-            function (e) {
-              if (!sum.contains(e.target)) return;
-              if (e.target.closest && e.target.closest('a[href], button, input, select, textarea')) return;
-              e.preventDefault();
-              try {
-                e.stopPropagation();
-              } catch (e1) {}
-              var nextOpen = !det.open;
-              det.open = nextOpen;
-              if (typeof requestAnimationFrame === 'function') {
-                requestAnimationFrame(function () {
-                  det.open = nextOpen;
-                });
-              }
-            },
-            true
-          );
-        });
+        document.addEventListener(
+          'click',
+          function (e) {
+            var raw = e.target;
+            var el = raw && raw.nodeType === 1 ? raw : raw && raw.parentElement;
+            if (!el || !el.closest) return;
+            var det = el.closest('#scenario-hub, #daily-plan');
+            if (!det || det.tagName !== 'DETAILS') return;
+            var sum = det.querySelector(':scope > summary');
+            if (!sum || !sum.contains(el)) return;
+            if (el.closest && el.closest('a[href], button, input, select, textarea')) return;
+            e.preventDefault();
+            try {
+              e.stopPropagation();
+            } catch (e1) {}
+            var nextOpen = !det.open;
+            det.open = nextOpen;
+            if (typeof requestAnimationFrame === 'function') {
+              requestAnimationFrame(function () {
+                det.open = nextOpen;
+              });
+            }
+          },
+          true
+        );
       }
 
       function wirePullDownReload() {
