@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Сценарий видео / Sam Bruev (v158)</title>
+  <title>Сценарий видео / Sam Bruev (v159)</title>
   <!-- До отрисовки тела: восстановить скролл после reload без «прыжка» картинки/фона -->
   <script>
     (function () {
@@ -263,29 +263,29 @@
       }
     }
 
-    /* «Скобка» у левого края — открыть план съёмок: уже, выше, заметнее */
+    /* Подсказка у левого края — узкая, приглушённая, в тон лампы (--gold) */
     .assistant-open-strip {
       position: fixed;
       left: env(safe-area-inset-left, 0px);
       top: 50%;
       transform: translateY(-50%);
-      width: 13px;
-      min-width: 11px;
+      width: 8px;
+      min-width: 7px;
       height: min(168px, 46vh);
       min-height: 72px;
       margin: 0;
       padding: 0;
       border: none;
-      border-radius: 0 11px 11px 0;
+      border-radius: 0 9px 9px 0;
       background: linear-gradient(
         90deg,
-        rgba(24, 18, 8, 0.42) 0%,
-        rgba(212, 175, 55, 0.38) 52%,
-        rgba(255, 236, 176, 0.52) 100%
+        rgba(12, 10, 8, 0.72) 0%,
+        rgba(212, 175, 55, 0.14) 55%,
+        rgba(212, 175, 55, 0.26) 100%
       );
       box-shadow:
-        inset -2px 0 8px rgba(255, 248, 220, 0.35),
-        2px 0 14px rgba(212, 175, 55, 0.22);
+        inset -1px 0 5px rgba(212, 175, 55, 0.12),
+        1px 0 8px rgba(0, 0, 0, 0.35);
       /* Выше .wrap (12) и дочерних слоёв сцен, но ниже teleprompter / pull-hint / drawer */
       z-index: 100;
       cursor: pointer;
@@ -300,29 +300,29 @@
       left: 46%;
       top: 50%;
       transform: translate(-50%, -50%);
-      font-size: 18px;
+      font-size: 15px;
       font-weight: 500;
       line-height: 1;
-      color: rgba(255, 245, 210, 0.88);
+      color: rgba(212, 175, 55, 0.72);
       pointer-events: none;
       letter-spacing: -0.08em;
-      text-shadow: 0 0 10px rgba(255, 220, 140, 0.65);
+      text-shadow: 0 0 6px rgba(212, 175, 55, 0.28);
     }
 
     .assistant-open-strip:active {
       background: linear-gradient(
         90deg,
-        rgba(18, 14, 6, 0.52) 0%,
-        rgba(212, 175, 55, 0.5) 52%,
-        rgba(255, 245, 200, 0.62) 100%
+        rgba(10, 8, 6, 0.82) 0%,
+        rgba(212, 175, 55, 0.2) 55%,
+        rgba(212, 175, 55, 0.34) 100%
       );
       box-shadow:
-        inset -2px 0 10px rgba(255, 252, 235, 0.45),
-        2px 0 18px rgba(212, 175, 55, 0.35);
+        inset -1px 0 6px rgba(212, 175, 55, 0.18),
+        1px 0 10px rgba(0, 0, 0, 0.4);
     }
 
     .assistant-open-strip:active::before {
-      color: rgba(255, 252, 235, 0.98);
+      color: rgba(230, 205, 140, 0.88);
     }
 
     body.assistant-drawer-open .assistant-open-strip {
@@ -3920,8 +3920,8 @@
       }
 
       /** Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages). */
-      var APP_VERSION = 'v158';
-      var BUILD_TIME = '2026-05-03 09:55 MSK';
+      var APP_VERSION = 'v159';
+      var BUILD_TIME = '2026-05-03 10:15 MSK';
       var APP_BUILD = APP_VERSION + ' · ' + BUILD_TIME;
       var lastSceneTimeTriggerTouchAt = 0;
       var APP_BUILD_KEY = 'abakan-app-build';
