@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Сценарий видео / Sam Bruev (v147)</title>
+  <title>Сценарий видео / Sam Bruev (v149)</title>
   <!-- До отрисовки тела: восстановить скролл после reload без «прыжка» картинки/фона -->
   <script>
     (function () {
@@ -263,26 +263,29 @@
       }
     }
 
-    /* Тихая «скобка» у левого края — открыть план съёмок (не перекрывает контент) */
+    /* «Скобка» у левого края — открыть план съёмок: уже, выше, заметнее */
     .assistant-open-strip {
       position: fixed;
       left: env(safe-area-inset-left, 0px);
       top: 50%;
       transform: translateY(-50%);
-      width: 20px;
-      min-width: 18px;
-      height: min(112px, 30vh);
-      min-height: 56px;
+      width: 13px;
+      min-width: 11px;
+      height: min(168px, 46vh);
+      min-height: 72px;
       margin: 0;
       padding: 0;
       border: none;
-      border-radius: 0 10px 10px 0;
+      border-radius: 0 11px 11px 0;
       background: linear-gradient(
         90deg,
-        rgba(0, 0, 0, 0.18) 0%,
-        rgba(212, 175, 55, 0.1) 100%
+        rgba(24, 18, 8, 0.42) 0%,
+        rgba(212, 175, 55, 0.38) 52%,
+        rgba(255, 236, 176, 0.52) 100%
       );
-      box-shadow: inset -1px 0 0 rgba(255, 228, 160, 0.14);
+      box-shadow:
+        inset -2px 0 8px rgba(255, 248, 220, 0.35),
+        2px 0 14px rgba(212, 175, 55, 0.22);
       z-index: 8;
       cursor: pointer;
       touch-action: manipulation;
@@ -296,25 +299,29 @@
       left: 46%;
       top: 50%;
       transform: translate(-50%, -50%);
-      font-size: 17px;
-      font-weight: 300;
+      font-size: 18px;
+      font-weight: 500;
       line-height: 1;
-      color: rgba(255, 228, 160, 0.42);
+      color: rgba(255, 245, 210, 0.88);
       pointer-events: none;
       letter-spacing: -0.08em;
+      text-shadow: 0 0 10px rgba(255, 220, 140, 0.65);
     }
 
     .assistant-open-strip:active {
       background: linear-gradient(
         90deg,
-        rgba(0, 0, 0, 0.26) 0%,
-        rgba(212, 175, 55, 0.2) 100%
+        rgba(18, 14, 6, 0.52) 0%,
+        rgba(212, 175, 55, 0.5) 52%,
+        rgba(255, 245, 200, 0.62) 100%
       );
-      box-shadow: inset -1px 0 0 rgba(255, 228, 160, 0.22);
+      box-shadow:
+        inset -2px 0 10px rgba(255, 252, 235, 0.45),
+        2px 0 18px rgba(212, 175, 55, 0.35);
     }
 
     .assistant-open-strip:active::before {
-      color: rgba(255, 240, 200, 0.55);
+      color: rgba(255, 252, 235, 0.98);
     }
 
     body.assistant-drawer-open .assistant-open-strip {
@@ -3803,8 +3810,8 @@
       }
 
       /** Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages). */
-      var APP_VERSION = 'v147';
-      var BUILD_TIME = '2026-05-03 04:49 MSK';
+      var APP_VERSION = 'v149';
+      var BUILD_TIME = '2026-05-03 06:20 MSK';
       var APP_BUILD = APP_VERSION + ' · ' + BUILD_TIME;
       var lastSceneTimeTriggerTouchAt = 0;
       var APP_BUILD_KEY = 'abakan-app-build';
@@ -4664,7 +4671,7 @@
         return { mm0: a.m, ss0: a.s, mm1: b.m, ss1: b.s };
       }
 
-      /* Одна строка HTML со всеми 00–59 — надёжнее для Safari/iOS, чем пустой select из localStorage + флаг data-time-filled */
+      /* Секунды: 60 значений 0–59. Минуты: только 0, 5, …, 55 (шаг 5). */
       var TIME_OPTIONS_HTML = (function () {
         var i, h = '';
         for (i = 0; i <= 59; i++) {
@@ -4672,6 +4679,29 @@
         }
         return h;
       })();
+
+      var TIME_MINUTE_OPTIONS_HTML = (function () {
+        var i,
+          h = '';
+        for (i = 0; i <= 55; i += 5) {
+          h += '<option value="' + i + '">' + (i < 10 ? '0' : '') + i + '</option>';
+        }
+        return h;
+      })();
+
+      function roundMinuteToStep5(m) {
+        var x = Number(m) || 0;
+        return Math.max(0, Math.min(55, Math.round(x / 5) * 5));
+      }
+
+      function isMinuteWheelKey(key) {
+        return key === 'mm0' || key === 'mm1';
+      }
+
+      function sceneTimeWheelSlotCount(col) {
+        var k = col && col.getAttribute ? col.getAttribute('data-key') : '';
+        return isMinuteWheelKey(k) ? 12 : 60;
+      }
 
       function getOrderedSceneTimeSelects(wrap) {
         if (!wrap || !wrap.querySelector) return null;
@@ -4838,27 +4868,33 @@
         var ch = col.clientHeight || 168;
         var item = m.item;
         var pad = m.pad;
-        var rows = 60 * SCENE_TIME_WHEEL_COPIES;
+        var slots = sceneTimeWheelSlotCount(col);
+        var rows = slots * SCENE_TIME_WHEEL_COPIES;
         var centerLine = col.scrollTop + ch / 2;
         var raw = (centerLine - pad - item / 2) / item;
         var g = Math.round(raw);
-        if (g < 36) col.scrollTop += 60 * item;
-        else if (g >= rows - 36) col.scrollTop -= 60 * item;
+        var jump = Math.max(1, Math.floor(slots * 0.6));
+        if (g < jump) col.scrollTop += slots * item;
+        else if (g >= rows - jump) col.scrollTop -= slots * item;
       }
 
       function buildSceneTimeWheelColumns(dlg) {
         if (!dlg || dlg.getAttribute('data-wheels-built') === '1') return;
         dlg.setAttribute('data-wheels-built', '1');
         dlg.querySelectorAll('.scene-time-wheel').forEach(function (col) {
+          var key = col.getAttribute('data-key') || '';
+          var isMm = isMinuteWheelKey(key);
+          var slots = isMm ? 12 : 60;
           var padTop = document.createElement('div');
           padTop.className = 'scene-time-wheel-pad';
           col.appendChild(padTop);
           var copy, i;
           for (copy = 0; copy < SCENE_TIME_WHEEL_COPIES; copy++) {
-            for (i = 0; i <= 59; i++) {
+            for (i = 0; i < slots; i++) {
+              var val = isMm ? i * 5 : i;
               var d = document.createElement('div');
               d.className = 'scene-time-wheel-item';
-              d.textContent = (i < 10 ? '0' : '') + i;
+              d.textContent = (val < 10 ? '0' : '') + val;
               col.appendChild(d);
             }
           }
@@ -4887,12 +4923,19 @@
         });
       }
 
-      function setSceneTimeWheelScroll(col, idx) {
+      function setSceneTimeWheelScroll(col, rawVal) {
         if (!col) return;
         var m = sceneTimeWheelMetrics(col);
-        idx = Math.max(0, Math.min(59, Number(idx) || 0));
+        var key = col.getAttribute('data-key') || '';
+        var slots = sceneTimeWheelSlotCount(col);
+        var idx;
+        if (isMinuteWheelKey(key)) {
+          idx = roundMinuteToStep5(rawVal) / 5;
+        } else {
+          idx = Math.max(0, Math.min(59, Number(rawVal) || 0));
+        }
         var ch = col.clientHeight || 168;
-        var globalRow = SCENE_TIME_WHEEL_MID_COPY * 60 + idx;
+        var globalRow = SCENE_TIME_WHEEL_MID_COPY * slots + idx;
         var centerY = m.pad + globalRow * m.item + m.item / 2;
         var st = centerY - ch / 2;
         var maxSt = Math.max(0, col.scrollHeight - ch);
@@ -4903,10 +4946,13 @@
         if (!col) return 0;
         var m = sceneTimeWheelMetrics(col);
         var ch = col.clientHeight || 168;
+        var key = col.getAttribute('data-key') || '';
+        var slots = sceneTimeWheelSlotCount(col);
         var centerLine = col.scrollTop + ch / 2;
         var raw = (centerLine - m.pad - m.item / 2) / m.item;
         var g = Math.round(raw);
-        var idx = ((g % 60) + 60) % 60;
+        var idx = ((g % slots) + slots) % slots;
+        if (isMinuteWheelKey(key)) return idx * 5;
         return idx;
       }
 
@@ -4996,9 +5042,13 @@
         var legacyDlg = document.getElementById('scene-time-center-dialog');
         if (legacyDlg) {
           var wheels = legacyDlg.querySelectorAll('.scene-time-wheel');
-          var sampleWheel = wheels[0];
-          var nItems = sampleWheel ? sampleWheel.querySelectorAll('.scene-time-wheel-item').length : 0;
-          if (wheels.length !== 4 || nItems !== 60 * SCENE_TIME_WHEEL_COPIES) legacyDlg.remove();
+          var mm0w = legacyDlg.querySelector('.scene-time-wheel[data-key="mm0"]');
+          var ss0w = legacyDlg.querySelector('.scene-time-wheel[data-key="ss0"]');
+          var nMm = mm0w ? mm0w.querySelectorAll('.scene-time-wheel-item').length : 0;
+          var nSs = ss0w ? ss0w.querySelectorAll('.scene-time-wheel-item').length : 0;
+          if (wheels.length !== 4 || nMm !== 12 * SCENE_TIME_WHEEL_COPIES || nSs !== 60 * SCENE_TIME_WHEEL_COPIES) {
+            legacyDlg.remove();
+          }
         }
         if (document.getElementById('scene-time-center-dialog')) return;
         var dlg = document.createElement('dialog');
@@ -5130,13 +5180,16 @@
           var m = s.match(/^(\d{1,2}):(\d{2}):(\d{2})$/);
           if (m) {
             return {
-              mm: Math.max(0, Math.min(59, Number(m[2]) || 0)),
+              mm: roundMinuteToStep5(Number(m[2]) || 0),
               ss: Math.max(0, Math.min(59, Number(m[3]) || 0))
             };
           }
           m = s.match(/^(\d{2}):(\d{2})$/);
           if (!m) return { mm: 0, ss: 0 };
-          return { mm: Math.max(0, Math.min(59, Number(m[1]) || 0)), ss: Math.max(0, Math.min(59, Number(m[2]) || 0)) };
+          return {
+            mm: roundMinuteToStep5(Number(m[1]) || 0),
+            ss: Math.max(0, Math.min(59, Number(m[2]) || 0))
+          };
         }
         function applyFromInputs() {
           var sels = getOrderedSceneTimeSelects(wrap);
@@ -5160,8 +5213,10 @@
       function initSceneTimeBlock(wrap) {
         if (!wrap) return;
         wrap.querySelectorAll('select.scene-time-select').forEach(function (sel) {
-          if (sel.options && sel.options.length >= 60) return;
-          sel.innerHTML = TIME_OPTIONS_HTML;
+          var isMm = sel.classList.contains('st-mm0') || sel.classList.contains('st-mm1');
+          var needLen = isMm ? 12 : 60;
+          if (sel.options && sel.options.length >= needLen) return;
+          sel.innerHTML = isMm ? TIME_MINUTE_OPTIONS_HTML : TIME_OPTIONS_HTML;
         });
         wrap.setAttribute('data-time-filled', '1');
         ensureIOSWheelInputs(wrap);
@@ -5365,10 +5420,15 @@
         document.querySelectorAll('.scene-time-wrap').forEach(function (w) {
           w.removeAttribute('data-time-filled');
           w.querySelectorAll('select.scene-time-select').forEach(function (sel) {
-            if (!sel.options || sel.options.length < 60) {
+            var isMm = sel.classList.contains('st-mm0') || sel.classList.contains('st-mm1');
+            var needLen = isMm ? 12 : 60;
+            if (!sel.options || sel.options.length < needLen) {
               var v = sel.value;
-              sel.innerHTML = TIME_OPTIONS_HTML;
-              if (v !== '' && v !== undefined) sel.value = v;
+              sel.innerHTML = isMm ? TIME_MINUTE_OPTIONS_HTML : TIME_OPTIONS_HTML;
+              if (v !== '' && v !== undefined) {
+                if (isMm) sel.value = String(roundMinuteToStep5(v));
+                else sel.value = String(Math.max(0, Math.min(59, Number(v) || 0)));
+              }
             }
           });
         });
@@ -5383,7 +5443,9 @@
           if (!selsProbe) return;
           var need = false;
           selsProbe.forEach(function (sel) {
-            if (!sel.options || sel.options.length < 60) need = true;
+            var isMm = sel.classList.contains('st-mm0') || sel.classList.contains('st-mm1');
+            var needLen = isMm ? 12 : 60;
+            if (!sel.options || sel.options.length < needLen) need = true;
           });
           if (!need) return;
           var vals = selsProbe.map(function (sel) {
@@ -5394,7 +5456,9 @@
           var restored = getOrderedSceneTimeSelects(w);
           if (!restored) return;
           restored.forEach(function (sel, i) {
-            if (vals[i] !== undefined && vals[i] !== null && vals[i] !== '') sel.value = vals[i];
+            if (vals[i] === undefined || vals[i] === null || vals[i] === '') return;
+            if (i === 0 || i === 2) sel.value = String(roundMinuteToStep5(vals[i]));
+            else sel.value = String(Math.max(0, Math.min(59, Number(vals[i]) || 0)));
           });
           syncIOSWheelFromSelects(w);
         });
@@ -5403,14 +5467,17 @@
       function setSceneTimeValues(wrap, mm0, ss0, mm1, ss1) {
         var sels = getOrderedSceneTimeSelects(wrap);
         if (!sels) return;
-        function set(sel, v) {
+        function setMinute(sel, v) {
+          sel.value = String(roundMinuteToStep5(v));
+        }
+        function setSecond(sel, v) {
           var n = Math.max(0, Math.min(59, Number(v) || 0));
           sel.value = String(n);
         }
-        set(sels[0], mm0);
-        set(sels[1], ss0);
-        set(sels[2], mm1);
-        set(sels[3], ss1);
+        setMinute(sels[0], mm0);
+        setSecond(sels[1], ss0);
+        setMinute(sels[2], mm1);
+        setSecond(sels[3], ss1);
         wrap.setAttribute('data-mm0', String(sels[0].value || '0'));
         wrap.setAttribute('data-ss0', String(sels[1].value || '0'));
         wrap.setAttribute('data-mm1', String(sels[2].value || '0'));
