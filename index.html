@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Сценарий видео / Sam Bruev (v156)</title>
+  <title>Сценарий видео / Sam Bruev (v158)</title>
   <!-- До отрисовки тела: восстановить скролл после reload без «прыжка» картинки/фона -->
   <script>
     (function () {
@@ -3920,8 +3920,8 @@
       }
 
       /** Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages). */
-      var APP_VERSION = 'v156';
-      var BUILD_TIME = '2026-05-03 09:05 MSK';
+      var APP_VERSION = 'v158';
+      var BUILD_TIME = '2026-05-03 09:55 MSK';
       var APP_BUILD = APP_VERSION + ' · ' + BUILD_TIME;
       var lastSceneTimeTriggerTouchAt = 0;
       var APP_BUILD_KEY = 'abakan-app-build';
@@ -6894,6 +6894,32 @@
           { passive: true }
         );
 
+        /** Блокируем вертикальный скролл, когда жест уже явно горизонтальный (иначе «дёргается» страница). */
+        document.addEventListener(
+          'touchmove',
+          function (e) {
+            if (!swipeArmed || swipeCancelled) return;
+            if (!e.touches || !e.touches.length) return;
+            if (document.body.classList.contains('assistant-drawer-open')) return;
+            var t = e.touches[0];
+            var dx = t.clientX - startX;
+            var dy = t.clientY - startY;
+            var adx = Math.abs(dx);
+            var ady = Math.abs(dy);
+            if (ady > 18 && ady > adx * 1.22) return;
+            if (adx > 7 && adx >= ady * 0.82) {
+              try {
+                e.preventDefault();
+              } catch (pe) {}
+              if (pullArmed) {
+                pullArmed = false;
+                resetPullHint();
+              }
+            }
+          },
+          { passive: false, capture: true }
+        );
+
         document.addEventListener(
           'touchmove',
           function (e) {
@@ -6925,12 +6951,13 @@
             if (swipeArmed && !swipeCancelled) {
               if (dx > swipeMaxDx) swipeMaxDx = dx;
               if (dx < swipeMinDx) swipeMinDx = dx;
-              if (dx > 10 && dx >= Math.abs(dy) * 0.65) swipeIntentHorizontal = true;
+              if (Math.abs(dx) > 10 && Math.abs(dx) >= Math.abs(dy) * 0.65) swipeIntentHorizontal = true;
               var vetoVertical =
                 !swipeIntentHorizontal &&
-                swipeMaxDx < 32 &&
-                Math.abs(dy) > 44 &&
-                Math.abs(dy) > Math.abs(dx) * 1.4;
+                swipeMaxDx < 36 &&
+                swipeMinDx > -36 &&
+                Math.abs(dy) > 40 &&
+                Math.abs(dy) > Math.abs(dx) * 1.35;
               if (vetoVertical) {
                 swipeCancelled = true;
                 swipeArmed = false;
@@ -7055,6 +7082,16 @@
           if (dx > maxDx) maxDx = dx;
           if (dx < minDx) minDx = dx;
           if (Math.abs(dy) > maxAbsDy) maxAbsDy = Math.abs(dy);
+          if (e.pointerType === 'touch' || e.pointerType === 'pen') {
+            var adx = Math.abs(dx);
+            var ady = Math.abs(dy);
+            if (ady > 20 && ady > adx * 1.2) return;
+            if (adx > 8 && adx >= ady * 0.8) {
+              try {
+                e.preventDefault();
+              } catch (ePrev) {}
+            }
+          }
         }
 
         function onPointerEnd(e) {
@@ -7070,7 +7107,7 @@
         }
 
         document.addEventListener('pointerdown', onPointerDown, { passive: true, capture: true });
-        document.addEventListener('pointermove', onPointerMove, { passive: true, capture: true });
+        document.addEventListener('pointermove', onPointerMove, { passive: false, capture: true });
         document.addEventListener('pointerup', onPointerEnd, { passive: true, capture: true });
         document.addEventListener(
           'pointercancel',
