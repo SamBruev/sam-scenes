@@ -433,11 +433,11 @@
         -webkit-backdrop-filter: none;
         background: linear-gradient(
           180deg,
-          rgba(0, 0, 0, 0.7) 0%,
-          rgba(0, 0, 0, 0.86) 48%,
-          rgba(0, 0, 0, 0.93) 100%
+          rgba(0, 0, 0, 0.88) 0%,
+          rgba(0, 0, 0, 0.94) 42%,
+          #000000 100%
         );
-        border-color: rgba(255, 255, 255, 0.07);
+        border-color: rgba(255, 255, 255, 0.06);
       }
 
       .scene.scene-main[data-scene-role="body"] {
@@ -445,12 +445,12 @@
         -webkit-backdrop-filter: none;
         background: linear-gradient(
           180deg,
-          rgba(18, 18, 18, 0.92) 0%,
-          rgba(10, 10, 10, 0.97) 45%,
+          rgba(6, 6, 7, 0.98) 0%,
+          rgba(2, 2, 2, 0.99) 40%,
           #000000 100%
         );
-        border-color: rgba(255, 255, 255, 0.04);
-        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.45);
+        border-color: rgba(255, 255, 255, 0.035);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
       }
     }
 
@@ -1925,15 +1925,15 @@
     .scene-main.scene-role-outro {
       background: linear-gradient(
         180deg,
-        rgba(0, 0, 0, 0.14) 0%,
-        rgba(0, 0, 0, 0.42) 32%,
-        rgba(0, 0, 0, 0.82) 68%,
+        rgba(0, 0, 0, 0.42) 0%,
+        rgba(0, 0, 0, 0.68) 28%,
+        rgba(0, 0, 0, 0.92) 62%,
         #000000 100%
       );
       backdrop-filter: blur(16px) saturate(105%);
       -webkit-backdrop-filter: blur(16px) saturate(105%);
-      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55);
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.62);
+      border: 1px solid rgba(255, 255, 255, 0.05);
     }
 
     /*
@@ -2102,27 +2102,27 @@
       border-radius: 22px;
       padding: 10px 12px 12px;
       background: #000000;
-      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.45);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.52);
       overflow: visible;
       position: relative;
     }
 
-    /* Основные сцены: сверху «стекло» (blur), к низу плавно в непрозрачный чёрный */
+    /* Основные сцены: сверху «стекло» (blur), к низу плавно в непрозрачный чёрный — затемнённее */
     .scene.scene-main[data-scene-role="body"] {
       background: linear-gradient(
         180deg,
-        rgba(14, 14, 16, 0.36) 0%,
-        rgba(10, 10, 12, 0.58) 26%,
-        rgba(5, 5, 6, 0.82) 55%,
-        rgba(2, 2, 2, 0.96) 78%,
+        rgba(5, 5, 6, 0.78) 0%,
+        rgba(3, 3, 4, 0.9) 22%,
+        rgba(1, 1, 2, 0.97) 48%,
+        rgba(0, 0, 0, 0.995) 74%,
         #000000 100%
       );
       backdrop-filter: blur(7px) saturate(103%);
       -webkit-backdrop-filter: blur(7px) saturate(103%);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.04);
       box-shadow:
-        0 10px 26px rgba(0, 0, 0, 0.42),
-        inset 0 1px 0 rgba(255, 255, 255, 0.032);
+        0 12px 32px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.022);
     }
 
     .scene.scene-main.scene-shot-complete {
