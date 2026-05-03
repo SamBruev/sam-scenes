@@ -1123,22 +1123,42 @@
     }
 
     .assistant-drawer-trash {
-      margin-top: 28px;
-      padding: 14px 12px 16px;
-      border-radius: 16px;
-      border: 1px solid rgba(255, 232, 190, 0.14);
-      background: linear-gradient(165deg, rgba(22, 18, 14, 0.96) 0%, #050504 52%, #000000 100%);
-      box-shadow:
-        inset 0 1px 0 rgba(255, 248, 235, 0.06),
-        0 10px 28px rgba(0, 0, 0, 0.35);
+      margin-top: 26px;
+      padding: 18px 0 4px;
+      border: none;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
       box-sizing: border-box;
       min-width: 0;
+      position: relative;
+    }
+
+    /* Одна линия от плана: тёплый крем без отдельного «цветного» блока */
+    .assistant-drawer-trash::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 1px;
+      border-radius: 999px;
+      pointer-events: none;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 244, 220, 0.07) 14%,
+        rgba(255, 236, 200, 0.34) 50%,
+        rgba(255, 244, 220, 0.07) 86%,
+        transparent 100%
+      );
+      box-shadow: 0 0 14px rgba(255, 230, 195, 0.12);
     }
 
     .assistant-drawer-trash-title {
       margin: 0 0 10px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 0;
+      border: none;
       font-size: 11px;
       font-weight: 800;
       letter-spacing: 0.14em;
@@ -1174,11 +1194,17 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      padding: 10px 12px;
-      border-radius: 12px;
-      border: 1px solid var(--ui-select-border);
-      background: #000000;
+      padding: 10px 0 12px;
+      border: none;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 0;
+      background: transparent;
       box-sizing: border-box;
+    }
+
+    .assistant-drawer-trash-list .assistant-drawer-trash-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
     }
 
     .assistant-drawer-trash-item-title {
@@ -1211,8 +1237,8 @@
       margin: 0;
       padding: 9px 10px;
       border-radius: 10px;
-      border: 1px solid var(--ui-select-border);
-      background: #000000;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: transparent;
       color: var(--cream);
       font: inherit;
       font-size: 12px;
@@ -1231,9 +1257,10 @@
     }
 
     .assistant-drawer-trash-btn--danger {
-      border-color: rgba(232, 96, 82, 0.35);
-      color: #ffc9c2;
-      background: #140806;
+      border-style: dashed;
+      border-color: rgba(255, 255, 255, 0.12);
+      color: rgba(250, 246, 240, 0.78);
+      background: transparent;
     }
 
     .wrap > * { order: 10; }
