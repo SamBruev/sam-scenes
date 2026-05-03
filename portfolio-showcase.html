@@ -24,6 +24,8 @@
       --muted: #958b7e;
       --label: #ebe3d6;
       --accent-soft: rgba(232, 201, 104, 0.92);
+      --lamp-blue: #091347;
+      --lamp-blue-soft: rgba(26, 58, 110, 0.85);
       --script-font: "Pacifico", cursive;
       --brand-serif: "Roboto Slab", Georgia, "Times New Roman", serif;
       --glass-top: rgba(255, 255, 255, 0.07);
@@ -99,24 +101,6 @@
       object-fit: contain;
     }
 
-    /* Второй слой — чуть меньше размытия = «глубина» */
-    .ambient__logo-b {
-      position: absolute;
-      left: 50%;
-      top: 44%;
-      transform: translate(-50%, -50%) scale(0.92);
-      width: min(95vw, 640px);
-      opacity: 0.08;
-      filter: blur(22px);
-      -webkit-filter: blur(22px);
-    }
-
-    .ambient__logo-b img {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
-
     .wrap {
       position: relative;
       z-index: 1;
@@ -125,19 +109,42 @@
       padding: calc(1.1rem + env(safe-area-inset-top, 0px)) clamp(1.1rem, 4.2vw, 2rem) calc(3rem + env(safe-area-inset-bottom, 0px));
     }
 
-    /* Шапка: чёткий символ + типографика как в приложении */
+    /* Шапка: полный брендовый знак + акцент «синяя ножка» лампы из фирменной графики */
     .brand-mark {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0.65rem;
+      gap: 0.5rem;
       margin-bottom: clamp(1.5rem, 4.5vw, 2.4rem);
     }
 
-    .brand-mark__symbol {
-      width: clamp(76px, 22vw, 104px);
+    .brand-mark__hero {
+      width: min(98vw, 520px);
+      margin: 0 auto;
+    }
+
+    .brand-mark__hero img {
+      width: 100%;
       height: auto;
-      filter: drop-shadow(0 12px 32px rgba(212, 175, 55, 0.2));
+      display: block;
+      filter: drop-shadow(0 12px 40px rgba(0, 0, 0, 0.75));
+    }
+
+    /* Вертикальный штрих под логотипом — отсылка к синей ножке лампы в макете */
+    .brand-mark__lamp-stem {
+      width: 6px;
+      height: 36px;
+      margin: 0.15rem auto 0.35rem;
+      border-radius: 999px;
+      background: linear-gradient(
+        180deg,
+        rgba(212, 175, 55, 0.45) 0%,
+        var(--lamp-blue-soft) 38%,
+        var(--lamp-blue) 100%
+      );
+      box-shadow:
+        0 0 14px rgba(9, 19, 71, 0.55),
+        0 0 6px rgba(212, 175, 55, 0.15);
     }
 
     header h1 {
@@ -301,12 +308,39 @@
     }
 
     footer {
-      margin-top: 2.75rem;
+      margin-top: 2.85rem;
       text-align: center;
-      font-size: 0.85rem;
-      color: var(--muted);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    .site-footer__sam {
       font-family: var(--script-font);
-      opacity: 0.9;
+      font-size: clamp(1.05rem, 3.8vw, 1.35rem);
+      color: var(--accent-soft);
+      text-shadow: 0 2px 20px rgba(212, 175, 55, 0.12);
+      display: block;
+    }
+
+    .site-footer__mix {
+      display: block;
+      margin-top: 0.4rem;
+      font-family: var(--brand-serif);
+      font-size: 0.64rem;
+      font-weight: 800;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(232, 201, 104, 0.72);
+    }
+
+    .site-footer__production {
+      display: block;
+      margin-top: 0.55rem;
+      font-family: var(--brand-serif);
+      font-size: 0.76rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(235, 227, 214, 0.48);
     }
   </style>
 </head>
@@ -314,19 +348,19 @@
   <div class="ambient" aria-hidden="true">
     <div class="ambient__glow"></div>
     <div class="ambient__logo">
-      <img src="portfolio-logo-full.svg" alt="" width="920" height="668" decoding="async" fetchpriority="low">
-    </div>
-    <div class="ambient__logo-b">
-      <img src="portfolio-logo-symbol.svg" alt="" width="832" height="1016" decoding="async" fetchpriority="low">
+      <img src="portfolio-logo-brand.svg" alt="" width="5000" height="3630" decoding="async" fetchpriority="low">
     </div>
   </div>
 
   <div class="wrap">
     <header class="brand-mark">
-      <img class="brand-mark__symbol" src="portfolio-logo-symbol.svg" alt="" width="104" height="127" decoding="async">
+      <div class="brand-mark__hero">
+        <img src="portfolio-logo-brand.svg" alt="Sam Bruev Mix &amp; Recording — Music production" width="5000" height="3630" decoding="async">
+      </div>
+      <div class="brand-mark__lamp-stem" aria-hidden="true"></div>
       <div>
         <h1>Примеры работ</h1>
-        <p class="subtitle">Портфолио в одном блоке — чёрный фон, ваш логотип в глубине, стеклянные панели и золото в акцентах, в духе сценарного приложения.</p>
+        <p class="subtitle">Подборка в фирменном стиле: лампа и золото из вашего логотипа, стеклянные панели как в сценарном приложении.</p>
       </div>
     </header>
 
@@ -375,7 +409,11 @@
       </div>
     </article>
 
-    <footer>Sam Bruev</footer>
+    <footer>
+      <span class="site-footer__sam">Sam Bruev</span>
+      <span class="site-footer__mix">Mix &amp; Recording</span>
+      <span class="site-footer__production">Music production</span>
+    </footer>
   </div>
 </body>
 </html>
