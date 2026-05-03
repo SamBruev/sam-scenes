@@ -8,7 +8,7 @@
   <title>Примеры работ / Sam Bruev</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto+Slab:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600;700&family=Kelly+Slab&family=Oswald:wght@600;700&family=Pacifico&family=Roboto+Slab:wght@400;600;700;800&family=Russo+One&display=swap" rel="stylesheet">
   <style>
     /* Палитра логотипа: чистый чёрный, крем «бумаги», металлическое золото (#d4af37) — без постоянных «ободков» по UI */
     :root {
@@ -27,6 +27,11 @@
       --surface-ink: #000000;
       --script-font: "Pacifico", cursive;
       --brand-serif: "Roboto Slab", Georgia, "Times New Roman", serif;
+      /* Жанровые заголовки: характер «под звук», не переименовывая текст */
+      --genre-title-metal: "Oswald", "Arial Narrow", system-ui, sans-serif;
+      --genre-title-rock: "Kelly Slab", var(--brand-serif);
+      --genre-title-pop: "Comfortaa", system-ui, sans-serif;
+      --genre-title-punk: "Russo One", Impact, fantasy;
       --shadow-lift: 0 20px 48px rgba(0, 0, 0, 0.55);
       --portfolio-revision-dock-h: clamp(52px, 14vw, 64px);
     }
@@ -83,9 +88,9 @@
       position: absolute;
       inset: 0;
       background:
-        radial-gradient(ellipse 120% 70% at 50% -8%, rgba(212, 175, 55, 0.09), transparent 52%),
-        radial-gradient(ellipse 80% 50% at 80% 100%, rgba(120, 90, 30, 0.04), transparent 45%),
-        linear-gradient(180deg, rgba(0, 0, 0, 0.15) 0%, #000000 38%, #000000 100%);
+        radial-gradient(ellipse 95% 55% at 50% -6%, rgba(212, 175, 55, 0.048), transparent 48%),
+        radial-gradient(ellipse 70% 42% at 80% 100%, rgba(120, 90, 30, 0.026), transparent 42%),
+        linear-gradient(180deg, rgba(0, 0, 0, 0.12) 0%, #000000 36%, #000000 100%);
     }
 
     /* Логотип на заднем плане — крупный, размытый */
@@ -143,63 +148,42 @@
       width: 100%;
     }
 
-    /* Символ студии: чёткий PNG спереди, мягкий золотой ореол только сзади (без фильтров по контуру картинки) */
+    /* Символ студии: чёткий PNG спереди; мягкий столб света задаётся .brand-stack::before */
     .brand-symbol {
       position: relative;
+      z-index: 1;
       display: flex;
       justify-content: center;
       align-items: center;
-      margin: 0 auto clamp(0.75rem, 3vw, 1.35rem);
+      margin: 0 auto clamp(0.28rem, 1.4vw, 0.65rem);
       max-width: min(170px, 46vw);
       isolation: isolate;
     }
 
-    /* Крупнее, размытее — только подложка; сам логотип не трогаем */
+    /* Слабый «филамент» только у плафона — не затемнять и не подсвечивать столб и ноту */
     .brand-symbol::before {
       content: "";
       position: absolute;
       left: 50%;
-      top: 54%;
+      top: 19%;
       z-index: 0;
-      width: 240%;
-      height: 240%;
-      max-width: min(460px, 110vw);
-      max-height: min(460px, 110vw);
+      width: 48%;
+      height: 20%;
+      max-width: min(108px, 30vw);
       transform: translate(-50%, -50%);
       pointer-events: none;
       border-radius: 50%;
       background: radial-gradient(
-        ellipse 55% 58% at 50% 45%,
-        rgba(252, 230, 165, 0.34) 0%,
-        rgba(212, 175, 55, 0.22) 32%,
-        rgba(212, 175, 55, 0.07) 55%,
-        transparent 72%
+        ellipse 70% 70% at 50% 50%,
+        rgba(252, 230, 165, 0.04) 0%,
+        rgba(212, 175, 55, 0.018) 52%,
+        transparent 76%
       );
-      filter: blur(26px);
-      -webkit-filter: blur(26px);
-      opacity: 0.9;
-    }
-
-    /* Шире рассеянный «рефлектор» сзади */
-    .brand-symbol::after {
-      content: "";
-      position: absolute;
-      left: 50%;
-      top: 54%;
-      z-index: 0;
-      width: 320%;
-      height: 280%;
-      max-width: min(560px, 130vw);
-      transform: translate(-50%, -50%);
-      pointer-events: none;
-      background: radial-gradient(
-        ellipse 50% 48% at 50% 50%,
-        rgba(212, 175, 55, 0.11) 0%,
-        transparent 68%
-      );
-      filter: blur(38px);
-      -webkit-filter: blur(38px);
-      opacity: 0.75;
+      filter: blur(9px);
+      -webkit-filter: blur(9px);
+      opacity: 0.32;
+      will-change: opacity, filter;
+      animation: brand-lamp-filament 2.35s ease-in-out infinite;
     }
 
     .brand-symbol img {
@@ -212,28 +196,123 @@
       transform: translateZ(0);
       -webkit-backface-visibility: hidden;
       backface-visibility: hidden;
-      /* узкая контактная тень вниз, без золотого ореола по контурам символа */
-      filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.55));
-      -webkit-filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.55));
+      /* Читаемость чёрного столба и ноты: только нейтральный контакт с фоном, без золотого halo */
+      will-change: filter;
+      animation: brand-lamp-symbol-lit 2.35s ease-in-out infinite;
+    }
+
+    /* Лампа + знак: одна вертикальная ось + свет как логическое продолжение лампы вниз */
+    .brand-stack {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Золотой объём только под «плафоном»: начинается под символом, не заливает столб и ноту */
+    .brand-stack::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: clamp(118px, 29.5vw, 186px);
+      z-index: 0;
+      width: min(400px, 98vw);
+      height: clamp(248px, 58vw, 472px);
+      transform: translateX(-50%);
+      pointer-events: none;
+      background: radial-gradient(
+        ellipse min(300px, 90vw) 118% at 50% 0%,
+        rgba(238, 210, 120, 0.046) 0%,
+        rgba(212, 175, 55, 0.024) 38%,
+        rgba(212, 175, 55, 0.01) 58%,
+        transparent 74%
+      );
+      filter: blur(22px);
+      -webkit-filter: blur(22px);
+      opacity: 0.68;
+      will-change: opacity, filter;
+      animation: brand-lamp-down-beam 2.35s ease-in-out infinite;
+      -webkit-mask-image: linear-gradient(
+        180deg,
+        transparent 0px,
+        #000 clamp(52px, 14vw, 88px)
+      );
+      mask-image: linear-gradient(
+        180deg,
+        transparent 0px,
+        #000 clamp(52px, 14vw, 88px)
+      );
     }
 
     /* Типографический знак под лампой (Logo v003 / descript) */
     .brand-wordmark {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin: 0 auto clamp(1rem, 3.5vw, 1.95rem);
-      max-width: min(300px, 90vw);
+      position: relative;
+      z-index: 1;
+      display: grid;
+      justify-items: center;
+      width: 100%;
+      max-width: none;
+      margin:
+        clamp(-0.55rem, -2.2vw, -0.2rem)
+        0
+        clamp(1rem, 3.5vw, 1.95rem);
+      padding: 0;
+      box-sizing: border-box;
+      isolation: isolate;
+      /* Композиция в PNG: связка строк чуть правее середины канваса — смещаем блок влево к оси лампы */
+      --wordmark-shift-x: clamp(-11px, -2.85vw, -4px);
+    }
+
+    /* Засветка только по знаку SAM BRUEV — без заметной утечки вверх к нотке */
+    .brand-wordmark::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: clamp(10px, 2.5vw, 22px);
+      z-index: 0;
+      width: min(340px, 94vw);
+      height: clamp(188px, 50vw, 276px);
+      transform: translateX(calc(-50% + var(--wordmark-shift-x)));
+      pointer-events: none;
+      background:
+        radial-gradient(
+          ellipse 86% 56% at 50% 2%,
+          rgba(252, 240, 210, 0.095) 0%,
+          rgba(212, 175, 55, 0.062) 36%,
+          rgba(212, 175, 55, 0.026) 55%,
+          transparent 71%
+        ),
+        radial-gradient(
+          ellipse 90% 68% at 50% 36%,
+          rgba(238, 210, 120, 0.048) 0%,
+          rgba(212, 175, 55, 0.022) 48%,
+          transparent 74%
+        );
+      filter: blur(16px);
+      -webkit-filter: blur(16px);
+      opacity: 0.92;
+      will-change: opacity, filter;
+      animation: brand-wordmark-wash 2.35s ease-in-out infinite;
     }
 
     .brand-wordmark img {
-      width: 100%;
+      position: relative;
+      z-index: 1;
+      width: min(300px, 90vw);
+      max-width: 100%;
       height: auto;
       display: block;
+      margin: 0;
+      border: none;
       object-fit: contain;
-      filter:
-        drop-shadow(0 0 26px rgba(212, 175, 55, 0.2))
-        drop-shadow(0 8px 32px rgba(0, 0, 0, 0.8));
+      object-position: center center;
+      will-change: filter, transform;
+      transform: translateX(var(--wordmark-shift-x));
+      animation: brand-wordmark-live-glow 2.35s ease-in-out infinite;
     }
 
     header h1 {
@@ -340,11 +419,172 @@
       }
     }
 
+    /* То же ритм 2.35s что у «Жанр»: слабый филамент, луч вниз, акцент внизу у знака */
+    @keyframes brand-lamp-filament {
+      0%,
+      100% {
+        opacity: 0.26;
+        filter: blur(8px);
+        -webkit-filter: blur(8px);
+        transform: translate(-50%, -50%);
+      }
+
+      50% {
+        opacity: 0.34;
+        filter: blur(10px);
+        -webkit-filter: blur(10px);
+        transform: translate(-50%, -50%);
+      }
+    }
+
+    @keyframes brand-lamp-down-beam {
+      0%,
+      100% {
+        opacity: 0.52;
+        filter: blur(20px);
+        -webkit-filter: blur(20px);
+      }
+
+      50% {
+        opacity: 0.67;
+        filter: blur(24px);
+        -webkit-filter: blur(24px);
+      }
+    }
+
+    @keyframes brand-lamp-symbol-lit {
+      0%,
+      100% {
+        filter:
+          contrast(1.06)
+          drop-shadow(0 1px 0 rgba(0, 0, 0, 0.88))
+          drop-shadow(0 4px 8px rgba(0, 0, 0, 0.55))
+          drop-shadow(0 10px 22px rgba(0, 0, 0, 0.7));
+        -webkit-filter:
+          contrast(1.06)
+          drop-shadow(0 1px 0 rgba(0, 0, 0, 0.88))
+          drop-shadow(0 4px 8px rgba(0, 0, 0, 0.55))
+          drop-shadow(0 10px 22px rgba(0, 0, 0, 0.7));
+      }
+
+      50% {
+        filter:
+          contrast(1.08)
+          drop-shadow(0 1px 0 rgba(0, 0, 0, 0.92))
+          drop-shadow(0 5px 10px rgba(0, 0, 0, 0.58))
+          drop-shadow(0 12px 24px rgba(0, 0, 0, 0.72));
+        -webkit-filter:
+          contrast(1.08)
+          drop-shadow(0 1px 0 rgba(0, 0, 0, 0.92))
+          drop-shadow(0 5px 10px rgba(0, 0, 0, 0.58))
+          drop-shadow(0 12px 24px rgba(0, 0, 0, 0.72));
+      }
+    }
+
+    @keyframes brand-wordmark-wash {
+      0%,
+      100% {
+        opacity: 0.78;
+        filter: blur(15px);
+        -webkit-filter: blur(15px);
+      }
+
+      50% {
+        opacity: 0.94;
+        filter: blur(19px);
+        -webkit-filter: blur(19px);
+      }
+    }
+
+    @keyframes brand-wordmark-live-glow {
+      0%,
+      100% {
+        transform: translateX(var(--wordmark-shift-x));
+        filter:
+          brightness(1.035)
+          drop-shadow(0 -8px 22px rgba(212, 175, 55, 0.12))
+          drop-shadow(0 4px 20px rgba(212, 175, 55, 0.08))
+          drop-shadow(0 1px 0 rgba(212, 175, 55, 0.05))
+          drop-shadow(0 8px 32px rgba(0, 0, 0, 0.8));
+        -webkit-filter:
+          brightness(1.035)
+          drop-shadow(0 -8px 22px rgba(212, 175, 55, 0.12))
+          drop-shadow(0 4px 20px rgba(212, 175, 55, 0.08))
+          drop-shadow(0 1px 0 rgba(212, 175, 55, 0.05))
+          drop-shadow(0 8px 32px rgba(0, 0, 0, 0.8));
+      }
+
+      50% {
+        transform: translateX(var(--wordmark-shift-x));
+        filter:
+          brightness(1.05)
+          drop-shadow(0 -6px 26px rgba(212, 175, 55, 0.16))
+          drop-shadow(0 8px 28px rgba(212, 175, 55, 0.12))
+          drop-shadow(0 0 12px rgba(252, 240, 200, 0.08))
+          drop-shadow(0 8px 36px rgba(0, 0, 0, 0.82));
+        -webkit-filter:
+          brightness(1.05)
+          drop-shadow(0 -6px 26px rgba(212, 175, 55, 0.16))
+          drop-shadow(0 8px 28px rgba(212, 175, 55, 0.12))
+          drop-shadow(0 0 12px rgba(252, 240, 200, 0.08))
+          drop-shadow(0 8px 36px rgba(0, 0, 0, 0.82));
+      }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       .tag--genre-live {
         animation: none;
         box-shadow: 0 1px 0 rgba(212, 175, 55, 0.08);
         color: var(--gold-dim);
+      }
+
+      .brand-stack::before {
+        animation: none;
+        opacity: 0.62;
+        filter: blur(22px);
+        -webkit-filter: blur(22px);
+      }
+
+      .brand-symbol::before {
+        animation: none;
+        opacity: 0.3;
+        filter: blur(9px);
+        -webkit-filter: blur(9px);
+        transform: translate(-50%, -50%);
+      }
+
+      .brand-symbol img {
+        animation: none;
+        filter:
+          contrast(1.06)
+          drop-shadow(0 1px 0 rgba(0, 0, 0, 0.88))
+          drop-shadow(0 6px 16px rgba(0, 0, 0, 0.68));
+        -webkit-filter:
+          contrast(1.06)
+          drop-shadow(0 1px 0 rgba(0, 0, 0, 0.88))
+          drop-shadow(0 6px 16px rgba(0, 0, 0, 0.68));
+      }
+
+      .brand-wordmark::before {
+        animation: none;
+        opacity: 0.82;
+        filter: blur(16px);
+        -webkit-filter: blur(16px);
+      }
+
+      .brand-wordmark img {
+        animation: none;
+        transform: translateX(var(--wordmark-shift-x));
+        filter:
+          brightness(1.04)
+          drop-shadow(0 -7px 20px rgba(212, 175, 55, 0.12))
+          drop-shadow(0 6px 22px rgba(212, 175, 55, 0.09))
+          drop-shadow(0 8px 32px rgba(0, 0, 0, 0.8));
+        -webkit-filter:
+          brightness(1.04)
+          drop-shadow(0 -7px 20px rgba(212, 175, 55, 0.12))
+          drop-shadow(0 6px 22px rgba(212, 175, 55, 0.09))
+          drop-shadow(0 8px 32px rgba(0, 0, 0, 0.8));
       }
     }
 
@@ -620,8 +860,8 @@
     .portfolio-player__seek {
       position: relative;
       flex: 1;
-      min-height: 50px;
-      height: 50px;
+      min-height: 46px;
+      height: 46px;
       display: flex;
       align-items: center;
       padding: 0 2px;
@@ -670,21 +910,21 @@
       left: calc(18px + (100% - 36px) * var(--pp, 0));
       top: 50%;
       transform: translate(-50%, -50%);
-      width: 34px;
-      height: 34px;
-      padding: 3px;
+      width: 26px;
+      height: 26px;
+      padding: 2px;
       box-sizing: border-box;
       margin: 0;
       border: none;
       background: transparent;
       cursor: grab;
       z-index: 2;
-      border-radius: 8px;
+      border-radius: 6px;
       display: grid;
       place-items: center;
       filter:
         drop-shadow(0 2px 2px rgba(0, 0, 0, 0.75))
-        drop-shadow(0 0 11px rgba(212, 175, 55, 0.2));
+        drop-shadow(0 0 8px rgba(212, 175, 55, 0.14));
       touch-action: none;
       -webkit-tap-highlight-color: transparent;
     }
@@ -1083,15 +1323,44 @@
 
     .portfolio-genre-title {
       margin: 0;
-      font-family: var(--script-font);
-      font-weight: 400;
+      font-family: var(--brand-serif);
+      font-weight: 700;
       font-size: clamp(1.55rem, 5.2vw, 2rem);
-      letter-spacing: 0.055em;
+      letter-spacing: 0.03em;
       color: var(--accent-soft);
       text-shadow:
         0 0 36px rgba(212, 175, 55, 0.18),
         0 2px 4px rgba(0, 0, 0, 0.7);
       line-height: 1.2;
+    }
+
+    .portfolio-genre--metal .portfolio-genre-title {
+      font-family: var(--genre-title-metal);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.11em;
+      font-size: clamp(1.8rem, 5.95vw, 2.42rem);
+    }
+
+    .portfolio-genre--rock .portfolio-genre-title {
+      font-family: var(--genre-title-rock);
+      font-weight: 400;
+      letter-spacing: 0.038em;
+      font-size: clamp(1.65rem, 5.45vw, 2.12rem);
+    }
+
+    .portfolio-genre--pop .portfolio-genre-title {
+      font-family: var(--genre-title-pop);
+      font-weight: 700;
+      letter-spacing: 0.035em;
+      font-size: clamp(1.5rem, 5.05vw, 2rem);
+    }
+
+    .portfolio-genre--punk .portfolio-genre-title {
+      font-family: var(--genre-title-punk);
+      font-weight: 400;
+      letter-spacing: 0.05em;
+      font-size: clamp(1.6rem, 5.35vw, 2.12rem);
     }
     .portfolio-genre > .note:last-child {
       margin-top: 0.15rem;
@@ -1500,12 +1769,14 @@
   </div>
 
   <div class="wrap">
-    <div class="brand-symbol">
-      <img src="portfolio-logo-symbol.png" alt="Sam Bruev Mix &amp; Recording — символ студии" width="833" height="1016" decoding="async" fetchpriority="high">
-    </div>
+    <div class="brand-stack">
+      <div class="brand-symbol">
+        <img src="portfolio-logo-symbol.png" alt="Sam Bruev Mix &amp; Recording — символ студии" width="833" height="1016" decoding="async" fetchpriority="high">
+      </div>
 
-    <div class="brand-wordmark">
-      <img src="portfolio-logo-descript.png" alt="Sam Bruev — Mix &amp; Recording, музыкальный продакшн" width="3000" height="2178" decoding="async" fetchpriority="high">
+      <div class="brand-wordmark">
+        <img src="portfolio-logo-descript.png" alt="Sam Bruev — Mix &amp; Recording, музыкальный продакшн" width="3000" height="2178" decoding="async" fetchpriority="high">
+      </div>
     </div>
 
     <article class="card card--greeting">

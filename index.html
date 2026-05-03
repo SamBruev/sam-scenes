@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v179: панель ассистента слева — ширина ⅔ экрана -->
+<!-- v183: полоска «открыть ассистента» — тот же золотой+фиолетовый блик, что у стрелки закрытия -->
 <html lang="ru" style="--logo-x: 0px; --logo-y: 0px; --logo-scale: 2.00; --top-logo-blur: 0px;">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Sam Scenes (v179)</title>
+  <title>Sam Scenes (v183)</title>
   <!-- До отрисовки тела: восстановить скролл после reload без «прыжка» картинки/фона -->
   <script>
     (function () {
@@ -80,6 +80,10 @@
       --top-logo-space: 34vh;
       /* Панель слева: две трети ширины вьюпорта */
       --assistant-drawer-w: calc(100vw * 2 / 3);
+      /* Крайние полоски ассистента: золото + лёгкий аметист (как на стрелке «закрыть») */
+      --assistant-hint-violet: rgba(200, 185, 255, 0.55);
+      --assistant-hint-violet-mid: rgba(175, 155, 240, 0.22);
+      --assistant-hint-violet-glow: rgba(145, 120, 210, 0.32);
     }
 
     /* Фон: body::before fixed — одинаково на iPhone при скролле; слой лампы — data URI + градиенты (см. также top-lamp-bg у логотипа). */
@@ -178,8 +182,8 @@
       pointer-events: none;
       user-select: none;
       transition: filter 0.38s cubic-bezier(0.25, 0.85, 0.32, 1);
-      filter: blur(11px) saturate(118%);
-      -webkit-filter: blur(11px) saturate(118%);
+      filter: blur(11px) saturate(102%);
+      -webkit-filter: blur(11px) saturate(102%);
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -264,7 +268,7 @@
       }
     }
 
-    /* Подсказка у левого края — узкая, приглушённая, в тон лампы (--gold) */
+    /* Подсказка у левого края — тот же язык, что стрелка закрытия: золото + фиолетовый блик */
     .assistant-open-strip {
       position: fixed;
       left: env(safe-area-inset-left, 0px);
@@ -280,13 +284,16 @@
       border-radius: 0 9px 9px 0;
       background: linear-gradient(
         90deg,
-        rgba(12, 10, 8, 0.72) 0%,
-        rgba(212, 175, 55, 0.14) 55%,
+        rgba(12, 10, 8, 0.76) 0%,
+        rgba(212, 175, 55, 0.11) 38%,
+        var(--assistant-hint-violet-mid) 62%,
         rgba(212, 175, 55, 0.26) 100%
       );
       box-shadow:
-        inset -1px 0 5px rgba(212, 175, 55, 0.12),
-        1px 0 8px rgba(0, 0, 0, 0.35);
+        inset -1px 0 7px var(--assistant-hint-violet-soft),
+        inset -1px 0 5px rgba(212, 175, 55, 0.1),
+        1px 0 10px rgba(0, 0, 0, 0.38),
+        0 0 16px var(--assistant-hint-violet-glow);
       /* Выше .wrap (12) и дочерних слоёв сцен, но ниже teleprompter / pull-hint / drawer */
       z-index: 100;
       cursor: pointer;
@@ -304,26 +311,34 @@
       font-size: 15px;
       font-weight: 500;
       line-height: 1;
-      color: rgba(212, 175, 55, 0.72);
+      color: var(--assistant-hint-violet);
       pointer-events: none;
       letter-spacing: -0.08em;
-      text-shadow: 0 0 6px rgba(212, 175, 55, 0.28);
+      text-shadow:
+        0 0 8px var(--assistant-hint-violet-glow),
+        0 0 5px rgba(212, 175, 55, 0.35);
     }
 
     .assistant-open-strip:active {
       background: linear-gradient(
         90deg,
         rgba(10, 8, 6, 0.82) 0%,
-        rgba(212, 175, 55, 0.2) 55%,
-        rgba(212, 175, 55, 0.34) 100%
+        rgba(212, 175, 55, 0.16) 38%,
+        rgba(185, 165, 245, 0.26) 62%,
+        rgba(212, 175, 55, 0.32) 100%
       );
       box-shadow:
-        inset -1px 0 6px rgba(212, 175, 55, 0.18),
-        1px 0 10px rgba(0, 0, 0, 0.4);
+        inset -1px 0 8px rgba(175, 155, 240, 0.22),
+        inset -1px 0 6px rgba(212, 175, 55, 0.14),
+        1px 0 12px rgba(0, 0, 0, 0.42),
+        0 0 18px var(--assistant-hint-violet-glow);
     }
 
     .assistant-open-strip:active::before {
-      color: rgba(230, 205, 140, 0.88);
+      color: rgba(225, 215, 255, 0.95);
+      text-shadow:
+        0 0 10px rgba(175, 155, 255, 0.55),
+        0 0 6px rgba(212, 175, 55, 0.4);
     }
 
     body.assistant-drawer-open .assistant-open-strip {
@@ -369,12 +384,15 @@
       background: linear-gradient(
         90deg,
         rgba(212, 175, 55, 0.26) 0%,
-        rgba(212, 175, 55, 0.14) 55%,
-        rgba(12, 10, 8, 0.72) 100%
+        var(--assistant-hint-violet-mid) 38%,
+        rgba(212, 175, 55, 0.12) 62%,
+        rgba(12, 10, 8, 0.76) 100%
       );
       box-shadow:
-        inset 1px 0 5px rgba(212, 175, 55, 0.12),
-        -1px 0 8px rgba(0, 0, 0, 0.35);
+        inset 1px 0 7px var(--assistant-hint-violet-soft),
+        inset 1px 0 5px rgba(212, 175, 55, 0.1),
+        -1px 0 10px rgba(0, 0, 0, 0.38),
+        0 0 16px var(--assistant-hint-violet-glow);
       transition: opacity 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
     }
 
@@ -387,26 +405,34 @@
       font-size: 15px;
       font-weight: 500;
       line-height: 1;
-      color: rgba(212, 175, 55, 0.72);
+      color: var(--assistant-hint-violet);
       pointer-events: none;
       letter-spacing: -0.08em;
-      text-shadow: 0 0 6px rgba(212, 175, 55, 0.28);
+      text-shadow:
+        0 0 8px var(--assistant-hint-violet-glow),
+        0 0 5px rgba(212, 175, 55, 0.35);
     }
 
     .assistant-drawer-dismiss-chevron:active {
       background: linear-gradient(
         90deg,
-        rgba(212, 175, 55, 0.34) 0%,
-        rgba(212, 175, 55, 0.2) 55%,
+        rgba(212, 175, 55, 0.32) 0%,
+        rgba(185, 165, 245, 0.26) 38%,
+        rgba(212, 175, 55, 0.16) 62%,
         rgba(10, 8, 6, 0.82) 100%
       );
       box-shadow:
-        inset 1px 0 6px rgba(212, 175, 55, 0.18),
-        -1px 0 10px rgba(0, 0, 0, 0.4);
+        inset 1px 0 8px rgba(175, 155, 240, 0.22),
+        inset 1px 0 6px rgba(212, 175, 55, 0.14),
+        -1px 0 12px rgba(0, 0, 0, 0.42),
+        0 0 18px var(--assistant-hint-violet-glow);
     }
 
     .assistant-drawer-dismiss-chevron:active::before {
-      color: rgba(230, 205, 140, 0.88);
+      color: rgba(225, 215, 255, 0.95);
+      text-shadow:
+        0 0 10px rgba(175, 155, 255, 0.55),
+        0 0 6px rgba(212, 175, 55, 0.4);
     }
 
     .assistant-drawer-scroll {
@@ -916,7 +942,7 @@
       margin-bottom: 4px;
       border-radius: 14px;
       border: 2px solid rgba(212, 175, 55, 0.65);
-      background: rgba(40, 32, 12, 0.65);
+      background: rgba(52, 30, 16, 0.68);
       box-shadow: 0 0 0 1px rgba(255, 220, 140, 0.12), inset 0 1px 0 rgba(255, 248, 230, 0.06);
     }
 
@@ -930,7 +956,7 @@
       font-size: 13px;
       border-radius: 14px;
       border: 2px solid rgba(255, 214, 120, 0.85);
-      background: linear-gradient(180deg, rgba(212, 175, 55, 0.35), rgba(90, 72, 24, 0.45));
+      background: linear-gradient(180deg, rgba(212, 175, 55, 0.35), rgba(95, 52, 22, 0.5));
       color: #fff8e8;
       cursor: pointer;
       touch-action: manipulation;
@@ -1163,14 +1189,14 @@
       position: relative;
     }
 
-    /* Intro / Outro — прозрачный верх в тон лампы / золота (--gold), не красный */
+    /* Intro / Outro — тёплый янтарь (без sienna rgb(160,82,22): на P3 часто даёт «оливковый» коричневый) */
     .scene-main.scene-role-intro,
     .scene-main.scene-role-outro {
       background: linear-gradient(
         165deg,
-        rgba(160, 82, 22, 0.38) 0%,
+        rgba(178, 76, 32, 0.34) 0%,
         rgba(212, 175, 55, 0.2) 22%,
-        rgba(28, 18, 10, 0.94) 46%,
+        rgba(34, 18, 12, 0.94) 46%,
         #000000 74%
       );
       box-shadow:
@@ -1212,7 +1238,7 @@
     .shotlist-pieces-row {
       display: flex;
       flex-wrap: wrap;
-      align-items: stretch;
+      align-items: center;
       gap: 10px 12px;
       margin-top: 10px;
     }
@@ -1733,8 +1759,8 @@
       box-shadow:
         0 18px 56px rgba(0, 0, 0, 0.55),
         inset 0 1px 0 rgba(255, 248, 230, 0.06);
-      -webkit-backdrop-filter: blur(18px) saturate(118%);
-      backdrop-filter: blur(18px) saturate(118%);
+      -webkit-backdrop-filter: blur(18px) saturate(102%);
+      backdrop-filter: blur(18px) saturate(102%);
       overflow: hidden;
     }
 
@@ -2313,12 +2339,10 @@
 
     .shotlist-section {
       margin-top: 80px;
-      margin-left: 0;
-      margin-right: 0;
-      width: 100%;
-      max-width: 100%;
-      padding: 20px 0 18px;
-      box-sizing: border-box;
+      margin-left: calc(-1 * max(14px, env(safe-area-inset-left)));
+      margin-right: calc(-1 * max(14px, env(safe-area-inset-right)));
+      width: calc(100% + max(14px, env(safe-area-inset-left)) + max(14px, env(safe-area-inset-right)));
+      padding: 20px max(14px, env(safe-area-inset-left)) 18px max(14px, env(safe-area-inset-right));
       border-radius: 0;
       border: none;
       background: transparent;
@@ -2330,15 +2354,13 @@
       border: none;
       box-shadow: none;
       margin-bottom: 0;
-      margin-left: auto;
-      margin-right: auto;
       padding-left: 0;
       padding-right: 0;
-      width: 100%;
-      max-width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
+    }
+
+    /* В v90 у обёртки шотлиста не было внутренней «рамки» .card::before */
+    .shotlist-section .card::before {
+      display: none;
     }
 
     .shotlist-section h2.shotlist-title {
@@ -2349,14 +2371,11 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
       text-align: center;
       gap: 6px;
       font-size: inherit;
       font-weight: inherit;
       line-height: 1.25;
-      width: 100%;
-      box-sizing: border-box;
     }
 
     .shotlist-section h2.shotlist-title .shotlist-title-main {
@@ -2374,19 +2393,21 @@
       text-transform: uppercase;
       max-width: 22rem;
       line-height: 1.35;
-      text-align: center;
-      margin-left: auto;
-      margin-right: auto;
     }
 
     .shotlist-section .muted {
-      margin: 0 auto 20px;
+      margin: 0 0 20px;
       padding: 0;
       border: none;
       border-radius: 0;
       background: transparent;
+    }
+
+    .shotlist-section p.muted.shotlist-hint {
       text-align: center;
       max-width: 32rem;
+      margin-left: auto;
+      margin-right: auto;
       line-height: 1.45;
     }
 
@@ -2591,19 +2612,14 @@
       }
     }
 
-    /* Локации шотлиста — три отдельные карточки */
+    /* Локации шотлиста — как v90: мягкое «стекло» rgba(8,8,8), без inset-линий (они дали сдвиг оттенка) */
     .shotlist-loc {
       margin: 0;
       padding: 16px 14px 14px;
       border-radius: 18px;
       border: 1px solid rgba(255, 228, 160, 0.28);
-      background: #000000;
-      box-shadow:
-        0 12px 36px rgba(0, 0, 0, 0.4),
-        inset 0 1px 0 rgba(255, 244, 220, 0.1),
-        inset 0 -1px 0 rgba(255, 228, 160, 0.08);
-      position: relative;
-      overflow: hidden;
+      background: rgba(8, 8, 8, 0.92);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
     }
 
     .shotlist-loc:first-of-type {
@@ -2667,16 +2683,15 @@
       border: 1px solid rgba(255, 228, 160, 0.22);
       border-radius: 18px;
       background: #000000;
-      box-shadow:
-        0 8px 24px rgba(0, 0, 0, 0.3),
-        inset 0 1px 0 rgba(255, 244, 220, 0.09),
-        inset 0 -1px 0 rgba(255, 228, 160, 0.08);
-      position: relative;
-      overflow: hidden;
     }
 
     .scene-controls .left { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
     .scene-controls .right { display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:flex-end; }
+
+    /* Как v90: без второго слоя .scene-controls::before */
+    .scene-controls::before {
+      display: none;
+    }
 
     .scene-controls .btn {
       padding: 6px 12px;
@@ -4258,7 +4273,7 @@
       }
 
       /** Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages). */
-      var APP_VERSION = 'v179';
+      var APP_VERSION = 'v182';
       var BUILD_TIME = '2026-05-03 05:49 MSK';
       var APP_BUILD = APP_VERSION + ' · ' + BUILD_TIME;
       var lastSceneTimeTriggerTouchAt = 0;
@@ -6956,22 +6971,6 @@
           tryRemoveScene(del);
         }, { passive: false });
 
-        root.addEventListener(
-          'touchend',
-          function (e) {
-            var cb = e.target && e.target.closest && e.target.closest('.scene-shot-checkbox');
-            if (!cb) return;
-            requestAnimationFrame(function () {
-              var scene = cb.closest('.scene-main');
-              syncShotClassForScene(scene);
-              updateAllShotlistProgress();
-              if (cb.checked) scrollToNextShotlistScene(scene);
-              markDirty();
-            });
-          },
-          { passive: true }
-        );
-
         root.addEventListener('input', function () {
           markDirty();
         });
@@ -6979,10 +6978,12 @@
         function onShotCheckboxToggle(e) {
           var t = e.target;
           if (!t || !t.matches || !t.matches('.scene-shot-checkbox')) return;
-          if (e.type === 'change') triggerHaptic('light');
+          if (e.type !== 'change') return;
+          triggerHaptic('light');
           var scene = t.closest('.scene-main');
           syncShotClassForScene(scene);
           updateAllShotlistProgress();
+          /* Только постановка галочки; при снятии не скроллим (input/touch иногда дают старое checked) */
           if (t.checked) scrollToNextShotlistScene(scene);
           markDirty();
         }
@@ -6999,8 +7000,6 @@
           }
           if (t.matches('select.scene-time-select') || t.matches('select.scene-select')) markDirty();
         });
-
-        root.addEventListener('input', onShotCheckboxToggle, true);
       }
 
       function addScene() {
