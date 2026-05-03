@@ -5,33 +5,41 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Примеры работ / портфолио</title>
+  <title>Примеры работ / Sam Bruev</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto+Slab:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto+Slab:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
-    /* В духе abakan-script: чёрный, крем/белый, золото, градиент «свет сверху» */
+    /* Совпадает с abakan-script: палитра логотипа — чёрный, крем, золото/янтарь; без холодных/зелёных оттенков вёрстки */
     :root {
-      --bg-black: #000000;
+      color-scheme: dark;
+      accent-color: #d4af37;
+      --bg: #000000;
       --gold: #d4af37;
-      --gold-soft: rgba(212, 175, 55, 0.35);
+      --gold-dim: rgba(212, 175, 55, 0.45);
+      --gold-line: rgba(255, 228, 160, 0.22);
+      --gold-line-strong: rgba(255, 236, 190, 0.38);
       --cream: #faf6f0;
       --text: #f5f0e8;
-      --muted: #a39888;
-      --label: #e8dfd4;
-      --accent: #e8c968;
-      --border: rgba(255, 224, 160, 0.42);
-      --border-strong: rgba(255, 236, 190, 0.62);
+      --muted: #958b7e;
+      --label: #ebe3d6;
+      --accent-soft: rgba(232, 201, 104, 0.92);
       --script-font: "Pacifico", cursive;
       --brand-serif: "Roboto Slab", Georgia, "Times New Roman", serif;
+      --glass-top: rgba(255, 255, 255, 0.07);
+      --glass-mid: rgba(18, 18, 18, 0.55);
+      --glass-bot: rgba(4, 4, 4, 0.88);
+      --shadow-deep: rgba(0, 0, 0, 0.65);
     }
 
-    * {
+    *,
+    *::before,
+    *::after {
       box-sizing: border-box;
     }
 
     html {
-      background: var(--bg-black);
+      background: var(--bg);
       min-height: 100%;
       overflow-x: hidden;
     }
@@ -43,101 +51,222 @@
       font-family: var(--brand-serif);
       color: var(--text);
       line-height: 1.55;
-      background: transparent;
+      background: var(--bg);
       -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
     }
 
-    body::before {
-      content: "";
+    /* Фон: чёрный + едва заметное золотистое свечение сверху (как «лампа» в приложении) */
+    .ambient {
       position: fixed;
       inset: 0;
-      z-index: -1;
+      z-index: 0;
       pointer-events: none;
-      background-color: #0c0603;
-      background-image:
-        radial-gradient(ellipse 140% 90% at 50% -15%, rgba(212, 175, 55, 0.18), transparent 55%),
-        linear-gradient(
-          180deg,
-          rgba(0, 0, 0, 0.68) 0%,
-          rgba(0, 0, 0, 0.34) 14%,
-          rgba(0, 0, 0, 0.22) 26%,
-          rgba(0, 0, 0, 0.30) 52%,
-          rgba(0, 0, 0, 0.58) 72%,
-          rgba(0, 0, 0, 0.92) 88%,
-          #000000 100%
-        );
+      overflow: hidden;
+      background: #000;
+    }
+
+    .ambient__glow {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 120% 70% at 50% -8%, rgba(212, 175, 55, 0.09), transparent 52%),
+        radial-gradient(ellipse 80% 50% at 80% 100%, rgba(120, 90, 30, 0.04), transparent 45%),
+        linear-gradient(180deg, rgba(0, 0, 0, 0.15) 0%, #000000 38%, #000000 100%);
+    }
+
+    /* Логотип на заднем плане — крупный, размытый */
+    .ambient__logo {
+      position: absolute;
+      left: 50%;
+      top: 42%;
+      transform: translate(-50%, -50%);
+      width: min(125vw, 920px);
+      max-height: 85vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.19;
+      filter: blur(46px) saturate(1.05);
+      -webkit-filter: blur(46px) saturate(1.05);
+      will-change: transform;
+    }
+
+    .ambient__logo img {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: contain;
+    }
+
+    /* Второй слой — чуть меньше размытия = «глубина» */
+    .ambient__logo-b {
+      position: absolute;
+      left: 50%;
+      top: 44%;
+      transform: translate(-50%, -50%) scale(0.92);
+      width: min(95vw, 640px);
+      opacity: 0.08;
+      filter: blur(22px);
+      -webkit-filter: blur(22px);
+    }
+
+    .ambient__logo-b img {
+      width: 100%;
+      height: auto;
+      display: block;
     }
 
     .wrap {
+      position: relative;
+      z-index: 1;
       max-width: 720px;
       margin: 0 auto;
-      padding: clamp(1.25rem, 4vw, 2.25rem);
-      padding-bottom: 4rem;
+      padding: calc(1.1rem + env(safe-area-inset-top, 0px)) clamp(1.1rem, 4.2vw, 2rem) calc(3rem + env(safe-area-inset-bottom, 0px));
     }
 
-    header {
-      text-align: center;
-      margin-bottom: clamp(1.75rem, 5vw, 3rem);
+    /* Шапка: чёткий символ + типографика как в приложении */
+    .brand-mark {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.65rem;
+      margin-bottom: clamp(1.5rem, 4.5vw, 2.4rem);
+    }
+
+    .brand-mark__symbol {
+      width: clamp(76px, 22vw, 104px);
+      height: auto;
+      filter: drop-shadow(0 12px 32px rgba(212, 175, 55, 0.2));
     }
 
     header h1 {
       font-family: var(--script-font);
       font-weight: 400;
-      font-size: clamp(1.85rem, 6vw, 2.65rem);
-      margin: 0 0 0.35rem;
-      color: var(--accent);
-      text-shadow: 0 2px 24px rgba(212, 175, 55, 0.25);
-    }
-
-    header p {
+      font-size: clamp(2rem, 6.8vw, 2.75rem);
       margin: 0;
-      color: var(--muted);
-      font-size: 0.95rem;
-      max-width: 28em;
-      margin-inline: auto;
+      letter-spacing: 0.02em;
+      color: var(--accent-soft);
+      text-shadow:
+        0 0 40px rgba(212, 175, 55, 0.18),
+        0 2px 2px rgba(0, 0, 0, 0.6);
     }
 
+    header .subtitle {
+      margin: 0.65rem auto 0;
+      max-width: 34em;
+      text-align: center;
+      font-size: 0.94rem;
+      font-weight: 400;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* Карточки: чёрное «liquid glass» — blur + насыщенность + золотая кромка, как панели в abakan-script */
     .card {
-      background: linear-gradient(180deg, rgba(212, 175, 55, 0.22), rgba(40, 32, 14, 0.55));
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 1.25rem 1.35rem;
-      margin-bottom: 1.35rem;
+      position: relative;
+      margin-bottom: 1.25rem;
+      padding: 1.35rem 1.4rem 1.4rem;
+      border-radius: 18px;
+      border: 1px solid var(--gold-line);
+      background: linear-gradient(
+        165deg,
+        rgba(14, 14, 14, 0.72) 0%,
+        rgba(8, 8, 8, 0.82) 42%,
+        rgba(2, 2, 2, 0.9) 100%
+      );
+      backdrop-filter: blur(22px) saturate(118%);
+      -webkit-backdrop-filter: blur(22px) saturate(118%);
       box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.08),
-        0 12px 40px rgba(0, 0, 0, 0.45);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
+        inset 0 1px 0 var(--glass-top),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.45),
+        0 4px 4px rgba(0, 0, 0, 0.25),
+        0 24px 56px var(--shadow-deep),
+        0 0 0 1px rgba(0, 0, 0, 0.35);
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(
+        145deg,
+        rgba(255, 236, 200, 0.18) 0%,
+        rgba(255, 255, 255, 0.02) 35%,
+        transparent 55%,
+        rgba(212, 175, 55, 0.06) 100%
+      );
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    @media (prefers-reduced-transparency: reduce) {
+      .card {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background: linear-gradient(180deg, #121212, #050505);
+      }
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .tag {
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(212, 175, 55, 0.68);
+      border: 1px solid rgba(255, 228, 160, 0.16);
+      padding: 0.28rem 0.55rem;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.35);
     }
 
     .card h2 {
-      margin: 0 0 0.5rem;
-      font-size: 1.125rem;
-      font-weight: 700;
+      margin: 0 0 0.45rem;
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
       color: var(--label);
-      letter-spacing: 0.02em;
     }
 
     .card .meta {
       font-size: 0.8125rem;
       color: var(--muted);
-      margin-bottom: 1rem;
+      margin: 0 0 1.05rem;
+      line-height: 1.45;
     }
 
-    /* Плееры в «плашке» как панели в приложении */
+    /* Внутренняя «колодца» для плееров — ещё темнее, стекло */
     .media-shell {
-      background: linear-gradient(180deg, rgba(28, 28, 28, 0.82), rgba(10, 10, 10, 0.88));
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 0.75rem 1rem;
+      position: relative;
+      padding: 0.85rem 1rem;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.72));
+      backdrop-filter: blur(12px) saturate(110%);
+      -webkit-backdrop-filter: blur(12px) saturate(110%);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 248, 230, 0.04),
+        inset 0 -8px 24px rgba(0, 0, 0, 0.35);
     }
 
     .media-shell audio,
     .media-shell video {
       width: 100%;
       display: block;
-      border-radius: 8px;
+      border-radius: 10px;
     }
 
     audio {
@@ -149,66 +278,64 @@
       background: #000;
     }
 
-    /* WebKit: чуть подогнать под тёмную тему */
-    audio::-webkit-media-controls-panel {
-      background: linear-gradient(180deg, #1e1a14, #0d0d0d);
+    /* Тёмные панели контролов — убираем «зелёный» дефолт где возможно */
+    audio::-webkit-media-controls-panel,
+    video::-webkit-media-controls-panel {
+      background: linear-gradient(180deg, #1a1814, #0c0b09) !important;
     }
 
     .note {
-      margin-top: 0.85rem;
-      font-size: 0.8125rem;
+      margin-top: 0.95rem;
+      font-size: 0.8rem;
       color: var(--muted);
-      line-height: 1.45;
+      line-height: 1.5;
     }
 
     .note code {
       font-size: 0.78em;
-      color: var(--gold-soft);
-      background: rgba(0, 0, 0, 0.35);
-      padding: 0.15em 0.4em;
-      border-radius: 4px;
+      color: rgba(232, 201, 104, 0.85);
+      background: rgba(0, 0, 0, 0.5);
+      padding: 0.12em 0.38em;
+      border-radius: 5px;
+      border: 1px solid rgba(255, 228, 160, 0.1);
     }
 
     footer {
-      margin-top: 2.5rem;
+      margin-top: 2.75rem;
       text-align: center;
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       color: var(--muted);
       font-family: var(--script-font);
-    }
-
-    .tag-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .tag {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--accent);
-      border: 1px solid var(--border);
-      padding: 0.2rem 0.5rem;
-      border-radius: 999px;
-      background: rgba(0, 0, 0, 0.25);
+      opacity: 0.9;
     }
   </style>
 </head>
 <body>
+  <div class="ambient" aria-hidden="true">
+    <div class="ambient__glow"></div>
+    <div class="ambient__logo">
+      <img src="portfolio-logo-full.svg" alt="" width="920" height="668" decoding="async" fetchpriority="low">
+    </div>
+    <div class="ambient__logo-b">
+      <img src="portfolio-logo-symbol.svg" alt="" width="832" height="1016" decoding="async" fetchpriority="low">
+    </div>
+  </div>
+
   <div class="wrap">
-    <header>
-      <h1>Примеры работ</h1>
-      <p>Одна страница в стиле вашего сценарного приложения: тёплый тёмный фон, золотые акценты и встроенные аудио- и видеоплееры для демонстрации клиентам.</p>
+    <header class="brand-mark">
+      <img class="brand-mark__symbol" src="portfolio-logo-symbol.svg" alt="" width="104" height="127" decoding="async">
+      <div>
+        <h1>Примеры работ</h1>
+        <p class="subtitle">Портфолио в одном блоке — чёрный фон, ваш логотип в глубине, стеклянные панели и золото в акцентах, в духе сценарного приложения.</p>
+      </div>
     </header>
 
     <article class="card">
       <div class="tag-row">
         <span class="tag">Звук</span>
-        <span class="tag">Подкаст / демо</span>
+        <span class="tag">Демо</span>
       </div>
-      <h2>Аудио: озвучка или музыка</h2>
+      <h2>Аудио</h2>
       <p class="meta">Замените <code>src</code> на свой файл (.mp3, .ogg, .wav).</p>
       <div class="media-shell">
         <audio controls preload="metadata"
@@ -216,42 +343,39 @@
           Ваш браузер не поддерживает воспроизведение аудио.
         </audio>
       </div>
-      <p class="note">Для локальных файлов положите <code>audio.mp3</code> рядом с этим HTML и укажите <code>src="audio.mp3"</code>.</p>
+      <p class="note">Локально: положите <code>audio.mp3</code> рядом с HTML → <code>src="audio.mp3"</code>.</p>
     </article>
 
     <article class="card">
       <div class="tag-row">
         <span class="tag">Видео</span>
-        <span class="tag">Клип / кейс</span>
+        <span class="tag">Кейс</span>
       </div>
-      <h2>Видео: монтаж или запись студии</h2>
-      <p class="meta">Ниже — бесплатный пример потокового видео; для своего ролика используйте локальный файл или ссылку.</p>
+      <h2>Видео</h2>
+      <p class="meta">Ниже — тестовый ролик; для портфолио подставьте свой файл или ссылку.</p>
       <div class="media-shell">
-        <video controls playsinline preload="metadata" poster="">
+        <video controls playsinline preload="metadata">
           <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4">
           Ваш браузер не поддерживает воспроизведение видео.
         </video>
       </div>
-      <p class="note">
-        Свой файл: <code>&lt;source src=&quot;moj-rolik.mp4&quot; type=&quot;video/mp4&quot;&gt;</code>.
-        Можно дублировать карточки <code>.card</code> для нескольких работ.
-      </p>
+      <p class="note">Свой ролик: <code>&lt;source src=&quot;moj-rolik.mp4&quot; type=&quot;video/mp4&quot;&gt;</code>. Дублируйте блоки <code>.card</code> для новых работ.</p>
     </article>
 
     <article class="card">
       <div class="tag-row">
-        <span class="tag">Только аудио</span>
+        <span class="tag">Звук</span>
       </div>
-      <h2>Вторая дорожка (удалите карточку или скопируйте)</h2>
-      <p class="meta">Шаблон для второго примера — скопируйте разметку и поменяйте заголовок и файл.</p>
+      <h2>Вторая дорожка</h2>
+      <p class="meta">Шаблон — скопируйте блок и укажите свой <code>src</code>.</p>
       <div class="media-shell">
         <audio controls preload="none" src="">
-          Задайте путь к аудиофайлу в атрибуте <code>src</code>.
+          Укажите путь в атрибуте <code>src</code>.
         </audio>
       </div>
     </article>
 
-    <footer>Sam · Mixing &amp; Recording vibe</footer>
+    <footer>Sam Bruev</footer>
   </div>
 </body>
 </html>
