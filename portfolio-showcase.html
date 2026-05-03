@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Примеры работ / портфолио</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto+Slab:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* В духе abakan-script: чёрный, крем/белый, золото, градиент «свет сверху» */
+    :root {
+      --bg-black: #000000;
+      --gold: #d4af37;
+      --gold-soft: rgba(212, 175, 55, 0.35);
+      --cream: #faf6f0;
+      --text: #f5f0e8;
+      --muted: #a39888;
+      --label: #e8dfd4;
+      --accent: #e8c968;
+      --border: rgba(255, 224, 160, 0.42);
+      --border-strong: rgba(255, 236, 190, 0.62);
+      --script-font: "Pacifico", cursive;
+      --brand-serif: "Roboto Slab", Georgia, "Times New Roman", serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      background: var(--bg-black);
+      min-height: 100%;
+      overflow-x: hidden;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+      font-family: var(--brand-serif);
+      color: var(--text);
+      line-height: 1.55;
+      background: transparent;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background-color: #0c0603;
+      background-image:
+        radial-gradient(ellipse 140% 90% at 50% -15%, rgba(212, 175, 55, 0.18), transparent 55%),
+        linear-gradient(
+          180deg,
+          rgba(0, 0, 0, 0.68) 0%,
+          rgba(0, 0, 0, 0.34) 14%,
+          rgba(0, 0, 0, 0.22) 26%,
+          rgba(0, 0, 0, 0.30) 52%,
+          rgba(0, 0, 0, 0.58) 72%,
+          rgba(0, 0, 0, 0.92) 88%,
+          #000000 100%
+        );
+    }
+
+    .wrap {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: clamp(1.25rem, 4vw, 2.25rem);
+      padding-bottom: 4rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: clamp(1.75rem, 5vw, 3rem);
+    }
+
+    header h1 {
+      font-family: var(--script-font);
+      font-weight: 400;
+      font-size: clamp(1.85rem, 6vw, 2.65rem);
+      margin: 0 0 0.35rem;
+      color: var(--accent);
+      text-shadow: 0 2px 24px rgba(212, 175, 55, 0.25);
+    }
+
+    header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+      max-width: 28em;
+      margin-inline: auto;
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(212, 175, 55, 0.22), rgba(40, 32, 14, 0.55));
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.25rem 1.35rem;
+      margin-bottom: 1.35rem;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 12px 40px rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .card h2 {
+      margin: 0 0 0.5rem;
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--label);
+      letter-spacing: 0.02em;
+    }
+
+    .card .meta {
+      font-size: 0.8125rem;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    /* Плееры в «плашке» как панели в приложении */
+    .media-shell {
+      background: linear-gradient(180deg, rgba(28, 28, 28, 0.82), rgba(10, 10, 10, 0.88));
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+    }
+
+    .media-shell audio,
+    .media-shell video {
+      width: 100%;
+      display: block;
+      border-radius: 8px;
+    }
+
+    audio {
+      height: 48px;
+    }
+
+    video {
+      max-height: 360px;
+      background: #000;
+    }
+
+    /* WebKit: чуть подогнать под тёмную тему */
+    audio::-webkit-media-controls-panel {
+      background: linear-gradient(180deg, #1e1a14, #0d0d0d);
+    }
+
+    .note {
+      margin-top: 0.85rem;
+      font-size: 0.8125rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .note code {
+      font-size: 0.78em;
+      color: var(--gold-soft);
+      background: rgba(0, 0, 0, 0.35);
+      padding: 0.15em 0.4em;
+      border-radius: 4px;
+    }
+
+    footer {
+      margin-top: 2.5rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-family: var(--script-font);
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .tag {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      border: 1px solid var(--border);
+      padding: 0.2rem 0.5rem;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.25);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Примеры работ</h1>
+      <p>Одна страница в стиле вашего сценарного приложения: тёплый тёмный фон, золотые акценты и встроенные аудио- и видеоплееры для демонстрации клиентам.</p>
+    </header>
+
+    <article class="card">
+      <div class="tag-row">
+        <span class="tag">Звук</span>
+        <span class="tag">Подкаст / демо</span>
+      </div>
+      <h2>Аудио: озвучка или музыка</h2>
+      <p class="meta">Замените <code>src</code> на свой файл (.mp3, .ogg, .wav).</p>
+      <div class="media-shell">
+        <audio controls preload="metadata"
+          src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3">
+          Ваш браузер не поддерживает воспроизведение аудио.
+        </audio>
+      </div>
+      <p class="note">Для локальных файлов положите <code>audio.mp3</code> рядом с этим HTML и укажите <code>src="audio.mp3"</code>.</p>
+    </article>
+
+    <article class="card">
+      <div class="tag-row">
+        <span class="tag">Видео</span>
+        <span class="tag">Клип / кейс</span>
+      </div>
+      <h2>Видео: монтаж или запись студии</h2>
+      <p class="meta">Ниже — бесплатный пример потокового видео; для своего ролика используйте локальный файл или ссылку.</p>
+      <div class="media-shell">
+        <video controls playsinline preload="metadata" poster="">
+          <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4">
+          Ваш браузер не поддерживает воспроизведение видео.
+        </video>
+      </div>
+      <p class="note">
+        Свой файл: <code>&lt;source src=&quot;moj-rolik.mp4&quot; type=&quot;video/mp4&quot;&gt;</code>.
+        Можно дублировать карточки <code>.card</code> для нескольких работ.
+      </p>
+    </article>
+
+    <article class="card">
+      <div class="tag-row">
+        <span class="tag">Только аудио</span>
+      </div>
+      <h2>Вторая дорожка (удалите карточку или скопируйте)</h2>
+      <p class="meta">Шаблон для второго примера — скопируйте разметку и поменяйте заголовок и файл.</p>
+      <div class="media-shell">
+        <audio controls preload="none" src="">
+          Задайте путь к аудиофайлу в атрибуте <code>src</code>.
+        </audio>
+      </div>
+    </article>
+
+    <footer>Sam · Mixing &amp; Recording vibe</footer>
+  </div>
+</body>
+</html>
