@@ -1470,18 +1470,6 @@
       letter-spacing: 0.02em;
     }
 
-    .card--speaking h2 {
-      letter-spacing: 0.02em;
-    }
-
-    .speaking-note {
-      margin: 0.72rem 0 0;
-      font-size: 0.8rem;
-      color: rgba(232, 201, 104, 0.78);
-      line-height: 1.52;
-      font-weight: 600;
-    }
-
     .collab-emphasis {
       margin: 0 0 0.85rem;
       font-size: 0.8375rem;
@@ -1725,8 +1713,8 @@
 
     .site-footer__social {
       margin-top: clamp(1rem, 3.8vw, 1.72rem);
-      padding: 0 clamp(0.5rem, 3vw, 1rem);
-      max-width: 26rem;
+      padding: 0 0.5rem;
+      max-width: 28rem;
       margin-left: auto;
       margin-right: auto;
     }
@@ -1738,64 +1726,26 @@
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 0.5rem;
-      align-items: stretch;
-    }
-
-    .site-footer__social-list > li {
-      display: flex;
+      gap: 0.45rem 1rem;
+      align-items: baseline;
     }
 
     .site-footer__social-link {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 2.35rem;
-      padding: 0.42rem 0.92rem;
-      border-radius: 999px;
-      border: 1px solid rgba(212, 175, 55, 0.28);
-      background: linear-gradient(
-        165deg,
-        rgba(22, 19, 15, 0.78) 0%,
-        rgba(9, 8, 7, 0.9) 100%
-      );
-      box-shadow:
-        inset 0 1px 0 rgba(212, 175, 55, 0.1),
-        0 2px 14px rgba(0, 0, 0, 0.42);
       font-family: var(--brand-serif);
-      font-size: clamp(0.69rem, 2.05vw, 0.78rem);
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      text-transform: none;
-      color: rgba(232, 214, 152, 0.94);
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(212, 175, 55, 0.62);
       text-decoration: none;
       white-space: nowrap;
-      transition:
-        color 0.2s ease,
-        border-color 0.2s ease,
-        background 0.2s ease,
-        box-shadow 0.2s ease,
-        transform 0.2s ease;
-      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+      transition: color 0.18s ease, text-shadow 0.18s ease;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
       -webkit-tap-highlight-color: transparent;
     }
 
     .site-footer__social-link:hover {
-      color: rgba(254, 240, 195, 0.98);
-      border-color: rgba(238, 214, 140, 0.48);
-      background: linear-gradient(
-        165deg,
-        rgba(32, 27, 20, 0.88) 0%,
-        rgba(14, 12, 10, 0.94) 100%
-      );
-      box-shadow:
-        inset 0 1px 0 rgba(255, 228, 160, 0.12),
-        0 3px 18px rgba(0, 0, 0, 0.5);
-      transform: translateY(-1px);
-    }
-
-    .site-footer__social-link:active {
-      transform: translateY(0);
+      color: rgba(238, 214, 140, 0.95);
     }
 
     .site-footer__social-link:focus {
@@ -1803,31 +1753,9 @@
     }
 
     .site-footer__social-link:focus-visible {
-      outline: 2px solid rgba(232, 201, 104, 0.55);
+      outline: 2px solid rgba(232, 201, 104, 0.45);
       outline-offset: 3px;
-    }
-
-    .site-footer__social-handle {
-      margin: 0.65rem 0 0;
-      padding: 0;
-      text-align: center;
-      font-family: var(--brand-serif);
-      font-size: clamp(0.62rem, 1.85vw, 0.69rem);
-      font-weight: 600;
-      letter-spacing: 0.14em;
-      color: rgba(212, 175, 55, 0.42);
-      text-transform: none;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .site-footer__social-link {
-        transition: none;
-      }
-
-      .site-footer__social-link:hover,
-      .site-footer__social-link:active {
-        transform: none;
-      }
+      border-radius: 4px;
     }
 
     .site-footer__mail-line {
@@ -2051,7 +1979,7 @@
       <p class="collab-warm">Здорово, что вы здесь, в этом небольшом приложении: в мои услуги входят помощь с аранжировкой, продюсирование и продакшн каждого инструмента — задачи до сведения мы можем проработать заранее.</p>
     </article>
 
-    <article class="card card--speaking">
+    <article class="card">
       <div class="tag-row">
         <span class="tag">Выступления</span>
         <span class="tag">Мероприятия</span>
@@ -2064,7 +1992,7 @@
         <p>Подберу формат под вашу площадку и задачу: есть <strong>готовые презентации</strong>, наблюдения из студийной практики и добрый запас <strong>смешных и показательных историй</strong> — не «сухая лекция ради галочки».</p>
         <p>С удовольствием выступлю на вашем <strong>музыкальном мероприятии</strong>, фестивале или встрече сообщества и проведу <strong>мастер-класс</strong> или <strong>лекцию для музыкантов</strong> — про запись, сведение, продакшн и смежные темы можно договориться заранее.</p>
       </div>
-      <p class="speaking-note">Формат, продолжительность и содержание — обсуждаем до анонса; контакты внизу страницы.</p>
+      <p class="note">Формат, продолжительность и содержание — обсуждаем до анонса; контакты внизу страницы.</p>
     </article>
 
     <section class="portfolio-genre portfolio-genre--metal" data-genre="metal" data-active-stem="drums" aria-labelledby="genre-metal">
@@ -2458,36 +2386,31 @@
             <a
               href="https://www.tiktok.com/@sam_bruev"
               class="site-footer__social-link"
-              aria-label="TikTok — @sam_bruev"
               target="_blank"
-              rel="noopener noreferrer">TikTok</a>
+              rel="noopener noreferrer">TikTok @sam_bruev</a>
           </li>
           <li>
             <a
               href="https://www.instagram.com/sam_bruev/"
               class="site-footer__social-link"
-              aria-label="Instagram — @sam_bruev"
               target="_blank"
-              rel="noopener noreferrer">Instagram</a>
+              rel="noopener noreferrer">Instagram @sam_bruev</a>
           </li>
           <li>
             <a
               href="https://www.youtube.com/@sam_bruev"
               class="site-footer__social-link"
-              aria-label="YouTube — @sam_bruev"
               target="_blank"
-              rel="noopener noreferrer">YouTube</a>
+              rel="noopener noreferrer">YouTube @sam_bruev</a>
           </li>
           <li>
             <a
               href="https://vk.com/sam_bruev"
               class="site-footer__social-link"
-              aria-label="ВКонтакте — sam_bruev"
               target="_blank"
-              rel="noopener noreferrer">VK</a>
+              rel="noopener noreferrer">VK sam_bruev</a>
           </li>
         </ul>
-        <p class="site-footer__social-handle" aria-hidden="true">@sam_bruev</p>
       </nav>
       <p class="site-footer__mail-line">
         <a
