@@ -13,7 +13,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Sam Scenes (v224)</title>
+  <title>Sam Scenes (v225)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -2402,6 +2402,18 @@
       border-bottom-color: rgba(242, 215, 140, 0.52);
     }
 
+    /* Пунктир только для пустых полей; при тексте подчёркивание убираем */
+    .scene-main > .line-note .note-editable.has-text,
+    .intercut .intercut-text.has-text {
+      border-bottom: none;
+    }
+
+    .scene-main > .line-note .note-editable.has-text:focus,
+    .intercut .intercut-text.has-text:focus {
+      border-bottom: none;
+      border-bottom-color: transparent;
+    }
+
     /* Фокус на примечании + клавиатура iPhone: запас для scrollIntoView / программного центрирования */
     .scene-main > .line-note {
       scroll-margin-top: 30vh;
@@ -4780,8 +4792,8 @@
        * Дублируйте те же поля в build-info.json — подпись внизу подгружает его с cache: no-store,
        * чтобы не залипала старая версия при закэшированном index.html.
        */
-      var APP_VERSION = 'v224';
-      var BUILD_TIME = '2026-05-03 16:05 MSK';
+      var APP_VERSION = 'v225';
+      var BUILD_TIME = '2026-05-03 16:35 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -7551,6 +7563,7 @@
         ensureSceneNoteLines(document);
         updateAllShotlistProgress();
         ensureShotlistPieceSelectOptions(document);
+        refreshNoteIntercutHasTextClasses(document);
       }
 
       function tryRemoveScene(delBtn) {
@@ -8080,6 +8093,36 @@
             { passive: true }
           );
         }
+      }
+
+      function syncNoteIntercutHasTextClass(el) {
+        if (!el || !el.classList) return;
+        if (!el.classList.contains('note-editable') && !el.classList.contains('intercut-text')) return;
+        var raw = String(el.textContent || '').replace(/\u00a0/g, ' ');
+        var meaningful = false;
+        if (el.classList.contains('intercut-text')) {
+          meaningful = raw.replace(/_+/g, '').replace(/\s{2,}/g, ' ').trim().length > 0;
+        } else {
+          meaningful = raw.trim().length > 0;
+        }
+        el.classList.toggle('has-text', meaningful);
+      }
+
+      function refreshNoteIntercutHasTextClasses(scope) {
+        (scope || document).querySelectorAll('.note-editable, .intercut-text').forEach(syncNoteIntercutHasTextClass);
+      }
+
+      function wireNoteIntercutHasTextUnderline() {
+        if (wireNoteIntercutHasTextUnderline._done) return;
+        wireNoteIntercutHasTextUnderline._done = true;
+        function onMaybeChange(e) {
+          var t = e.target;
+          if (!t || !t.classList) return;
+          if (t.classList.contains('note-editable') || t.classList.contains('intercut-text'))
+            syncNoteIntercutHasTextClass(t);
+        }
+        document.addEventListener('input', onMaybeChange, true);
+        document.addEventListener('focusout', onMaybeChange, true);
       }
 
       function wireIntercutUnderscoreStrip() {
@@ -9202,6 +9245,7 @@
       migrateShotlistPiecesMarkup(document);
       ensureShotlistPieceSelectOptions(document);
       wireIntercutUnderscoreStrip();
+      wireNoteIntercutHasTextUnderline();
       wireNoteFocusViewportCenter();
       wireShotlistPiecePickers();
       wireShotlistPiecesManualInput();
