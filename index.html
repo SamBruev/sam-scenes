@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Сценарий видео / Sam Bruev (v160)</title>
+  <title>Сценарий видео / Sam Bruev (v161)</title>
   <!-- До отрисовки тела: восстановить скролл после reload без «прыжка» картинки/фона -->
   <script>
     (function () {
@@ -1563,64 +1563,74 @@
     }
 
     .scene-time-center-dialog {
+      --scene-wheel-row: 30px;
       position: fixed;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
       margin: 0;
       border: none;
-      border-radius: 18px;
+      border-radius: 16px;
       padding: 0;
-      max-width: min(340px, 92vw);
-      width: min(340px, 92vw);
-      max-height: min(500px, 90vh);
-      background: #100e0a;
+      max-width: min(272px, 90vw);
+      width: min(272px, 90vw);
+      max-height: min(380px, 88vh);
+      background: linear-gradient(
+        165deg,
+        rgba(28, 22, 16, 0.88) 0%,
+        rgba(10, 8, 6, 0.82) 100%
+      );
       color: var(--text);
-      box-shadow: 0 28px 80px rgba(0, 0, 0, 0.65);
+      border: 1px solid rgba(212, 175, 55, 0.32);
+      box-shadow:
+        0 18px 56px rgba(0, 0, 0, 0.55),
+        inset 0 1px 0 rgba(255, 248, 230, 0.06);
+      -webkit-backdrop-filter: blur(18px) saturate(118%);
+      backdrop-filter: blur(18px) saturate(118%);
       overflow: hidden;
     }
 
     .scene-time-center-dialog::backdrop {
-      background: rgba(0, 0, 0, 0.72);
-      -webkit-backdrop-filter: blur(4px);
-      backdrop-filter: blur(4px);
+      background: rgba(0, 0, 0, 0.48);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
     }
 
     .scene-time-dialog-panel {
-      padding: 14px 12px 12px;
+      padding: 11px 10px 10px;
       box-sizing: border-box;
-      max-height: min(460px, 86vh);
+      max-height: min(340px, 82vh);
       overflow-x: hidden;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
     }
 
     .scene-time-dialog-title {
-      margin: 0 0 10px;
+      margin: 0 0 8px;
       text-align: center;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 800;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: var(--cream);
+      color: rgba(250, 246, 240, 0.92);
     }
 
     .scene-time-dialog-actions {
       display: flex;
       justify-content: center;
-      margin-top: 14px;
-      padding-top: 12px;
-      border-top: 1px solid rgba(255, 228, 160, 0.14);
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(212, 175, 55, 0.18);
     }
 
     .scene-time-dialog-done {
-      min-width: 140px;
-      padding: 12px 22px;
+      min-width: 120px;
+      padding: 10px 18px;
       font-weight: 800;
       letter-spacing: 0.06em;
-      border-radius: 12px;
-      border: 1px solid rgba(255, 228, 160, 0.45);
-      background: linear-gradient(180deg, rgba(212, 175, 55, 0.35), rgba(90, 70, 24, 0.55));
+      border-radius: 11px;
+      border: 1px solid rgba(212, 175, 55, 0.42);
+      background: linear-gradient(180deg, rgba(212, 175, 55, 0.22), rgba(40, 32, 14, 0.55));
       color: var(--cream);
       cursor: pointer;
       touch-action: manipulation;
@@ -1628,92 +1638,102 @@
     }
 
     .scene-time-dialog-done:active {
-      filter: brightness(1.06);
+      filter: brightness(1.08);
     }
 
     .scene-time-dialog-wheels {
       display: flex;
       flex-direction: column;
       align-items: stretch;
-      gap: 10px;
+      gap: 8px;
     }
 
     .scene-time-dialog-row {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px 10px;
+      gap: 6px 8px;
       flex-wrap: wrap;
     }
 
     .scene-time-dialog-label {
       flex: 1 1 100%;
       text-align: center;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 700;
       letter-spacing: 0.14em;
       text-transform: uppercase;
-      color: var(--muted);
+      color: rgba(163, 152, 136, 0.95);
       margin: 0;
     }
 
+    /* Ровно три видимые строки цифр; отступы = одна строка — центр по средней */
     .scene-time-wheel {
-      height: 168px;
-      width: 3rem;
-      min-width: 2.85rem;
+      height: calc(var(--scene-wheel-row) * 3);
+      width: 2.55rem;
+      min-width: 2.45rem;
       overflow-y: auto;
       overflow-x: hidden;
       scroll-snap-type: y mandatory;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: contain;
       touch-action: pan-y;
-      border-radius: 10px;
-      border: 1px solid rgba(255, 228, 160, 0.22);
-      background: #080808;
+      border-radius: 11px;
+      border: 1px solid rgba(212, 175, 55, 0.26);
+      background: rgba(0, 0, 0, 0.35);
       box-sizing: border-box;
+      -webkit-mask-image: linear-gradient(
+        to bottom,
+        transparent 0%,
+        #000 14%,
+        #000 86%,
+        transparent 100%
+      );
+      mask-image: linear-gradient(to bottom, transparent 0%, #000 14%, #000 86%, transparent 100%);
     }
 
     .scene-time-wheel-pad {
-      height: 64px;
+      height: var(--scene-wheel-row);
       flex-shrink: 0;
     }
 
     .scene-time-wheel-item {
-      height: 34px;
+      height: var(--scene-wheel-row);
+      min-height: var(--scene-wheel-row);
       scroll-snap-align: center;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 15px;
+      font-size: 13px;
       font-weight: 800;
       font-variant-numeric: tabular-nums;
-      color: #f0e6d4;
+      color: rgba(232, 223, 210, 0.82);
       user-select: none;
     }
 
     .scene-time-dialog-colon {
-      font-size: 15px;
+      font-size: 13px;
       font-weight: 800;
-      color: rgba(212, 175, 55, 0.55);
-      padding: 0 2px;
+      color: rgba(212, 175, 55, 0.62);
+      padding: 0 1px;
     }
 
     .scene-time-dialog-dash {
-      font-size: 14px;
-      color: rgba(242, 215, 140, 0.45);
-      padding: 0 4px;
+      font-size: 12px;
+      color: rgba(212, 175, 55, 0.38);
+      padding: 0 3px;
       align-self: center;
     }
 
     @media (max-width: 932px) {
       .scene-time-center-dialog {
-        max-width: calc(100vw - max(24px, env(safe-area-inset-left) + env(safe-area-inset-right) + 16px));
-        width: min(340px, calc(100vw - max(24px, env(safe-area-inset-left) + env(safe-area-inset-right) + 16px)));
-        max-height: min(500px, 92dvh, calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 24px));
+        max-width: calc(100vw - max(20px, env(safe-area-inset-left) + env(safe-area-inset-right) + 14px));
+        width: min(272px, calc(100vw - max(20px, env(safe-area-inset-left) + env(safe-area-inset-right) + 14px)));
+        max-height: min(380px, 88dvh, calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 20px));
       }
 
       .scene-time-dialog-panel {
-        max-height: min(460px, calc(88dvh - 56px), calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 72px));
+        max-height: min(330px, calc(82dvh - 48px), calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 56px));
       }
 
       .ios-wheel-time .scene-time-ios .scene-time-trigger {
@@ -3943,8 +3963,8 @@
       }
 
       /** Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages). */
-      var APP_VERSION = 'v160';
-      var BUILD_TIME = '2026-05-03 10:45 MSK';
+      var APP_VERSION = 'v161';
+      var BUILD_TIME = '2026-05-03 11:20 MSK';
       var APP_BUILD = APP_VERSION + ' · ' + BUILD_TIME;
       var lastSceneTimeTriggerTouchAt = 0;
       var APP_BUILD_KEY = 'abakan-app-build';
@@ -4913,8 +4933,8 @@
         dlg.removeAttribute('open');
       }
 
-      var SCENE_TIME_W_PAD = 64;
-      var SCENE_TIME_W_ITEM = 34;
+      var SCENE_TIME_W_PAD = 30;
+      var SCENE_TIME_W_ITEM = 30;
       var SCENE_TIME_WHEEL_COPIES = 3;
       var SCENE_TIME_WHEEL_MID_COPY = 1;
       var sceneTimeDialogWrap = null;
@@ -5007,7 +5027,7 @@
       function normalizeSceneTimeInfiniteWheel(col) {
         if (!col) return;
         var m = sceneTimeWheelMetrics(col);
-        var ch = col.clientHeight || 168;
+        var ch = col.clientHeight || 90;
         var item = m.item;
         var pad = m.pad;
         var slots = sceneTimeWheelSlotCount(col);
@@ -5076,7 +5096,7 @@
         } else {
           idx = Math.max(0, Math.min(59, Number(rawVal) || 0));
         }
-        var ch = col.clientHeight || 168;
+        var ch = col.clientHeight || 90;
         var globalRow = SCENE_TIME_WHEEL_MID_COPY * slots + idx;
         var centerY = m.pad + globalRow * m.item + m.item / 2;
         var st = centerY - ch / 2;
@@ -5087,7 +5107,7 @@
       function getSceneTimeWheelValue(col) {
         if (!col) return 0;
         var m = sceneTimeWheelMetrics(col);
-        var ch = col.clientHeight || 168;
+        var ch = col.clientHeight || 90;
         var key = col.getAttribute('data-key') || '';
         var slots = sceneTimeWheelSlotCount(col);
         var centerLine = col.scrollTop + ch / 2;
