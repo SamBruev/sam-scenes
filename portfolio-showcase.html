@@ -24,8 +24,6 @@
       --muted: #958b7e;
       --label: #ebe3d6;
       --accent-soft: rgba(232, 201, 104, 0.92);
-      --lamp-blue: #091347;
-      --lamp-blue-soft: rgba(26, 58, 110, 0.85);
       --script-font: "Pacifico", cursive;
       --brand-serif: "Roboto Slab", Georgia, "Times New Roman", serif;
       --glass-top: rgba(255, 255, 255, 0.07);
@@ -56,6 +54,16 @@
       background: var(--bg);
       -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
+      caret-color: var(--gold);
+    }
+
+    input[type="range"] {
+      accent-color: var(--gold);
+    }
+
+    ::selection {
+      background: rgba(212, 175, 55, 0.32);
+      color: var(--cream);
     }
 
     /* Фон: чёрный + едва заметное золотистое свечение сверху (как «лампа» в приложении) */
@@ -83,12 +91,12 @@
       left: 50%;
       top: 42%;
       transform: translate(-50%, -50%);
-      width: min(125vw, 920px);
-      max-height: 85vh;
+      width: min(85vw, 520px);
+      max-height: 78vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      opacity: 0.19;
+      opacity: 0.21;
       filter: blur(46px) saturate(1.05);
       -webkit-filter: blur(46px) saturate(1.05);
       will-change: transform;
@@ -109,42 +117,45 @@
       padding: calc(1.1rem + env(safe-area-inset-top, 0px)) clamp(1.1rem, 4.2vw, 2rem) calc(3rem + env(safe-area-inset-bottom, 0px));
     }
 
-    /* Шапка: полный брендовый знак + акцент «синяя ножка» лампы из фирменной графики */
+    /* Шапка раздела «Примеры работ»: заголовок и подпись */
     .brand-mark {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 0.5rem;
       margin-bottom: clamp(1.5rem, 4.5vw, 2.4rem);
+      text-align: center;
     }
 
-    .brand-mark__hero {
-      width: min(98vw, 520px);
+    .brand-mark > div {
+      width: 100%;
+      max-width: 38rem;
       margin: 0 auto;
+      text-align: center;
     }
 
-    .brand-mark__hero img {
+    header.brand-mark h1 {
+      text-align: center;
+      width: 100%;
+    }
+
+    /* Символ студии над контентом (лампа / нота) */
+    .brand-symbol {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0 auto clamp(0.85rem, 3.2vw, 1.5rem);
+      max-width: min(200px, 52vw);
+    }
+
+    .brand-symbol img {
       width: 100%;
       height: auto;
       display: block;
-      filter: drop-shadow(0 12px 40px rgba(0, 0, 0, 0.75));
-    }
-
-    /* Вертикальный штрих под логотипом — отсылка к синей ножке лампы в макете */
-    .brand-mark__lamp-stem {
-      width: 6px;
-      height: 36px;
-      margin: 0.15rem auto 0.35rem;
-      border-radius: 999px;
-      background: linear-gradient(
-        180deg,
-        rgba(212, 175, 55, 0.45) 0%,
-        var(--lamp-blue-soft) 38%,
-        var(--lamp-blue) 100%
-      );
-      box-shadow:
-        0 0 14px rgba(9, 19, 71, 0.55),
-        0 0 6px rgba(212, 175, 55, 0.15);
+      object-fit: contain;
+      filter:
+        drop-shadow(0 0 36px rgba(212, 175, 55, 0.28))
+        drop-shadow(0 12px 40px rgba(0, 0, 0, 0.82));
     }
 
     header h1 {
@@ -167,6 +178,11 @@
       font-weight: 400;
       color: var(--muted);
       line-height: 1.5;
+    }
+
+    header .subtitle strong {
+      color: rgba(238, 212, 132, 0.95);
+      font-weight: 700;
     }
 
     /* Карточки: чёрное «liquid glass» — blur + насыщенность + золотая кромка, как панели в abakan-script */
@@ -239,7 +255,8 @@
       background: rgba(0, 0, 0, 0.35);
     }
 
-    .card h2 {
+    .card h2,
+    .card h3 {
       margin: 0 0 0.45rem;
       font-size: 1.05rem;
       font-weight: 800;
@@ -251,8 +268,39 @@
     .card .meta {
       font-size: 0.8125rem;
       color: var(--muted);
-      margin: 0 0 1.05rem;
+      margin: 0 auto 1.05rem;
+      max-width: 36rem;
       line-height: 1.45;
+      text-align: center;
+    }
+
+    .card > .tag-row {
+      justify-content: center;
+    }
+
+    .card > h2,
+    .card > h3 {
+      text-align: center;
+    }
+
+    .card > .note {
+      margin-left: auto;
+      margin-right: auto;
+      max-width: 38rem;
+      text-align: center;
+    }
+
+    .about-body,
+    .about-body p {
+      text-align: left;
+    }
+
+    .briefing-lead,
+    .collab-emphasis,
+    .collab-warm,
+    .briefing-consequence,
+    .briefing-fee {
+      text-align: left;
     }
 
     /* Внутренняя «колодца» для плееров — ещё темнее, стекло */
@@ -308,11 +356,26 @@
       background: radial-gradient(ellipse at center 30%, rgba(30, 28, 24, 0.92), #000000 78%);
     }
 
-    .portfolio-player__overlay-play {
+    .portfolio-player__overlay-stack {
       position: absolute;
       left: 50%;
       top: 42%;
       transform: translate(-50%, -50%);
+      width: 64px;
+      height: 64px;
+      z-index: 4;
+      pointer-events: none;
+    }
+
+    .portfolio-player__overlay-stack > button {
+      pointer-events: auto;
+    }
+
+    .portfolio-player__overlay-face {
+      position: absolute;
+      inset: 0;
+      margin: 0;
+      padding: 0;
       width: 64px;
       height: 64px;
       border-radius: 50%;
@@ -323,24 +386,50 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: opacity 0.26s ease, border-color 0.2s ease;
+      transition: border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55);
-      z-index: 4;
+      z-index: 1;
       -webkit-tap-highlight-color: transparent;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
     }
 
-    .portfolio-player__overlay-play:focus-visible {
+    button.portfolio-player__overlay-face::-moz-focus-inner {
+      border: 0;
+      padding: 0;
+    }
+
+    .portfolio-player__overlay-face:focus {
+      outline: none;
+    }
+
+    .portfolio-player__overlay-face--pause {
+      border-color: rgba(255, 236, 200, 0.5);
+      background: radial-gradient(circle at 35% 28%, rgba(64, 54, 36, 0.82), rgba(6, 6, 6, 0.96));
+    }
+
+    .portfolio-player__overlay-face:focus-visible {
       outline: 2px solid rgba(232, 201, 104, 0.55);
       outline-offset: 3px;
     }
 
-    .portfolio-player__overlay-play:hover {
-      border-color: rgba(255, 236, 200, 0.62);
+    .portfolio-player__overlay-face:hover {
+      border-color: rgba(255, 236, 200, 0.65);
+      color: rgba(255, 244, 220, 1);
     }
 
-    .portfolio-player--video.is-playing .portfolio-player__overlay-play {
-      opacity: 0;
-      pointer-events: none;
+    .portfolio-player__overlay-glyph-play {
+      display: block;
+      width: 34px;
+      height: 34px;
+      margin-left: 3px;
+    }
+
+    .portfolio-player__overlay-glyph-pause {
+      display: block;
+      width: 28px;
+      height: 28px;
     }
 
     .portfolio-player__bar {
@@ -350,12 +439,21 @@
       margin-top: 0.72rem;
     }
 
-    .portfolio-player__toggle {
+    .portfolio-player__transport {
+      position: relative;
       flex-shrink: 0;
       width: 42px;
       height: 42px;
-      border-radius: 50%;
+    }
+
+    .portfolio-player__transport-btn {
+      position: absolute;
+      inset: 0;
+      width: 42px;
+      height: 42px;
+      margin: 0;
       padding: 0;
+      border-radius: 50%;
       cursor: pointer;
       border: 1px solid rgba(255, 228, 160, 0.26);
       background: radial-gradient(circle at 30% 24%, rgba(52, 48, 38, 0.92), rgba(8, 8, 8, 0.96));
@@ -368,32 +466,51 @@
         0 2px 14px rgba(0, 0, 0, 0.42);
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
     }
 
-    .portfolio-player__toggle:hover {
+    button.portfolio-player__transport-btn::-moz-focus-inner {
+      border: 0;
+      padding: 0;
+    }
+
+    .portfolio-player__transport-btn:focus {
+      outline: none;
+    }
+
+    .portfolio-player__transport-btn:hover {
       color: rgba(255, 238, 210, 1);
-      border-color: rgba(255, 228, 160, 0.34);
+      border-color: rgba(255, 228, 160, 0.38);
     }
 
-    .portfolio-player__toggle:focus-visible {
+    .portfolio-player__transport-btn:focus-visible {
       outline: 2px solid rgba(232, 201, 104, 0.5);
       outline-offset: 2px;
     }
 
-    .portfolio-player__ic {
+    .portfolio-player__transport-btn--pause {
+      border-color: rgba(255, 228, 160, 0.34);
+      background: radial-gradient(circle at 30% 24%, rgba(58, 50, 36, 0.96), rgba(6, 6, 6, 0.98));
+    }
+
+    .portfolio-player__glyph {
       width: 21px;
       height: 21px;
       display: block;
+      flex-shrink: 0;
     }
 
-    .portfolio-player__ic--play {
+    .portfolio-player__glyph--play {
       margin-left: 3px;
     }
 
     .portfolio-player__seek {
       position: relative;
       flex: 1;
-      height: 42px;
+      min-height: 50px;
+      height: 50px;
       display: flex;
       align-items: center;
       padding: 0 2px;
@@ -442,15 +559,16 @@
       left: calc(18px + (100% - 36px) * var(--pp, 0));
       top: 50%;
       transform: translate(-50%, -50%);
-      width: 38px;
-      height: 38px;
-      padding: 0;
+      width: 44px;
+      height: 44px;
+      padding: 4px;
+      box-sizing: border-box;
       margin: 0;
       border: none;
       background: transparent;
       cursor: grab;
       z-index: 2;
-      border-radius: 50%;
+      border-radius: 10px;
       display: grid;
       place-items: center;
       filter:
@@ -470,9 +588,12 @@
     }
 
     .portfolio-player__thumb img {
-      width: 32px;
-      height: 32px;
+      width: 100%;
+      height: 100%;
+      max-width: none;
+      max-height: none;
       object-fit: contain;
+      object-position: center;
       pointer-events: none;
       display: block;
     }
@@ -496,10 +617,278 @@
       align-items: stretch;
     }
 
+    .card--stem-audio[data-compare-view="demo"] .compare-pair,
+    .card--stem-audio[data-compare-view="master"] .compare-pair {
+      grid-template-columns: 1fr;
+    }
+
+    .card--stem-audio[data-compare-view="demo"] .compare-col--master {
+      display: none !important;
+    }
+
+    .card--stem-audio[data-compare-view="master"] .compare-col--demo {
+      display: none !important;
+    }
+
     @media (max-width: 520px) {
       .compare-pair {
         grid-template-columns: 1fr;
       }
+
+      /* В режиме «оба» даже узкий экран: две дорожки остаются в столбце */
+      .card--stem-audio[data-compare-view="demo"] .compare-pair,
+      .card--stem-audio[data-compare-view="master"] .compare-pair {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Плавное «перетекание» демо ↔ мастер по громкости (одно место воспроизведения) */
+    .compare-fusion {
+      margin-top: 0.75rem;
+      padding: 0.82rem 0.92rem;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 228, 160, 0.12);
+      background: rgba(0, 0, 0, 0.36);
+      box-shadow: inset 0 1px 0 rgba(255, 248, 220, 0.04);
+    }
+
+    .card--stem-audio[data-compare-view="demo"] .compare-fusion,
+    .card--stem-audio[data-compare-view="master"] .compare-fusion {
+      display: none !important;
+    }
+
+    .compare-fusion__hint {
+      margin: 0 auto 0.72rem;
+      max-width: 36rem;
+      font-size: 0.74rem;
+      line-height: 1.46;
+      color: var(--muted);
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .compare-fusion__row {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+    }
+
+    .compare-fusion__end {
+      flex-shrink: 0;
+      width: 4rem;
+      font-size: 0.5825rem;
+      font-weight: 800;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+    }
+
+    .compare-fusion__end--demo {
+      color: rgba(235, 200, 120, 0.58);
+      text-align: center;
+    }
+
+    .compare-fusion__mix-label {
+      flex: 1;
+      margin: 0;
+      min-width: 0;
+    }
+
+    .compare-fusion__end--master {
+      color: rgba(232, 201, 104, 0.9);
+      text-align: center;
+    }
+
+    .compare-fusion__range {
+      width: 100%;
+      height: 9px;
+      border-radius: 999px;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background: transparent;
+      accent-color: var(--gold);
+      cursor: pointer;
+    }
+
+    .compare-fusion__range::-webkit-slider-runnable-track {
+      height: 8px;
+      border-radius: 999px;
+      background: linear-gradient(
+        90deg,
+        rgba(235, 200, 120, 0.2),
+        rgba(212, 175, 55, 0.34)
+      );
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.45);
+    }
+
+    .compare-fusion__range::-webkit-slider-thumb {
+      appearance: none;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 236, 200, 0.45);
+      background: radial-gradient(circle at 32% 28%, rgba(250, 230, 165, 0.95), rgba(180, 140, 40, 0.95));
+      box-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+      margin-top: -3.5px;
+    }
+
+    .compare-fusion__range::-moz-range-track {
+      height: 8px;
+      border-radius: 999px;
+      background: linear-gradient(
+        90deg,
+        rgba(235, 200, 120, 0.2),
+        rgba(212, 175, 55, 0.34)
+      );
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.45);
+    }
+
+    .compare-fusion__range::-moz-range-thumb {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 236, 200, 0.45);
+      background: radial-gradient(circle at 32% 28%, rgba(250, 230, 165, 0.95), rgba(180, 140, 40, 0.95));
+      box-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    .compare-fusion__controls {
+      margin-top: 0.68rem;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.42rem;
+    }
+
+    .compare-fusion__auto {
+      cursor: pointer;
+      margin: 0;
+      padding: 0.36rem 0.92rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 228, 160, 0.22);
+      font-family: inherit;
+      font-size: 0.62rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(232, 201, 104, 0.94);
+      background: radial-gradient(circle at 30% 24%, rgba(52, 48, 38, 0.9), rgba(8, 8, 8, 0.96));
+      box-shadow:
+        inset 0 1px 0 rgba(255, 248, 220, 0.06),
+        0 2px 14px rgba(0, 0, 0, 0.4);
+      -webkit-tap-highlight-color: transparent;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    .compare-fusion__auto:hover {
+      border-color: rgba(255, 236, 200, 0.38);
+    }
+
+    .compare-fusion__auto:disabled {
+      opacity: 0.55;
+      cursor: progress;
+      pointer-events: none;
+    }
+
+    .compare-fusion__auto:focus {
+      outline: none;
+    }
+
+    .compare-fusion__auto:focus-visible {
+      outline: 2px solid rgba(232, 201, 104, 0.42);
+      outline-offset: 2px;
+    }
+
+    /* Переключатель режима и навигация по дорожке (уровень жанра + сегменты) */
+    .genre-playback-bar {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.55rem;
+      margin: 0 auto 1.15rem;
+      max-width: 100%;
+      padding: 0 0.1rem;
+    }
+
+    .genre-playback-bar__row {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .stem-switch--genre {
+      max-width: 100%;
+    }
+
+    .card--genre-anchor {
+      scroll-margin-top: clamp(4.25rem, 12vw, 6.25rem);
+    }
+
+    .stem-switch {
+      display: inline-flex;
+      flex-wrap: wrap;
+      padding: 3px;
+      gap: 2px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 228, 160, 0.18);
+      background: rgba(0, 0, 0, 0.45);
+      box-shadow: inset 0 1px 0 rgba(255, 248, 220, 0.04);
+    }
+
+    .stem-switch__btn {
+      margin: 0;
+      padding: 0.32rem 0.82rem;
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.62rem;
+      font-weight: 800;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: rgba(212, 175, 55, 0.55);
+      background: transparent;
+      -webkit-tap-highlight-color: transparent;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      transition:
+        background 0.18s ease,
+        color 0.18s ease,
+        border-color 0.18s ease;
+    }
+
+    .stem-switch__btn:hover {
+      color: rgba(232, 201, 104, 0.88);
+    }
+
+    button.stem-switch__btn::-moz-focus-inner {
+      border: 0;
+      padding: 0;
+    }
+
+    .stem-switch__btn:focus {
+      outline: none;
+    }
+
+    .stem-switch__btn:focus-visible {
+      outline: 2px solid rgba(232, 201, 104, 0.45);
+      outline-offset: 2px;
+    }
+
+    .stem-switch__btn.is-active {
+      color: rgba(18, 16, 12, 0.96);
+      background: linear-gradient(
+        165deg,
+        rgba(250, 224, 150, 0.98),
+        rgba(212, 165, 55, 0.88)
+      );
+      box-shadow: 0 1px 8px rgba(212, 175, 55, 0.2);
+    }
+
+    .compare-col {
+      text-align: center;
     }
 
     .compare-label {
@@ -509,6 +898,7 @@
       letter-spacing: 0.17em;
       text-transform: uppercase;
       margin-bottom: 0.42rem;
+      text-align: center;
     }
 
     .compare-label--demo {
@@ -517,6 +907,46 @@
 
     .compare-label--master {
       color: rgba(232, 201, 104, 0.92);
+    }
+
+    .portfolio-genre-banner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 1.65rem auto 1.05rem;
+      padding: 0 0.5rem 0.65rem;
+      text-align: center;
+      border-bottom: 1px solid rgba(255, 228, 160, 0.14);
+    }
+
+    section.portfolio-genre:first-of-type .portfolio-genre-banner {
+      margin-top: 0.35rem;
+    }
+
+    .portfolio-genre-banner .tag {
+      margin-bottom: 0.42rem;
+    }
+
+    .portfolio-genre-title {
+      margin: 0;
+      font-family: var(--script-font);
+      font-weight: 400;
+      font-size: clamp(1.55rem, 5.2vw, 2rem);
+      letter-spacing: 0.055em;
+      color: rgba(236, 210, 125, 0.96);
+      text-shadow:
+        0 0 32px rgba(212, 175, 55, 0.2),
+        0 2px 2px rgba(0, 0, 0, 0.45);
+      line-height: 1.2;
+    }
+
+    .portfolio-genre > .note:last-child {
+      margin-top: 0.15rem;
+      margin-bottom: 0.2rem;
+      max-width: 42rem;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
     }
 
     /* Первое на странице: обращение к зрителю */
@@ -589,6 +1019,56 @@
 
     .card--briefing h2 {
       letter-spacing: 0.03em;
+    }
+
+    .card--collab {
+      border-color: rgba(255, 214, 130, 0.26);
+    }
+
+    .card--collab h2 {
+      letter-spacing: 0.02em;
+    }
+
+    .collab-emphasis {
+      margin: 0 0 0.85rem;
+      font-size: 0.8375rem;
+      color: rgba(248, 242, 232, 0.96);
+      line-height: 1.53;
+      font-weight: 600;
+    }
+
+    .collab-warm {
+      margin: 0;
+      font-size: 0.8375rem;
+      color: rgba(232, 201, 104, 0.88);
+      line-height: 1.53;
+      font-weight: 600;
+    }
+
+    /* Обо мне */
+    .card--about {
+      border-color: rgba(255, 214, 130, 0.24);
+    }
+
+    .about-body {
+      margin-top: 0.35rem;
+    }
+
+    .about-body p {
+      margin: 0 0 0.72rem;
+      font-size: 0.8375rem;
+      color: rgba(243, 236, 224, 0.94);
+      line-height: 1.53;
+      font-weight: 500;
+    }
+
+    .about-body p:last-child {
+      margin-bottom: 0;
+    }
+
+    .about-body strong {
+      color: rgba(248, 242, 232, 0.98);
+      font-weight: 700;
     }
 
     .briefing-lead {
@@ -851,11 +1331,15 @@
   <div class="ambient" aria-hidden="true">
     <div class="ambient__glow"></div>
     <div class="ambient__logo">
-      <img src="portfolio-logo-brand.svg" alt="" width="5000" height="3630" decoding="async" fetchpriority="low">
+      <img src="portfolio-logo-symbol.png" alt="" width="833" height="1016" decoding="async" fetchpriority="low">
     </div>
   </div>
 
   <div class="wrap">
+    <div class="brand-symbol">
+      <img src="portfolio-logo-symbol.png" alt="Sam Bruev Mix &amp; Recording — символ студии" width="833" height="1016" decoding="async" fetchpriority="high">
+    </div>
+
     <article class="card card--greeting">
       <div class="tag-row">
         <span class="tag">Видео</span>
@@ -870,24 +1354,40 @@
             <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4">
             Ваш браузер не поддерживает воспроизведение видео.
           </video>
-          <button type="button" class="portfolio-player__overlay-play" aria-label="Воспроизвести">
-            <svg viewBox="0 0 24 24" width="34" height="34" aria-hidden="true"><path fill="currentColor" d="M10 8.065v7.87L16.956 12 10 8.065z"/></svg>
-          </button>
+          <div class="portfolio-player__overlay-stack">
+            <button type="button" class="portfolio-player__overlay-face portfolio-player__overlay-face--play" aria-label="Воспроизвести">
+              <svg class="portfolio-player__overlay-glyph-play" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10 8.065v7.87L16.956 12 10 8.065z"/></svg>
+            </button>
+            <button type="button" class="portfolio-player__overlay-face portfolio-player__overlay-face--pause" aria-label="Пауза" hidden>
+              <svg class="portfolio-player__overlay-glyph-pause" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 6h4v12H8V6zm10 0h4v12h-4V6z"/></svg>
+            </button>
+          </div>
         </div>
       </div>
       <p class="note">Подмените файл <code>portfolio-video/obraschenie.mp4</code> на свой ролик; второй источник в коде — только запасной пример до загрузки.</p>
     </article>
 
     <header class="brand-mark">
-      <div class="brand-mark__hero">
-        <img src="portfolio-logo-brand.svg" alt="Sam Bruev Mix &amp; Recording — Music production" width="5000" height="3630" decoding="async">
-      </div>
-      <div class="brand-mark__lamp-stem" aria-hidden="true"></div>
       <div>
         <h1>Примеры работ</h1>
-        <p class="subtitle">Сначала — короткое видеообращение, далее логотип, список работ и примеры демо / мастер. Аудио — в <code>portfolio-audio/</code>.</p>
+        <p class="subtitle">Жанровые блоки металл, рок, поп и панк: режим «Темы» — два плеера; под ними ползунок <strong>плавной смеси</strong> демо&nbsp;→&nbsp;мастер при одном времени воспроизведения или кнопка авто-перетекания. Клавиши <strong>Демо / Мастер</strong> режут до одной дорожки без смеси. Наверху жанра — переключение режима секции и прыжки к барабанам · вокал · гитарам.</p>
       </div>
     </header>
+
+    <article class="card card--about">
+      <div class="tag-row">
+        <span class="tag">Обо мне</span>
+        <span class="tag">Образование · опыт</span>
+      </div>
+      <h2>Семён Бруев</h2>
+      <p class="meta">Звук, сведение и продакшн — одна линия, по которой иду с подросткового возраста.</p>
+      <div class="about-body">
+        <p>Меня зовут <strong>Семён Бруев</strong>. Высшее образование по музыкальной режиссуре получил в Москве, в <strong>ИСИ</strong>, в <strong>2018 году</strong>. Образование имеет значение, когда были сильные педагоги — у меня таких три: <strong>Софья Николаевна Кругликова</strong>, <strong>Мария Александровна Соболева</strong>, <strong>Андрей Александрович Левин</strong>.</p>
+        <p>С <strong>14 лет</strong> занимаюсь музыкой: это главное профессиональное дело в моей жизни — люблю работу, музыку и людей.</p>
+        <p>После института учился в онлайн-программе <strong>Berklee College of Music</strong>, проходил практику в <strong>Европе</strong>. Работал на студиях звукозаписи, в том числе на <strong>Мосфильме</strong>, в <strong>Vintage Record</strong>, <strong>Cinelab</strong>, в студии <strong>Игоря Матвиенко</strong> и на других площадках.</p>
+        <p>В каждой работе подробно расписываю, что конкретно делал — при выборе специалиста это действительно важно.</p>
+      </div>
+    </article>
 
     <article class="card">
       <div class="tag-row">
@@ -911,73 +1411,352 @@
       </div>
     </article>
 
-    <article class="card">
+    <article class="card card--collab">
       <div class="tag-row">
-        <span class="tag">Стемы</span>
-        <span class="tag">Демо · мастер</span>
+        <span class="tag">Особенности</span>
+        <span class="tag">Сведение · ожидания</span>
       </div>
-      <h2>Барабаны</h2>
-      <p class="meta">Черновая лента и финал после компрессии, эквализации и сборки под микс.</p>
-      <div class="compare-pair">
-        <div class="media-shell">
-          <span class="compare-label compare-label--demo">Демо</span>
-          <div class="portfolio-player portfolio-player--audio" data-player>
-            <audio preload="metadata" playsinline src="portfolio-audio/drums-demo.m4a"></audio>
-          </div>
-        </div>
-        <div class="media-shell">
-          <span class="compare-label compare-label--master">Мастер</span>
-          <div class="portfolio-player portfolio-player--audio" data-player>
-            <audio preload="metadata" playsinline src="portfolio-audio/drums-master.m4a"></audio>
-          </div>
-        </div>
-      </div>
+      <h2>Особенности работы со мной</h2>
+      <p class="meta">Что именно делает финальное сведение — и что лучше закрыть раньше.</p>
+      <p class="briefing-lead">Сведение — последний этап музыкального производства: оно аккуратно собирает и подчёркивает уже готовый материал, но не заменяет предыдущие шаги.</p>
+      <ul class="briefing-list">
+        <li>не исправляет ошибки на этапе написания песни и смыслового наполнения;</li>
+        <li>не устраняет ошибки аранжировки;</li>
+        <li>не компенсирует слабую или халтурную запись — «поставить галочку» на плохом сырье сведением нельзя.</li>
+      </ul>
+      <p class="collab-emphasis">Обратите внимание: осознанно сыгранные дубли, характерные для звучания (как у Nirvana — почти ни одной партии точь-в-точь), не то же самое, что неровная игра на гитаре человеком, который ещё не владеет инструментом.</p>
+      <p class="collab-warm">Здорово, что вы здесь, в этом небольшом приложении: в мои услуги входят помощь с аранжировкой, продюсирование и продакшн каждого инструмента — задачи до сведения мы можем проработать заранее.</p>
     </article>
 
-    <article class="card">
-      <div class="tag-row">
-        <span class="tag">Стемы</span>
-      </div>
-      <h2>Вокал</h2>
-      <p class="meta">От сырой записи к обработке: монтаж шумов, тональный баланс, пространство.</p>
-      <div class="compare-pair">
-        <div class="media-shell">
-          <span class="compare-label compare-label--demo">Демо</span>
-          <div class="portfolio-player portfolio-player--audio" data-player>
-            <audio preload="metadata" playsinline src="portfolio-audio/vocals-demo.m4a"></audio>
-          </div>
-        </div>
-        <div class="media-shell">
-          <span class="compare-label compare-label--master">Мастер</span>
-          <div class="portfolio-player portfolio-player--audio" data-player>
-            <audio preload="metadata" playsinline src="portfolio-audio/vocals-master.m4a"></audio>
-          </div>
-        </div>
-      </div>
-    </article>
+    <section class="portfolio-genre portfolio-genre--metal" data-genre="metal" aria-labelledby="genre-metal">
+      <header class="portfolio-genre-banner">
+        <span class="tag">Жанр</span>
+        <h2 class="portfolio-genre-title" id="genre-metal">Металл</h2>
+      </header>
 
-    <article class="card">
-      <div class="tag-row">
-        <span class="tag">Стемы</span>
-      </div>
-      <h2>Гитары</h2>
-      <p class="meta">Ритм-партии и акценты: панорама и цвет против исходного дублей.</p>
-      <div class="compare-pair">
-        <div class="media-shell">
-          <span class="compare-label compare-label--demo">Демо</span>
-          <div class="portfolio-player portfolio-player--audio" data-player>
-            <audio preload="metadata" playsinline src="portfolio-audio/guitars-demo.m4a"></audio>
+      <div class="genre-playback-bar">
+        <div class="genre-playback-bar__row genre-playback-bar__modes">
+          <div class="stem-switch stem-switch--genre" role="group" aria-label="Режим: темы, демо или мастер">
+            <button type="button" class="stem-switch__btn is-active" aria-pressed="true" data-genre-scope="modes" data-compare-show="both">Темы</button>
+            <button type="button" class="stem-switch__btn" aria-pressed="false" data-genre-scope="modes" data-compare-show="demo">Демо</button>
+            <button type="button" class="stem-switch__btn" aria-pressed="false" data-genre-scope="modes" data-compare-show="master">Мастер</button>
           </div>
         </div>
-        <div class="media-shell">
-          <span class="compare-label compare-label--master">Мастер</span>
-          <div class="portfolio-player portfolio-player--audio" data-player>
-            <audio preload="metadata" playsinline src="portfolio-audio/guitars-master.m4a"></audio>
+        <div class="genre-playback-bar__row genre-playback-bar__tracks">
+          <div class="stem-switch stem-switch--genre stem-switch--tracks" role="group" aria-label="Переход к инструменту">
+            <button type="button" class="stem-switch__btn stem-switch__btn--track" data-genre-scroll="drums">Барабаны</button>
+            <button type="button" class="stem-switch__btn stem-switch__btn--track" data-genre-scroll="vocals">Вокал</button>
+            <button type="button" class="stem-switch__btn stem-switch__btn--track" data-genre-scroll="guitars">Гитары</button>
           </div>
         </div>
       </div>
-      <p class="note">Сейчас в плеерах заглушки (короткая тишина, .m4a). Замените файлы в <code>portfolio-audio/</code> на свои дорожки, сохранив имена или поменяв пути в HTML. Поддерживаются и <code>.mp3</code>, и <code>.wav</code> — просто переименуйте <code>src</code>.</p>
-    </article>
+
+
+      <article id="metal-drums" class="card card--stem-audio card--genre-anchor" data-compare-view="both">
+        <h3>Барабаны</h3>
+        <p class="meta">Черновая лента и финал после компрессии и эквалайзера под плотный микс.</p>
+        <div class="compare-pair">
+          <div class="compare-col compare-col--demo media-shell">
+            <span class="compare-label compare-label--demo">Демо</span>
+            <div class="portfolio-player portfolio-player--audio" data-player>
+              <audio preload="metadata" playsinline src="portfolio-audio/metal-drums-demo.m4a"></audio>
+            </div>
+          </div>
+          <div class="compare-col compare-col--master media-shell">
+            <span class="compare-label compare-label--master">Мастер</span>
+            <div class="portfolio-player portfolio-player--audio" data-player>
+              <audio preload="metadata" playsinline src="portfolio-audio/metal-drums-master.m4a"></audio>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article id="metal-vocals" class="card card--stem-audio card--genre-anchor" data-compare-view="both">
+        <h3>Вокал</h3>
+        <p class="meta">Сырой крик / чистый вокал: шумы, объём и агрессия в финале.</p>
+        <div class="compare-pair">
+          <div class="compare-col compare-col--demo media-shell">
+            <span class="compare-label compare-label--demo">Демо</span>
+            <div class="portfolio-player portfolio-player--audio" data-player>
+              <audio preload="metadata" playsinline src="portfolio-audio/metal-vocals-demo.m4a"></audio>
+            </div>
+          </div>
+          <div class="compare-col compare-col--master media-shell">
+            <span class="compare-label compare-label--master">Мастер</span>
+            <div class="portfolio-player portfolio-player--audio" data-player>
+              <audio preload="metadata" playsinline src="portfolio-audio/metal-vocals-master.m4a"></audio>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article id="metal-guitars" class="card card--stem-audio card--genre-anchor" data-compare-view="both">
+        <h3>Гитары</h3>
+        <p class="meta">Удвоенные партии и пан: плотность, срезы и средние без каши.</p>
+        <div class="compare-pair">
+          <div class="compare-col compare-col--demo media-shell">
+            <span class="compare-label compare-label--demo">Демо</span>
+            <div class="portfolio-player portfolio-player--audio" data-player>
+              <audio preload="metadata" playsinline src="portfolio-audio/metal-guitars-demo.m4a"></audio>
+            </div>
+          </div>
+          <div class="compare-col compare-col--master media-shell">
+            <span class="compare-label compare-label--master">Мастер</span>
+            <div class="portfolio-player portfolio-player--audio" data-player>
+              <audio preload="metadata" playsinline src="portfolio-audio/metal-guitars-master.m4a"></audio>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="portfolio-genre portfolio-genre--rock" data-genre="rock" aria-labelledby="genre-rock">
+      <header class="portfolio-genre-banner">
+        <span class="tag">Жанр</span>
+        <h2 class="portfolio-genre-title" id="genre-rock">Рок</h2>
+      </header>
+
+      <div class="genre-playback-bar">
+        <div class="genre-playback-bar__row genre-playback-bar__modes">
+          <div class="stem-switch stem-switch--genre" role="group" aria-label="Режим: темы, демо или мастер">
+            <button type="button" class="stem-switch__btn is-active" aria-pressed="true" data-genre-scope="modes" data-compare-show="both">Темы</button>
+            <button type="button" class="stem-switch__btn" aria-pressed="false" data-genre-scope="modes" data-compare-show="demo">Демо</button>
+            <button type="button" class="stem-switch__btn" aria-pressed="false" data-genre-scope="modes" data-compare-show="master">Мастер</button>
+          </div>
+        </div>
+        <div class="genre-playback-bar__row genre-playback-bar__tracks">
+          <div class="stem-switch stem-switch--genre stem-switch--tracks" role="group" aria-label="Переход к инструменту">
+            <button type="button" class="stem-switch__btn stem-switch__btn--track" data-genre-scroll="drums">Барабаны</button>
+            <button type="button" class="stem-switch__btn stem-switch__btn--track" data-genre-scroll="vocals">Вокал</button>
+            <button type="button" class="stem-switch__btn stem-switch__btn--track" data-genre-scroll="guitars">Гитары</button>
+          </div>
+        </div>
+      </div>
+
+
+      <article id="rock-drums" class="card card--stem-audio card--genre-anchor" data-compare-view="both">
+        <h3>Барабаны</h3>
+        <p class="meta">Живость и кач: баланс панорамы и ограничения по дайнамике под рок.</p>
+        <div class="compare-pair">
+          <div class="compare-col compare-col--demo media-shell">
+            <span class="compare-label compare-label--demo">Демо</span>
+            <div class="portfolio-player portfolio-player--audio" data-player>
+              <audio preload="metadata" playsinline src="portfolio-audio/rock-drums-demo.m4a"></audio>
+            </div>
+          </div>
+          <div class="compare-col compare-col--master media-shell">
+            <span class="compare-label compare-label--master">Мастер</span>
+            <div class="portfolio-player portfolio-player--audio" data-player>
+              <audio preload="metadata" playsinline src="portfolio-audio/rock-drums-master.m4a"></audio>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article id="rock-vocals" class="card card--stem-audio card--genre-anchor" data-compare-view="both">
+        <h3>Вокал</h3>
+        <p class="meta">Телесность и текст: выравнивание дикции и место в миксе.</p>
+        <div class="compare-pair">
+          <div class="compare-col compare-col--demo media-shell">
+            <span class="compare-label compare-label--demo">Демо</span>
+            <div class="portfolio-player portfolio-player--audio" data-player>
+              <audio preload="metadata" playsinline src="portfolio-audio/rock-vocals-demo.m4a"></audio>
+            </div>
+          </div>
+          <div class="compare-col compare-col--master media-shell">
+            <span class="compare-label compare-label--master">Мастер</span>
+            <div class="portfolio-player portfolio-player--audio" data-player>
+              <audio preload="metadata" playsinline src="portfolio-audio/rock-vocals-master.m4a"></audio>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article id="rock-guitars" class="card card--stem-audio card--genre-anchor" data-compare-view="both">
+        <h3>Гитары</h3>
+        <p class="meta">Ритм и соло-слои: ширина сцены без потери середины.</p>
+        <div class="compare-pair">
+          <div class="compare-col compare-col--demo media-shell">
+            <span class="compare-label compare-label--demo">Демо</span>
+            <div class="portfolio-player portfolio-player--audio" data-player>
+              <audio preload="metadata" playsinline src="portfolio-audio/rock-guitars-demo.m4a"></audio>
+            </div>
+          </div>
+          <div class="compare-col compare-col--master media-shell">
+            <span class="compare-label compare-label--master">Мастер</span>
+            <div class="portfolio-player portfolio-player--audio" data-player>
+              <audio preload="metadata" playsinline src="portfolio-audio/rock-guitars-master.m4a"></audio>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="portfolio-genre portfolio-genre--pop" data-genre="pop" aria-labelledby="genre-pop">
+      <header class="portfolio-genre-banner">
+        <span class="tag">Жанр</span>
+        <h2 class="portfolio-genre-title" id="genre-pop">Поп</h2>
+      </header>
+
+      <div class="genre-playback-bar">
+        <div class="genre-playback-bar__row genre-playback-bar__modes">
+          <div class="stem-switch stem-switch--genre" role="group" aria-label="Режим: темы, демо или мастер">
+            <button type="button" class="stem-switch__btn is-active" aria-pressed="true" data-genre-scope="modes" data-compare-show="both">Темы</button>
+            <button type="button" class="stem-switch__btn" aria-pressed="false" data-genre-scope="modes" data-compare-show="demo">Демо</button>
+            <button type="button" class="stem-switch__btn" aria-pressed="false" data-genre-scope="modes" data-compare-show="master">Мастер</button>
+          </div>
+        </div>
+        <div class="genre-playback-bar__row genre-playback-bar__tracks">
+          <div class="stem-switch stem-switch--genre stem-switch--tracks" role="group" aria-label="Переход к инструменту">
+            <button type="button" class="stem-switch__btn stem-switch__btn--track" data-genre-scroll="drums">Барабаны</button>
+            <button type="button" class="stem-switch__btn stem-switch__btn--track" data-genre-scroll="vocals">Вокал</button>
+            <button type="button" class="stem-switch__btn stem-switch__btn--track" data-genre-scroll="guitars">Гитары</button>
+          </div>
+        </div>
+      </div>
+
+
+      <article id="pop-drums" class="card card--stem-audio card--genre-anchor" data-compare-view="both">
+        <h3>Барабаны</h3>
+        <p class="meta">Строгая посадка в сетке, «воздух» и упругость удара.</p>
+        <div class="compare-pair">
+          <div class="compare-col compare-col--demo media-shell">
+            <span class="compare-label compare-label--demo">Демо</span>
+            <div class="portfolio-player portfolio-player--audio" data-player>
+              <audio preload="metadata" playsinline src="portfolio-audio/pop-drums-demo.m4a"></audio>
+            </div>
+          </div>
+          <div class="compare-col compare-col--master media-shell">
+            <span class="compare-label compare-label--master">Мастер</span>
+            <div class="portfolio-player portfolio-player--audio" data-player>
+              <audio preload="metadata" playsinline src="portfolio-audio/pop-drums-master.m4a"></audio>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article id="pop-vocals" class="card card--stem-audio card--genre-anchor" data-compare-view="both">
+        <h3>Вокал</h3>
+        <p class="meta">Шейпы, даблы и аккуратное «переднее» звучание поп-группы.</p>
+        <div class="compare-pair">
+          <div class="compare-col compare-col--demo media-shell">
+            <span class="compare-label compare-label--demo">Демо</span>
+            <div class="portfolio-player portfolio-player--audio" data-player>
+              <audio preload="metadata" playsinline src="portfolio-audio/pop-vocals-demo.m4a"></audio>
+            </div>
+          </div>
+          <div class="compare-col compare-col--master media-shell">
+            <span class="compare-label compare-label--master">Мастер</span>
+            <div class="portfolio-player portfolio-player--audio" data-player>
+              <audio preload="metadata" playsinline src="portfolio-audio/pop-vocals-master.m4a"></audio>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article id="pop-guitars" class="card card--stem-audio card--genre-anchor" data-compare-view="both">
+        <h3>Гитары</h3>
+        <p class="meta">Структурные падики и филь: ясность партий на радиофоне.</p>
+        <div class="compare-pair">
+          <div class="compare-col compare-col--demo media-shell">
+            <span class="compare-label compare-label--demo">Демо</span>
+            <div class="portfolio-player portfolio-player--audio" data-player>
+              <audio preload="metadata" playsinline src="portfolio-audio/pop-guitars-demo.m4a"></audio>
+            </div>
+          </div>
+          <div class="compare-col compare-col--master media-shell">
+            <span class="compare-label compare-label--master">Мастер</span>
+            <div class="portfolio-player portfolio-player--audio" data-player>
+              <audio preload="metadata" playsinline src="portfolio-audio/pop-guitars-master.m4a"></audio>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="portfolio-genre portfolio-genre--punk" data-genre="punk" aria-labelledby="genre-punk">
+      <header class="portfolio-genre-banner">
+        <span class="tag">Жанр</span>
+        <h2 class="portfolio-genre-title" id="genre-punk">Панк</h2>
+      </header>
+
+      <div class="genre-playback-bar">
+        <div class="genre-playback-bar__row genre-playback-bar__modes">
+          <div class="stem-switch stem-switch--genre" role="group" aria-label="Режим: темы, демо или мастер">
+            <button type="button" class="stem-switch__btn is-active" aria-pressed="true" data-genre-scope="modes" data-compare-show="both">Темы</button>
+            <button type="button" class="stem-switch__btn" aria-pressed="false" data-genre-scope="modes" data-compare-show="demo">Демо</button>
+            <button type="button" class="stem-switch__btn" aria-pressed="false" data-genre-scope="modes" data-compare-show="master">Мастер</button>
+          </div>
+        </div>
+        <div class="genre-playback-bar__row genre-playback-bar__tracks">
+          <div class="stem-switch stem-switch--genre stem-switch--tracks" role="group" aria-label="Переход к инструменту">
+            <button type="button" class="stem-switch__btn stem-switch__btn--track" data-genre-scroll="drums">Барабаны</button>
+            <button type="button" class="stem-switch__btn stem-switch__btn--track" data-genre-scroll="vocals">Вокал</button>
+            <button type="button" class="stem-switch__btn stem-switch__btn--track" data-genre-scroll="guitars">Гитары</button>
+          </div>
+        </div>
+      </div>
+
+
+      <article id="punk-drums" class="card card--stem-audio card--genre-anchor" data-compare-view="both">
+        <h3>Барабаны</h3>
+        <p class="meta">Ломаный темп и сырая энергия: быстро довести до читаемой «стены» звука.</p>
+        <div class="compare-pair">
+          <div class="compare-col compare-col--demo media-shell">
+            <span class="compare-label compare-label--demo">Демо</span>
+            <div class="portfolio-player portfolio-player--audio" data-player>
+              <audio preload="metadata" playsinline src="portfolio-audio/punk-drums-demo.m4a"></audio>
+            </div>
+          </div>
+          <div class="compare-col compare-col--master media-shell">
+            <span class="compare-label compare-label--master">Мастер</span>
+            <div class="portfolio-player portfolio-player--audio" data-player>
+              <audio preload="metadata" playsinline src="portfolio-audio/punk-drums-master.m4a"></audio>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article id="punk-vocals" class="card card--stem-audio card--genre-anchor" data-compare-view="both">
+        <h3>Вокал</h3>
+        <p class="meta">Приближенный захват: шипение, дыхание и драйв без лишней грязи.</p>
+        <div class="compare-pair">
+          <div class="compare-col compare-col--demo media-shell">
+            <span class="compare-label compare-label--demo">Демо</span>
+            <div class="portfolio-player portfolio-player--audio" data-player>
+              <audio preload="metadata" playsinline src="portfolio-audio/punk-vocals-demo.m4a"></audio>
+            </div>
+          </div>
+          <div class="compare-col compare-col--master media-shell">
+            <span class="compare-label compare-label--master">Мастер</span>
+            <div class="portfolio-player portfolio-player--audio" data-player>
+              <audio preload="metadata" playsinline src="portfolio-audio/punk-vocals-master.m4a"></audio>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article id="punk-guitars" class="card card--stem-audio card--genre-anchor" data-compare-view="both">
+        <h3>Гитары</h3>
+        <p class="meta">Царапающие риффы на одну ширину: грязно, но пробивает микс.</p>
+        <div class="compare-pair">
+          <div class="compare-col compare-col--demo media-shell">
+            <span class="compare-label compare-label--demo">Демо</span>
+            <div class="portfolio-player portfolio-player--audio" data-player>
+              <audio preload="metadata" playsinline src="portfolio-audio/punk-guitars-demo.m4a"></audio>
+            </div>
+          </div>
+          <div class="compare-col compare-col--master media-shell">
+            <span class="compare-label compare-label--master">Мастер</span>
+            <div class="portfolio-player portfolio-player--audio" data-player>
+              <audio preload="metadata" playsinline src="portfolio-audio/punk-guitars-master.m4a"></audio>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <p class="note">Сейчас в плеерах заглушки (.m4a). Подложите дорожки в <code>portfolio-audio/</code> под именами <code>[metal|rock|pop|punk]-[drums|vocals|guitars]-[demo|master].m4a</code> или поменяйте пути.</p>
+    </section>
 
     <article class="card">
       <div class="tag-row">
@@ -992,9 +1771,14 @@
             <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4">
             Ваш браузер не поддерживает воспроизведение видео.
           </video>
-          <button type="button" class="portfolio-player__overlay-play" aria-label="Воспроизвести">
-            <svg viewBox="0 0 24 24" width="34" height="34" aria-hidden="true"><path fill="currentColor" d="M10 8.065v7.87L16.956 12 10 8.065z"/></svg>
-          </button>
+          <div class="portfolio-player__overlay-stack">
+            <button type="button" class="portfolio-player__overlay-face portfolio-player__overlay-face--play" aria-label="Воспроизвести">
+              <svg class="portfolio-player__overlay-glyph-play" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10 8.065v7.87L16.956 12 10 8.065z"/></svg>
+            </button>
+            <button type="button" class="portfolio-player__overlay-face portfolio-player__overlay-face--pause" aria-label="Пауза" hidden>
+              <svg class="portfolio-player__overlay-glyph-pause" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 6h4v12H8V6zm10 0h4v12h-4V6z"/></svg>
+            </button>
+          </div>
         </div>
       </div>
       <p class="note">Свой ролик: <code>&lt;source src=&quot;moj-rolik.mp4&quot; type=&quot;video/mp4&quot;&gt;</code>. Дублируйте блоки <code>.card</code> для новых работ.</p>
@@ -1021,7 +1805,7 @@
       <span class="site-footer__mix">Mix &amp; Recording</span>
       <span class="site-footer__production">Music production</span>
       <div class="site-footer__revision" role="note">
-        <span class="site-footer__revision-line">приложение <strong>portfolio-showcase</strong>&nbsp;<span class="site-footer__rev-ver" title="Перед деплоем измените версию здесь в HTML">v1.3.0</span></span>
+        <span class="site-footer__revision-line">приложение <strong>portfolio-showcase</strong>&nbsp;<span class="site-footer__rev-ver" title="Перед деплоем измените версию здесь в HTML">v2.3.0</span></span>
         <span class="site-footer__revision-div" aria-hidden="true">/</span>
         <span class="site-footer__revision-line">метка времени документа <time id="portfolio-html-stamp"></time></span>
       </div>
@@ -1030,15 +1814,19 @@
 
   <template id="portfolio-player-bar-tmpl">
     <div class="portfolio-player__bar">
-      <button type="button" class="portfolio-player__toggle" aria-label="Воспроизвести">
-        <svg class="portfolio-player__ic portfolio-player__ic--play" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 6.82v10.36c0 .79.87 1.27 1.54.84l8.14-5.18a1 1 0 000-1.69L9.54 5.98A.998.998 0 008 6.82z"/></svg>
-        <svg class="portfolio-player__ic portfolio-player__ic--pause" hidden viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 19h4V5H8v14zm6-14v14h4V5h-4z"/></svg>
-      </button>
+      <div class="portfolio-player__transport" role="group" aria-label="Воспроизведение">
+        <button type="button" class="portfolio-player__transport-btn portfolio-player__transport-btn--play" aria-label="Воспроизвести">
+          <svg class="portfolio-player__glyph portfolio-player__glyph--play" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 6.82v10.36c0 .79.87 1.27 1.54.84l8.14-5.18a1 1 0 000-1.69L9.54 5.98A.998.998 0 008 6.82z"/></svg>
+        </button>
+        <button type="button" class="portfolio-player__transport-btn portfolio-player__transport-btn--pause" aria-label="Пауза" hidden>
+          <svg class="portfolio-player__glyph" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 6h4v12H8V6zM14 6h4v12h-4V6z"/></svg>
+        </button>
+      </div>
       <div class="portfolio-player__seek" data-hit tabindex="0" role="slider" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Позиция на дорожке">
         <span class="portfolio-player__rail-line" aria-hidden="true"></span>
         <span class="portfolio-player__progress-line" aria-hidden="true"></span>
         <button type="button" class="portfolio-player__thumb" aria-label="Лампа — перемотка">
-          <img src="portfolio-lamp-knob.svg" alt="" decoding="async" />
+          <img src="portfolio-logo-symbol.png" alt="" width="833" height="1016" decoding="async">
         </button>
       </div>
       <span class="portfolio-player__time">0:00 / —:—</span>
@@ -1063,13 +1851,13 @@
 
         var bar = box.querySelector(".portfolio-player__bar");
         if (!bar) return;
-        var btn = bar.querySelector(".portfolio-player__toggle");
-        var playIc = bar.querySelector(".portfolio-player__ic--play");
-        var pauseIc = bar.querySelector(".portfolio-player__ic--pause");
+        var btPlay = bar.querySelector(".portfolio-player__transport-btn--play");
+        var btPause = bar.querySelector(".portfolio-player__transport-btn--pause");
         var seek = bar.querySelector("[data-hit]");
         var thumb = bar.querySelector(".portfolio-player__thumb");
         var timeEl = bar.querySelector(".portfolio-player__time");
-        var overlay = box.querySelector(".portfolio-player__overlay-play");
+        var overlayPlay = box.querySelector(".portfolio-player__overlay-face--play");
+        var overlayPause = box.querySelector(".portfolio-player__overlay-face--pause");
 
         function setPct(pct) {
           pct = Math.max(0, Math.min(1, pct));
@@ -1099,9 +1887,10 @@
 
         function syncToggleUi() {
           var paused = media.paused;
-          btn.setAttribute("aria-label", paused ? "Воспроизвести" : "Пауза");
-          playIc.hidden = !paused;
-          pauseIc.hidden = paused;
+          if (btPlay) btPlay.hidden = !paused;
+          if (btPause) btPause.hidden = paused;
+          if (overlayPlay) overlayPlay.hidden = !paused;
+          if (overlayPause) overlayPause.hidden = paused;
           box.classList.toggle("is-playing", !paused);
         }
 
@@ -1113,8 +1902,10 @@
           }
         }
 
-        btn.addEventListener("click", togglePlay);
-        if (overlay) overlay.addEventListener("click", togglePlay);
+        if (btPlay) btPlay.addEventListener("click", togglePlay);
+        if (btPause) btPause.addEventListener("click", togglePlay);
+        if (overlayPlay) overlayPlay.addEventListener("click", togglePlay);
+        if (overlayPause) overlayPause.addEventListener("click", togglePlay);
 
         media.addEventListener("timeupdate", refreshTimeUi);
         media.addEventListener("durationchange", refreshTimeUi);
@@ -1181,10 +1972,323 @@
         document.querySelectorAll("[data-player]").forEach(wirePortfolioPlayer);
       }
 
-      if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", initPortfolioPlayers);
-      } else {
+      function clampBlend(x, lo, hi) {
+        if (x < lo) return lo;
+        if (x > hi) return hi;
+        return x;
+      }
+
+      function initStemFusionPairs() {
+        document.querySelectorAll("article.card--stem-audio").forEach(
+          setupStemFusionPair
+        );
+      }
+
+      function setupStemFusionPair(card) {
+        var pairRoot = card.querySelector(".compare-pair");
+        if (!pairRoot || card.dataset.stemFusionWired === "1") return;
+        var demoA = pairRoot.querySelector(".compare-col--demo audio");
+        var masterA = pairRoot.querySelector(".compare-col--master audio");
+        if (!demoA || !masterA) return;
+        card.dataset.stemFusionWired = "1";
+
+        var box = document.createElement("div");
+        box.className = "compare-fusion";
+        box.innerHTML =
+          '<p class="compare-fusion__hint">Оба файла синхронны по времени: слева слышен демо-микс, справа — мастер. Двигайте ползунок — звук перетекается между дорожками (на части браузеров мобильного Safari громкость может игнорироваться системой; тогда смесь точнее на десктопе).</p>' +
+          '<div class="compare-fusion__row">' +
+          '<span class="compare-fusion__end compare-fusion__end--demo">Демо</span>' +
+          '<label class="compare-fusion__mix-label">' +
+          '<input type="range" class="compare-fusion__range" min="0" max="100" value="0" />' +
+          "</label>" +
+          '<span class="compare-fusion__end compare-fusion__end--master">Мастер</span>' +
+          "</div>" +
+          '<div class="compare-fusion__controls">' +
+          '<button type="button" class="compare-fusion__auto">Авто-перетекание 8 сек</button>' +
+          "</div>";
+        pairRoot.insertAdjacentElement("afterend", box);
+
+        var range = box.querySelector(".compare-fusion__range");
+        var autoBt = box.querySelector(".compare-fusion__auto");
+        range.setAttribute(
+          "aria-label",
+          "Плавное смещение: демо слева, мастер справа"
+        );
+
+        var autoRaf = null;
+        var autoStartTs = 0;
+        var autoFromBlend = 0;
+        var autoMs = 8000;
+        var mutePair = false;
+
+        function fusionBothVisible() {
+          return card.getAttribute("data-compare-view") === "both";
+        }
+
+        function cancelAutoTween() {
+          if (autoRaf) cancelAnimationFrame(autoRaf);
+          autoRaf = null;
+          autoBt.disabled = false;
+          autoBt.textContent = "Авто-перетекание 8 сек";
+        }
+
+        function resetVolumesStereo() {
+          cancelAutoTween();
+          demoA.volume = 1;
+          masterA.volume = 1;
+        }
+
+        function mirrorTime(src, tgt) {
+          var t = src.currentTime;
+          if (!isFinite(t)) return;
+          if (
+            tgt &&
+            isFinite(tgt.currentTime) &&
+            Math.abs(tgt.currentTime - t) > 0.068
+          ) {
+            tgt.currentTime = t;
+          }
+        }
+
+        function applyFusionBlend(wMaster) {
+          wMaster = clampBlend(wMaster, 0, 1);
+          if (wMaster <= 0.004) {
+            demoA.volume = 1;
+            masterA.volume = 0;
+            return;
+          }
+          if (wMaster >= 0.996) {
+            demoA.volume = 0;
+            masterA.volume = 1;
+            return;
+          }
+          var ang = wMaster * (Math.PI * 0.5);
+          var dGain = Math.cos(ang);
+          var mGain = Math.sin(ang);
+          var floor = 0.035;
+          demoA.volume = Math.max(floor * 0.3, dGain);
+          masterA.volume = Math.max(floor * 0.3, mGain);
+        }
+
+        function readSliderBlend() {
+          var v = parseInt(range.value, 10);
+          if (!isFinite(v)) v = 0;
+          return clampBlend(v / 100, 0, 1);
+        }
+
+        function applySliderVolumes() {
+          applyFusionBlend(readSliderBlend());
+        }
+
+        range.addEventListener("input", function () {
+          cancelAutoTween();
+          if (!fusionBothVisible()) return;
+          applySliderVolumes();
+        });
+
+        range.addEventListener("mousedown", cancelAutoTween);
+        range.addEventListener("touchstart", cancelAutoTween, { passive: true });
+
+        demoA.addEventListener("timeupdate", function () {
+          if (!fusionBothVisible()) return;
+          mirrorTime(demoA, masterA);
+        });
+
+        demoA.addEventListener("seeked", function () {
+          if (!fusionBothVisible()) return;
+          if (mutePair) return;
+          mutePair = true;
+          try {
+            mirrorTime(demoA, masterA);
+          } finally {
+            mutePair = false;
+          }
+        });
+
+        demoA.addEventListener("play", function () {
+          if (!fusionBothVisible()) return;
+          if (mutePair) return;
+          mutePair = true;
+          try {
+            mirrorTime(demoA, masterA);
+            masterA.play().catch(function () {});
+          } finally {
+            mutePair = false;
+          }
+          applySliderVolumes();
+        });
+
+        demoA.addEventListener("pause", function () {
+          if (!fusionBothVisible()) return;
+          if (mutePair) return;
+          mutePair = true;
+          try {
+            masterA.pause();
+          } finally {
+            mutePair = false;
+          }
+        });
+
+        masterA.addEventListener("seeked", function () {
+          if (!fusionBothVisible()) return;
+          if (mutePair) return;
+          mutePair = true;
+          try {
+            mirrorTime(masterA, demoA);
+          } finally {
+            mutePair = false;
+          }
+        });
+
+        masterA.addEventListener("play", function () {
+          if (!fusionBothVisible()) return;
+          if (mutePair) return;
+          mutePair = true;
+          try {
+            mirrorTime(masterA, demoA);
+            if (demoA.paused) {
+              demoA.play().catch(function () {});
+            }
+          } finally {
+            mutePair = false;
+          }
+          applySliderVolumes();
+        });
+
+        masterA.addEventListener("pause", function () {
+          if (!fusionBothVisible()) return;
+          if (mutePair) return;
+          mutePair = true;
+          try {
+            demoA.pause();
+          } finally {
+            mutePair = false;
+          }
+        });
+
+        autoBt.addEventListener("click", function () {
+          if (!fusionBothVisible()) return;
+          cancelAutoTween();
+          autoBt.disabled = true;
+          autoBt.textContent = "Перетекание…";
+          autoFromBlend = readSliderBlend();
+          autoStartTs = performance.now();
+          mutePair = true;
+          try {
+            mirrorTime(demoA, masterA);
+            demoA.play().catch(function () {});
+            masterA.play().catch(function () {});
+          } finally {
+            mutePair = false;
+          }
+          applySliderVolumes();
+
+          function tick(now) {
+            if (!fusionBothVisible()) {
+              cancelAutoTween();
+              applySliderVolumes();
+              return;
+            }
+            var p = (now - autoStartTs) / autoMs;
+            if (!isFinite(p) || p >= 1) {
+              range.value = "100";
+              applyFusionBlend(1);
+              cancelAutoTween();
+              applySliderVolumes();
+              return;
+            }
+            var e = p * p * (3 - 2 * p);
+            var w = autoFromBlend + (1 - autoFromBlend) * e;
+            range.value = String(Math.round(clampBlend(w * 100, 0, 100)));
+            applyFusionBlend(w);
+            autoRaf = requestAnimationFrame(tick);
+          }
+          autoRaf = requestAnimationFrame(tick);
+        });
+
+        function syncFusionStrip() {
+          if (!fusionBothVisible()) {
+            box.hidden = true;
+            resetVolumesStereo();
+            return;
+          }
+          box.hidden = false;
+          applySliderVolumes();
+        }
+
+        var mo = new MutationObserver(syncFusionStrip);
+        mo.observe(card, {
+          attributes: true,
+          attributeFilter: ["data-compare-view"]
+        });
+
+        syncFusionStrip();
+      }
+
+      document.addEventListener("click", function (evt) {
+        var jp = evt.target.closest("[data-genre-scroll]");
+        if (jp && jp.closest(".genre-playback-bar")) {
+          evt.preventDefault();
+          var sx = jp.closest(".portfolio-genre");
+          var gid = sx ? sx.getAttribute("data-genre") : "";
+          var inst = jp.getAttribute("data-genre-scroll");
+          if (!gid || !inst) return;
+          var tgt = document.getElementById(gid + "-" + inst);
+          if (!tgt || !tgt.scrollIntoView) return;
+          var reduceMotion = false;
+          try {
+            reduceMotion =
+              window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+          } catch (errRed) {}
+          tgt.scrollIntoView({
+            behavior: reduceMotion ? "auto" : "smooth",
+            block: "start"
+          });
+          return;
+        }
+
+        var bt = evt.target.closest(
+          "[data-genre-scope='modes'][data-compare-show]"
+        );
+        if (!bt || !bt.closest(".genre-playback-bar")) return;
+        var section = bt.closest(".portfolio-genre");
+        if (!section) return;
+        var mode = bt.getAttribute("data-compare-show");
+        if (mode !== "both" && mode !== "demo" && mode !== "master") return;
+        evt.preventDefault();
+
+        section.querySelectorAll(".card--stem-audio").forEach(function (card) {
+          card.setAttribute("data-compare-view", mode);
+          if (mode === "demo") {
+            card.querySelectorAll(".compare-col--master audio").forEach(function (a) {
+              a.pause();
+            });
+          } else if (mode === "master") {
+            card.querySelectorAll(".compare-col--demo audio").forEach(function (a) {
+              a.pause();
+            });
+          }
+        });
+
+        var row = section.querySelector(".genre-playback-bar__modes");
+        if (row) {
+          row.querySelectorAll("[data-genre-scope='modes']").forEach(function (btn) {
+            var on = btn.getAttribute("data-compare-show") === mode;
+            btn.classList.toggle("is-active", on);
+            btn.setAttribute("aria-pressed", on ? "true" : "false");
+          });
+        }
+      });
+
+      function bootstrapPortfolioMedia() {
         initPortfolioPlayers();
+        initStemFusionPairs();
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", bootstrapPortfolioMedia);
+      } else {
+        bootstrapPortfolioMedia();
       }
     })();
   </script>

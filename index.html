@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<!-- v121: сценарии — блок/папка съёмки + фильтр по блоку, список группируется по блоку -->
+<!-- v173: панель ассистента — новый план; + накопленные фиксы summary/gestures, intro-линия, лампа -->
 <html lang="ru" style="--logo-x: 0px; --logo-y: 0px; --logo-scale: 2.00; --top-logo-blur: 0px;">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Sam Bruev">
+  <meta name="apple-mobile-web-app-title" content="Sam Scenes">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Сценарий видео / Sam Bruev (v163)</title>
+  <title>Sam Scenes (v173)</title>
   <!-- До отрисовки тела: восстановить скролл после reload без «прыжка» картинки/фона -->
   <script>
     (function () {
@@ -81,7 +81,7 @@
       --assistant-drawer-w: min(50vw, 380px);
     }
 
-    /* Фон: слой ::before position:fixed — одинаково на iPhone при скролле. Картинка lamp-corpus-bg.png — рядом с файлом. Низ и края дожимаем градиентами под текст */
+    /* Фон: body::before fixed — одинаково на iPhone при скролле; слой лампы — data URI + градиенты (см. также top-lamp-bg у логотипа). */
     html {
       background: #000;
       height: 100%;
@@ -223,17 +223,17 @@
         rgba(28, 22, 14, 0.34),
         rgba(10, 8, 6, 0.44)
       );
-      backdrop-filter: blur(22px) saturate(118%);
-      -webkit-backdrop-filter: blur(22px) saturate(118%);
+      backdrop-filter: blur(22px) saturate(100%);
+      -webkit-backdrop-filter: blur(22px) saturate(100%);
       border-right: 1px solid rgba(255, 228, 160, 0.28);
       box-shadow:
         10px 0 48px rgba(0, 0, 0, 0.2),
         inset 0 1px 0 rgba(255, 248, 230, 0.07);
       transform: translateX(-102%);
       transition: transform 0.38s cubic-bezier(0.25, 0.85, 0.32, 1);
-      overflow-x: hidden;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
       color: var(--text);
       pointer-events: auto;
       visibility: hidden;
@@ -331,10 +331,6 @@
     }
 
     .assistant-drawer-head {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 10px;
       margin-bottom: 10px;
     }
 
@@ -348,29 +344,37 @@
       margin: 0;
     }
 
-    /* Закрыть: стрелка ‹ как у полоски открытия (›), без крестика */
+    /*
+      Закрыть: та же узкая вертикальная полоска, что .assistant-open-strip (› слева),
+      зеркально у правого края панели — ‹, те же размеры и шрифт стрелки.
+    */
     .assistant-drawer-dismiss-chevron {
-      flex-shrink: 0;
-      position: relative;
-      width: 2.6rem;
-      min-width: 2.35rem;
-      height: 2.85rem;
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 6;
+      width: 8px;
+      min-width: 7px;
+      height: min(168px, 46vh);
+      min-height: 72px;
+      margin: 0;
       padding: 0;
-      margin: -8px -10px -4px 0;
       border: none;
-      border-radius: 12px 0 0 12px;
+      border-radius: 9px 0 0 9px;
       cursor: pointer;
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
       background: linear-gradient(
         90deg,
-        rgba(24, 18, 8, 0.42) 0%,
-        rgba(212, 175, 55, 0.38) 52%,
-        rgba(255, 236, 176, 0.52) 100%
+        rgba(212, 175, 55, 0.26) 0%,
+        rgba(212, 175, 55, 0.14) 55%,
+        rgba(12, 10, 8, 0.72) 100%
       );
       box-shadow:
-        inset -2px 0 8px rgba(255, 248, 220, 0.35),
-        2px 0 14px rgba(212, 175, 55, 0.22);
+        inset 1px 0 5px rgba(212, 175, 55, 0.12),
+        -1px 0 8px rgba(0, 0, 0, 0.35);
+      transition: opacity 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
     }
 
     .assistant-drawer-dismiss-chevron::before {
@@ -379,29 +383,37 @@
       left: 46%;
       top: 50%;
       transform: translate(-50%, -50%);
-      font-size: 18px;
+      font-size: 15px;
       font-weight: 500;
       line-height: 1;
-      color: rgba(255, 245, 210, 0.88);
+      color: rgba(212, 175, 55, 0.72);
       pointer-events: none;
       letter-spacing: -0.08em;
-      text-shadow: 0 0 10px rgba(255, 220, 140, 0.65);
+      text-shadow: 0 0 6px rgba(212, 175, 55, 0.28);
     }
 
     .assistant-drawer-dismiss-chevron:active {
       background: linear-gradient(
         90deg,
-        rgba(18, 14, 6, 0.52) 0%,
-        rgba(212, 175, 55, 0.5) 52%,
-        rgba(255, 245, 200, 0.62) 100%
+        rgba(212, 175, 55, 0.34) 0%,
+        rgba(212, 175, 55, 0.2) 55%,
+        rgba(10, 8, 6, 0.82) 100%
       );
       box-shadow:
-        inset -2px 0 10px rgba(255, 252, 235, 0.45),
-        2px 0 18px rgba(212, 175, 55, 0.35);
+        inset 1px 0 6px rgba(212, 175, 55, 0.18),
+        -1px 0 10px rgba(0, 0, 0, 0.4);
     }
 
     .assistant-drawer-dismiss-chevron:active::before {
-      color: rgba(255, 252, 235, 0.98);
+      color: rgba(230, 205, 140, 0.88);
+    }
+
+    .assistant-drawer-scroll {
+      flex: 1;
+      min-height: 0;
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     .assistant-drawer-intro {
@@ -409,6 +421,112 @@
       line-height: 1.35;
       color: var(--muted);
       margin: 0 0 14px;
+    }
+
+    .assistant-drawer-tools {
+      margin: 0 0 18px;
+      padding: 12px 12px 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(212, 175, 55, 0.28);
+      background: rgba(12, 10, 8, 0.72);
+      box-shadow: inset 0 1px 0 rgba(255, 248, 230, 0.06);
+    }
+
+    .assistant-drawer-tools-label {
+      margin: 0 0 10px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--cream);
+    }
+
+    .assistant-drawer-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 10px;
+      font-size: 11px;
+      color: var(--label);
+    }
+
+    .assistant-drawer-field:last-of-type {
+      margin-bottom: 12px;
+    }
+
+    .assistant-drawer-field span:first-child {
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .assistant-drawer-field--row {
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: 10px 12px;
+    }
+
+    .assistant-drawer-field--row .assistant-drawer-field--grow {
+      flex: 1 1 9rem;
+      min-width: 0;
+      margin-bottom: 0;
+    }
+
+    .assistant-drawer-field--row .assistant-drawer-field--count {
+      flex: 0 0 6.5rem;
+      margin-bottom: 0;
+    }
+
+    .assistant-drawer-field--row .assistant-drawer-input--short {
+      max-width: 7.5rem;
+    }
+
+    .assistant-drawer-input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 228, 160, 0.22);
+      background: #000;
+      color: var(--text);
+      font: inherit;
+      font-size: 15px;
+      line-height: 1.3;
+      color-scheme: dark;
+    }
+
+    .assistant-drawer-input::placeholder {
+      color: rgba(255, 244, 220, 0.35);
+    }
+
+    .btn-assistant-create {
+      display: block;
+      width: 100%;
+      margin: 0;
+      padding: 11px 14px;
+      border-radius: 12px;
+      border: 2px solid rgba(255, 214, 120, 0.75);
+      background: linear-gradient(180deg, rgba(212, 175, 55, 0.32), rgba(60, 48, 20, 0.5));
+      color: #fff8e8;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: rgba(212, 175, 55, 0.3);
+    }
+
+    .btn-assistant-create:active {
+      filter: brightness(1.05);
+    }
+
+    .assistant-drawer-tools-hint {
+      margin: 10px 0 0;
+      font-size: 11px;
+      line-height: 1.4;
+      color: var(--muted);
     }
 
     .assistant-drawer-list {
@@ -1001,13 +1119,13 @@
     .scene-stack {
       display: flex;
       flex-direction: column;
-      gap: 22px;
+      gap: 16px;
       margin-top: 40px;
     }
 
     .scene-stack-outro {
       margin-top: 38px;
-      gap: 22px;
+      gap: 16px;
     }
 
     .scene-main.scene-role-intro {
@@ -1033,38 +1151,29 @@
         inset 0 1px 0 rgba(255, 224, 160, 0.12);
     }
 
-    .scene-main.scene-role-intro::after {
-      content: "";
-      position: absolute;
-      left: 8px;
-      right: 8px;
-      bottom: 0;
-      height: 2px;
-      border-radius: 999px;
-      background: linear-gradient(
-        90deg,
-        rgba(255, 200, 120, 0.18) 0%,
-        rgba(212, 155, 48, 0.9) 50%,
-        rgba(255, 200, 120, 0.18) 100%
-      );
-      box-shadow: 0 0 18px rgba(212, 165, 55, 0.48);
-    }
-
+    /*
+      Нижняя полоса света: на всю ширину padding-box (как внутренняя кромка под box-shadow 1px),
+      нижнее скругление = радиус карточки минус горизонтальный padding (.scene 22px − 12px → 10px),
+      чтобы линия стыковалась с обводкой по углам без «ступеньки».
+    */
+    .scene-main.scene-role-intro::after,
     .scene-main.scene-role-outro::after {
       content: "";
       position: absolute;
-      left: 8px;
-      right: 8px;
+      left: 0;
+      right: 0;
       bottom: 0;
       height: 2px;
-      border-radius: 999px;
+      border-radius: 0 0 calc(22px - 12px) calc(22px - 12px);
+      pointer-events: none;
+      z-index: 2;
       background: linear-gradient(
         90deg,
-        rgba(255, 200, 120, 0.18) 0%,
-        rgba(212, 155, 48, 0.9) 50%,
-        rgba(255, 200, 120, 0.18) 100%
+        rgba(255, 200, 120, 0.22) 0%,
+        rgba(212, 155, 48, 0.92) 50%,
+        rgba(255, 200, 120, 0.22) 100%
       );
-      box-shadow: 0 0 18px rgba(212, 165, 55, 0.48);
+      box-shadow: 0 0 16px rgba(212, 165, 55, 0.45);
     }
 
     .scene-main[data-scene-role="intro"] .scene-remove,
@@ -1183,14 +1292,36 @@
     .scene {
       border: none;
       border-radius: 22px;
-      padding: 14px 14px 16px;
+      padding: 10px 12px 12px;
       background: #000000;
       box-shadow: 0 10px 26px rgba(0, 0, 0, 0.45);
       overflow: visible;
       position: relative;
     }
 
-    /* Снято: без отдельного тёмного слоя (::before/::after) — иначе на стыках со скруглением виден «лишний» прямоугольник */
+    /* Верхняя «обводка»: заметна у закруглений, к середине растворяется */
+    .scene::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 2px;
+      border-radius: 22px 22px 0 0;
+      pointer-events: none;
+      z-index: 3;
+      background: linear-gradient(
+        90deg,
+        rgba(255, 244, 220, 0.58) 0%,
+        rgba(212, 175, 55, 0.38) 18%,
+        rgba(212, 175, 55, 0.12) 38%,
+        transparent 50%,
+        rgba(212, 175, 55, 0.12) 62%,
+        rgba(212, 175, 55, 0.38) 82%,
+        rgba(255, 244, 220, 0.58) 100%
+      );
+    }
+
     .scene.scene-main.scene-shot-complete {
       filter: brightness(0.42);
       transition: filter 0.22s ease;
@@ -1237,7 +1368,7 @@
     .scene-stack .scene-time-wrap {
       font-size: 26px;
       letter-spacing: 0.02em;
-      padding: 4px 16px 10px;
+      padding: 2px 14px 6px;
       box-sizing: border-box;
       border: none !important;
       border-radius: 0;
@@ -1275,7 +1406,7 @@
       font-weight: 700;
       flex-shrink: 0;
       color: var(--anna-gold);
-      font-size: clamp(40px, 12vw, 58px);
+      font-size: clamp(34px, 9.5vw, 52px);
       letter-spacing: 0.03em;
       white-space: nowrap;
       line-height: 1.05;
@@ -1291,15 +1422,26 @@
       text-transform: uppercase;
       letter-spacing: 0.07em;
       font-weight: 800;
-      font-size: clamp(42px, 12.8vw, 62px);
+      font-size: clamp(34px, 9.5vw, 52px);
     }
+    .scene-main[data-scene-role="intro"] .scene-time-wrap .time-leading {
+      color: var(--anna-gold-bright);
+      text-shadow:
+        0 0 18px rgba(212, 175, 55, 0.42),
+        0 0 28px rgba(180, 130, 50, 0.22),
+        0 2px 3px rgba(12, 8, 4, 0.85);
+    }
+
     .scene-main[data-scene-role="intro"] .scene-time-wrap .time-leading,
     .scene-main[data-scene-role="outro"] .scene-time-wrap .time-leading {
-      font-size: clamp(42px, 12.8vw, 62px);
+      font-size: clamp(34px, 9.5vw, 52px);
       font-weight: 800;
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      /* Цвет слова INTRO/OUTRO — в разметке (красный Intro и т.д.); база как у шапки сцены */
+    }
+
+    .scene-main[data-scene-role="outro"] .scene-time-wrap .time-leading {
+      /* Цвет OUTRO — золото палитры */
       color: var(--anna-gold);
       text-shadow:
         0 0 20px rgba(212, 175, 55, 0.35),
@@ -1332,8 +1474,8 @@
     }
 
     .scene-time-wrap .time-heading {
-      --scene-play-size: 2.45rem;
-      --scene-play-corner-pad: 10px;
+      --scene-play-size: 2.25rem;
+      --scene-play-corner-pad: 8px;
       display: grid;
       grid-template-columns: minmax(0, 1fr);
       grid-template-rows: auto;
@@ -1345,8 +1487,9 @@
       grid-column: 1 / -1;
       position: relative;
       box-sizing: border-box;
+      /* Было min(5.5rem, 20vw) — слишком высоко; оставляем запас под ▶ и заголовок */
       min-height: calc(
-        var(--scene-play-corner-pad) * 2 + max(var(--scene-play-size), min(5.5rem, 20vw))
+        var(--scene-play-corner-pad) * 2 + max(var(--scene-play-size), min(2.85rem, 11vw))
       );
     }
 
@@ -1432,7 +1575,7 @@
       flex: 1 1 auto;
       min-width: 0;
       width: 100%;
-      margin-top: -26px !important;
+      margin-top: -18px !important;
       overflow-x: auto;
       overflow-y: hidden;
       -webkit-overflow-scrolling: touch;
@@ -1470,8 +1613,8 @@
       font-weight: 600;
       font-size: 22px;
       line-height: 1.15;
-      padding: 6px 36px 6px 12px;
-      min-height: 56px;
+      padding: 4px 32px 4px 10px;
+      min-height: 48px;
       min-width: 5.5rem;
       flex: 0 0 auto;
       max-width: none;
@@ -1501,12 +1644,12 @@
     .scene-time-ios {
       display: none;
       align-items: center;
-      gap: 12px 20px;
+      gap: 8px 16px;
       justify-content: center;
       width: 100%;
       max-width: 100%;
       margin-inline: auto;
-      padding: 8px 4px 4px;
+      padding: 4px 4px 2px;
       box-sizing: border-box;
       grid-column: 1 / -1;
       flex-wrap: wrap;
@@ -1518,9 +1661,9 @@
       border-radius: 16px;
       color: #f1e3be;
       font: inherit;
-      font-size: 26px;
+      font-size: 24px;
       font-weight: 700;
-      padding: 10px 18px;
+      padding: 7px 14px;
       color-scheme: dark;
       min-width: min(17rem, 76vw);
       text-align: center;
@@ -1538,19 +1681,19 @@
       display: none;
       align-items: center;
       justify-content: center;
-      gap: 12px 20px;
+      gap: 8px 16px;
       flex-wrap: wrap;
       width: 100%;
       max-width: 100%;
       margin: 0;
-      padding: 10px 22px 12px;
+      padding: 6px 18px 8px;
       box-sizing: border-box;
       border-radius: 0;
       border: none;
       background: transparent;
       color: #f1e3be;
       font: inherit;
-      font-size: 27px;
+      font-size: 24px;
       font-weight: 700;
       font-variant-numeric: tabular-nums;
       cursor: pointer;
@@ -1790,8 +1933,8 @@
       display: flex;
       position: relative;
       z-index: 20;
-      margin-top: -26px;
-      padding-top: 2px;
+      margin-top: -18px;
+      padding-top: 0;
     }
 
     .line { margin-top: 8px; color: var(--label); }
@@ -2244,7 +2387,7 @@
       margin-top: 0.2em;
     }
 
-    /* Свайп вниз от верха: анимация символа лампы (видео) + вспышка и reload */
+    /* Свайп вниз от верха: символ лампы (SVG) + вспышка и reload */
     .pull-reload-hint {
       position: fixed;
       left: 50%;
@@ -2261,7 +2404,10 @@
       overflow: visible;
       /* Одна формула transform: без inline-анимации translate — иначе дёргается */
       transform: translateY(calc(-16px + var(--pull-dot-y, 0px))) scale(var(--pull-dot-s, 0.85));
-      transition: opacity 0.22s ease, transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), filter 0.25s ease;
+      transition:
+        opacity 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.48s cubic-bezier(0.22, 1, 0.36, 1),
+        filter 0.38s ease;
     }
 
     .pull-reload-hint-video {
@@ -2271,23 +2417,61 @@
       object-fit: contain;
       pointer-events: none;
       vertical-align: middle;
-      filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.38));
+      /* Небольшой боковой «rim light», не только ровное свечение по кругу */
+      filter:
+        drop-shadow(-3px 1px 5px rgba(212, 175, 55, 0.42))
+        drop-shadow(2px 2px 4px rgba(255, 236, 190, 0.1))
+        drop-shadow(0 0 6px rgba(212, 175, 55, 0.22));
     }
 
     .pull-reload-hint.pull-reload-hint--dragging {
-      transition: opacity 0.14s ease-out, filter 0.2s ease;
+      will-change: opacity, transform;
+      transition:
+        opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+        transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+        filter 0.35s ease;
     }
 
     .pull-reload-hint.pull-reload-hint--ready {
       animation: pullReloadLampPulse 1.05s ease-in-out infinite alternate;
     }
 
-    @keyframes pullReloadLampPulse {
+    /* Пока тянем, но ещё не «готово» — мягкая пульсация */
+    .pull-reload-hint--dragging:not(.pull-reload-hint--ready) .pull-reload-hint-video {
+      animation: pullReloadLampDrag 1.2s ease-in-out infinite alternate;
+    }
+
+    @keyframes pullReloadLampDrag {
       from {
-        filter: brightness(1) drop-shadow(0 0 5px rgba(212, 175, 55, 0.38));
+        filter:
+          brightness(0.96)
+          drop-shadow(-4px 0 5px rgba(212, 175, 55, 0.28))
+          drop-shadow(2px 2px 5px rgba(255, 230, 170, 0.08))
+          drop-shadow(0 0 4px rgba(212, 175, 55, 0.2));
       }
       to {
-        filter: brightness(1.18) drop-shadow(0 0 10px rgba(212, 175, 55, 0.48));
+        filter:
+          brightness(1.06)
+          drop-shadow(-6px 1px 11px rgba(212, 175, 55, 0.42))
+          drop-shadow(3px 3px 7px rgba(255, 238, 200, 0.14))
+          drop-shadow(0 0 9px rgba(212, 175, 55, 0.34));
+      }
+    }
+
+    @keyframes pullReloadLampPulse {
+      from {
+        filter:
+          brightness(1)
+          drop-shadow(-3px 1px 6px rgba(212, 175, 55, 0.34))
+          drop-shadow(2px 2px 5px rgba(255, 236, 190, 0.1))
+          drop-shadow(0 0 6px rgba(212, 175, 55, 0.28));
+      }
+      to {
+        filter:
+          brightness(1.14)
+          drop-shadow(-7px 2px 14px rgba(212, 175, 55, 0.48))
+          drop-shadow(4px 3px 10px rgba(255, 240, 210, 0.16))
+          drop-shadow(0 0 12px rgba(212, 175, 55, 0.38));
       }
     }
 
@@ -2318,24 +2502,70 @@
       height: 52px;
       margin-top: -26px;
       border-radius: 5px;
-      background: linear-gradient(180deg, rgba(255, 236, 190, 0.36), rgba(212, 175, 55, 0.2) 45%, rgba(90, 74, 28, 0.26));
+      /* Полоска у края: свет с бока (ярче к внешнему правому краю) */
+      background: linear-gradient(
+        100deg,
+        rgba(55, 44, 20, 0.45) 0%,
+        rgba(212, 175, 55, 0.32) 42%,
+        rgba(255, 236, 190, 0.55) 78%,
+        rgba(255, 248, 230, 0.68) 100%
+      );
       opacity: 0;
       pointer-events: none;
       transform: translateX(10px) scaleY(0.88);
-      filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.2));
-      transition: opacity 0.2s ease, transform 0.24s cubic-bezier(0.22, 1, 0.36, 1), filter 0.24s ease;
+      box-shadow:
+        -4px 0 14px rgba(212, 175, 55, 0.16),
+        inset -2px 0 8px rgba(255, 236, 190, 0.22);
+      filter: drop-shadow(-6px 0 10px rgba(212, 175, 55, 0.16));
+      transition: opacity 0.2s ease, transform 0.24s cubic-bezier(0.22, 1, 0.36, 1), filter 0.24s ease, box-shadow 0.24s ease;
     }
 
     .pull-swipe-hint.pull-swipe-hint--show {
       opacity: 1;
+      animation: pullSwipeSideGlow 1.15s ease-in-out infinite alternate;
     }
 
-    .pull-swipe-hint.pull-swipe-hint--ready {
-      filter: drop-shadow(0 0 12px rgba(212, 175, 55, 0.3));
+    .pull-swipe-hint.pull-swipe-hint--ready.pull-swipe-hint--show {
+      animation-name: pullSwipeSideGlowReady;
+      animation-duration: 0.9s;
+    }
+
+    @keyframes pullSwipeSideGlow {
+      from {
+        filter: drop-shadow(-4px 0 8px rgba(212, 175, 55, 0.14)) drop-shadow(-10px 0 18px rgba(255, 220, 160, 0.06));
+        box-shadow:
+          -3px 0 12px rgba(212, 175, 55, 0.12),
+          inset -1px 0 6px rgba(255, 236, 190, 0.16);
+      }
+      to {
+        filter: drop-shadow(-7px 0 14px rgba(212, 175, 55, 0.26)) drop-shadow(-14px 0 22px rgba(255, 230, 190, 0.12));
+        box-shadow:
+          -6px 0 20px rgba(212, 175, 55, 0.22),
+          inset -2px 0 11px rgba(255, 248, 220, 0.32);
+      }
+    }
+
+    @keyframes pullSwipeSideGlowReady {
+      from {
+        filter: drop-shadow(-5px 0 12px rgba(212, 175, 55, 0.22)) drop-shadow(-12px 0 22px rgba(255, 224, 150, 0.1));
+        box-shadow:
+          -4px 0 16px rgba(212, 175, 55, 0.18),
+          inset -2px 0 9px rgba(255, 240, 215, 0.26);
+      }
+      to {
+        filter: drop-shadow(-9px 0 18px rgba(212, 175, 55, 0.34)) drop-shadow(-18px 0 28px rgba(255, 236, 200, 0.16));
+        box-shadow:
+          -8px 0 26px rgba(212, 175, 55, 0.28),
+          inset -3px 0 14px rgba(255, 250, 235, 0.38);
+      }
     }
 
     @media (prefers-reduced-motion: reduce) {
       .pull-reload-hint.pull-reload-hint--ready {
+        animation: none;
+      }
+
+      .pull-reload-hint--dragging:not(.pull-reload-hint--ready) .pull-reload-hint-video {
         animation: none;
       }
 
@@ -2346,6 +2576,7 @@
 
       .pull-swipe-hint {
         transition: none;
+        animation: none !important;
       }
     }
 
@@ -2641,8 +2872,13 @@
     }
 
     @media (max-width: 700px) {
+      /*
+        Отступ контента под фиксированную шапку должен быть не меньше её min-height,
+        иначе первый блок (.scenario-hub и др.) визуально оказывается под логотипом.
+        Совпадает с .top-logo { min-height: calc(30vh - env(safe-area-inset-top)) } + верхний паддинг шапки.
+      */
       :root {
-        --top-logo-space: 14vh;
+        --top-logo-space: 30vh;
       }
 
       .wrap {
@@ -2777,12 +3013,12 @@
       .meta { grid-template-columns: 1fr; }
 
       .scene-stack {
-        gap: 28px;
+        gap: 18px;
       }
 
       .scene-main.scene-role-intro {
-        margin-bottom: 50px;
-        padding-bottom: 28px;
+        margin-bottom: 32px;
+        padding-bottom: 16px;
       }
 
       .scene-stack .scene-time-wrap {
@@ -2806,36 +3042,36 @@
       }
     @media (max-width: 520px) {
       .scene-time-wrap .time-heading {
-        --scene-play-size: 2.2rem;
-        --scene-play-corner-pad: 8px;
+        --scene-play-size: 2.05rem;
+        --scene-play-corner-pad: 7px;
       }
 
       .scene-time-wrap .time-leading {
-        font-size: clamp(27px, 7.1vw, 36px);
+        font-size: clamp(24px, 6.5vw, 32px);
         letter-spacing: 0.02em;
-        padding: 0 calc(var(--scene-play-corner-pad) + var(--scene-play-size) + 12px);
+        padding: 0 calc(var(--scene-play-corner-pad) + var(--scene-play-size) + 10px);
       }
 
       .scene-main[data-scene-role="body"] .scene-time-wrap .time-leading {
-        font-size: clamp(28px, 7.4vw, 38px);
+        font-size: clamp(25px, 6.8vw, 34px);
         letter-spacing: 0.05em;
       }
 
       .scene-main[data-scene-role="intro"] .scene-time-wrap .time-leading,
       .scene-main[data-scene-role="outro"] .scene-time-wrap .time-leading {
-        font-size: clamp(28px, 7.4vw, 38px);
+        font-size: clamp(25px, 6.8vw, 34px);
         letter-spacing: 0.06em;
       }
 
       .scene-stack .scene-time-wrap {
         grid-template-columns: 1fr;
-        row-gap: 2px;
+        row-gap: 0;
         align-items: stretch;
-        padding: 8px 20px 14px;
+        padding: 4px 16px 8px;
       }
 
       .scene-time-wrap .time-pickers {
-        margin-top: -22px;
+        margin-top: -14px;
       }
 
       .scene-time-wrap .time-pickers {
@@ -2844,7 +3080,7 @@
       }
 
       .ios-wheel-time .scene-time-wrap .scene-time-ios {
-        margin-top: -22px;
+        margin-top: -14px;
       }
 
       .scene-time-ios {
@@ -2854,8 +3090,8 @@
       }
 
       .scene-time-ios input[type="time"] {
-        font-size: 26px;
-        min-height: 68px;
+        font-size: 24px;
+        min-height: 52px;
       }
 
       .scene-main > .scene-time-wrap {
@@ -2885,36 +3121,76 @@
     aria-modal="true"
     role="dialog"
     aria-labelledby="assistant-drawer-title">
-    <div class="assistant-drawer-inner">
-      <div class="assistant-drawer-head">
-        <h2 class="assistant-drawer-title" id="assistant-drawer-title">План съёмок</h2>
-        <button
-          type="button"
-          class="assistant-drawer-dismiss-chevron"
-          id="assistant-drawer-close"
-          aria-label="Закрыть меню"
-          title="Закрыть"></button>
+    <button
+      type="button"
+      class="assistant-drawer-dismiss-chevron"
+      id="assistant-drawer-close"
+      aria-label="Закрыть меню"
+      title="Закрыть"></button>
+    <div class="assistant-drawer-scroll">
+      <div class="assistant-drawer-inner">
+        <div class="assistant-drawer-head">
+          <h2 class="assistant-drawer-title" id="assistant-drawer-title">План съёмок</h2>
+        </div>
+        <p class="assistant-drawer-intro">
+          Создай план ниже (название, блок съёмки, дата) или выбери существующий — лист обновится как при смене сценария в настройках.
+        </p>
+        <div class="assistant-drawer-tools" id="assistant-drawer-tools" aria-label="Новый план съёмок">
+          <p class="assistant-drawer-tools-label">Новый план</p>
+          <label class="assistant-drawer-field">
+            <span>Название</span>
+            <input
+              type="text"
+              id="assistant-new-name"
+              class="assistant-drawer-input"
+              placeholder="например, Съёмка хука"
+              maxlength="200"
+              autocomplete="off" />
+          </label>
+          <label class="assistant-drawer-field">
+            <span>Блок съёмки</span>
+            <input
+              type="text"
+              id="assistant-new-block"
+              class="assistant-drawer-input"
+              placeholder="группа планов, напр. Май — студия, Блок A"
+              maxlength="120"
+              autocomplete="off" />
+          </label>
+          <div class="assistant-drawer-field assistant-drawer-field--row">
+            <label class="assistant-drawer-field assistant-drawer-field--grow">
+              <span>Дата</span>
+              <input type="date" id="assistant-new-date" class="assistant-drawer-input" />
+            </label>
+            <label class="assistant-drawer-field assistant-drawer-field--count">
+              <span>Роликов</span>
+              <input
+                type="number"
+                id="assistant-new-count"
+                class="assistant-drawer-input assistant-drawer-input--short"
+                min="1"
+                max="50"
+                placeholder="—" />
+            </label>
+          </div>
+          <button type="button" class="btn-assistant-create" id="btn-assistant-new-scenario">+ Создать сценарий</button>
+          <p class="assistant-drawer-tools-hint">
+            <strong>Новый блок</strong> — укажи неиспользованное имя в «Блок съёмки»; в настройках сценариев планы сгруппируются по этому полю.
+          </p>
+        </div>
+        <div id="assistant-drawer-list" class="assistant-drawer-list"></div>
       </div>
-      <p class="assistant-drawer-intro">
-        Сценарии по датам и блоку — нажми, чтобы открыть и перезагрузить лист как с выпадающего списка.
-      </p>
-      <div id="assistant-drawer-list" class="assistant-drawer-list"></div>
     </div>
   </aside>
   <div id="pull-reload-hint" class="pull-reload-hint" aria-hidden="true">
-    <video
+    <img
       class="pull-reload-hint-video"
-      muted
-      playsinline
-      disablepictureinpicture
-      loop
-      preload="metadata"
-      poster="lamp-icon.png"
+      src="media/symbol-lamp.svg"
+      alt=""
       width="80"
-      height="80">
-      <source src="media/pull-reload-lamp.webm" type="video/webm" />
-      <source src="media/pull-reload-lamp.mp4" type="video/mp4" />
-    </video>
+      height="80"
+      decoding="async"
+      draggable="false" />
   </div>
   <div id="pull-swipe-hint" class="pull-swipe-hint" aria-hidden="true"></div>
   <div id="pull-reload-flash" class="pull-reload-flash" aria-hidden="true"></div>
@@ -2996,7 +3272,7 @@
     </details>
 
     <div class="title-row">
-      <h1 class="page-title"><span class="title-lead">Сценарий видео</span><span class="title-subject" contenteditable="true" spellcheck="true">ПОРА ПИЛИТЬ КОНТЕНТ</span></h1>
+      <h1 class="page-title"><span class="title-lead">Sam Scenes</span><span class="title-subject" contenteditable="true" spellcheck="true">ПОРА ПИЛИТЬ КОНТЕНТ</span></h1>
     </div>
 
     <div class="card">
@@ -3974,8 +4250,8 @@
       }
 
       /** Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages). */
-      var APP_VERSION = 'v163';
-      var BUILD_TIME = '2026-05-03 14:10 MSK';
+      var APP_VERSION = 'v173';
+      var BUILD_TIME = '2026-05-03 05:49 MSK';
       var APP_BUILD = APP_VERSION + ' · ' + BUILD_TIME;
       var lastSceneTimeTriggerTouchAt = 0;
       /** Открывать диалог времени только при коротком тапе; при скролле палец смещается сильнее. */
@@ -3988,6 +4264,9 @@
       var LEGACY_SCENARIO_KEYS = ['abakan-scenarios-v1'];
       /** Авто-перезагрузка страницы: подтягивает свежую версию с сервера; данные сценариев — из localStorage этой же вкладки. */
       var AUTO_PAGE_RELOAD_MS = 3 * 60 * 1000;
+      /** Не перехватывать жесты pull/assist на интерактиве; иначе <summary> в <details> не раскрывается. */
+      var PULL_SKIP_INTERACTIVE =
+        'input, textarea, select, button, summary, a, .logo-bg, .logo-controls, [contenteditable="true"]';
 
       // Анти-кэш разметки: при новой сборке чистим только слой «интерфейса», но НЕ abakan-scenarios-v2 —
       // там все сценарии пользователя; иначе после каждого деплоя всё обнулялось.
@@ -4097,7 +4376,7 @@
         host.innerHTML = '';
         var img = document.createElement('img');
         img.className = 'logo-img-bottom';
-        img.alt = 'Sam Bruev — Mixing & Recording';
+        img.alt = 'Sam Scenes';
         img.decoding = 'async';
         img.loading = 'lazy';
         img.src = src;
@@ -4411,7 +4690,8 @@
         if (!items.length) {
           var empty = document.createElement('p');
           empty.className = 'assistant-drawer-empty';
-          empty.textContent = 'Пока нет сценариев — создай шаблон в «Настройки сценариев».';
+          empty.textContent =
+            'Пока нет сценариев — создайте план формой «Новый план» выше или в «Настройки сценариев».';
           host.appendChild(empty);
           return;
         }
@@ -4462,6 +4742,12 @@
       function openAssistantDrawer() {
         if (document.body.classList.contains('assistant-drawer-open')) return;
         renderAssistantDrawerList();
+        var ad = document.getElementById('assistant-new-date');
+        if (ad && !ad.value) {
+          try {
+            ad.value = new Date().toISOString().slice(0, 10);
+          } catch (eD) {}
+        }
         document.body.classList.add('assistant-drawer-open');
         document.body.setAttribute('data-assistant-drawer-open', '1');
         var d = document.getElementById('assistant-drawer');
@@ -4637,6 +4923,36 @@
             } catch (eCh) {}
           });
         }
+        var btnAssistNew = document.getElementById('btn-assistant-new-scenario');
+        if (btnAssistNew) {
+          var assistNewLastTouch = 0;
+          function runAssistantCreate() {
+            var n = document.getElementById('assistant-new-name');
+            var b = document.getElementById('assistant-new-block');
+            var d = document.getElementById('assistant-new-date');
+            var c = document.getElementById('assistant-new-count');
+            createNewScenarioTemplate({
+              name: n && n.value ? n.value : '',
+              shootBlock: b && b.value ? b.value : '',
+              date: d && d.value ? d.value : '',
+              targetCount: c && c.value !== '' && c.value != null ? c.value : ''
+            });
+          }
+          btnAssistNew.addEventListener('click', function (e) {
+            if (Date.now() - assistNewLastTouch < 450) return;
+            e.preventDefault();
+            runAssistantCreate();
+          });
+          btnAssistNew.addEventListener(
+            'touchend',
+            function (e) {
+              assistNewLastTouch = Date.now();
+              e.preventDefault();
+              runAssistantCreate();
+            },
+            { passive: false }
+          );
+        }
       }
 
       function persistToStorage(statusText) {
@@ -4693,6 +5009,69 @@
         } catch (e) {
           setStatus('Не удалось сохранить (браузер / память)', true);
         }
+      }
+
+      /**
+       * Новый сценарий-шаблон. opts: name, date, targetCount, shootBlock — если поле не передано, берётся из блока «Настройки сценариев».
+       */
+      function createNewScenarioTemplate(opts) {
+        opts = opts || {};
+        try {
+          persistToStorage('Сохранено');
+        } catch (e) {}
+        var bundle = readScenarioBundle() || { activeId: null, items: [] };
+        var baseName;
+        if (opts.name != null && String(opts.name).trim()) {
+          baseName = String(opts.name).trim();
+        } else if (scenarioName && scenarioName.value.trim()) {
+          baseName = scenarioName.value.trim();
+        } else {
+          baseName = 'Новый сценарий';
+        }
+        var date;
+        if (opts.date !== undefined) {
+          date = String(opts.date || '').slice(0, 10);
+        } else {
+          date = scenarioDate ? scenarioDate.value || '' : '';
+        }
+        var targetCount;
+        if (opts.targetCount !== undefined) {
+          targetCount =
+            opts.targetCount === null || opts.targetCount === ''
+              ? ''
+              : String(opts.targetCount);
+        } else {
+          targetCount = scenarioCount ? scenarioCount.value || '' : '';
+        }
+        var shootBlock;
+        if (opts.shootBlock !== undefined) {
+          shootBlock = String(opts.shootBlock || '').trim();
+        } else {
+          shootBlock =
+            scenarioShootBlock && scenarioShootBlock.value.trim ? scenarioShootBlock.value.trim() : '';
+        }
+        var id = uid();
+        var sc = {
+          id: id,
+          name: baseName + ' (шаблон)',
+          date: date,
+          targetCount: targetCount,
+          status: 'draft',
+          shootBlock: shootBlock,
+          html: buildEmptyScenarioHtml(wrap ? wrap.innerHTML : ''),
+          logo: { x: x.value, y: y.value, scale: s.value },
+          prep: getPrep(),
+          updatedAt: Date.now()
+        };
+        bundle.items.push(sc);
+        bundle.activeId = id;
+        if (!writeScenarioBundle(bundle)) {
+          alert('Не удалось создать шаблон. Освободите память сайта (кэш/данные) и попробуйте снова.');
+          return false;
+        }
+        saveScrollForNextLoad();
+        location.reload();
+        return true;
       }
 
       function scheduleAutosave() {
@@ -6269,6 +6648,24 @@
         if (loc) loc.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
       }
 
+      /** Когда шотлист не задаёт порядок (сцена ни в одной строке с номерами), листаем по порядку ленты сценария. */
+      function scrollToNextMainSceneInOrder(currentScene) {
+        if (!currentScene) return;
+        var all = mainScenes();
+        var i;
+        for (i = 0; i < all.length; i++) {
+          if (all[i] === currentScene) break;
+        }
+        if (i < 0 || i >= all.length - 1) return;
+        var next = all[i + 1];
+        if (!next) return;
+        next.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+        pulseSceneShotGuide(next);
+        try {
+          triggerHaptic('light');
+        } catch (eH) {}
+      }
+
       function scrollToNextShotlistScene(currentScene) {
         if (!currentScene) return;
         var doneToken = sceneTokenForScene(currentScene);
@@ -6310,7 +6707,10 @@
           tokenIndex = fallbackTokenIndex;
           pieces = fallbackPieces;
         }
-        if (rowIndex === -1) return;
+        if (rowIndex === -1) {
+          scrollToNextMainSceneInOrder(currentScene);
+          return;
+        }
 
         var nextScene = firstUndoneSceneInPieceRange(pieces, tokenIndex + 1, pieces.length);
         if (!nextScene) nextScene = firstUndoneSceneInPieceRange(pieces, 0, tokenIndex);
@@ -6683,16 +7083,17 @@
           triggerHaptic('light');
         }, true);
 
-        // iOS/Yandex: снимаем фокус после выбора там, где без blur нативный picker залипает.
-        // Селекты в карточке сцены (локация / план / кадр) не трогаем — blur + тяжёлый innerHTML давали «подсветку» и секунду без повторного открытия.
+        // iOS/Yandex: снимаем фокус после выбора — иначе :focus + нативный sheet оставляют подсветку,
+        // и касание по тому же полю не открывает picker сразу. Двойной rAF — после закрытия нативного UI.
         document.addEventListener('change', function (e) {
           var t = e.target;
           if (!t || !t.matches || !t.matches('select')) return;
           if (t.classList && t.classList.contains('shotlist-piece-digit')) return;
-          if (t.closest && t.closest('.scene-main') && t.matches('select.scene-select')) return;
-          setTimeout(function () {
-            try { t.blur(); } catch (err) {}
-          }, 0);
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+              try { t.blur(); } catch (err) {}
+            });
+          });
         }, true);
 
         document.addEventListener('visibilitychange', function () {
@@ -6775,30 +7176,7 @@
 
         if (btnScenarioNew) {
           bindTapAndClick(btnScenarioNew, function () {
-            try { persistToStorage('Сохранено'); } catch (e) {}
-            var bundle = readScenarioBundle() || { activeId: null, items: [] };
-            var name = (scenarioName && scenarioName.value.trim()) ? scenarioName.value.trim() : 'Новый сценарий';
-            var id = uid();
-            var sc = {
-              id: id,
-              name: name + ' (шаблон)',
-              date: scenarioDate ? (scenarioDate.value || '') : '',
-              targetCount: scenarioCount ? (scenarioCount.value || '') : '',
-              status: 'draft',
-              shootBlock: scenarioShootBlock && scenarioShootBlock.value.trim ? scenarioShootBlock.value.trim() : '',
-              html: buildEmptyScenarioHtml(wrap ? wrap.innerHTML : ''),
-              logo: { x: x.value, y: y.value, scale: s.value },
-              prep: getPrep(),
-              updatedAt: Date.now()
-            };
-            bundle.items.push(sc);
-            bundle.activeId = id;
-            if (!writeScenarioBundle(bundle)) {
-              alert('Не удалось создать шаблон. Освободите память сайта (кэш/данные) и попробуйте снова.');
-              return;
-            }
-            saveScrollForNextLoad();
-            location.reload();
+            createNewScenarioTemplate();
           });
         }
 
@@ -6911,6 +7289,12 @@
         var ASSIST_SWIPE_MIN = 38;
         var pullReloadedAt = 0;
 
+        /** Smoothstep: мягкое нарастание видимости лампы при pull (без рывка по opacity). */
+        function pullHintEase(t) {
+          t = Math.max(0, Math.min(1, t));
+          return t * t * (3 - 2 * t);
+        }
+
         /** Для pull-to-reload от верха — не начинаем на контролах */
         function skipPull(el) {
           if (!el || !el.closest) return true;
@@ -6918,8 +7302,7 @@
           if (el.closest('dialog[open]')) return true;
           if (el.closest('.teleprompter-overlay.open')) return true;
           if (el.closest('.assistant-drawer')) return true;
-          if (el.closest('input, textarea, select, button, .logo-bg, .logo-controls, [contenteditable="true"]'))
-            return true;
+          if (el.closest(PULL_SKIP_INTERACTIVE)) return true;
           return false;
         }
 
@@ -6931,7 +7314,7 @@
           var tp = document.getElementById('teleprompter-overlay');
           if (tp && tp.classList.contains('open') && el.closest('.teleprompter-overlay')) return true;
           if (el.closest('.assistant-drawer')) return true;
-          if (el.closest('[contenteditable="true"]')) return true;
+          if (el.closest(PULL_SKIP_INTERACTIVE)) return true;
           return false;
         }
 
@@ -6954,7 +7337,7 @@
 
         function pausePullHintLamp(hint) {
           var v = hint && hint.querySelector && hint.querySelector('.pull-reload-hint-video');
-          if (!v) return;
+          if (!v || typeof v.pause !== 'function') return;
           try {
             v.pause();
             v.currentTime = 0;
@@ -7067,20 +7450,21 @@
               if (scrollTopNow() <= TOP_EPS) {
                 if (dy > pullMaxDy) pullMaxDy = dy;
                 var hint = pullHintEl();
-                if (hint && dy > 16) {
+                if (hint && dy > 12) {
                   hint.classList.add('pull-reload-hint--dragging');
                   var lamp = hint.querySelector('.pull-reload-hint-video');
-                  if (lamp && lamp.paused) {
+                  if (lamp && typeof lamp.play === 'function' && lamp.paused) {
                     try {
                       lamp.play().catch(function () {});
                     } catch (eP) {}
                   }
-                  var yShift = Math.min(36, dy * 0.26);
-                  var pullProg = Math.min(1, Math.max(0, (dy - 16) / (PULL_MIN - 16)));
-                  var s = 0.85 + pullProg * 0.15;
+                  var pullRaw = Math.min(1, Math.max(0, (dy - 12) / (PULL_MIN - 12)));
+                  var pullSmooth = pullHintEase(pullRaw);
+                  var yShift = Math.min(36, dy * 0.24);
+                  var s = 0.8 + pullSmooth * 0.2;
                   hint.style.setProperty('--pull-dot-y', yShift + 'px');
                   hint.style.setProperty('--pull-dot-s', String(s));
-                  hint.style.opacity = String(Math.min(1, 0.16 + pullProg * 0.84));
+                  hint.style.opacity = String(0.02 + pullSmooth * 0.98);
                   hint.classList.toggle('pull-reload-hint--ready', dy >= PULL_MIN * 0.88);
                 }
               } else {
@@ -7195,8 +7579,7 @@
           if (el.closest('.assistant-drawer')) return true;
           var tpOv = document.getElementById('teleprompter-overlay');
           if (tpOv && tpOv.classList.contains('open') && el.closest('.teleprompter-overlay')) return true;
-          if (el.closest('input, textarea, select, button, .logo-bg, .logo-controls, [contenteditable="true"]'))
-            return true;
+          if (el.closest(PULL_SKIP_INTERACTIVE)) return true;
           if (el.closest('.assistant-open-strip')) return true;
           return false;
         }
