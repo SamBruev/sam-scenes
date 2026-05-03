@@ -13,7 +13,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Sam Scenes (v231)</title>
+  <title>Sam Scenes (v232)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -421,7 +421,7 @@
       }
     }
 
-    /* Подсказка у левого края — тот же неоновый акцент, что у ▲▼ на полоске закрытия панели */
+    /* Подсказка у левого края — те же фон/рамка, что у блока подсказок внутри ассистента */
     .assistant-open-strip {
       position: fixed;
       left: env(safe-area-inset-left, 0px);
@@ -433,26 +433,19 @@
       min-height: 72px;
       margin: 0;
       padding: 0;
-      border: none;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-left: none;
       border-radius: 0 9px 9px 0;
-      background: linear-gradient(
-        90deg,
-        rgba(12, 10, 8, 0.76) 0%,
-        rgba(255, 255, 255, 0.11) 38%,
-        var(--assistant-hint-violet-mid) 62%,
-        rgba(255, 255, 255, 0.26) 100%
-      );
+      background: rgba(0, 0, 0, 0.38);
       box-shadow:
-        inset -1px 0 7px var(--assistant-hint-violet-soft),
-        inset -1px 0 5px rgba(255, 255, 255, 0.1),
-        1px 0 10px rgba(0, 0, 0, 0.38),
-        0 0 16px var(--assistant-hint-violet-glow);
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        2px 0 12px rgba(0, 0, 0, 0.35);
       /* Выше .wrap (12) и дочерних слоёв сцен, но ниже teleprompter / pull-hint / drawer */
       z-index: 100;
       cursor: pointer;
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
-      transition: opacity 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+      transition: opacity 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
     }
 
     .assistant-open-strip::before {
@@ -464,36 +457,25 @@
       font-size: 15px;
       font-weight: 500;
       line-height: 1;
-      color: var(--ui-violet);
+      color: var(--muted);
       pointer-events: none;
       letter-spacing: -0.08em;
-      opacity: 0.82;
-      text-shadow:
-        0 0 8px var(--ui-violet-glow),
-        0 0 4px rgba(255, 255, 255, 0.14);
+      opacity: 0.95;
+      text-shadow: none;
     }
 
     .assistant-open-strip:active {
-      background: linear-gradient(
-        90deg,
-        rgba(10, 8, 6, 0.82) 0%,
-        rgba(255, 255, 255, 0.16) 38%,
-        rgba(185, 165, 245, 0.26) 62%,
-        rgba(255, 255, 255, 0.32) 100%
-      );
+      background: rgba(0, 0, 0, 0.48);
+      border-color: rgba(255, 255, 255, 0.16);
       box-shadow:
-        inset -1px 0 8px rgba(175, 155, 240, 0.22),
-        inset -1px 0 6px rgba(255, 255, 255, 0.14),
-        1px 0 12px rgba(0, 0, 0, 0.42),
-        0 0 18px var(--assistant-hint-violet-glow);
+        inset 0 1px 0 rgba(255, 255, 255, 0.07),
+        2px 0 14px rgba(0, 0, 0, 0.42);
     }
 
     .assistant-open-strip:active::before {
-      color: rgba(232, 224, 255, 0.92);
+      color: var(--muted);
       opacity: 1;
-      text-shadow:
-        0 0 12px var(--ui-violet-glow),
-        0 0 6px rgba(255, 255, 255, 0.18);
+      text-shadow: none;
     }
 
     body.assistant-drawer-open .assistant-open-strip {
@@ -1456,11 +1438,9 @@
       content: '▾';
       float: none;
       flex-shrink: 0;
-      color: var(--ui-violet);
-      text-shadow:
-        0 0 10px var(--ui-violet-glow),
-        0 0 5px rgba(255, 255, 255, 0.2);
-      opacity: 0.88;
+      color: rgba(252, 249, 244, 0.62);
+      text-shadow: none;
+      opacity: 0.92;
       transition: transform 0.18s ease;
     }
 
@@ -1661,11 +1641,9 @@
       content: '▾';
       float: none;
       flex-shrink: 0;
-      color: var(--ui-violet);
-      text-shadow:
-        0 0 10px var(--ui-violet-glow),
-        0 0 5px rgba(255, 255, 255, 0.2);
-      opacity: 0.88;
+      color: rgba(252, 249, 244, 0.62);
+      text-shadow: none;
+      opacity: 0.92;
       transition: transform 0.18s ease;
     }
 
@@ -5243,8 +5221,8 @@
        * Дублируйте те же поля в build-info.json — подпись внизу подгружает его с cache: no-store,
        * чтобы не залипала старая версия при закэшированном index.html.
        */
-      var APP_VERSION = 'v231';
-      var BUILD_TIME = '2026-05-03 20:36 MSK';
+      var APP_VERSION = 'v232';
+      var BUILD_TIME = '2026-05-03 20:40 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
