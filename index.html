@@ -3930,7 +3930,7 @@
       box-sizing: border-box;
     }
 
-    /* «Снято» — круг с хлопушкой: верхняя планка захлопывается */
+    /* «Снято» — кинохлопушка: нижняя доска + верхняя планка, захлопывание к стыку */
     .scene-main > .scene-toolbar .scene-done-label.scene-done-checkbox-only {
       display: inline-flex;
       align-items: center;
@@ -3938,20 +3938,20 @@
       gap: 0;
       position: relative;
       overflow: visible;
-      width: clamp(58px, 17vw, 72px);
-      height: clamp(58px, 17vw, 72px);
-      min-width: clamp(58px, 17vw, 72px);
-      min-height: clamp(58px, 17vw, 72px);
+      width: clamp(56px, 16vw, 72px);
+      height: clamp(62px, 18vw, 78px);
+      min-width: clamp(56px, 16vw, 72px);
+      min-height: clamp(62px, 18vw, 78px);
       padding: 0;
       box-sizing: border-box;
-      border-radius: 50%;
+      border-radius: 14px;
       border: none;
-      background: radial-gradient(circle at 36% 28%, rgba(72, 68, 62, 0.55), #121110 52%, #030302 100%);
+      background: linear-gradient(165deg, rgba(42, 38, 34, 0.55) 0%, #10100e 42%, #030302 100%);
       box-shadow:
         0 6px 22px rgba(0, 0, 0, 0.58),
         0 1px 0 rgba(255, 255, 255, 0.06),
-        inset 0 2px 3px rgba(255, 255, 255, 0.07),
-        inset 0 -12px 28px rgba(0, 0, 0, 0.55);
+        inset 0 2px 3px rgba(255, 255, 255, 0.06),
+        inset 0 -10px 24px rgba(0, 0, 0, 0.5);
     }
 
     /* «Снято» — клик по label; чекбокс поверх зоны фокуса */
@@ -3981,8 +3981,8 @@
 
     .scene-main > .scene-toolbar .camera-lens-shutter {
       position: relative;
-      width: clamp(50px, 14vw, 62px);
-      height: clamp(50px, 14vw, 62px);
+      width: clamp(48px, 13.5vw, 60px);
+      height: clamp(52px, 14.5vw, 64px);
       flex-shrink: 0;
       pointer-events: none;
       z-index: 1;
@@ -4002,8 +4002,8 @@
 
     .scene-main > .scene-toolbar .take-clapper-up {
       transform-box: fill-box;
-      transform-origin: 8px 33px;
-      transform: rotate(-46deg);
+      transform-origin: 50% 100%;
+      transform: rotate(-56deg);
       transition: transform 0.42s cubic-bezier(0.34, 1.18, 0.36, 1);
     }
 
@@ -4042,13 +4042,16 @@
 
     @keyframes take-clapper-slam {
       0% {
-        transform: rotate(-46deg);
+        transform: rotate(-56deg);
       }
-      38% {
-        transform: rotate(11deg);
+      32% {
+        transform: rotate(9deg);
       }
-      68% {
-        transform: rotate(-3deg);
+      58% {
+        transform: rotate(-4deg);
+      }
+      82% {
+        transform: rotate(1.5deg);
       }
       100% {
         transform: rotate(0deg);
@@ -9479,18 +9482,24 @@
         mainScenes().forEach(syncShotClassForScene);
       }
 
-      /** Разметка «Снято» — чекбокс + иконка хлопушки (верхняя планка захлопывается). */
+      /** Разметка «Снято» — чекбокс + кинохлопушка (верхняя планка захлопывается к нижней). */
       var SHOT_CHECKBOX_LENS_INNER =
         '<input type="checkbox" class="scene-shot-checkbox" autocomplete="off" title="Снято" aria-label="Снято" />' +
         '<span class="camera-lens-shutter" aria-hidden="true">' +
         '<svg class="take-mark-icon" viewBox="0 0 56 56" width="100%" height="100%" focusable="false">' +
-        '<circle class="take-rim" cx="28" cy="28" r="26" fill="#131211" stroke="rgba(210, 198, 175, 0.38)" stroke-width="1"/>' +
-        '<rect class="take-base" x="8" y="34" width="40" height="10" rx="2.25" fill="#141210" stroke="rgba(0, 0, 0, 0.5)" stroke-width="0.65"/>' +
-        '<path d="M12 38.5h32" stroke="rgba(255, 248, 235, 0.1)" stroke-width="1.1" stroke-linecap="round"/>' +
-        '<g class="take-clapper-up">' +
-        '<rect x="8" y="14" width="40" height="19" rx="2.25" fill="#161411" stroke="rgba(0, 0, 0, 0.48)" stroke-width="0.65"/>' +
-        '<path d="M13 23h30M13 27h26" stroke="rgba(255, 248, 235, 0.09)" stroke-width="1" stroke-linecap="round"/>' +
+        '<rect class="take-rim" x="2.5" y="2.5" width="51" height="51" rx="12" fill="#0a0908" stroke="rgba(210, 198, 175, 0.38)" stroke-width="1"/>' +
+        '<g class="take-board-lower">' +
+        '<rect x="8" y="34" width="40" height="14" rx="2.25" fill="#141210" stroke="rgba(0,0,0,0.55)" stroke-width="0.65"/>' +
+        '<path d="M10 46l9-10M16 46l9-10M22 46l9-10M28 46l9-10M34 46l9-10M40 46l9-10" fill="none" stroke="rgba(248,244,236,0.12)" stroke-width="1.05" stroke-linecap="round"/>' +
+        '<path d="M12 39h32M12 42h26" stroke="rgba(255,248,235,0.08)" stroke-width="0.9" stroke-linecap="round"/>' +
         '</g>' +
+        '<g transform="translate(28,34)">' +
+        '<g class="take-clapper-up">' +
+        '<rect x="-20" y="-25" width="40" height="25" rx="2.2" fill="#161411" stroke="rgba(0,0,0,0.5)" stroke-width="0.65"/>' +
+        '<path d="M-17-18h34M-17-14h28" stroke="rgba(255,248,235,0.1)" stroke-width="0.85" stroke-linecap="round"/>' +
+        '<path d="M-18-8l8-8M-14-8l8-8M-10-8l8-8M-6-8l8-8M-2-8l8-8M2-8l8-8M6-8l8-8M10-8l8-8" fill="none" stroke="rgba(248,244,236,0.14)" stroke-width="1" stroke-linecap="round"/>' +
+        '<rect x="-20" y="-4" width="40" height="4" rx="0.75" fill="rgba(255,220,175,0.38)"/>' +
+        '</g></g>' +
         '</svg>' +
         '</span>';
 
