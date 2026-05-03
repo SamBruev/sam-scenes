@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Сценарий видео / Sam Bruev (v142)</title>
+  <title>Сценарий видео / Sam Bruev (v143)</title>
   <!-- До отрисовки тела: восстановить скролл после reload без «прыжка» картинки/фона -->
   <script>
     (function () {
@@ -3754,7 +3754,7 @@
         } catch (e) {}
       }
 
-      var APP_BUILD = 'v142-trim-assistant-chrome';
+      var APP_BUILD = 'v143-drawer-swipe-left-close';
       var lastSceneTimeTriggerTouchAt = 0;
       var APP_BUILD_KEY = 'abakan-app-build';
       var STORAGE_KEY = 'abakan-main-abakan-layout-v15';
@@ -4260,6 +4260,90 @@
         var bk = document.getElementById('assistant-drawer-backdrop');
         if (d) d.setAttribute('aria-hidden', 'true');
         if (bk) bk.setAttribute('aria-hidden', 'true');
+      }
+
+      /** Свайп влево по панели меню — закрыть (как в нативных sheet). */
+      function wireAssistantDrawerCloseSwipe() {
+        if (wireAssistantDrawerCloseSwipe._done) return;
+        wireAssistantDrawerCloseSwipe._done = true;
+        var drawer = document.getElementById('assistant-drawer');
+        if (!drawer) return;
+        var CLOSE_MIN = 52;
+        var RATIO = 0.72;
+        var activePid = null;
+        var sx = 0;
+        var sy = 0;
+        var minDx = 0;
+        var maxDx = 0;
+        var maxAbsDy = 0;
+
+        function trackMove(clientX, clientY) {
+          var dx = clientX - sx;
+          var dy = clientY - sy;
+          if (dx < minDx) minDx = dx;
+          if (dx > maxDx) maxDx = dx;
+          if (Math.abs(dy) > maxAbsDy) maxAbsDy = Math.abs(dy);
+        }
+
+        function endGesture(clientX, clientY) {
+          if (!document.body.classList.contains('assistant-drawer-open')) return;
+          var finDx = clientX - sx;
+          var leftMag = Math.max(0, -Math.min(minDx, finDx));
+          if (leftMag < CLOSE_MIN) return;
+          if (leftMag < maxAbsDy * RATIO) return;
+          if (maxDx > 26 && maxDx > leftMag * 0.48) return;
+          try {
+            triggerHaptic('light');
+          } catch (eH) {}
+          closeAssistantDrawer();
+        }
+
+        drawer.addEventListener(
+          'pointerdown',
+          function (e) {
+            if (!document.body.classList.contains('assistant-drawer-open')) return;
+            if (e.pointerType === 'mouse' && e.button !== 0) return;
+            activePid = e.pointerId;
+            sx = e.clientX;
+            sy = e.clientY;
+            minDx = 0;
+            maxDx = 0;
+            maxAbsDy = 0;
+            try {
+              if (drawer.setPointerCapture) drawer.setPointerCapture(e.pointerId);
+            } catch (eCap) {}
+          },
+          true
+        );
+        drawer.addEventListener(
+          'pointermove',
+          function (e) {
+            if (activePid !== e.pointerId) return;
+            trackMove(e.clientX, e.clientY);
+          },
+          true
+        );
+        drawer.addEventListener(
+          'pointerup',
+          function (e) {
+            if (activePid !== e.pointerId) return;
+            try {
+              if (drawer.releasePointerCapture) drawer.releasePointerCapture(e.pointerId);
+            } catch (eRel) {}
+            trackMove(e.clientX, e.clientY);
+            endGesture(e.clientX, e.clientY);
+            activePid = null;
+            minDx = maxDx = maxAbsDy = 0;
+          },
+          true
+        );
+        drawer.addEventListener(
+          'pointercancel',
+          function (e) {
+            if (activePid === e.pointerId) activePid = null;
+          },
+          true
+        );
       }
 
       function wireAssistantDrawer() {
@@ -6716,6 +6800,7 @@
       wireTopLogoScrollBlur();
       wirePullDownReload();
       wireAssistantDrawer();
+      wireAssistantDrawerCloseSwipe();
       wireAssistantDrawerOpenGestures();
       wirePeriodicPageReload();
       initBottomLogoFromTop();
