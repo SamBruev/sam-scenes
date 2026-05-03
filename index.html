@@ -2994,25 +2994,7 @@
     }
 
     .field-prep-date .prep-date-field-head {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .field-prep-date .prep-date-cal-icon {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 26px;
-      height: 26px;
-      flex-shrink: 0;
-      color: rgba(245, 204, 118, 0.95);
-    }
-
-    .field-prep-date .prep-date-cal-icon svg {
-      width: 22px;
-      height: 22px;
+      margin: 0 0 2px;
     }
 
     .prep-date-wrap {
@@ -3024,10 +3006,30 @@
       overflow: hidden;
     }
 
+    .prep-date-wrap .prep-date-cal-icon {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 3;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      color: rgba(245, 204, 118, 0.95);
+      pointer-events: none;
+    }
+
+    .prep-date-wrap .prep-date-cal-icon svg {
+      width: 22px;
+      height: 22px;
+    }
+
     .field-prep-date input[type='date'].prep-date-input {
       width: 100%;
       box-sizing: border-box;
-      padding: 12px 14px;
+      padding: 12px 46px 12px 14px;
       margin: 0;
       border: none;
       border-radius: 0;
@@ -3042,15 +3044,29 @@
       direction: ltr;
     }
 
-    .field-prep-date input[type='date'].prep-date-input::-webkit-datetime-edit,
-    .field-prep-date input[type='date'].prep-date-input::-webkit-datetime-edit-fields-wrapper {
+    .field-prep-date input[type='date'].prep-date-input::-webkit-datetime-edit {
+      padding: 0;
+      margin: 0;
       text-align: left;
     }
 
+    .field-prep-date input[type='date'].prep-date-input::-webkit-datetime-edit-fields-wrapper {
+      text-align: left;
+      padding: 0;
+    }
+
+    /* Невидимая зона тапа справа — открывает нативный календарь (иконка декоративная поверх). */
     .field-prep-date input[type='date'].prep-date-input::-webkit-calendar-picker-indicator {
-      opacity: 0.88;
+      position: absolute;
+      right: 4px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 40px;
+      height: 40px;
+      margin: 0;
+      padding: 0;
       cursor: pointer;
-      filter: invert(1) sepia(0.35) saturate(4) hue-rotate(5deg) brightness(0.95);
+      opacity: 0;
     }
 
     .prep-date-mask {
@@ -3060,6 +3076,7 @@
       transform: translateY(-50%);
       pointer-events: none;
       z-index: 1;
+      text-align: left;
       font-family: ui-monospace, 'SF Mono', Consolas, monospace;
       font-size: 15px;
       letter-spacing: 0.02em;
@@ -4609,6 +4626,13 @@
         </div>
         <div class="field field-prep-date">
           <div class="prep-date-field-head">
+            <b>Дата съёмки</b>
+          </div>
+          <div class="prep-date-wrap" id="prep-date-wrap">
+            <input id="prep-date" type="date" class="prep-date-input" autocomplete="off" aria-describedby="prep-date-hint" />
+            <span class="prep-date-mask" aria-hidden="true">
+              <span class="prep-date-mask-num">____</span><span class="prep-date-mask-sep">-</span><span class="prep-date-mask-num">__</span><span class="prep-date-mask-sep">-</span><span class="prep-date-mask-num">__</span>
+            </span>
             <span class="prep-date-cal-icon" aria-hidden="true"
               ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
                 <rect x="3.5" y="5" width="17" height="15.5" rx="2" stroke="currentColor" stroke-width="1.65" />
@@ -4621,15 +4645,7 @@
                   stroke-linecap="round"
                   opacity="0.45"
                 />
-              </svg>
-            </span>
-            <b>Дата съёмки</b>
-          </div>
-          <div class="prep-date-wrap" id="prep-date-wrap">
-            <input id="prep-date" type="date" class="prep-date-input" autocomplete="off" aria-describedby="prep-date-hint" />
-            <span class="prep-date-mask" aria-hidden="true">
-              <span class="prep-date-mask-num">____</span><span class="prep-date-mask-sep">-</span><span class="prep-date-mask-num">__</span><span class="prep-date-mask-sep">-</span><span class="prep-date-mask-num">__</span>
-            </span>
+              </svg></span>
           </div>
           <p class="prep-date-hint" id="prep-date-hint">Нажмите поле или иконку календаря справа · год, месяц, день</p>
         </div>
