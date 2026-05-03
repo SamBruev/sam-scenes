@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v219: темнее карточки Intro / Outro -->
+<!-- v220: единый пунктир у примечания и перебивки -->
 <html lang="ru" style="--logo-x: 0px; --logo-y: 0px; --logo-scale: 2.00; --top-logo-blur: 0px;">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -2278,8 +2278,9 @@
       color: #f8eed1;
     }
 
-    /* Как у названия сцены и текста перебивки — пунктир снизу */
-    .scene-main > .line-note .note-editable {
+    /* Примечание и перебивка — одна схема пунктира (как у названия сцены) */
+    .scene-main > .line-note .note-editable,
+    .intercut .intercut-text {
       display: inline-block;
       min-height: 1.35em;
       min-width: min(100%, 10ch);
@@ -2292,7 +2293,8 @@
       border-bottom: 1px dashed rgba(242, 215, 140, 0.38);
     }
 
-    .scene-main > .line-note .note-editable:focus {
+    .scene-main > .line-note .note-editable:focus,
+    .intercut .intercut-text:focus {
       background: transparent;
       box-shadow: none;
       border-bottom-color: rgba(242, 215, 140, 0.52);
@@ -2512,19 +2514,8 @@
     }
 
     .intercut .intercut-text {
-      display: inline-block;
-      min-width: min(100%, 6ch);
-      max-width: 100%;
-      padding: 0 0 2px;
-      margin: 0;
-      vertical-align: bottom;
       color: rgba(245, 236, 220, 0.88);
       font-weight: 500;
-      border-bottom: 1px dashed rgba(242, 215, 140, 0.38);
-    }
-
-    .intercut .intercut-text:focus {
-      border-bottom-color: rgba(242, 215, 140, 0.52);
     }
 
     .loc-line { margin-top: 10px; color: var(--label); }
