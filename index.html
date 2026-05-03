@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Сценарий видео / Sam Bruev (v155)</title>
+  <title>Сценарий видео / Sam Bruev (v156)</title>
   <!-- До отрисовки тела: восстановить скролл после reload без «прыжка» картинки/фона -->
   <script>
     (function () {
@@ -348,24 +348,60 @@
       margin: 0;
     }
 
-    .assistant-drawer-close {
+    /* Закрыть: стрелка ‹ как у полоски открытия (›), без крестика */
+    .assistant-drawer-dismiss-chevron {
       flex-shrink: 0;
-      width: 2.25rem;
-      height: 2.25rem;
+      position: relative;
+      width: 2.6rem;
+      min-width: 2.35rem;
+      height: 2.85rem;
       padding: 0;
-      margin: -4px -6px 0 0;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 228, 160, 0.28);
-      background: rgba(0, 0, 0, 0.5);
-      color: var(--cream);
-      font-size: 22px;
-      line-height: 1;
+      margin: -8px -10px -4px 0;
+      border: none;
+      border-radius: 12px 0 0 12px;
       cursor: pointer;
+      touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
+      background: linear-gradient(
+        90deg,
+        rgba(24, 18, 8, 0.42) 0%,
+        rgba(212, 175, 55, 0.38) 52%,
+        rgba(255, 236, 176, 0.52) 100%
+      );
+      box-shadow:
+        inset -2px 0 8px rgba(255, 248, 220, 0.35),
+        2px 0 14px rgba(212, 175, 55, 0.22);
     }
 
-    .assistant-drawer-close:active {
-      background: rgba(255, 228, 160, 0.08);
+    .assistant-drawer-dismiss-chevron::before {
+      content: '\2039';
+      position: absolute;
+      left: 46%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 18px;
+      font-weight: 500;
+      line-height: 1;
+      color: rgba(255, 245, 210, 0.88);
+      pointer-events: none;
+      letter-spacing: -0.08em;
+      text-shadow: 0 0 10px rgba(255, 220, 140, 0.65);
+    }
+
+    .assistant-drawer-dismiss-chevron:active {
+      background: linear-gradient(
+        90deg,
+        rgba(18, 14, 6, 0.52) 0%,
+        rgba(212, 175, 55, 0.5) 52%,
+        rgba(255, 245, 200, 0.62) 100%
+      );
+      box-shadow:
+        inset -2px 0 10px rgba(255, 252, 235, 0.45),
+        2px 0 18px rgba(212, 175, 55, 0.35);
+    }
+
+    .assistant-drawer-dismiss-chevron:active::before {
+      color: rgba(255, 252, 235, 0.98);
     }
 
     .assistant-drawer-intro {
@@ -981,19 +1017,20 @@
       position: relative;
     }
 
-    /* Intro / Outro — заметнее красная тема */
+    /* Intro / Outro — прозрачный верх в тон лампы / золота (--gold), не красный */
     .scene-main.scene-role-intro,
     .scene-main.scene-role-outro {
       background: linear-gradient(
         165deg,
-        rgba(110, 14, 22, 0.42) 0%,
-        rgba(14, 6, 8, 0.98) 38%,
-        #000000 72%
+        rgba(160, 82, 22, 0.38) 0%,
+        rgba(212, 175, 55, 0.2) 22%,
+        rgba(28, 18, 10, 0.94) 46%,
+        #000000 74%
       );
       box-shadow:
         0 10px 28px rgba(0, 0, 0, 0.52),
-        0 0 0 1px rgba(200, 38, 48, 0.55),
-        inset 0 1px 0 rgba(255, 95, 95, 0.1);
+        0 0 0 1px rgba(212, 175, 55, 0.42),
+        inset 0 1px 0 rgba(255, 224, 160, 0.12);
     }
 
     .scene-main.scene-role-intro::after {
@@ -1006,11 +1043,11 @@
       border-radius: 999px;
       background: linear-gradient(
         90deg,
-        rgba(255, 45, 45, 0.12) 0%,
-        rgba(230, 35, 45, 0.92) 50%,
-        rgba(255, 45, 45, 0.12) 100%
+        rgba(255, 200, 120, 0.18) 0%,
+        rgba(212, 155, 48, 0.9) 50%,
+        rgba(255, 200, 120, 0.18) 100%
       );
-      box-shadow: 0 0 18px rgba(220, 40, 55, 0.55);
+      box-shadow: 0 0 18px rgba(212, 165, 55, 0.48);
     }
 
     .scene-main.scene-role-outro::after {
@@ -1023,11 +1060,11 @@
       border-radius: 999px;
       background: linear-gradient(
         90deg,
-        rgba(255, 45, 45, 0.12) 0%,
-        rgba(230, 35, 45, 0.92) 50%,
-        rgba(255, 45, 45, 0.12) 100%
+        rgba(255, 200, 120, 0.18) 0%,
+        rgba(212, 155, 48, 0.9) 50%,
+        rgba(255, 200, 120, 0.18) 100%
       );
-      box-shadow: 0 0 18px rgba(220, 40, 55, 0.55);
+      box-shadow: 0 0 18px rgba(212, 165, 55, 0.48);
     }
 
     .scene-main[data-scene-role="intro"] .scene-remove,
@@ -1262,22 +1299,16 @@
       font-weight: 800;
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: #ff3030;
-    }
-
-    .scene-main[data-scene-role="intro"] .scene-time-wrap .time-leading {
+      /* Цвет слова INTRO/OUTRO — в разметке (красный Intro и т.д.); база как у шапки сцены */
+      color: var(--anna-gold);
       text-shadow:
-        0 0 22px rgba(255, 55, 55, 0.65),
-        0 0 48px rgba(200, 25, 35, 0.42),
-        0 2px 2px rgba(60, 0, 8, 0.85);
+        0 0 20px rgba(212, 175, 55, 0.35),
+        0 0 36px rgba(180, 120, 40, 0.22),
+        0 2px 2px rgba(20, 12, 4, 0.75);
     }
 
     .scene-main[data-scene-role="outro"] .scene-time-wrap .time-leading {
       transform: translateY(-50%);
-      text-shadow:
-        0 0 22px rgba(255, 55, 55, 0.58),
-        0 0 40px rgba(200, 25, 35, 0.38),
-        0 2px 2px rgba(60, 0, 8, 0.85);
     }
 
     .scene-time-wrap .scene-index {
@@ -2817,9 +2848,12 @@
     <div class="assistant-drawer-inner">
       <div class="assistant-drawer-head">
         <h2 class="assistant-drawer-title" id="assistant-drawer-title">План съёмок</h2>
-        <button type="button" class="assistant-drawer-close" id="assistant-drawer-close" aria-label="Закрыть меню">
-          ×
-        </button>
+        <button
+          type="button"
+          class="assistant-drawer-dismiss-chevron"
+          id="assistant-drawer-close"
+          aria-label="Закрыть меню"
+          title="Закрыть"></button>
       </div>
       <p class="assistant-drawer-intro">
         Сценарии по датам и блоку — нажми, чтобы открыть и перезагрузить лист как с выпадающего списка.
@@ -3886,8 +3920,8 @@
       }
 
       /** Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages). */
-      var APP_VERSION = 'v155';
-      var BUILD_TIME = '2026-05-03 08:40 MSK';
+      var APP_VERSION = 'v156';
+      var BUILD_TIME = '2026-05-03 09:05 MSK';
       var APP_BUILD = APP_VERSION + ' · ' + BUILD_TIME;
       var lastSceneTimeTriggerTouchAt = 0;
       var APP_BUILD_KEY = 'abakan-app-build';
