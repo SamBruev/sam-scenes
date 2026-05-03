@@ -13,7 +13,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Sam Scenes (v223)</title>
+  <title>Sam Scenes (v224)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -4780,8 +4780,8 @@
        * Дублируйте те же поля в build-info.json — подпись внизу подгружает его с cache: no-store,
        * чтобы не залипала старая версия при закэшированном index.html.
        */
-      var APP_VERSION = 'v223';
-      var BUILD_TIME = '2026-05-03 15:10 MSK';
+      var APP_VERSION = 'v224';
+      var BUILD_TIME = '2026-05-03 16:05 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -8383,13 +8383,26 @@
         document.addEventListener('pointerdown', function (e) {
           var t = e.target;
           if (t && t.matches && t.matches('select')) clearPendingSelectBlur(t);
+          /* Тап по подписи/полю рядом с select — отменяем отложенный blur до таймеров 40/120 ms (иначе iOS «глушит» повторное открытие). */
+          var prepCard = t && t.closest ? t.closest('.card-prep') : null;
+          if (prepCard) {
+            prepCard.querySelectorAll('select.prep-select, select.format-select').forEach(function (s) {
+              clearPendingSelectBlur(s);
+            });
+          }
+          var hub = t && t.closest ? t.closest('#scenario-hub') : null;
+          if (hub) {
+            hub.querySelectorAll('select').forEach(function (s) {
+              clearPendingSelectBlur(s);
+            });
+          }
           if (!t || !t.matches || !t.matches('select')) return;
           if (t.closest && t.closest('.scene-main') && t.matches('select.scene-select')) return;
           triggerHaptic('light');
         }, true);
 
         // iOS/touch: после выбора фокус может зависнуть на <select> — без blur второй тап не открывает sheet.
-        // Раньше стояла гроза таймаутов до 520ms — она срабатывала уже на повторном открытии и убивала меню.
+        // Отложенные blur (40/120 ms) на полях «Подготовка» и в #scenario-hub срывали повторное открытие нативного меню.
         function scheduleSelectBlurAfterNativeChoice(sel) {
           if (!sel || sel.nodeName !== 'SELECT') return;
           if (sel.classList && sel.classList.contains('shotlist-piece-digit')) return;
@@ -8404,6 +8417,18 @@
             (window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
 
           clearPendingSelectBlur(sel);
+
+          var lightBlurOnly =
+            (sel.classList &&
+              (sel.classList.contains('prep-select') || sel.classList.contains('format-select'))) ||
+            (sel.closest && sel.closest('#scenario-hub'));
+
+          if (lightBlurOnly) {
+            requestAnimationFrame(function () {
+              doBlur();
+            });
+            return;
+          }
 
           if (!coarse) {
             requestAnimationFrame(doBlur);
