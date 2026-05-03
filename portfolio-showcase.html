@@ -8,7 +8,7 @@
   <title>Примеры работ / Sam Bruev</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600;700&family=Kelly+Slab&family=Oswald:wght@600;700&family=Pacifico&family=Roboto+Slab:wght@400;600;700;800&family=Russo+One&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@500;600;700&family=Pacifico&family=Roboto+Slab:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
     /* Палитра логотипа: чистый чёрный, крем «бумаги», металлическое золото (#d4af37) — без постоянных «ободков» по UI */
     :root {
@@ -27,11 +27,9 @@
       --surface-ink: #000000;
       --script-font: "Pacifico", cursive;
       --brand-serif: "Roboto Slab", Georgia, "Times New Roman", serif;
-      /* Жанровые заголовки: характер «под звук», не переименовывая текст */
-      --genre-title-metal: "Oswald", "Arial Narrow", system-ui, sans-serif;
-      --genre-title-rock: "Kelly Slab", var(--brand-serif);
-      --genre-title-pop: "Comfortaa", system-ui, sans-serif;
-      --genre-title-punk: "Russo One", Impact, fantasy;
+      /* Единый жёсткий display для блоков METAL / ROCK / POP / PUNK — не как Pacifico/Roboto тела страницы */
+      --genre-display-font: "Bebas Neue", "Oswald", "Arial Narrow", system-ui,
+        sans-serif;
       --shadow-lift: 0 20px 48px rgba(0, 0, 0, 0.55);
       --portfolio-revision-dock-h: clamp(52px, 14vw, 64px);
     }
@@ -218,18 +216,18 @@
       content: "";
       position: absolute;
       left: 50%;
-      top: clamp(118px, 29.5vw, 186px);
+      top: clamp(104px, 27.8vw, 172px);
       z-index: 0;
       width: min(400px, 98vw);
       height: clamp(248px, 58vw, 472px);
       transform: translateX(-50%);
       pointer-events: none;
       background: radial-gradient(
-        ellipse min(300px, 90vw) 118% at 50% 0%,
-        rgba(238, 210, 120, 0.046) 0%,
-        rgba(212, 175, 55, 0.024) 38%,
-        rgba(212, 175, 55, 0.01) 58%,
-        transparent 74%
+        ellipse min(300px, 90vw) 118% at 50% 6%,
+        rgba(238, 210, 120, 0.048) 0%,
+        rgba(212, 175, 55, 0.026) 34%,
+        rgba(212, 175, 55, 0.012) 54%,
+        transparent 73%
       );
       filter: blur(22px);
       -webkit-filter: blur(22px);
@@ -257,7 +255,7 @@
       width: 100%;
       max-width: none;
       margin:
-        clamp(-0.55rem, -2.2vw, -0.2rem)
+        clamp(-1.35rem, -5.4vw, -0.65rem)
         0
         clamp(1rem, 3.5vw, 1.95rem);
       padding: 0;
@@ -267,30 +265,30 @@
       --wordmark-shift-x: clamp(-11px, -2.85vw, -4px);
     }
 
-    /* Засветка только по знаку SAM BRUEV — без заметной утечки вверх к нотке */
+    /* Засветка по знаку: пик ближе к верхнему краю блока (центр столба под лампой) */
     .brand-wordmark::before {
       content: "";
       position: absolute;
       left: 50%;
-      top: clamp(10px, 2.5vw, 22px);
+      top: clamp(-22px, -3vw, -4px);
       z-index: 0;
       width: min(340px, 94vw);
-      height: clamp(188px, 50vw, 276px);
+      height: clamp(200px, 52vw, 288px);
       transform: translateX(calc(-50% + var(--wordmark-shift-x)));
       pointer-events: none;
       background:
         radial-gradient(
-          ellipse 86% 56% at 50% 2%,
-          rgba(252, 240, 210, 0.095) 0%,
-          rgba(212, 175, 55, 0.062) 36%,
-          rgba(212, 175, 55, 0.026) 55%,
-          transparent 71%
+          ellipse 88% 62% at 50% -4%,
+          rgba(252, 240, 210, 0.1) 0%,
+          rgba(212, 175, 55, 0.068) 34%,
+          rgba(212, 175, 55, 0.03) 52%,
+          transparent 69%
         ),
         radial-gradient(
-          ellipse 90% 68% at 50% 36%,
-          rgba(238, 210, 120, 0.048) 0%,
-          rgba(212, 175, 55, 0.022) 48%,
-          transparent 74%
+          ellipse 90% 74% at 50% 28%,
+          rgba(238, 210, 120, 0.052) 0%,
+          rgba(212, 175, 55, 0.024) 46%,
+          transparent 73%
         );
       filter: blur(16px);
       -webkit-filter: blur(16px);
@@ -1180,10 +1178,29 @@
       display: flex;
       flex-direction: column;
       align-items: stretch;
-      gap: 0.55rem;
-      margin: 0 auto 1.15rem;
+      gap: clamp(0.62rem, 2.2vw, 0.78rem);
+      margin: 0 auto clamp(1.2rem, 3.9vw, 1.72rem);
       max-width: 100%;
-      padding: 0 0.1rem;
+      padding: 0 0.08rem;
+    }
+
+    /* Внутри секции жанра — массивнее и контрастнее сегменты управления */
+    .portfolio-genre .genre-playback-bar {
+      margin-bottom: clamp(1rem, 3.6vw, 1.52rem);
+    }
+
+    .portfolio-genre .stem-switch {
+      background: rgba(0, 0, 0, 0.94);
+      padding: 4px;
+      gap: 3px;
+      box-shadow:
+        inset 0 0 0 1px rgba(212, 175, 55, 0.15),
+        0 5px 20px rgba(0, 0, 0, 0.55);
+    }
+
+    .portfolio-genre .stem-switch__btn {
+      padding: 0.38rem 0.9rem;
+      font-size: clamp(0.58rem, 2.05vw, 0.63rem);
     }
 
     .genre-playback-bar__row {
@@ -1303,64 +1320,74 @@
       color: rgba(232, 201, 104, 0.92);
     }
 
+    /* Секции жанра — отдельные тяжёлые острова над общим фоном */
+    section.portfolio-genre {
+      position: relative;
+      margin-bottom: clamp(2rem, 5.5vw, 3.15rem);
+      padding:
+        clamp(1.12rem, 4.2vw, 1.82rem)
+        clamp(0.68rem, 3.2vw, 1.22rem)
+        clamp(1.18rem, 4.5vw, 2.08rem);
+      border-radius: 22px;
+      background:
+        radial-gradient(ellipse 118% 68% at 50% -14%, rgba(212, 175, 55, 0.085), transparent 54%),
+        linear-gradient(
+          166deg,
+          #101012 0%,
+          #060607 46%,
+          var(--surface-ink) 100%
+        );
+      box-shadow:
+        0 0 0 1px rgba(212, 175, 55, 0.16),
+        0 22px 56px rgba(0, 0, 0, 0.65),
+        0 6px 20px rgba(0, 0, 0, 0.48),
+        inset 0 1px 0 rgba(212, 175, 55, 0.09),
+        inset 0 -32px 48px rgba(0, 0, 0, 0.38);
+    }
+
+    section.portfolio-genre:last-of-type {
+      margin-bottom: clamp(1.35rem, 4vw, 2.1rem);
+    }
+
     .portfolio-genre-banner {
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin: 1.65rem auto 1.05rem;
-      padding: 0 0.5rem 0.85rem;
+      margin: 0 auto clamp(1.05rem, 3.2vw, 1.35rem);
+      padding: 0 clamp(0.42rem, 2.4vw, 0.92rem)
+        clamp(0.92rem, 3.2vw, 1.32rem);
       text-align: center;
-      border-bottom: none;
+      border-bottom: 1px solid rgba(212, 175, 55, 0.22);
     }
 
     section.portfolio-genre:first-of-type .portfolio-genre-banner {
-      margin-top: 0.35rem;
+      margin-top: 0;
+      padding-top: clamp(0.08rem, 0.65vw, 0.38rem);
     }
 
     .portfolio-genre-banner .tag {
       margin-bottom: 0.42rem;
     }
 
+    /* Метка «Жанр» с анимацией — немного левее оси заголовка */
+    .portfolio-genre-banner .tag.tag--genre-live {
+      margin-left: clamp(-28px, -6.25vw, -10px);
+    }
+
     .portfolio-genre-title {
       margin: 0;
-      font-family: var(--brand-serif);
-      font-weight: 700;
-      font-size: clamp(1.55rem, 5.2vw, 2rem);
-      letter-spacing: 0.03em;
-      color: var(--accent-soft);
-      text-shadow:
-        0 0 36px rgba(212, 175, 55, 0.18),
-        0 2px 4px rgba(0, 0, 0, 0.7);
-      line-height: 1.2;
-    }
-
-    .portfolio-genre--metal .portfolio-genre-title {
-      font-family: var(--genre-title-metal);
-      font-weight: 700;
+      font-family: var(--genre-display-font);
+      font-weight: 400;
+      font-size: clamp(2.12rem, 7vw, 2.92rem);
+      letter-spacing: clamp(0.16em, 1.55vw, 0.26em);
       text-transform: uppercase;
-      letter-spacing: 0.11em;
-      font-size: clamp(1.8rem, 5.95vw, 2.42rem);
-    }
-
-    .portfolio-genre--rock .portfolio-genre-title {
-      font-family: var(--genre-title-rock);
-      font-weight: 400;
-      letter-spacing: 0.038em;
-      font-size: clamp(1.65rem, 5.45vw, 2.12rem);
-    }
-
-    .portfolio-genre--pop .portfolio-genre-title {
-      font-family: var(--genre-title-pop);
-      font-weight: 700;
-      letter-spacing: 0.035em;
-      font-size: clamp(1.5rem, 5.05vw, 2rem);
-    }
-
-    .portfolio-genre--punk .portfolio-genre-title {
-      font-family: var(--genre-title-punk);
-      font-weight: 400;
-      letter-spacing: 0.05em;
-      font-size: clamp(1.6rem, 5.35vw, 2.12rem);
+      color: rgba(242, 218, 135, 0.99);
+      text-shadow:
+        0 2px 1px rgba(0, 0, 0, 1),
+        0 4px 0 rgba(0, 0, 0, 0.82),
+        0 22px 40px rgba(0, 0, 0, 0.88),
+        0 0 28px rgba(212, 175, 55, 0.2);
+      line-height: 1.03;
     }
     .portfolio-genre > .note:last-child {
       margin-top: 0.15rem;
@@ -1684,6 +1711,53 @@
       color: rgba(235, 227, 214, 0.48);
     }
 
+    .site-footer__social {
+      margin-top: clamp(1rem, 3.8vw, 1.72rem);
+      padding: 0 0.5rem;
+      max-width: 28rem;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .site-footer__social-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.45rem 1rem;
+      align-items: baseline;
+    }
+
+    .site-footer__social-link {
+      font-family: var(--brand-serif);
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(212, 175, 55, 0.62);
+      text-decoration: none;
+      white-space: nowrap;
+      transition: color 0.18s ease, text-shadow 0.18s ease;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .site-footer__social-link:hover {
+      color: rgba(238, 214, 140, 0.95);
+    }
+
+    .site-footer__social-link:focus {
+      outline: none;
+    }
+
+    .site-footer__social-link:focus-visible {
+      outline: 2px solid rgba(232, 201, 104, 0.45);
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+
     /* Плашка приложение · версия · метка времени — закреплена к низу экрана, видна при любом скролле */
     .site-footer__revision {
       position: fixed;
@@ -1809,7 +1883,7 @@
     <header class="brand-mark">
       <div>
         <h1>Примеры работ</h1>
-        <p class="subtitle">Жанровые блоки — <strong>тяжёлый металл</strong>, <strong>рок-музыка</strong>, <strong>поп-звук</strong> и <strong>панк-рок</strong>. Режим «Темы» — два плеера; под ними ползунок <strong>плавной смеси</strong> демо&nbsp;→&nbsp;мастер при одном времени воспроизведения или кнопка авто-перетекания. Клавиши <strong>Демо / Мастер</strong> режут до одной дорожки без смеси. В каждом жанре <strong>барабаны · вокал · гитары</strong> меняют одну активную дорожку <strong>на месте</strong>, без переезда страницы; дальше можно спокойно листать к следующим разделам.</p>
+        <p class="subtitle">Жанровые блоки — <strong>METAL</strong>, <strong>ROCK</strong>, <strong>POP</strong> и <strong>PUNK</strong>. Режим «Темы» — два плеера; под ними ползунок <strong>плавной смеси</strong> демо&nbsp;→&nbsp;мастер при одном времени воспроизведения или кнопка авто-перетекания. Клавиши <strong>Демо / Мастер</strong> режут до одной дорожки без смеси. В каждом жанре <strong>барабаны · вокал · гитары</strong> меняют одну активную дорожку <strong>на месте</strong>, без переезда страницы; дальше можно спокойно листать к следующим разделам.</p>
       </div>
     </header>
 
@@ -1854,7 +1928,8 @@
     <article class="card card--collab">
       <div class="tag-row">
         <span class="tag">Особенности</span>
-        <span class="tag">Сведение · ожидания</span>
+        <span class="tag">Сведение</span>
+        <span class="tag">Ожидания</span>
       </div>
       <h2>Особенности работы со мной</h2>
       <p class="meta">Что именно делает финальное сведение — и что лучше закрыть раньше.</p>
@@ -1871,7 +1946,7 @@
     <section class="portfolio-genre portfolio-genre--metal" data-genre="metal" data-active-stem="drums" aria-labelledby="genre-metal">
       <header class="portfolio-genre-banner">
         <span class="tag tag--genre-live">Жанр</span>
-        <h2 class="portfolio-genre-title" id="genre-metal">Тяжёлый металл</h2>
+        <h2 class="portfolio-genre-title" id="genre-metal">METAL</h2>
       </header>
 
       <div class="genre-playback-bar">
@@ -1955,7 +2030,7 @@
     <section class="portfolio-genre portfolio-genre--rock" data-genre="rock" data-active-stem="drums" aria-labelledby="genre-rock">
       <header class="portfolio-genre-banner">
         <span class="tag tag--genre-live">Жанр</span>
-        <h2 class="portfolio-genre-title" id="genre-rock">Рок-музыка</h2>
+        <h2 class="portfolio-genre-title" id="genre-rock">ROCK</h2>
       </header>
 
       <div class="genre-playback-bar">
@@ -2039,7 +2114,7 @@
     <section class="portfolio-genre portfolio-genre--pop" data-genre="pop" data-active-stem="drums" aria-labelledby="genre-pop">
       <header class="portfolio-genre-banner">
         <span class="tag tag--genre-live">Жанр</span>
-        <h2 class="portfolio-genre-title" id="genre-pop">Поп-звук</h2>
+        <h2 class="portfolio-genre-title" id="genre-pop">POP</h2>
       </header>
 
       <div class="genre-playback-bar">
@@ -2123,7 +2198,7 @@
     <section class="portfolio-genre portfolio-genre--punk" data-genre="punk" data-active-stem="drums" aria-labelledby="genre-punk">
       <header class="portfolio-genre-banner">
         <span class="tag tag--genre-live">Жанр</span>
-        <h2 class="portfolio-genre-title" id="genre-punk">Панк-рок</h2>
+        <h2 class="portfolio-genre-title" id="genre-punk">PUNK</h2>
       </header>
 
       <div class="genre-playback-bar">
@@ -2253,6 +2328,38 @@
       <span class="site-footer__sam">Sam Bruev</span>
       <span class="site-footer__mix">Mix &amp; Recording</span>
       <span class="site-footer__production">Music production</span>
+      <nav class="site-footer__social" aria-label="Профили в соцсетях — везде @sam_bruev">
+        <ul class="site-footer__social-list">
+          <li>
+            <a
+              href="https://www.tiktok.com/@sam_bruev"
+              class="site-footer__social-link"
+              target="_blank"
+              rel="noopener noreferrer">TikTok @sam_bruev</a>
+          </li>
+          <li>
+            <a
+              href="https://www.instagram.com/sam_bruev/"
+              class="site-footer__social-link"
+              target="_blank"
+              rel="noopener noreferrer">Instagram @sam_bruev</a>
+          </li>
+          <li>
+            <a
+              href="https://www.youtube.com/@sam_bruev"
+              class="site-footer__social-link"
+              target="_blank"
+              rel="noopener noreferrer">YouTube @sam_bruev</a>
+          </li>
+          <li>
+            <a
+              href="https://vk.com/sam_bruev"
+              class="site-footer__social-link"
+              target="_blank"
+              rel="noopener noreferrer">VK sam_bruev</a>
+          </li>
+        </ul>
+      </nav>
       <div class="site-footer__revision" role="note">
         <span class="site-footer__revision-line">приложение <strong>portfolio-showcase</strong>&nbsp;<span class="site-footer__rev-ver" title="Перед деплоем измените версию здесь в HTML">v1.3.0</span></span>
         <span class="site-footer__revision-div" aria-hidden="true">/</span>
