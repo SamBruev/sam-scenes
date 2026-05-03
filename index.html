@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Сценарий видео / Sam Bruev (v146)</title>
+  <title>Сценарий видео / Sam Bruev (v147)</title>
   <!-- До отрисовки тела: восстановить скролл после reload без «прыжка» картинки/фона -->
   <script>
     (function () {
@@ -1494,6 +1494,32 @@
       letter-spacing: 0.06em;
       text-transform: uppercase;
       color: var(--cream);
+    }
+
+    .scene-time-dialog-actions {
+      display: flex;
+      justify-content: center;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 228, 160, 0.14);
+    }
+
+    .scene-time-dialog-done {
+      min-width: 140px;
+      padding: 12px 22px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 228, 160, 0.45);
+      background: linear-gradient(180deg, rgba(212, 175, 55, 0.35), rgba(90, 70, 24, 0.55));
+      color: var(--cream);
+      cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .scene-time-dialog-done:active {
+      filter: brightness(1.06);
     }
 
     .scene-time-dialog-wheels {
@@ -3777,8 +3803,8 @@
       }
 
       /** Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages). */
-      var APP_VERSION = 'v146';
-      var BUILD_TIME = '2026-05-03 04:45 MSK';
+      var APP_VERSION = 'v147';
+      var BUILD_TIME = '2026-05-03 04:49 MSK';
       var APP_BUILD = APP_VERSION + ' · ' + BUILD_TIME;
       var lastSceneTimeTriggerTouchAt = 0;
       var APP_BUILD_KEY = 'abakan-app-build';
@@ -4919,6 +4945,53 @@
         flushSceneTimeDialogToStorage(wrap);
       }
 
+      function syncSceneTimeWheelsFromSelects(dlg, wrap) {
+        if (!dlg || !wrap) return;
+        var sels = getOrderedSceneTimeSelects(wrap);
+        if (!sels) return;
+        var keys = ['mm0', 'ss0', 'mm1', 'ss1'];
+        keys.forEach(function (key, i) {
+          var col = dlg.querySelector('.scene-time-wheel[data-key="' + key + '"]');
+          setSceneTimeWheelScroll(col, sels[i].value);
+        });
+        dlg.querySelectorAll('.scene-time-wheel').forEach(function (col) {
+          try {
+            col._lastCommittedV = getSceneTimeWheelValue(col);
+          } catch (eC) {}
+        });
+      }
+
+      /** Закрытие с сохранением: два кадра + пауза под инерцию скролла колёс на iOS. */
+      function prepareSceneTimeDialogClose(dlg, wrap) {
+        if (!dlg || !wrap || dlg._sceneTimeClosing) return;
+        dlg._sceneTimeClosing = true;
+        if (dlg._flushSceneTimeTO) {
+          clearTimeout(dlg._flushSceneTimeTO);
+          dlg._flushSceneTimeTO = null;
+        }
+        function snapAndFlush() {
+          dlg.querySelectorAll('.scene-time-wheel').forEach(function (col) {
+            normalizeSceneTimeInfiniteWheel(col);
+          });
+          flushSceneTimeDialogToStorage(wrap);
+        }
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            snapAndFlush();
+            setTimeout(function () {
+              snapAndFlush();
+              try {
+                updateSceneTimeTriggerText(wrap);
+              } catch (eTxt) {}
+              try {
+                closeSceneCenterDialogSafe(dlg);
+              } catch (eCl) {}
+              dlg._sceneTimeClosing = false;
+            }, 130);
+          });
+        });
+      }
+
       function ensureSceneTimeCenterDialog() {
         var legacyDlg = document.getElementById('scene-time-center-dialog');
         if (legacyDlg) {
@@ -4949,27 +5022,40 @@
           '<div class="scene-time-wheel" data-key="ss1" role="listbox" aria-label="Секунды конца"></div>' +
           '</div>' +
           '</div>' +
+          '<div class="scene-time-dialog-actions">' +
+          '<button type="button" class="scene-time-dialog-done" id="scene-time-dialog-done">Готово</button>' +
+          '</div>' +
           '</div>';
         document.body.appendChild(dlg);
         buildSceneTimeWheelColumns(dlg);
-        dlg.addEventListener('click', function (e) {
-          if (e.target === dlg) {
-            finalizeSceneTimeWheelsAndSave(dlg, sceneTimeDialogWrap);
-            closeSceneCenterDialogSafe(dlg);
-          }
-        });
-        dlg.addEventListener('cancel', function () {
-          finalizeSceneTimeWheelsAndSave(dlg, sceneTimeDialogWrap);
+        var doneBtn = document.getElementById('scene-time-dialog-done');
+        if (doneBtn) {
+          doneBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            prepareSceneTimeDialogClose(dlg, sceneTimeDialogWrap);
+          });
+        }
+        if (!dlg._sceneTimeBackdropDown) {
+          dlg._sceneTimeBackdropDown = function (e) {
+            if (typeof dlg.open === 'boolean' && !dlg.open) return;
+            if (!sceneTimeDialogWrap) return;
+            var panel = dlg.querySelector('.scene-time-dialog-panel');
+            if (panel && panel.contains(e.target)) return;
+            e.preventDefault();
+            prepareSceneTimeDialogClose(dlg, sceneTimeDialogWrap);
+          };
+          document.addEventListener('pointerdown', dlg._sceneTimeBackdropDown, true);
+        }
+        dlg.addEventListener('cancel', function (e) {
+          e.preventDefault();
+          prepareSceneTimeDialogClose(dlg, sceneTimeDialogWrap);
         });
         dlg.addEventListener('close', function () {
           var closedWrap = sceneTimeDialogWrap;
-          finalizeSceneTimeWheelsAndSave(dlg, closedWrap);
+          if (sceneTimeDialogWrap === closedWrap) sceneTimeDialogWrap = null;
+          dlg._sceneTimeClosing = false;
           requestAnimationFrame(function () {
-            requestAnimationFrame(function () {
-              finalizeSceneTimeWheelsAndSave(dlg, closedWrap);
-              if (sceneTimeDialogWrap === closedWrap) sceneTimeDialogWrap = null;
-              resetSceneTimeDialogPosition(dlg);
-            });
+            resetSceneTimeDialogPosition(dlg);
           });
         });
       }
@@ -4981,7 +5067,6 @@
         sceneTimeDialogWrap = wrap;
         var sels = getOrderedSceneTimeSelects(wrap);
         if (!sels) return;
-        var keys = ['mm0', 'ss0', 'mm1', 'ss1'];
         resetSceneTimeDialogPosition(dlg);
         openSceneCenterDialogSafe(dlg);
         requestAnimationFrame(function () {
@@ -4990,14 +5075,19 @@
           requestAnimationFrame(function () {
             if (useSceneTimeCenterModal()) centerSceneTimeDialogInViewport(dlg);
             else positionSceneTimeDialogNearAnchor(dlg, anchorX, anchorY);
-            keys.forEach(function (key, i) {
-              var col = dlg.querySelector('.scene-time-wheel[data-key="' + key + '"]');
-              setSceneTimeWheelScroll(col, sels[i].value);
-            });
-            dlg.querySelectorAll('.scene-time-wheel').forEach(function (col) {
-              col._lastCommittedV = getSceneTimeWheelValue(col);
-            });
+            syncSceneTimeWheelsFromSelects(dlg, wrap);
             updateSceneTimeTriggerText(wrap);
+            setTimeout(function () {
+              syncSceneTimeWheelsFromSelects(dlg, wrap);
+            }, 55);
+            setTimeout(function () {
+              syncSceneTimeWheelsFromSelects(dlg, wrap);
+            }, 220);
+            setTimeout(function () {
+              if (useSceneTimeCenterModal()) centerSceneTimeDialogInViewport(dlg);
+              else positionSceneTimeDialogNearAnchor(dlg, anchorX, anchorY);
+              syncSceneTimeWheelsFromSelects(dlg, wrap);
+            }, 90);
           });
         });
       }
