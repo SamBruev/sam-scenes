@@ -5677,8 +5677,8 @@
       /** Не перехватывать вертикальный pull на интерактиве; иначе <summary> в <details> не раскрывается. */
       var PULL_SKIP_INTERACTIVE_BASE =
         'input, textarea, select, button, summary, details, a, .time-leading, [contenteditable="true"]';
-      /** Вертикальный pull + перетаскивание логотипа / слайдер — не перехватывать. */
-      var PULL_SKIP_INTERACTIVE = PULL_SKIP_INTERACTIVE_BASE + ', .logo-bg, .logo-controls';
+      /** Вертикальный pull: с .logo-bg разрешён (шапка «Збруев»); слайдер масштаба — по-прежнему исключить. */
+      var PULL_SKIP_INTERACTIVE = PULL_SKIP_INTERACTIVE_BASE + ', .logo-controls';
       /** Свайп «ассистент» вправо: можно с фона шапки и с .logo-bg; слайдер масштаба — по-прежнему исключить. */
       var ASSIST_SWIPE_SKIP_INTERACTIVE = PULL_SKIP_INTERACTIVE_BASE + ', .logo-controls';
 
@@ -11365,6 +11365,18 @@
             if (arx > 14 && arx >= ary * 0.82) {
               assistFromLogoBg = false;
             } else if (ary > 16 && ary > arx * 1.15) {
+              var scrollTopPull =
+                window.scrollY ||
+                document.documentElement.scrollTop ||
+                (document.body && document.body.scrollTop) ||
+                0;
+              /* У верха: свайп вниз — pull-to-reload (touch), не перехватывать в перетаскивание логотипа. */
+              if (scrollTopPull <= 10 && rdy > 16) {
+                assistFromLogoBg = false;
+                activePid = null;
+                assistOpenGesturePid = null;
+                return;
+              }
               assistFromLogoBg = false;
               activePid = null;
               assistOpenGesturePid = null;
