@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v215: Sam Scenes — ключи storage samscenes-* (миграция с abakan-* при первом заходе) -->
+<!-- v216: без фиолетового свечения у карточек сценарий/план дня/подготовка -->
 <html lang="ru" style="--logo-x: 0px; --logo-y: 0px; --logo-scale: 2.00; --top-logo-blur: 0px;">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -13,7 +13,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Sam Scenes (v215)</title>
+  <title>Sam Scenes (v216)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -1379,57 +1379,6 @@
       padding: 2px 8px;
       color: var(--label);
       white-space: nowrap;
-    }
-
-    /* Сценарии, план дня, подготовка — полупрозрачные карточки + явное фиолетовое свечение (как у остального UI) */
-    #scenario-hub.card,
-    #daily-plan.card,
-    .card.card-prep {
-      background: rgba(0, 0, 0, 0.48);
-      border-color: rgba(200, 185, 255, 0.38);
-      backdrop-filter: blur(16px) saturate(1.06);
-      -webkit-backdrop-filter: blur(16px) saturate(1.06);
-      box-shadow:
-        0 10px 28px rgba(0, 0, 0, 0.34),
-        inset 0 1px 0 rgba(255, 244, 220, 0.1),
-        inset 0 -1px 0 rgba(255, 228, 160, 0.08),
-        0 0 40px -10px rgba(165, 145, 235, 0.38),
-        0 0 64px -12px rgba(145, 120, 210, 0.32),
-        0 0 88px -20px rgba(130, 95, 200, 0.22);
-    }
-
-    .scenario-hub > summary,
-    .daily-plan > summary {
-      background: rgba(9, 9, 9, 0.48);
-      border-bottom-color: rgba(175, 155, 240, 0.42);
-      backdrop-filter: blur(12px) saturate(1.04);
-      -webkit-backdrop-filter: blur(12px) saturate(1.04);
-      box-shadow: inset 0 -1px 0 rgba(145, 120, 210, 0.2);
-    }
-
-    @media (prefers-reduced-transparency: reduce) {
-      #scenario-hub.card,
-      #daily-plan.card,
-      .card.card-prep {
-        background: #0a0a0a;
-        border-color: rgba(255, 228, 160, 0.22);
-        backdrop-filter: none;
-        -webkit-backdrop-filter: none;
-        box-shadow:
-          0 10px 28px rgba(0, 0, 0, 0.34),
-          inset 0 1px 0 rgba(255, 244, 220, 0.1),
-          inset 0 -1px 0 rgba(255, 228, 160, 0.08),
-          0 0 36px -12px var(--ui-violet-soft);
-      }
-
-      .scenario-hub > summary,
-      .daily-plan > summary {
-        background: #090909;
-        border-bottom-color: rgba(255, 228, 160, 0.16);
-        backdrop-filter: none;
-        -webkit-backdrop-filter: none;
-        box-shadow: none;
-      }
     }
 
     .card > h2 {
@@ -4724,8 +4673,8 @@
        * Дублируйте те же поля в build-info.json — подпись внизу подгружает его с cache: no-store,
        * чтобы не залипала старая версия при закэшированном index.html.
        */
-      var APP_VERSION = 'v215';
-      var BUILD_TIME = '2026-05-03 09:06 MSK';
+      var APP_VERSION = 'v216';
+      var BUILD_TIME = '2026-05-03 10:05 MSK';
       var APP_BUILD = APP_VERSION + ' · ' + BUILD_TIME;
       var BUILD_INFO_FILE = 'build-info.json';
       var lastSceneTimeTriggerTouchAt = 0;
