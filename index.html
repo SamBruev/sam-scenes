@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v173: панель ассистента — новый план; + накопленные фиксы summary/gestures, intro-линия, лампа -->
+<!-- v179: панель ассистента слева — ширина ⅔ экрана -->
 <html lang="ru" style="--logo-x: 0px; --logo-y: 0px; --logo-scale: 2.00; --top-logo-blur: 0px;">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Sam Scenes (v173)</title>
+  <title>Sam Scenes (v179)</title>
   <!-- До отрисовки тела: восстановить скролл после reload без «прыжка» картинки/фона -->
   <script>
     (function () {
@@ -78,7 +78,8 @@
       --script-font: "Pacifico", cursive;
       --brand-serif: "Roboto Slab", Georgia, "Times New Roman", serif;
       --top-logo-space: 34vh;
-      --assistant-drawer-w: min(50vw, 380px);
+      /* Панель слева: две трети ширины вьюпорта */
+      --assistant-drawer-w: calc(100vw * 2 / 3);
     }
 
     /* Фон: body::before fixed — одинаково на iPhone при скролле; слой лампы — data URI + градиенты (см. также top-lamp-bg у логотипа). */
@@ -211,7 +212,7 @@
       bottom: 0;
       left: 0;
       width: var(--assistant-drawer-w);
-      max-width: 88vw;
+      max-width: 100vw;
       z-index: 2147483639;
       box-sizing: border-box;
       margin: 0;
@@ -742,9 +743,9 @@
       display: block;
       width: 100%;
       color: var(--muted);
-      letter-spacing: 0.22em;
-      font-weight: 700;
-      font-size: 11px;
+      letter-spacing: 0.18em;
+      font-weight: 800;
+      font-size: clamp(14px, 3.8vw, 20px);
       text-transform: uppercase;
       text-align: center;
     }
@@ -839,7 +840,6 @@
     }
 
     .card::before,
-    .shotlist-loc::before,
     .scene-controls::before {
       content: '';
       position: absolute;
@@ -860,6 +860,12 @@
       list-style: none;
       cursor: pointer;
       user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      width: 100%;
+      box-sizing: border-box;
       padding: 14px 18px;
       font-weight: 800;
       letter-spacing: 0.08em;
@@ -867,6 +873,13 @@
       color: var(--cream);
       border-bottom: 1px solid rgba(255, 228, 160, 0.16);
       background: #090909;
+      -webkit-tap-highlight-color: rgba(212, 175, 55, 0.2);
+    }
+
+    .scenario-hub > summary .details-summary-label {
+      flex: 1;
+      min-width: 0;
+      text-align: left;
     }
 
     .scenario-hub > summary::-webkit-details-marker {
@@ -875,7 +888,8 @@
 
     .scenario-hub > summary::after {
       content: '▾';
-      float: right;
+      float: none;
+      flex-shrink: 0;
       opacity: 0.8;
       transition: transform 0.18s ease;
     }
@@ -1043,6 +1057,12 @@
       list-style: none;
       cursor: pointer;
       user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      width: 100%;
+      box-sizing: border-box;
       padding: 14px 18px;
       font-weight: 800;
       letter-spacing: 0.08em;
@@ -1050,6 +1070,13 @@
       color: var(--cream);
       border-bottom: 1px solid rgba(255, 228, 160, 0.16);
       background: #090909;
+      -webkit-tap-highlight-color: rgba(212, 175, 55, 0.2);
+    }
+
+    .daily-plan > summary .details-summary-label {
+      flex: 1;
+      min-width: 0;
+      text-align: left;
     }
 
     .daily-plan > summary::-webkit-details-marker {
@@ -1058,7 +1085,8 @@
 
     .daily-plan > summary::after {
       content: '▾';
-      float: right;
+      float: none;
+      flex-shrink: 0;
       opacity: 0.8;
       transition: transform 0.18s ease;
     }
@@ -1297,29 +1325,6 @@
       box-shadow: 0 10px 26px rgba(0, 0, 0, 0.45);
       overflow: visible;
       position: relative;
-    }
-
-    /* Верхняя «обводка»: заметна у закруглений, к середине растворяется */
-    .scene::before {
-      content: "";
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 0;
-      height: 2px;
-      border-radius: 22px 22px 0 0;
-      pointer-events: none;
-      z-index: 3;
-      background: linear-gradient(
-        90deg,
-        rgba(255, 244, 220, 0.58) 0%,
-        rgba(212, 175, 55, 0.38) 18%,
-        rgba(212, 175, 55, 0.12) 38%,
-        transparent 50%,
-        rgba(212, 175, 55, 0.12) 62%,
-        rgba(212, 175, 55, 0.38) 82%,
-        rgba(255, 244, 220, 0.58) 100%
-      );
     }
 
     .scene.scene-main.scene-shot-complete {
@@ -2297,6 +2302,12 @@
       box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.15);
     }
 
+    /* Тач без «клавиатурного» focus-visible: без золотой обводки после закрытия picker — см. blur после change в скрипте */
+    select.scene-select:focus:not(:focus-visible) {
+      border-color: rgba(255, 228, 160, 0.22);
+      box-shadow: none;
+    }
+
     [contenteditable="true"] { outline: none; }
     [contenteditable="true"]:focus { border-color: var(--focus); background: rgba(212, 175, 55, 0.07); border-radius: 12px; }
 
@@ -2393,9 +2404,9 @@
       left: 50%;
       top: calc(10px + env(safe-area-inset-top, 0px));
       z-index: 2147483000;
-      width: 28px;
-      height: 28px;
-      margin-left: -14px;
+      width: 52px;
+      height: 52px;
+      margin-left: -26px;
       border-radius: 0;
       background: transparent;
       box-shadow: none;
@@ -2403,7 +2414,7 @@
       pointer-events: none;
       overflow: visible;
       /* Одна формула transform: без inline-анимации translate — иначе дёргается */
-      transform: translateY(calc(-16px + var(--pull-dot-y, 0px))) scale(var(--pull-dot-s, 0.85));
+      transform: translateY(calc(-22px + var(--pull-dot-y, 0px))) scale(var(--pull-dot-s, 0.85));
       transition:
         opacity 0.42s cubic-bezier(0.22, 1, 0.36, 1),
         transform 0.48s cubic-bezier(0.22, 1, 0.36, 1),
@@ -2989,13 +3000,10 @@
         row-gap: 4px;
       }
 
-      /* Возвращаем нативную iPhone-анимацию открытия списков */
+      /* Нативная анимация только у хаба подготовки — селекты сцен/шотлиста остаются кастомными (золото/чёрный, без зелёного iOS-accent) */
       .scenario-hub select,
       .field select.prep-select,
-      .field select.format-select,
-      select.scene-select,
-      select.scene-time-select,
-      .shotlist-piece-digit {
+      .field select.format-select {
         -webkit-appearance: menulist;
         appearance: auto;
         background-image: none;
@@ -3187,8 +3195,8 @@
       class="pull-reload-hint-video"
       src="media/symbol-lamp.svg"
       alt=""
-      width="80"
-      height="80"
+      width="128"
+      height="128"
       decoding="async"
       draggable="false" />
   </div>
@@ -3212,7 +3220,7 @@
     </div>
 
     <details class="card scenario-hub" id="scenario-hub" open>
-      <summary>Настройки сценариев</summary>
+      <summary><span class="details-summary-label">Настройки сценариев</span></summary>
       <div class="scenario-hub-body">
         <div class="scenario-hub-assist-row">
           <button type="button" class="btn-assistant-plan" id="btn-assistant-plan-open">
@@ -3264,7 +3272,7 @@
     </details>
 
     <details class="card daily-plan" id="daily-plan" open>
-      <summary>План дня</summary>
+      <summary><span class="details-summary-label">План дня</span></summary>
       <div class="daily-plan-body">
         <div class="plan-summary" id="plan-summary">Нет данных.</div>
         <div class="plan-list" id="plan-list"></div>
@@ -4250,7 +4258,7 @@
       }
 
       /** Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages). */
-      var APP_VERSION = 'v173';
+      var APP_VERSION = 'v179';
       var BUILD_TIME = '2026-05-03 05:49 MSK';
       var APP_BUILD = APP_VERSION + ' · ' + BUILD_TIME;
       var lastSceneTimeTriggerTouchAt = 0;
@@ -7083,17 +7091,32 @@
           triggerHaptic('light');
         }, true);
 
-        // iOS/Yandex: снимаем фокус после выбора — иначе :focus + нативный sheet оставляют подсветку,
-        // и касание по тому же полю не открывает picker сразу. Двойной rAF — после закрытия нативного UI.
+        // iOS: после выбора в нативном списке фокус остаётся/возвращается на <select> — повторный тап не открывает sheet,
+        // пока не погаснет :focus. Один rAF слишком рано: sheet ещё закрывается. Несколько blur с задержками.
+        function scheduleSelectBlurAfterNativeChoice(sel) {
+          if (!sel || sel.nodeName !== 'SELECT') return;
+          if (sel.classList && sel.classList.contains('shotlist-piece-digit')) return;
+          function doBlur() {
+            try {
+              if (document.activeElement === sel) sel.blur();
+            } catch (err) {}
+          }
+          doBlur();
+          requestAnimationFrame(function () {
+            doBlur();
+            requestAnimationFrame(function () {
+              doBlur();
+            });
+          });
+          [32, 80, 160, 320, 520].forEach(function (ms) {
+            setTimeout(doBlur, ms);
+          });
+        }
         document.addEventListener('change', function (e) {
           var t = e.target;
           if (!t || !t.matches || !t.matches('select')) return;
           if (t.classList && t.classList.contains('shotlist-piece-digit')) return;
-          requestAnimationFrame(function () {
-            requestAnimationFrame(function () {
-              try { t.blur(); } catch (err) {}
-            });
-          });
+          scheduleSelectBlurAfterNativeChoice(t);
         }, true);
 
         document.addEventListener('visibilitychange', function () {
@@ -7265,6 +7288,26 @@
         window.addEventListener('scroll', onScroll, { passive: true });
         window.addEventListener('resize', onScroll, { passive: true });
         updateTopLogoScrollBlur();
+      }
+
+      /** Вся полоса заголовка переключает раскрытие; на iOS у нативного summary иногда срабатывает только стрелка. */
+      function wireDetailsSummaryRowToggle() {
+        if (wireDetailsSummaryRowToggle._done) return;
+        wireDetailsSummaryRowToggle._done = true;
+        ['scenario-hub', 'daily-plan'].forEach(function (id) {
+          var det = document.getElementById(id);
+          if (!det || det.tagName !== 'DETAILS') return;
+          var sum = det.querySelector(':scope > summary');
+          if (!sum) return;
+          sum.addEventListener(
+            'click',
+            function (e) {
+              e.preventDefault();
+              det.open = !det.open;
+            },
+            true
+          );
+        });
       }
 
       function wirePullDownReload() {
@@ -7663,6 +7706,7 @@
 
       loadFromStorage();
       wireTopLogoScrollBlur();
+      wireDetailsSummaryRowToggle();
       wirePullDownReload();
       wireAssistantDrawer();
       wireAssistantDrawerCloseSwipe();
