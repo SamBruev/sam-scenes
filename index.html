@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Сценарий видео / Sam Bruev (v154)</title>
+  <title>Сценарий видео / Sam Bruev (v155)</title>
   <!-- До отрисовки тела: восстановить скролл после reload без «прыжка» картинки/фона -->
   <script>
     (function () {
@@ -467,7 +467,8 @@
       padding-left: max(14px, env(safe-area-inset-left));
       padding-right: max(14px, env(safe-area-inset-right));
       box-sizing: border-box;
-      z-index: 0;
+      /* Выше карточек .wrap (у них z-index: 2), ниже .assistant-open-strip (100) */
+      z-index: 10;
       pointer-events: none;
     }
 
@@ -3885,8 +3886,8 @@
       }
 
       /** Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages). */
-      var APP_VERSION = 'v154';
-      var BUILD_TIME = '2026-05-03 08:25 MSK';
+      var APP_VERSION = 'v155';
+      var BUILD_TIME = '2026-05-03 08:40 MSK';
       var APP_BUILD = APP_VERSION + ' · ' + BUILD_TIME;
       var lastSceneTimeTriggerTouchAt = 0;
       var APP_BUILD_KEY = 'abakan-app-build';
