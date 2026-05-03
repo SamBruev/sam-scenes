@@ -393,6 +393,80 @@
       box-shadow: 0 0 12px rgba(212, 175, 55, 0.22);
     }
 
+    /* Требования к материалам перед сведением */
+    .card--briefing {
+      border-color: rgba(255, 214, 130, 0.32);
+    }
+
+    .card--briefing h2 {
+      letter-spacing: 0.03em;
+    }
+
+    .briefing-lead {
+      margin: 0 0 0.95rem;
+      font-size: 0.8875rem;
+      font-weight: 600;
+      color: rgba(248, 242, 232, 0.96);
+      line-height: 1.53;
+    }
+
+    .briefing-list {
+      list-style: none;
+      margin: 0 0 1rem;
+      padding: 0.85rem 0.95rem;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 228, 160, 0.1);
+      background: rgba(0, 0, 0, 0.28);
+    }
+
+    .briefing-list li {
+      position: relative;
+      padding-left: 1rem;
+      margin-bottom: 0.62rem;
+      font-size: 0.8375rem;
+      color: var(--text);
+      line-height: 1.5;
+      font-weight: 600;
+    }
+
+    .briefing-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    .briefing-list li::before {
+      content: "";
+      position: absolute;
+      left: 2px;
+      top: 0.55em;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: rgba(232, 201, 104, 0.85);
+    }
+
+    .briefing-list strong {
+      font-weight: 700;
+      color: rgba(243, 236, 224, 0.96);
+    }
+
+    .briefing-consequence,
+    .briefing-fee {
+      margin: 0 0 0.82rem;
+      font-size: 0.8375rem;
+      color: var(--muted);
+      line-height: 1.55;
+      font-weight: 400;
+    }
+
+    .briefing-fee:last-child {
+      margin-bottom: 0;
+    }
+
+    .briefing-fee strong {
+      color: rgba(232, 201, 104, 0.95);
+      font-weight: 700;
+    }
+
     footer {
       margin-top: 2.85rem;
       text-align: center;
@@ -560,6 +634,22 @@
         </video>
       </div>
       <p class="note">Свой ролик: <code>&lt;source src=&quot;moj-rolik.mp4&quot; type=&quot;video/mp4&quot;&gt;</code>. Дублируйте блоки <code>.card</code> для новых работ.</p>
+    </article>
+
+    <article class="card card--briefing">
+      <div class="tag-row">
+        <span class="tag">Сведение</span>
+        <span class="tag">Подготовка файлов</span>
+      </div>
+      <h2>Перед отправкой на сведение</h2>
+      <p class="meta">Обязательно для старта по срокам.</p>
+      <p class="briefing-lead">Пожалуйста, прежде чем отправить мне работу на сведение, проверьте, что выполнены все пункты:</p>
+      <ul class="briefing-list">
+        <li>частота дискретизации и битность — <strong>не ниже 48&nbsp;кГц и 24&nbsp;bit</strong>;</li>
+        <li>названия аудиофайлов — <strong>предельно ясные и короткие</strong>.</li>
+      </ul>
+      <p class="briefing-consequence">В противном случае я не смогу приступить к своей работе вовремя.</p>
+      <p class="briefing-fee">Если у вас нет возможности сделать эту работу самостоятельно, возможна добавочная стоимость <strong>3000&nbsp;₽</strong>: это примерно час, чтобы разобраться, какой аудиофайл за что отвечает.</p>
     </article>
 
     <footer>
