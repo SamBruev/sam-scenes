@@ -269,11 +269,223 @@
         inset 0 -8px 24px rgba(0, 0, 0, 0.35);
     }
 
-    .media-shell audio,
-    .media-shell video {
+    /* Кастомный плеер: круглый Play + дорожка с лампой вместо «белой точки» */
+    .portfolio-player {
       width: 100%;
+      position: relative;
+      --pp: 0;
+    }
+
+    .portfolio-player--audio > audio {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      border: 0;
+      clip: rect(0, 0, 0, 0);
+    }
+
+    .portfolio-player--video {
+      position: relative;
+    }
+
+    .portfolio-player--video > video {
       display: block;
+      width: 100%;
+      max-height: 360px;
       border-radius: 10px;
+      background: #000;
+      outline: none;
+    }
+
+    .portfolio-player--greeting.portfolio-player--video > video {
+      max-height: min(78vh, 520px);
+      aspect-ratio: 16 / 9;
+      object-fit: contain;
+      background: radial-gradient(ellipse at center 30%, rgba(30, 28, 24, 0.92), #000000 78%);
+    }
+
+    .portfolio-player__overlay-play {
+      position: absolute;
+      left: 50%;
+      top: 42%;
+      transform: translate(-50%, -50%);
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 228, 160, 0.42);
+      background: radial-gradient(circle at 35% 28%, rgba(58, 52, 44, 0.65), rgba(6, 6, 6, 0.92));
+      color: rgba(248, 220, 150, 0.96);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.26s ease, border-color 0.2s ease;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55);
+      z-index: 4;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .portfolio-player__overlay-play:focus-visible {
+      outline: 2px solid rgba(232, 201, 104, 0.55);
+      outline-offset: 3px;
+    }
+
+    .portfolio-player__overlay-play:hover {
+      border-color: rgba(255, 236, 200, 0.62);
+    }
+
+    .portfolio-player--video.is-playing .portfolio-player__overlay-play {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .portfolio-player__bar {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      margin-top: 0.72rem;
+    }
+
+    .portfolio-player__toggle {
+      flex-shrink: 0;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      padding: 0;
+      cursor: pointer;
+      border: 1px solid rgba(255, 228, 160, 0.26);
+      background: radial-gradient(circle at 30% 24%, rgba(52, 48, 38, 0.92), rgba(8, 8, 8, 0.96));
+      color: rgba(232, 201, 104, 0.96);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 248, 220, 0.07),
+        0 2px 14px rgba(0, 0, 0, 0.42);
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .portfolio-player__toggle:hover {
+      color: rgba(255, 238, 210, 1);
+      border-color: rgba(255, 228, 160, 0.34);
+    }
+
+    .portfolio-player__toggle:focus-visible {
+      outline: 2px solid rgba(232, 201, 104, 0.5);
+      outline-offset: 2px;
+    }
+
+    .portfolio-player__ic {
+      width: 21px;
+      height: 21px;
+      display: block;
+    }
+
+    .portfolio-player__ic--play {
+      margin-left: 3px;
+    }
+
+    .portfolio-player__seek {
+      position: relative;
+      flex: 1;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      padding: 0 2px;
+      cursor: pointer;
+      touch-action: none;
+      border-radius: 10px;
+    }
+
+    .portfolio-player__seek:focus-visible {
+      outline: 1px solid rgba(255, 228, 160, 0.25);
+      outline-offset: 2px;
+    }
+
+    .portfolio-player__rail-line {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 5px;
+      border-radius: 999px;
+      background: rgba(255, 248, 230, 0.1);
+      pointer-events: none;
+    }
+
+    .portfolio-player__progress-line {
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 5px;
+      width: calc((100% - 36px) * var(--pp, 0));
+      border-radius: 999px;
+      pointer-events: none;
+      max-width: calc(100% - 36px);
+      background: linear-gradient(
+        90deg,
+        rgba(212, 175, 55, 0.42),
+        rgba(250, 224, 150, 0.98)
+      );
+      box-shadow: 0 0 12px rgba(212, 175, 55, 0.18);
+    }
+
+    .portfolio-player__thumb {
+      position: absolute;
+      left: calc(18px + (100% - 36px) * var(--pp, 0));
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      margin: 0;
+      border: none;
+      background: transparent;
+      cursor: grab;
+      z-index: 2;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      filter:
+        drop-shadow(0 2px 3px rgba(0, 0, 0, 0.8))
+        drop-shadow(0 0 14px rgba(212, 175, 55, 0.22));
+      touch-action: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .portfolio-player__thumb:active {
+      cursor: grabbing;
+    }
+
+    .portfolio-player__thumb:focus-visible {
+      outline: 2px solid rgba(232, 201, 104, 0.45);
+      outline-offset: 2px;
+    }
+
+    .portfolio-player__thumb img {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+      pointer-events: none;
+      display: block;
+    }
+
+    .portfolio-player__time {
+      flex-shrink: 0;
+      min-width: 7rem;
+      text-align: right;
+      font-size: 0.66rem;
+      font-weight: 700;
+      letter-spacing: 0.055em;
+      color: rgba(182, 172, 158, 0.96);
+      font-variant-numeric: tabular-nums;
     }
 
     /* Демо ↔ мастер: две дорожки в ряд на широком экране */
@@ -307,32 +519,9 @@
       color: rgba(232, 201, 104, 0.92);
     }
 
-    audio {
-      height: 48px;
-    }
-
-    video {
-      max-height: 360px;
-      background: #000;
-    }
-
     /* Первое на странице: обращение к зрителю */
     .card--greeting {
       margin-top: 0;
-    }
-
-    .card--greeting video {
-      max-height: min(78vh, 520px);
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      object-fit: contain;
-      background: radial-gradient(ellipse at center 30%, rgba(30, 28, 24, 0.9), #000000 75%);
-    }
-
-    /* Тёмные панели контролов — убираем «зелёный» дефолт где возможно */
-    audio::-webkit-media-controls-panel,
-    video::-webkit-media-controls-panel {
-      background: linear-gradient(180deg, #1a1814, #0c0b09) !important;
     }
 
     .note {
@@ -619,12 +808,16 @@
       <h2>Видеообращение</h2>
       <p class="meta">Короткое знакомство — кто делает записи и сведение, чем могу быть полезен.</p>
       <div class="media-shell">
-        <video controls playsinline preload="metadata">
-          <!-- Своё видео: положите MP4 рядом с этой страницей в portfolio-video/obraschenie.mp4 -->
-          <source src="portfolio-video/obraschenie.mp4" type="video/mp4">
-          <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4">
-          Ваш браузер не поддерживает воспроизведение видео.
-        </video>
+        <div class="portfolio-player portfolio-player--video portfolio-player--greeting" data-player>
+          <video playsinline preload="metadata">
+            <source src="portfolio-video/obraschenie.mp4" type="video/mp4">
+            <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4">
+            Ваш браузер не поддерживает воспроизведение видео.
+          </video>
+          <button type="button" class="portfolio-player__overlay-play" aria-label="Воспроизвести">
+            <svg viewBox="0 0 24 24" width="34" height="34" aria-hidden="true"><path fill="currentColor" d="M10 8.065v7.87L16.956 12 10 8.065z"/></svg>
+          </button>
+        </div>
       </div>
       <p class="note">Подмените файл <code>portfolio-video/obraschenie.mp4</code> на свой ролик; второй источник в коде — только запасной пример до загрузки.</p>
     </article>
@@ -672,11 +865,15 @@
       <div class="compare-pair">
         <div class="media-shell">
           <span class="compare-label compare-label--demo">Демо</span>
-          <audio controls preload="metadata" src="portfolio-audio/drums-demo.m4a"></audio>
+          <div class="portfolio-player portfolio-player--audio" data-player>
+            <audio preload="metadata" playsinline src="portfolio-audio/drums-demo.m4a"></audio>
+          </div>
         </div>
         <div class="media-shell">
           <span class="compare-label compare-label--master">Мастер</span>
-          <audio controls preload="metadata" src="portfolio-audio/drums-master.m4a"></audio>
+          <div class="portfolio-player portfolio-player--audio" data-player>
+            <audio preload="metadata" playsinline src="portfolio-audio/drums-master.m4a"></audio>
+          </div>
         </div>
       </div>
     </article>
@@ -690,11 +887,15 @@
       <div class="compare-pair">
         <div class="media-shell">
           <span class="compare-label compare-label--demo">Демо</span>
-          <audio controls preload="metadata" src="portfolio-audio/vocals-demo.m4a"></audio>
+          <div class="portfolio-player portfolio-player--audio" data-player>
+            <audio preload="metadata" playsinline src="portfolio-audio/vocals-demo.m4a"></audio>
+          </div>
         </div>
         <div class="media-shell">
           <span class="compare-label compare-label--master">Мастер</span>
-          <audio controls preload="metadata" src="portfolio-audio/vocals-master.m4a"></audio>
+          <div class="portfolio-player portfolio-player--audio" data-player>
+            <audio preload="metadata" playsinline src="portfolio-audio/vocals-master.m4a"></audio>
+          </div>
         </div>
       </div>
     </article>
@@ -708,11 +909,15 @@
       <div class="compare-pair">
         <div class="media-shell">
           <span class="compare-label compare-label--demo">Демо</span>
-          <audio controls preload="metadata" src="portfolio-audio/guitars-demo.m4a"></audio>
+          <div class="portfolio-player portfolio-player--audio" data-player>
+            <audio preload="metadata" playsinline src="portfolio-audio/guitars-demo.m4a"></audio>
+          </div>
         </div>
         <div class="media-shell">
           <span class="compare-label compare-label--master">Мастер</span>
-          <audio controls preload="metadata" src="portfolio-audio/guitars-master.m4a"></audio>
+          <div class="portfolio-player portfolio-player--audio" data-player>
+            <audio preload="metadata" playsinline src="portfolio-audio/guitars-master.m4a"></audio>
+          </div>
         </div>
       </div>
       <p class="note">Сейчас в плеерах заглушки (короткая тишина, .m4a). Замените файлы в <code>portfolio-audio/</code> на свои дорожки, сохранив имена или поменяв пути в HTML. Поддерживаются и <code>.mp3</code>, и <code>.wav</code> — просто переименуйте <code>src</code>.</p>
@@ -726,10 +931,15 @@
       <h2>Дополнительное видео</h2>
       <p class="meta">Сюда можно вложить второй материал: клип, бэкстейдж или запись сессии.</p>
       <div class="media-shell">
-        <video controls playsinline preload="metadata">
-          <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4">
-          Ваш браузер не поддерживает воспроизведение видео.
-        </video>
+        <div class="portfolio-player portfolio-player--video" data-player>
+          <video playsinline preload="metadata">
+            <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4">
+            Ваш браузер не поддерживает воспроизведение видео.
+          </video>
+          <button type="button" class="portfolio-player__overlay-play" aria-label="Воспроизвести">
+            <svg viewBox="0 0 24 24" width="34" height="34" aria-hidden="true"><path fill="currentColor" d="M10 8.065v7.87L16.956 12 10 8.065z"/></svg>
+          </button>
+        </div>
       </div>
       <p class="note">Свой ролик: <code>&lt;source src=&quot;moj-rolik.mp4&quot; type=&quot;video/mp4&quot;&gt;</code>. Дублируйте блоки <code>.card</code> для новых работ.</p>
     </article>
@@ -756,6 +966,167 @@
       <span class="site-footer__production">Music production</span>
     </footer>
   </div>
+
+  <template id="portfolio-player-bar-tmpl">
+    <div class="portfolio-player__bar">
+      <button type="button" class="portfolio-player__toggle" aria-label="Воспроизвести">
+        <svg class="portfolio-player__ic portfolio-player__ic--play" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 6.82v10.36c0 .79.87 1.27 1.54.84l8.14-5.18a1 1 0 000-1.69L9.54 5.98A.998.998 0 008 6.82z"/></svg>
+        <svg class="portfolio-player__ic portfolio-player__ic--pause" hidden viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 19h4V5H8v14zm6-14v14h4V5h-4z"/></svg>
+      </button>
+      <div class="portfolio-player__seek" data-hit tabindex="0" role="slider" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Позиция на дорожке">
+        <span class="portfolio-player__rail-line" aria-hidden="true"></span>
+        <span class="portfolio-player__progress-line" aria-hidden="true"></span>
+        <button type="button" class="portfolio-player__thumb" aria-label="Лампа — перемотка">
+          <img src="portfolio-lamp-knob.svg" alt="" decoding="async" />
+        </button>
+      </div>
+      <span class="portfolio-player__time">0:00 / —:—</span>
+    </div>
+  </template>
+
+  <script>
+    (function () {
+      function formatPortfolioTime(sec) {
+        if (!isFinite(sec) || sec < 0) return "—:—";
+        var m = Math.floor(sec / 60);
+        var s = Math.floor(sec % 60);
+        return m + ":" + (s < 10 ? "0" : "") + s;
+      }
+
+      function wirePortfolioPlayer(box) {
+        var media = box.querySelector("audio, video");
+        var tmplEl = document.getElementById("portfolio-player-bar-tmpl");
+        if (!media || !tmplEl || box.dataset.portfolioPlayerWired === "1") return;
+        box.dataset.portfolioPlayerWired = "1";
+        box.appendChild(tmplEl.content.cloneNode(true));
+
+        var bar = box.querySelector(".portfolio-player__bar");
+        if (!bar) return;
+        var btn = bar.querySelector(".portfolio-player__toggle");
+        var playIc = bar.querySelector(".portfolio-player__ic--play");
+        var pauseIc = bar.querySelector(".portfolio-player__ic--pause");
+        var seek = bar.querySelector("[data-hit]");
+        var thumb = bar.querySelector(".portfolio-player__thumb");
+        var timeEl = bar.querySelector(".portfolio-player__time");
+        var overlay = box.querySelector(".portfolio-player__overlay-play");
+
+        function setPct(pct) {
+          pct = Math.max(0, Math.min(1, pct));
+          seek.style.setProperty("--pp", String(pct));
+          seek.setAttribute("aria-valuenow", String(Math.round(pct * 100)));
+        }
+
+        function pctFromClientX(cx) {
+          var rect = seek.getBoundingClientRect();
+          var pad = 18;
+          var usable = rect.width - pad * 2;
+          if (usable <= 0) return 0;
+          var x = cx - rect.left - pad;
+          return Math.max(0, Math.min(1, x / usable));
+        }
+
+        function refreshTimeUi() {
+          var cur = formatPortfolioTime(media.currentTime);
+          var dur = media.duration;
+          var total =
+            dur && isFinite(dur) && dur > 0 ? formatPortfolioTime(dur) : "—:—";
+          timeEl.textContent = cur + " / " + total;
+          var pct =
+            dur && isFinite(dur) && dur > 0 ? media.currentTime / dur : 0;
+          setPct(pct);
+        }
+
+        function syncToggleUi() {
+          var paused = media.paused;
+          btn.setAttribute("aria-label", paused ? "Воспроизвести" : "Пауза");
+          playIc.hidden = !paused;
+          pauseIc.hidden = paused;
+          box.classList.toggle("is-playing", !paused);
+        }
+
+        function togglePlay() {
+          if (media.paused) {
+            media.play().catch(function () {});
+          } else {
+            media.pause();
+          }
+        }
+
+        btn.addEventListener("click", togglePlay);
+        if (overlay) overlay.addEventListener("click", togglePlay);
+
+        media.addEventListener("timeupdate", refreshTimeUi);
+        media.addEventListener("durationchange", refreshTimeUi);
+        media.addEventListener("loadedmetadata", refreshTimeUi);
+        media.addEventListener("progress", refreshTimeUi);
+        media.addEventListener("ended", refreshTimeUi);
+        media.addEventListener("play", syncToggleUi);
+        media.addEventListener("pause", syncToggleUi);
+
+        seek.addEventListener("click", function (evt) {
+          if (evt.target.closest(".portfolio-player__thumb")) return;
+          var dur = media.duration;
+          if (!dur || !isFinite(dur)) return;
+          var p = pctFromClientX(evt.clientX);
+          setPct(p);
+          media.currentTime = p * dur;
+          refreshTimeUi();
+        });
+
+        seek.addEventListener("keydown", function (evt) {
+          if (evt.key !== "ArrowLeft" && evt.key !== "ArrowRight") return;
+          evt.preventDefault();
+          var dur = media.duration;
+          if (!dur || !isFinite(dur)) return;
+          var dt = dur * (evt.key === "ArrowRight" ? 0.035 : -0.035);
+          media.currentTime = Math.max(0, Math.min(dur, media.currentTime + dt));
+          refreshTimeUi();
+        });
+
+        thumb.addEventListener("click", function (e) {
+          e.stopPropagation();
+        });
+
+        var dragging = false;
+        thumb.addEventListener("pointerdown", function (ev) {
+          dragging = true;
+          thumb.setPointerCapture(ev.pointerId);
+        });
+        thumb.addEventListener("pointermove", function (ev) {
+          if (!dragging) return;
+          var dur = media.duration;
+          if (!dur || !isFinite(dur)) return;
+          var p = pctFromClientX(ev.clientX);
+          setPct(p);
+          media.currentTime = p * dur;
+          refreshTimeUi();
+        });
+
+        function endDrag(ev) {
+          if (!dragging) return;
+          dragging = false;
+          try {
+            thumb.releasePointerCapture(ev.pointerId);
+          } catch (err) {}
+        }
+        thumb.addEventListener("pointerup", endDrag);
+        thumb.addEventListener("pointercancel", endDrag);
+
+        refreshTimeUi();
+        syncToggleUi();
+      }
+
+      function initPortfolioPlayers() {
+        document.querySelectorAll("[data-player]").forEach(wirePortfolioPlayer);
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initPortfolioPlayers);
+      } else {
+        initPortfolioPlayers();
+      }
+    })();
+  </script>
   <script>
     (function () {
       var minDownPx = 100;
