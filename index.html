@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Сценарий видео / Sam Bruev (v152)</title>
+  <title>Сценарий видео / Sam Bruev (v154)</title>
   <!-- До отрисовки тела: восстановить скролл после reload без «прыжка» картинки/фона -->
   <script>
     (function () {
@@ -781,6 +781,37 @@
       color: rgba(255, 236, 200, 0.92);
       font-variant-numeric: tabular-nums;
       line-height: 1.35;
+    }
+
+    /* Всегда видно: версия + время сборки для проверки GitHub Pages */
+    .app-build-chip {
+      position: fixed;
+      right: max(10px, env(safe-area-inset-right, 0px));
+      bottom: max(10px, env(safe-area-inset-bottom, 0px));
+      z-index: 95;
+      max-width: min(calc(100vw - 24px), 19rem);
+      padding: 5px 10px;
+      border-radius: 10px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.35;
+      color: rgba(255, 244, 218, 0.94);
+      background: rgba(12, 10, 8, 0.82);
+      border: 1px solid rgba(212, 175, 55, 0.42);
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      pointer-events: auto;
+      cursor: default;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+
+    body.assistant-drawer-open .app-build-chip {
+      opacity: 0.28;
+      pointer-events: none;
     }
 
     .scenario-hub .row {
@@ -2798,6 +2829,11 @@
   <div id="pull-reload-hint" class="pull-reload-hint" aria-hidden="true"></div>
   <div id="pull-swipe-hint" class="pull-swipe-hint" aria-hidden="true"></div>
   <div id="pull-reload-flash" class="pull-reload-flash" aria-hidden="true"></div>
+  <div
+    class="app-build-chip"
+    id="app-build-chip"
+    role="status"
+    title="Версия и время сборки на странице — сравните с последним деплоем GitHub Pages"></div>
   <div class="wrap">
     <div class="top-logo" id="top-logo-block">
       <div class="top-logo-brand">
@@ -3849,8 +3885,8 @@
       }
 
       /** Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages). */
-      var APP_VERSION = 'v152';
-      var BUILD_TIME = '2026-05-03 07:35 MSK';
+      var APP_VERSION = 'v154';
+      var BUILD_TIME = '2026-05-03 08:25 MSK';
       var APP_BUILD = APP_VERSION + ' · ' + BUILD_TIME;
       var lastSceneTimeTriggerTouchAt = 0;
       var APP_BUILD_KEY = 'abakan-app-build';
@@ -4459,6 +4495,8 @@
           APP_BUILD +
           ' — если время/версия не совпадают с последним деплоем, обновите страницу или подождите GitHub Pages.';
         if (deployTag) deployTag.textContent = buildTxt;
+        var buildChip = document.getElementById('app-build-chip');
+        if (buildChip) buildChip.textContent = APP_BUILD;
         var btnAssistHub = document.getElementById('btn-assistant-plan-open');
         if (btnAssistHub) {
           btnAssistHub.addEventListener('click', function (e) {
