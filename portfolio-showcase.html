@@ -1186,7 +1186,11 @@
 
     /* Внутри секции жанра — массивнее и контрастнее сегменты управления */
     .portfolio-genre .genre-playback-bar {
-      margin-bottom: clamp(1rem, 3.6vw, 1.52rem);
+      margin: 0 0 clamp(1rem, 3.6vw, 1.52rem);
+    }
+
+    .portfolio-genre .genre-playback-bar__row {
+      justify-content: flex-start;
     }
 
     .portfolio-genre .stem-switch {
@@ -1320,14 +1324,20 @@
       color: rgba(232, 201, 104, 0.92);
     }
 
-    /* Секции жанра — без отдельного градиентного блока, как раньше: только вертикальные отступы */
+    /* Секции жанра — на всю ширину экрана, содержимое к левому краю как у общей колонки */
     section.portfolio-genre {
       position: relative;
+      width: 100vw;
+      max-width: 100vw;
+      margin-left: calc(50% - 50vw);
+      margin-right: 0;
       margin-bottom: clamp(2rem, 5.5vw, 3.15rem);
-      padding: 0;
+      padding-left: max(env(safe-area-inset-left), clamp(1.1rem, 4.2vw, 2rem));
+      padding-right: max(env(safe-area-inset-right), clamp(1.1rem, 4.2vw, 2rem));
       border-radius: 0;
       background: transparent;
       box-shadow: none;
+      box-sizing: border-box;
     }
 
     section.portfolio-genre:last-of-type {
@@ -1337,10 +1347,10 @@
     .portfolio-genre-banner {
       display: flex;
       flex-direction: column;
-      align-items: center;
-      margin: 1.65rem auto 1.05rem;
-      padding: 0 0.5rem 0.85rem;
-      text-align: center;
+      align-items: flex-start;
+      margin: 1.65rem 0 1.05rem;
+      padding: 0 0 0.85rem;
+      text-align: left;
       border-bottom: none;
     }
 
@@ -1371,9 +1381,9 @@
       margin-top: 0.15rem;
       margin-bottom: 0.2rem;
       max-width: 42rem;
-      margin-left: auto;
+      margin-left: 0;
       margin-right: auto;
-      text-align: center;
+      text-align: left;
     }
 
     /* Первое на странице: обращение к зрителю */
