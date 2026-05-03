@@ -2910,21 +2910,30 @@
   </script>
   <script>
     (function () {
-      var minDownPx = 100;
-      var topPx = 8;
+      var pullThresholdPx = 88;
+      var topEpsPx = 6;
       var delayMs = 720;
-      var hasScrolledDown = false;
       var reloading = false;
-      var prevY = window.scrollY || document.documentElement.scrollTop || 0;
+      var wheelAccum = 0;
+      var wheelTimer = null;
 
-      function onScroll() {
+      function scrollTopNow() {
+        return window.scrollY || document.documentElement.scrollTop || 0;
+      }
+
+      function blockedGestureStart(e) {
+        var el = e.target;
+        return !!(
+          el &&
+          el.closest &&
+          el.closest(
+            "input, textarea, button, select, a, summary, video, audio, [contenteditable], .portfolio-player__seek, .compare-fusion__range, label[for], .portfolio-player__transport, .portfolio-player__thumb"
+          )
+        );
+      }
+
+      function doReload() {
         if (reloading) return;
-        var y = window.scrollY || document.documentElement.scrollTop || 0;
-        if (y > minDownPx) hasScrolledDown = true;
-        var fromAbove =
-          hasScrolledDown && prevY > topPx && y <= topPx;
-        prevY = y;
-        if (!fromAbove) return;
         reloading = true;
         document.documentElement.classList.add("refresh-at-top");
         var mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -2935,7 +2944,157 @@
         }, wait);
       }
 
-      window.addEventListener("scroll", onScroll, { passive: true });
+      /** Смартфон / тач: при жесте от верха тянуть вниз — всегда обновление, без условия «сначала уехать вниз по странице» */
+      var touchArmed = false;
+      var touchStartY = 0;
+      var touchPullMax = 0;
+
+      document.addEventListener(
+        "touchstart",
+        function (e) {
+          if (reloading || e.touches.length !== 1 || blockedGestureStart(e)) {
+            touchArmed = false;
+            return;
+          }
+          if (scrollTopNow() > topEpsPx) {
+            touchArmed = false;
+            return;
+          }
+          touchArmed = true;
+          touchStartY = e.touches[0].clientY;
+          touchPullMax = 0;
+        },
+        { passive: true }
+      );
+
+      document.addEventListener(
+        "touchmove",
+        function (e) {
+          if (!touchArmed || e.touches.length !== 1) return;
+          if (scrollTopNow() > topEpsPx) {
+            touchArmed = false;
+            return;
+          }
+          var dy = e.touches[0].clientY - touchStartY;
+          if (dy > touchPullMax) touchPullMax = dy;
+        },
+        { passive: true }
+      );
+
+      function touchPullEnd() {
+        if (!touchArmed) return;
+        touchArmed = false;
+        if (
+          scrollTopNow() <= topEpsPx &&
+          touchPullMax >= pullThresholdPx &&
+          !reloading
+        ) {
+          doReload();
+        }
+        touchPullMax = 0;
+      }
+
+      document.addEventListener("touchend", touchPullEnd, { passive: true });
+      document.addEventListener("touchcancel", touchPullEnd, {
+        passive: true
+      });
+
+      /** Мышь / трекбол у верха: удерживая кнопку, тянуть вниз (devtools, эмулятор) */
+      var ptrArmed = false;
+      var ptrStartY = 0;
+      var ptrPullMax = 0;
+      var ptrId = null;
+
+      document.addEventListener(
+        "pointerdown",
+        function (e) {
+          if (
+            reloading ||
+            e.pointerType !== "mouse" ||
+            e.button !== 0 ||
+            blockedGestureStart(e)
+          ) {
+            ptrArmed = false;
+            return;
+          }
+          if (scrollTopNow() > topEpsPx) {
+            ptrArmed = false;
+            return;
+          }
+          ptrArmed = true;
+          ptrId = e.pointerId;
+          ptrStartY = e.clientY;
+          ptrPullMax = 0;
+        },
+        { passive: true }
+      );
+
+      document.addEventListener(
+        "pointermove",
+        function (e) {
+          if (!ptrArmed || ptrId !== e.pointerId) return;
+          if (scrollTopNow() > topEpsPx) {
+            ptrArmed = false;
+            return;
+          }
+          var dy = e.clientY - ptrStartY;
+          if (dy > ptrPullMax) ptrPullMax = dy;
+        },
+        { passive: true }
+      );
+
+      function ptrPullEnd(e) {
+        if (!ptrArmed || ptrId !== e.pointerId) return;
+        ptrArmed = false;
+        ptrId = null;
+        if (
+          scrollTopNow() <= topEpsPx &&
+          ptrPullMax >= pullThresholdPx &&
+          !reloading
+        ) {
+          doReload();
+        }
+      }
+
+      document.addEventListener("pointerup", ptrPullEnd, { passive: true });
+      document.addEventListener(
+        "pointercancel",
+        function (e) {
+          if (ptrArmed && ptrId === e.pointerId) {
+            ptrArmed = false;
+            ptrId = null;
+          }
+        },
+        { passive: true }
+      );
+
+      /** Десктоп: колесо «вверх» у верха страницы — суммировать как pull */
+      window.addEventListener(
+        "wheel",
+        function (e) {
+          if (reloading || scrollTopNow() > topEpsPx) {
+            wheelAccum = 0;
+            return;
+          }
+          if (e.deltaY >= -2) return;
+          wheelAccum += -e.deltaY;
+          if (wheelTimer) clearTimeout(wheelTimer);
+          wheelTimer = window.setTimeout(function () {
+            wheelTimer = null;
+            if (
+              wheelAccum >= 110 &&
+              scrollTopNow() <= topEpsPx &&
+              !reloading
+            ) {
+              wheelAccum = 0;
+              doReload();
+              return;
+            }
+            wheelAccum = 0;
+          }, 120);
+        },
+        { passive: true }
+      );
     })();
   </script>
   <script>
