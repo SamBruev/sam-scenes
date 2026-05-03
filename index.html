@@ -13,7 +13,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Sam Scenes (v222)</title>
+  <title>Sam Scenes (v223)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -4780,9 +4780,17 @@
        * Дублируйте те же поля в build-info.json — подпись внизу подгружает его с cache: no-store,
        * чтобы не залипала старая версия при закэшированном index.html.
        */
-      var APP_VERSION = 'v222';
-      var BUILD_TIME = '2026-05-03 14:40 MSK';
-      var APP_BUILD = APP_VERSION + ' · ' + BUILD_TIME;
+      var APP_VERSION = 'v223';
+      var BUILD_TIME = '2026-05-03 15:10 MSK';
+
+      /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
+      function formatDatesInDisplayString(str) {
+        return String(str || '').replace(/\b(\d{4})-(\d{2})-(\d{2})\b/g, function (_, y, m, d) {
+          return d + '.' + m + '.' + y;
+        });
+      }
+
+      var APP_BUILD = formatDatesInDisplayString(APP_VERSION + ' · ' + BUILD_TIME);
       var BUILD_INFO_FILE = 'build-info.json';
       var lastSceneTimeTriggerTouchAt = 0;
       /** Открывать диалог времени только при коротком тапе; при скролле палец смещается сильнее. */
@@ -4964,6 +4972,22 @@
 
       function uid() {
         return 'scn-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
+      }
+
+      /** Календарная дата для подписей: день.месяц.год (в данных по-прежнему ISO YYYY-MM-DD). */
+      function formatIsoDateForDisplay(isoYmd) {
+        var s = String(isoYmd || '').trim();
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+        var p = s.split('-');
+        return p[2] + '.' + p[1] + '.' + p[0];
+      }
+
+      /** Заголовки групп по дате: ISO → DD.MM.YYYY, «Без даты» без изменений. */
+      function formatDateGroupLabel(key) {
+        var k = String(key || '').trim();
+        if (!k || k === 'Без даты') return 'Без даты';
+        if (/^\d{4}-\d{2}-\d{2}$/.test(k)) return formatIsoDateForDisplay(k);
+        return k;
       }
 
       function buildEmptyScenarioHtml(baseHtml) {
@@ -5169,7 +5193,7 @@
         planList.innerHTML = keys.map(function (k) {
           var g = groups[k];
           return '<div class="plan-row">' +
-            '<span class="date">' + k + '</span>' +
+            '<span class="date">' + formatDateGroupLabel(k) + '</span>' +
             '<span class="tag">сценариев: ' + g.scenarios + '</span>' +
             '<span class="tag">видео: ' + g.videos + '</span>' +
             '<span class="tag">готово: ' + g.ready + '</span>' +
@@ -5303,7 +5327,7 @@
             var cnt = it.targetCount ? ' · ' + it.targetCount + ' видео' : '';
             var statusMap = { draft: 'черновик', ready: 'готов', shot: 'снято' };
             var st = it.status ? ' · ' + (statusMap[it.status] || it.status) : '';
-            var dateBit = it.date ? it.date : 'без даты';
+            var dateBit = it.date ? formatIsoDateForDisplay(it.date) : 'без даты';
             opt.textContent = dateBit + ' — ' + (it.name || 'Без названия') + cnt + st;
             grp.appendChild(opt);
           });
@@ -5358,7 +5382,7 @@
         dates.forEach(function (dkey) {
           var h = document.createElement('div');
           h.className = 'assistant-drawer-date';
-          h.textContent = dkey;
+          h.textContent = formatDateGroupLabel(dkey);
           host.appendChild(h);
           byDate[dkey].forEach(function (it) {
             var btn = document.createElement('button');
@@ -5743,7 +5767,7 @@
         var v = obj.version != null ? String(obj.version) : '';
         var t = obj.build != null ? String(obj.build) : '';
         if (!v || !t) return '';
-        return v + ' · ' + t;
+        return formatDatesInDisplayString(v + ' · ' + t);
       }
 
       function applyBuildStampToUi(stamp) {
@@ -8160,7 +8184,8 @@
           var url = URL.createObjectURL(blob);
           var a = document.createElement('a');
           a.href = url;
-          a.download = 'shoot-date-' + dateInput.value + '.ics';
+          a.download =
+            'shoot-date-' + formatIsoDateForDisplay(dateInput.value).replace(/\./g, '-') + '.ics';
           document.body.appendChild(a);
           a.click();
           a.remove();
