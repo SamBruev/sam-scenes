@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v216: без фиолетового свечения у карточек сценарий/план дня/подготовка -->
+<!-- v217: плавное закрытие панели ассистента (как открытие) -->
 <html lang="ru" style="--logo-x: 0px; --logo-y: 0px; --logo-scale: 2.00; --top-logo-blur: 0px;">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -13,7 +13,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Sam Scenes (v216)</title>
+  <title>Sam Scenes (v217)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -289,6 +289,8 @@
       position: relative;
       z-index: 12;
       will-change: filter;
+      /* Тот же темп, что у панели ассистента — blur снимается плавно при закрытии */
+      transition: filter 0.38s cubic-bezier(0.25, 0.85, 0.32, 1);
     }
 
     /* Пока открыт ассистент — без подстраховки iOS всё ещё тянет страницу под blur; доп. блокировка в JS */
@@ -307,13 +309,17 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
+      .wrap {
+        transition: none;
+      }
+
       body.assistant-drawer-open .wrap {
         transition: none;
       }
     }
 
     .assistant-drawer-backdrop {
-      display: none;
+      display: block;
       position: fixed;
       top: 0;
       bottom: 0;
@@ -325,10 +331,14 @@
       touch-action: none;
       -webkit-tap-highlight-color: transparent;
       cursor: pointer;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.38s cubic-bezier(0.25, 0.85, 0.32, 1);
     }
 
     body.assistant-drawer-open .assistant-drawer-backdrop {
-      display: block;
+      opacity: 1;
+      pointer-events: auto;
     }
 
     .assistant-drawer {
@@ -361,17 +371,21 @@
       display: flex;
       flex-direction: column;
       color: var(--text);
-      pointer-events: auto;
-      visibility: hidden;
+      /* visibility:hidden обрывает transition при закрытии; уводим панель только transform + pointer-events */
+      pointer-events: none;
     }
 
     body.assistant-drawer-open .assistant-drawer {
       transform: translateX(0);
-      visibility: visible;
+      pointer-events: auto;
     }
 
     @media (prefers-reduced-motion: reduce) {
       .assistant-drawer {
+        transition: none;
+      }
+
+      .assistant-drawer-backdrop {
         transition: none;
       }
     }
@@ -4673,8 +4687,8 @@
        * Дублируйте те же поля в build-info.json — подпись внизу подгружает его с cache: no-store,
        * чтобы не залипала старая версия при закэшированном index.html.
        */
-      var APP_VERSION = 'v216';
-      var BUILD_TIME = '2026-05-03 10:05 MSK';
+      var APP_VERSION = 'v217';
+      var BUILD_TIME = '2026-05-03 10:08 MSK';
       var APP_BUILD = APP_VERSION + ' · ' + BUILD_TIME;
       var BUILD_INFO_FILE = 'build-info.json';
       var lastSceneTimeTriggerTouchAt = 0;
@@ -5304,6 +5318,22 @@
       var assistantDrawerLockScrollY = 0;
       /** После горизонтального жеста на строке списка — не открывать сценарий по synthetic click. */
       var assistantDrawerSuppressClickUntil = 0;
+      var assistantDrawerCloseEndHandler = null;
+      var assistantDrawerCloseSafetyTimer = null;
+
+      function clearAssistantDrawerCloseListeners() {
+        var el = document.getElementById('assistant-drawer');
+        if (el && assistantDrawerCloseEndHandler) {
+          try {
+            el.removeEventListener('transitionend', assistantDrawerCloseEndHandler);
+          } catch (eRm) {}
+        }
+        assistantDrawerCloseEndHandler = null;
+        if (assistantDrawerCloseSafetyTimer) {
+          clearTimeout(assistantDrawerCloseSafetyTimer);
+          assistantDrawerCloseSafetyTimer = null;
+        }
+      }
 
       function lockAssistantDrawerMainScroll() {
         assistantDrawerLockScrollY =
@@ -5334,6 +5364,7 @@
 
       function openAssistantDrawer() {
         if (document.body.classList.contains('assistant-drawer-open')) return;
+        clearAssistantDrawerCloseListeners();
         renderAssistantDrawerList();
         var ad = document.getElementById('assistant-new-date');
         if (ad && !ad.value) {
@@ -5341,6 +5372,7 @@
             ad.value = new Date().toISOString().slice(0, 10);
           } catch (eD) {}
         }
+        document.body.removeAttribute('data-assistant-drawer-closing');
         document.documentElement.classList.add('assistant-drawer-open');
         document.body.classList.add('assistant-drawer-open');
         document.body.setAttribute('data-assistant-drawer-open', '1');
@@ -5368,14 +5400,46 @@
 
       function closeAssistantDrawer() {
         if (!document.body.classList.contains('assistant-drawer-open')) return;
-        unlockAssistantDrawerMainScroll();
+        if (document.body.getAttribute('data-assistant-drawer-closing') === '1') return;
+        clearAssistantDrawerCloseListeners();
+        var d = document.getElementById('assistant-drawer');
+        var bk = document.getElementById('assistant-drawer-backdrop');
+        var finished = false;
+
+        function complete() {
+          if (finished) return;
+          if (document.body.classList.contains('assistant-drawer-open')) {
+            document.body.removeAttribute('data-assistant-drawer-closing');
+            clearAssistantDrawerCloseListeners();
+            return;
+          }
+          finished = true;
+          document.body.removeAttribute('data-assistant-drawer-closing');
+          clearAssistantDrawerCloseListeners();
+          unlockAssistantDrawerMainScroll();
+        }
+
+        function onEnd(e) {
+          if (!d || e.target !== d) return;
+          if (e.propertyName !== 'transform') return;
+          complete();
+        }
+
+        document.body.setAttribute('data-assistant-drawer-closing', '1');
         document.documentElement.classList.remove('assistant-drawer-open');
         document.body.classList.remove('assistant-drawer-open');
         document.body.removeAttribute('data-assistant-drawer-open');
-        var d = document.getElementById('assistant-drawer');
-        var bk = document.getElementById('assistant-drawer-backdrop');
         if (d) d.setAttribute('aria-hidden', 'true');
         if (bk) bk.setAttribute('aria-hidden', 'true');
+
+        if (!d) {
+          complete();
+          return;
+        }
+        assistantDrawerCloseEndHandler = onEnd;
+        d.addEventListener('transitionend', onEnd);
+        /* prefers-reduced-motion: transition отключён — transitionend не придёт; дублируем таймаутом */
+        assistantDrawerCloseSafetyTimer = setTimeout(complete, 500);
       }
 
       /** Свайп влево — закрыть: и по панели меню, и по правой зоне (backdrop), как у нативного sheet. */
