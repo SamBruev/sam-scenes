@@ -20,7 +20,8 @@
       --gold-whisper: rgba(212, 175, 55, 0.12);
       --cream: #faf6f0;
       --text: #f5f0e8;
-      --muted: #9a917f;
+      /* Тёплый тауп без жёлтого «хаки» — на экранах не уходит в оливковый */
+      --muted: #8f7870;
       --label: #ebe3d6;
       --accent-soft: rgba(232, 201, 104, 0.92);
       --surface: #050505;
@@ -63,8 +64,38 @@
       caret-color: var(--gold);
     }
 
-    input[type="range"] {
+    a:any-link {
+      color: var(--accent-soft);
+      text-underline-offset: 0.14em;
+    }
+
+    a:any-link:hover {
+      color: var(--cream);
+    }
+
+    :focus-visible {
+      outline-color: rgba(232, 201, 104, 0.72);
+    }
+
+    input,
+    textarea,
+    select,
+    button {
       accent-color: var(--gold);
+    }
+
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    textarea:-webkit-autofill,
+    textarea:-webkit-autofill:hover,
+    textarea:-webkit-autofill:focus,
+    select:-webkit-autofill,
+    select:-webkit-autofill:hover,
+    select:-webkit-autofill:focus {
+      -webkit-text-fill-color: var(--text);
+      caret-color: var(--gold);
+      box-shadow: 0 0 0 100vmax #0a0808 inset;
     }
 
     ::selection {
@@ -1747,7 +1778,7 @@
       content: "·";
       margin-left: 0.55rem;
       font-weight: 300;
-      color: rgba(146, 136, 124, 0.55);
+      color: rgba(138, 126, 118, 0.58);
       pointer-events: none;
       user-select: none;
     }
@@ -1869,7 +1900,7 @@
       font-weight: 700;
       letter-spacing: 0.068em;
       text-transform: uppercase;
-      color: rgba(146, 136, 124, 0.96);
+      color: rgba(138, 126, 118, 0.96);
     }
 
     .site-footer__revision-line strong {
@@ -1895,7 +1926,7 @@
     }
 
     #portfolio-html-stamp {
-      color: rgba(206, 196, 176, 0.96);
+      color: rgba(210, 198, 186, 0.96);
       font-weight: 700;
       letter-spacing: 0.02em;
       text-transform: none;

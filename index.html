@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v194: селекты на узком экране — снова стеклянные (убран override appearance:auto); v193 blur только в JS -->
+<!-- v196: фоновая лампа — ещё темнее и меньше (body::before + top-lamp-bg, портрет) -->
 <html lang="ru" style="--logo-x: 0px; --logo-y: 0px; --logo-scale: 2.00; --top-logo-blur: 0px;">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Sam Scenes (v194)</title>
+  <title>Sam Scenes (v196)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="abakan-restore-critical">
     html {
@@ -4531,7 +4531,7 @@
       }
 
       /** Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages). */
-      var APP_VERSION = 'v194';
+      var APP_VERSION = 'v196';
       var BUILD_TIME = '2026-05-03 05:49 MSK';
       var APP_BUILD = APP_VERSION + ' · ' + BUILD_TIME;
       var lastSceneTimeTriggerTouchAt = 0;
@@ -4557,6 +4557,36 @@
         while (n && n.nodeType !== 1) n = n.parentElement;
         if (!n || typeof n.closest !== 'function') return document.body;
         return n;
+      }
+
+      /**
+       * Между карточками WebKit часто отдаёт «не тот» event.target; координаты стабильнее.
+       * elementFromPoint даёт верхний элемент под пальцем (учитывает z-index).
+       */
+      function gestureHitTargetFromClientXY(clientX, clientY, fallbackEl) {
+        var picked = fallbackEl;
+        try {
+          if (typeof document.elementFromPoint === 'function') {
+            var node = document.elementFromPoint(clientX, clientY);
+            if (node) picked = node;
+          }
+        } catch (err) {}
+        return normalizeGestureTarget(picked);
+      }
+
+      function gestureHitTargetFromTouchLike(e) {
+        var x = e.clientX;
+        var y = e.clientY;
+        try {
+          if (e.touches && e.touches[0]) {
+            x = e.touches[0].clientX;
+            y = e.touches[0].clientY;
+          } else if (e.changedTouches && e.changedTouches[0]) {
+            x = e.changedTouches[0].clientX;
+            y = e.changedTouches[0].clientY;
+          }
+        } catch (err) {}
+        return gestureHitTargetFromClientXY(x, y, e.target);
       }
 
       // Анти-кэш разметки: при новой сборке чистим только слой «интерфейса», но НЕ abakan-scenarios-v2 —
@@ -7737,7 +7767,7 @@
             resetSwipeHint();
             swipeCancelled = false;
             swipeIntentHorizontal = false;
-            var tgt = normalizeGestureTarget(e.target);
+            var tgt = gestureHitTargetFromTouchLike(e);
             if (skipPull(tgt)) {
               pullArmed = false;
             } else {
@@ -7934,7 +7964,8 @@
         function onPointerDown(e) {
           if (activePid !== null) return;
           if (e.pointerType === 'mouse' && e.button !== 0) return;
-          if (ignorePtrTarget(e.target)) return;
+          var ptrTgt = gestureHitTargetFromClientXY(e.clientX, e.clientY, e.target);
+          if (ignorePtrTarget(ptrTgt)) return;
           activePid = e.pointerId;
           sx = e.clientX;
           sy = e.clientY;
@@ -7942,7 +7973,7 @@
           minDx = 0;
           maxAbsDy = 0;
           try {
-            var capEl = normalizeGestureTarget(e.target);
+            var capEl = ptrTgt;
             if (capEl && capEl.setPointerCapture) capEl.setPointerCapture(e.pointerId);
           } catch (eCap) {}
         }
