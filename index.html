@@ -13,7 +13,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Sam Scenes (v235)</title>
+  <title>Sam Scenes (v236)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -1947,6 +1947,7 @@
       letter-spacing: 0.07em;
       font-weight: 800;
       font-size: clamp(34px, 9.5vw, 52px);
+      color: rgba(255, 132, 62, 0.96);
     }
     /* INTRO / OUTRO — сплошной красный, без свечения и неона */
     .scene-main[data-scene-role="intro"] .scene-time-wrap .time-leading,
@@ -1964,7 +1965,7 @@
     }
 
     .scene-time-wrap .scene-index {
-      color: rgba(255, 132, 62, 0.95);
+      color: inherit;
       font-variant-numeric: tabular-nums;
     }
 
@@ -5219,8 +5220,8 @@
        * Дублируйте те же поля в build-info.json — подпись внизу подгружает его с cache: no-store,
        * чтобы не залипала старая версия при закэшированном index.html.
        */
-      var APP_VERSION = 'v235';
-      var BUILD_TIME = '2026-05-03 21:02 MSK';
+      var APP_VERSION = 'v236';
+      var BUILD_TIME = '2026-05-03 21:12 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
