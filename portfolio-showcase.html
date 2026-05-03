@@ -1461,6 +1461,27 @@
       box-shadow: 0 0 12px rgba(212, 175, 55, 0.22);
     }
 
+    .doc-list a {
+      color: rgba(232, 201, 104, 0.92);
+      text-decoration: none;
+      transition: color 0.18s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .doc-list a:hover {
+      color: rgba(252, 232, 180, 0.98);
+    }
+
+    .doc-list a:focus {
+      outline: none;
+    }
+
+    .doc-list a:focus-visible {
+      outline: 2px solid rgba(232, 201, 104, 0.45);
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+
     /* Требования к материалам перед сведением */
     .card--briefing h2 {
       letter-spacing: 0.03em;
@@ -2020,6 +2041,23 @@
         <p>С удовольствием выступлю на вашем <strong>музыкальном мероприятии</strong>, фестивале или встрече сообщества и проведу <strong>мастер-класс</strong> или <strong>лекцию для музыкантов</strong> — про запись, сведение, продакшн и смежные темы можно договориться заранее.</p>
       </div>
       <p class="note">Формат, продолжительность и содержание — обсуждаем до анонса; контакты внизу страницы.</p>
+    </article>
+
+    <article class="card" id="dokumenty">
+      <div class="tag-row">
+        <span class="tag">Документы</span>
+        <span class="tag">PDF</span>
+      </div>
+      <h2>Документы</h2>
+      <p class="meta">Официальные материалы и реквизиты для юрлиц — открыть или скачать в браузере.</p>
+      <div class="work-list-shell media-shell">
+        <ul class="work-list doc-list">
+          <li><a href="portfolio-docs/oferta.pdf" target="_blank" rel="noopener">Публичная оферта (PDF)</a></li>
+          <li><a href="portfolio-docs/politika-pd.pdf" target="_blank" rel="noopener">Политика обработки персональных данных (PDF)</a></li>
+          <li><a href="portfolio-docs/rekvizity.pdf" target="_blank" rel="noopener">Реквизиты для договора (PDF)</a></li>
+        </ul>
+      </div>
+      <p class="note">Положите файлы с этими именами в папку <code>portfolio-docs/</code> рядом с этой страницей или измените адреса в разметке.</p>
     </article>
 
     <section class="portfolio-genre portfolio-genre--metal" data-genre="metal" data-active-stem="drums" aria-labelledby="genre-metal">
