@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Сценарий видео / Sam Bruev (v141)</title>
+  <title>Сценарий видео / Sam Bruev (v142)</title>
   <!-- До отрисовки тела: восстановить скролл после reload без «прыжка» картинки/фона -->
   <script>
     (function () {
@@ -245,80 +245,63 @@
       }
     }
 
-    /* Узкая зона: не перекрывает блок времени и контент (z ниже .wrap) */
+    /* Тихая «скобка» у левого края — открыть план съёмок (не перекрывает контент) */
     .assistant-open-strip {
       position: fixed;
       left: env(safe-area-inset-left, 0px);
       top: 50%;
       transform: translateY(-50%);
-      width: 14px;
-      min-width: 12px;
-      height: min(160px, 42vh);
+      width: 20px;
+      min-width: 18px;
+      height: min(112px, 30vh);
+      min-height: 56px;
       margin: 0;
       padding: 0;
       border: none;
-      border-radius: 0 12px 12px 0;
-      background: rgba(212, 175, 55, 0.2);
-      box-shadow: inset -1px 0 0 rgba(255, 228, 160, 0.18);
+      border-radius: 0 10px 10px 0;
+      background: linear-gradient(
+        90deg,
+        rgba(0, 0, 0, 0.18) 0%,
+        rgba(212, 175, 55, 0.1) 100%
+      );
+      box-shadow: inset -1px 0 0 rgba(255, 228, 160, 0.14);
       z-index: 8;
       cursor: pointer;
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
-      transition: opacity 0.2s ease, background 0.2s ease;
+      transition: opacity 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .assistant-open-strip::before {
+      content: '\203A';
+      position: absolute;
+      left: 46%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 17px;
+      font-weight: 300;
+      line-height: 1;
+      color: rgba(255, 228, 160, 0.42);
+      pointer-events: none;
+      letter-spacing: -0.08em;
     }
 
     .assistant-open-strip:active {
-      background: rgba(212, 175, 55, 0.35);
+      background: linear-gradient(
+        90deg,
+        rgba(0, 0, 0, 0.26) 0%,
+        rgba(212, 175, 55, 0.2) 100%
+      );
+      box-shadow: inset -1px 0 0 rgba(255, 228, 160, 0.22);
+    }
+
+    .assistant-open-strip:active::before {
+      color: rgba(255, 240, 200, 0.55);
     }
 
     body.assistant-drawer-open .assistant-open-strip {
       opacity: 0;
       pointer-events: none;
-    }
-
-    /* Всегда на экране: план ассистента (не нужно искать в «Настройках») */
-    .assistant-fab {
-      position: fixed;
-      right: max(14px, env(safe-area-inset-right));
-      bottom: max(18px, env(safe-area-inset-bottom));
-      width: 56px;
-      height: 56px;
-      border-radius: 999px;
-      z-index: 2147483644;
-      margin: 0;
-      padding: 0;
-      border: 3px solid rgba(255, 224, 150, 0.95);
-      background: linear-gradient(165deg, #e8c04a, #8a6a1e);
-      color: #140f08;
-      font-size: 28px;
-      font-weight: 900;
-      font-family: var(--brand-serif), Georgia, serif;
-      line-height: 54px;
-      text-align: center;
-      cursor: pointer;
-      box-shadow:
-        0 8px 26px rgba(0, 0, 0, 0.5),
-        inset 0 1px 0 rgba(255, 250, 230, 0.35);
-      touch-action: manipulation;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .assistant-fab:active {
-      transform: scale(0.96);
-      filter: brightness(1.08);
-    }
-
-    body.assistant-drawer-open .assistant-fab {
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.22s ease;
-    }
-
-    body.assistant-drawer-open #assistant-entry-banner {
-      opacity: 0;
-      pointer-events: none;
-      visibility: hidden;
-      transition: opacity 0.2s ease;
     }
 
     .assistant-drawer-head {
@@ -432,63 +415,6 @@
 
     .wrap > * { order: 10; }
     .wrap > *:not(#top-logo-block) { position: relative; z-index: 2; }
-
-    /* Плашка ассистента ВНЕ .wrap — иначе на телефоне она уезжает ниже ~30vh отступа и не видна без скролла */
-    .assistant-entry-outer {
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 0 max(14px, env(safe-area-inset-left)) 10px max(14px, env(safe-area-inset-right));
-      box-sizing: border-box;
-      width: 100%;
-      position: relative;
-      z-index: 14;
-    }
-
-    #assistant-entry-banner {
-      width: 100%;
-      box-sizing: border-box;
-      margin: 0;
-      padding: 12px 14px;
-      border-radius: 16px;
-      border: 3px solid rgba(255, 210, 90, 0.95);
-      background: linear-gradient(180deg, rgba(255, 200, 60, 0.35), rgba(120, 85, 20, 0.55));
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 250, 230, 0.2);
-    }
-
-    .assistant-entry-btn {
-      display: block;
-      width: 100%;
-      margin: 0 0 8px;
-      padding: 14px 16px;
-      border-radius: 12px;
-      border: 2px solid rgba(40, 30, 10, 0.9);
-      background: linear-gradient(180deg, #f5d875, #c9a030);
-      color: #120c04;
-      font: inherit;
-      font-weight: 900;
-      font-size: 15px;
-      letter-spacing: 0.04em;
-      line-height: 1.35;
-      text-align: center;
-      cursor: pointer;
-      touch-action: manipulation;
-      -webkit-tap-highlight-color: rgba(0, 0, 0, 0.15);
-    }
-
-    .assistant-entry-btn:active {
-      filter: brightness(1.05);
-      transform: scale(0.99);
-    }
-
-    .assistant-entry-hint {
-      display: block;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      color: rgba(255, 248, 225, 0.95);
-      text-align: center;
-      line-height: 1.4;
-    }
 
     #top-logo-block { order: 0; }
     #scenario-hub { order: 1; }
@@ -2526,41 +2452,10 @@
         --top-logo-space: 14vh;
       }
 
-      /* Выше .wrap (12) и FAB (3644): iOS иногда «теряет» fixed внутри раннего узла */
-      .assistant-entry-outer {
-        padding: 0;
-        max-width: none;
-        position: relative;
-        z-index: 2147483645;
-        pointer-events: none;
-      }
-
-      /* Закреплено под вырезом — всегда видно без прокрутки */
-      #assistant-entry-banner {
-        position: fixed;
-        top: env(safe-area-inset-top, 0px);
-        left: 0;
-        right: 0;
-        width: 100%;
-        margin: 0;
-        border-radius: 0;
-        border-left: none;
-        border-right: none;
-        border-top: none;
-        padding: 12px max(14px, env(safe-area-inset-left)) 10px max(14px, env(safe-area-inset-right));
-        z-index: 2147483645;
-        pointer-events: auto;
-        -webkit-transform: translateZ(0);
-        transform: translateZ(0);
-        backface-visibility: hidden;
-        box-shadow: 0 6px 28px rgba(0, 0, 0, 0.55);
-      }
-
       .wrap {
         padding-left: max(14px, env(safe-area-inset-left));
         padding-right: max(14px, env(safe-area-inset-right));
-        /* место под фиксированную плашку (~88px + safe), затем воздух под логотип */
-        padding-top: calc(env(safe-area-inset-top) + 92px + var(--top-logo-space));
+        padding-top: calc(env(safe-area-inset-top) + var(--top-logo-space));
       }
 
       .top-logo {
@@ -2780,7 +2675,7 @@
     class="assistant-open-strip"
     id="assistant-open-strip"
     aria-label="Открыть план съёмок"
-    title="План съёмок — свайп вправо по тексту или нажми"></button>
+    title="План съёмок"></button>
   <div
     class="assistant-drawer-backdrop"
     id="assistant-drawer-backdrop"
@@ -2806,22 +2701,6 @@
       <div id="assistant-drawer-list" class="assistant-drawer-list"></div>
     </div>
   </aside>
-  <button
-    type="button"
-    class="assistant-fab"
-    id="assistant-fab-help"
-    aria-label="План съёмок для ассистента"
-    title="План съёмок — список сценариев по датам">
-    ?
-  </button>
-  <div class="assistant-entry-outer" id="assistant-entry-outer">
-    <div class="assistant-entry-banner" id="assistant-entry-banner">
-      <button type="button" class="assistant-entry-btn" id="assistant-entry-btn">
-        ▶ План съёмок для ассистента — нажми здесь
-      </button>
-      <span class="assistant-entry-hint" id="assistant-entry-build"></span>
-    </div>
-  </div>
   <div id="pull-reload-hint" class="pull-reload-hint" aria-hidden="true"></div>
   <div id="pull-swipe-hint" class="pull-swipe-hint" aria-hidden="true"></div>
   <div id="pull-reload-flash" class="pull-reload-flash" aria-hidden="true"></div>
@@ -3875,7 +3754,7 @@
         } catch (e) {}
       }
 
-      var APP_BUILD = 'v141-scene-time-desktop-modal';
+      var APP_BUILD = 'v142-trim-assistant-chrome';
       var lastSceneTimeTriggerTouchAt = 0;
       var APP_BUILD_KEY = 'abakan-app-build';
       var STORAGE_KEY = 'abakan-main-abakan-layout-v15';
@@ -4389,25 +4268,9 @@
         var deployTag = document.getElementById('deploy-build-tag');
         var buildTxt = 'Сборка: ' + APP_BUILD + ' — если эта строка старая, сайт не обновился.';
         if (deployTag) deployTag.textContent = buildTxt;
-        var entryBuild = document.getElementById('assistant-entry-build');
-        if (entryBuild) entryBuild.textContent = buildTxt;
-        var entryBtn = document.getElementById('assistant-entry-btn');
-        if (entryBtn) {
-          entryBtn.addEventListener('click', function (e) {
-            e.preventDefault();
-            openAssistantDrawer();
-          });
-        }
         var btnAssistHub = document.getElementById('btn-assistant-plan-open');
         if (btnAssistHub) {
           btnAssistHub.addEventListener('click', function (e) {
-            e.preventDefault();
-            openAssistantDrawer();
-          });
-        }
-        var fabHelp = document.getElementById('assistant-fab-help');
-        if (fabHelp) {
-          fabHelp.addEventListener('click', function (e) {
             e.preventDefault();
             openAssistantDrawer();
           });
