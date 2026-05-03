@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Сценарий видео / Sam Bruev (v149)</title>
+  <title>Сценарий видео / Sam Bruev (v151)</title>
   <!-- До отрисовки тела: восстановить скролл после reload без «прыжка» картинки/фона -->
   <script>
     (function () {
@@ -3810,8 +3810,8 @@
       }
 
       /** Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages). */
-      var APP_VERSION = 'v149';
-      var BUILD_TIME = '2026-05-03 06:20 MSK';
+      var APP_VERSION = 'v151';
+      var BUILD_TIME = '2026-05-03 07:10 MSK';
       var APP_BUILD = APP_VERSION + ' · ' + BUILD_TIME;
       var lastSceneTimeTriggerTouchAt = 0;
       var APP_BUILD_KEY = 'abakan-app-build';
@@ -4320,88 +4320,95 @@
         if (bk) bk.setAttribute('aria-hidden', 'true');
       }
 
-      /** Свайп влево по панели меню — закрыть (как в нативных sheet). */
+      /** Свайп влево — закрыть: и по панели меню, и по правой зоне (backdrop), как у нативного sheet. */
       function wireAssistantDrawerCloseSwipe() {
         if (wireAssistantDrawerCloseSwipe._done) return;
         wireAssistantDrawerCloseSwipe._done = true;
-        var drawer = document.getElementById('assistant-drawer');
-        if (!drawer) return;
-        var CLOSE_MIN = 52;
-        var RATIO = 0.72;
-        var activePid = null;
-        var sx = 0;
-        var sy = 0;
-        var minDx = 0;
-        var maxDx = 0;
-        var maxAbsDy = 0;
+        var CLOSE_MIN = 44;
+        var RATIO = 0.62;
+        var JITTER_MAX_DX = 36;
+        var JITTER_VS_LEFT = 0.42;
 
-        function trackMove(clientX, clientY) {
-          var dx = clientX - sx;
-          var dy = clientY - sy;
-          if (dx < minDx) minDx = dx;
-          if (dx > maxDx) maxDx = dx;
-          if (Math.abs(dy) > maxAbsDy) maxAbsDy = Math.abs(dy);
-        }
+        function bindCloseSwipeSurface(surface) {
+          if (!surface) return;
+          var activePid = null;
+          var sx = 0;
+          var sy = 0;
+          var minDx = 0;
+          var maxDx = 0;
+          var maxAbsDy = 0;
 
-        function endGesture(clientX, clientY) {
-          if (!document.body.classList.contains('assistant-drawer-open')) return;
-          var finDx = clientX - sx;
-          var leftMag = Math.max(0, -Math.min(minDx, finDx));
-          if (leftMag < CLOSE_MIN) return;
-          if (leftMag < maxAbsDy * RATIO) return;
-          if (maxDx > 26 && maxDx > leftMag * 0.48) return;
-          try {
-            triggerHaptic('light');
-          } catch (eH) {}
-          closeAssistantDrawer();
-        }
+          function trackMove(clientX, clientY) {
+            var dx = clientX - sx;
+            var dy = clientY - sy;
+            if (dx < minDx) minDx = dx;
+            if (dx > maxDx) maxDx = dx;
+            if (Math.abs(dy) > maxAbsDy) maxAbsDy = Math.abs(dy);
+          }
 
-        drawer.addEventListener(
-          'pointerdown',
-          function (e) {
+          function endGesture(clientX, clientY) {
             if (!document.body.classList.contains('assistant-drawer-open')) return;
-            if (e.pointerType === 'mouse' && e.button !== 0) return;
-            activePid = e.pointerId;
-            sx = e.clientX;
-            sy = e.clientY;
-            minDx = 0;
-            maxDx = 0;
-            maxAbsDy = 0;
+            var finDx = clientX - sx;
+            var leftMag = Math.max(0, -Math.min(minDx, finDx));
+            if (leftMag < CLOSE_MIN) return;
+            if (leftMag < maxAbsDy * RATIO) return;
+            if (maxDx > JITTER_MAX_DX && maxDx > leftMag * JITTER_VS_LEFT) return;
             try {
-              if (drawer.setPointerCapture) drawer.setPointerCapture(e.pointerId);
-            } catch (eCap) {}
-          },
-          true
-        );
-        drawer.addEventListener(
-          'pointermove',
-          function (e) {
-            if (activePid !== e.pointerId) return;
-            trackMove(e.clientX, e.clientY);
-          },
-          true
-        );
-        drawer.addEventListener(
-          'pointerup',
-          function (e) {
-            if (activePid !== e.pointerId) return;
-            try {
-              if (drawer.releasePointerCapture) drawer.releasePointerCapture(e.pointerId);
-            } catch (eRel) {}
-            trackMove(e.clientX, e.clientY);
-            endGesture(e.clientX, e.clientY);
-            activePid = null;
-            minDx = maxDx = maxAbsDy = 0;
-          },
-          true
-        );
-        drawer.addEventListener(
-          'pointercancel',
-          function (e) {
-            if (activePid === e.pointerId) activePid = null;
-          },
-          true
-        );
+              triggerHaptic('light');
+            } catch (eH) {}
+            closeAssistantDrawer();
+          }
+
+          surface.addEventListener(
+            'pointerdown',
+            function (e) {
+              if (!document.body.classList.contains('assistant-drawer-open')) return;
+              if (e.pointerType === 'mouse' && e.button !== 0) return;
+              activePid = e.pointerId;
+              sx = e.clientX;
+              sy = e.clientY;
+              minDx = 0;
+              maxDx = 0;
+              maxAbsDy = 0;
+              try {
+                if (surface.setPointerCapture) surface.setPointerCapture(e.pointerId);
+              } catch (eCap) {}
+            },
+            true
+          );
+          surface.addEventListener(
+            'pointermove',
+            function (e) {
+              if (activePid !== e.pointerId) return;
+              trackMove(e.clientX, e.clientY);
+            },
+            true
+          );
+          surface.addEventListener(
+            'pointerup',
+            function (e) {
+              if (activePid !== e.pointerId) return;
+              try {
+                if (surface.releasePointerCapture) surface.releasePointerCapture(e.pointerId);
+              } catch (eRel) {}
+              trackMove(e.clientX, e.clientY);
+              endGesture(e.clientX, e.clientY);
+              activePid = null;
+              minDx = maxDx = maxAbsDy = 0;
+            },
+            true
+          );
+          surface.addEventListener(
+            'pointercancel',
+            function (e) {
+              if (activePid === e.pointerId) activePid = null;
+            },
+            true
+          );
+        }
+
+        bindCloseSwipeSurface(document.getElementById('assistant-drawer'));
+        bindCloseSwipeSurface(document.getElementById('assistant-drawer-backdrop'));
       }
 
       function wireAssistantDrawer() {
