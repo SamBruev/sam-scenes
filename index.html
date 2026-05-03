@@ -1360,7 +1360,8 @@
       flex-direction: column;
       align-items: stretch;
       gap: 10px;
-      margin: 14px 0 12px;
+      /* Меньше зазор до карточки «Подготовка» ниже по странице */
+      margin: 12px 0 6px;
       padding: 10px 12px 12px;
       background: #000000;
       border: 1px solid rgba(255, 232, 175, 0.45);
@@ -1884,12 +1885,12 @@
       display: flex;
       flex-direction: column;
       gap: 16px;
-      /* Сразу после «Подготовка»: без лишнего «воздуха» — ритм как у .card (margin-bottom ~14px). */
-      margin-top: 14px;
+      /* Отступ только у карточки .card-prep (margin-bottom); здесь margin-top не дублировать. */
+      margin-top: 0;
     }
 
     .scene-stack-outro {
-      margin-top: 18px;
+      margin-top: 14px;
       gap: 16px;
     }
 
