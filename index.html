@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v183: полоска «открыть ассистента» — тот же золотой+фиолетовый блик, что у стрелки закрытия -->
+<!-- v185: жесты pull/свайп — нормализация target + зона .wrap на всю высоту экрана -->
 <html lang="ru" style="--logo-x: 0px; --logo-y: 0px; --logo-scale: 2.00; --top-logo-blur: 0px;">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Sam Scenes (v183)</title>
+  <title>Sam Scenes (v185)</title>
   <!-- До отрисовки тела: восстановить скролл после reload без «прыжка» картинки/фона -->
   <script>
     (function () {
@@ -83,6 +83,7 @@
       /* Крайние полоски ассистента: золото + лёгкий аметист (как на стрелке «закрыть») */
       --assistant-hint-violet: rgba(200, 185, 255, 0.55);
       --assistant-hint-violet-mid: rgba(175, 155, 240, 0.22);
+      --assistant-hint-violet-soft: rgba(165, 145, 235, 0.18);
       --assistant-hint-violet-glow: rgba(145, 120, 210, 0.32);
     }
 
@@ -170,11 +171,56 @@
       padding-bottom: max(44px, env(safe-area-inset-bottom));
       box-sizing: border-box;
       width: 100%;
+      min-height: 100vh;
+      min-height: 100dvh;
       display: flex;
       flex-direction: column;
       position: relative;
       z-index: 12;
       will-change: filter;
+    }
+
+    /* Левый край основного блока: узкая жёлтая «канавка» + мини-стрелка (не ловит тапы) */
+    .wrap::before {
+      content: '';
+      position: absolute;
+      left: max(11px, calc(env(safe-area-inset-left, 0px) + 3px));
+      top: 20%;
+      bottom: 20%;
+      width: 2px;
+      border-radius: 2px;
+      z-index: 13;
+      pointer-events: none;
+      background: linear-gradient(
+        180deg,
+        rgba(255, 238, 180, 0) 0%,
+        rgba(255, 226, 96, 0.82) 22%,
+        rgba(255, 214, 52, 0.98) 50%,
+        rgba(255, 226, 96, 0.82) 78%,
+        rgba(255, 238, 180, 0) 100%
+      );
+      box-shadow:
+        0 0 12px rgba(255, 210, 60, 0.28),
+        0 0 4px rgba(255, 228, 140, 0.45);
+    }
+
+    .wrap::after {
+      content: '\203A';
+      position: absolute;
+      left: max(6px, calc(env(safe-area-inset-left, 0px) - 1px));
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 13;
+      pointer-events: none;
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.06em;
+      color: rgba(255, 218, 72, 0.96);
+      text-shadow:
+        0 0 8px rgba(255, 215, 80, 0.55),
+        0 0 4px rgba(255, 236, 160, 0.35);
+      opacity: 0.95;
     }
 
     /* Панель «План съёмок» не сдвигает основной контент — только blur и блок кликов */
@@ -4273,7 +4319,7 @@
       }
 
       /** Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages). */
-      var APP_VERSION = 'v182';
+      var APP_VERSION = 'v185';
       var BUILD_TIME = '2026-05-03 05:49 MSK';
       var APP_BUILD = APP_VERSION + ' · ' + BUILD_TIME;
       var lastSceneTimeTriggerTouchAt = 0;
@@ -4290,6 +4336,16 @@
       /** Не перехватывать жесты pull/assist на интерактиве; иначе <summary> в <details> не раскрывается. */
       var PULL_SKIP_INTERACTIVE =
         'input, textarea, select, button, summary, a, .logo-bg, .logo-controls, [contenteditable="true"]';
+
+      /** Тап по пробелу между блоками даёт Text/node без .closest — жесты не включались. */
+      function normalizeGestureTarget(el) {
+        if (!el) return document.body;
+        var n = el;
+        if (n.nodeType === 3) n = n.parentElement;
+        while (n && n.nodeType !== 1) n = n.parentElement;
+        if (!n || typeof n.closest !== 'function') return document.body;
+        return n;
+      }
 
       // Анти-кэш разметки: при новой сборке чистим только слой «интерфейса», но НЕ abakan-scenarios-v2 —
       // там все сценарии пользователя; иначе после каждого деплоя всё обнулялось.
@@ -7432,18 +7488,17 @@
             resetSwipeHint();
             swipeCancelled = false;
             swipeIntentHorizontal = false;
-            var tgt = e.target;
-            if (skipHorizontalSwipe(tgt)) {
-              pullArmed = false;
-              swipeArmed = false;
-              return;
-            }
+            var tgt = normalizeGestureTarget(e.target);
             if (skipPull(tgt)) {
               pullArmed = false;
             } else {
               pullArmed = scrollTopNow() <= TOP_EPS;
             }
-            swipeArmed = true;
+            if (skipHorizontalSwipe(tgt)) {
+              swipeArmed = false;
+            } else {
+              swipeArmed = true;
+            }
             var t0 = e.touches[0];
             startX = t0.clientX;
             startY = t0.clientY;
@@ -7615,6 +7670,7 @@
         var OPEN_MIN = 40;
 
         function ignorePtrTarget(el) {
+          el = normalizeGestureTarget(el);
           if (!el || !el.closest) return true;
           if (document.body.classList.contains('assistant-drawer-open')) return true;
           if (el.closest('dialog[open]')) return true;
