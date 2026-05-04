@@ -16,7 +16,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Sam Scenes (v279)</title>
+  <title>Sam Scenes (v280)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -5570,8 +5570,8 @@
        * Дублируйте те же поля в build-info.json — подпись внизу подгружает его с cache: no-store,
        * чтобы не залипала старая версия при закэшированной главной странице.
        */
-      var APP_VERSION = 'v279';
-      var BUILD_TIME = '2026-05-04 05:10 MSK';
+      var APP_VERSION = 'v280';
+      var BUILD_TIME = '2026-05-04 05:14 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -6339,6 +6339,36 @@
           else navigator.vibrate([8]);
         } catch (e) {}
       }
+
+      /** Микро-вибрация перед нативными попапами (confirm/alert/prompt) — патчим один раз. */
+      (function wrapNativePopupsHaptic() {
+        try {
+          var origConfirm = window.confirm;
+          var origAlert = window.alert;
+          var origPrompt = window.prompt;
+          if (typeof origConfirm === 'function' && !window.confirm._hapticWrapped) {
+            window.confirm = function (msg) {
+              triggerHaptic('micro');
+              return origConfirm.call(window, msg);
+            };
+            window.confirm._hapticWrapped = true;
+          }
+          if (typeof origAlert === 'function' && !window.alert._hapticWrapped) {
+            window.alert = function (msg) {
+              triggerHaptic('micro');
+              return origAlert.call(window, msg);
+            };
+            window.alert._hapticWrapped = true;
+          }
+          if (typeof origPrompt === 'function' && !window.prompt._hapticWrapped) {
+            window.prompt = function (msg, def) {
+              triggerHaptic('micro');
+              return origPrompt.call(window, msg, def);
+            };
+            window.prompt._hapticWrapped = true;
+          }
+        } catch (e) {}
+      })();
 
       function snapshotCurrentHtml() {
         return wrap ? String(wrap.innerHTML || '') : '';
@@ -7191,6 +7221,7 @@
         if (!document.body.classList.contains('assistant-drawer-open')) return;
         closeAllAssistantRowSwipePanels();
         if (document.body.getAttribute('data-assistant-drawer-closing') === '1') return;
+        triggerHaptic('micro');
         /** Иначе после свайпа остаётся html.assistant-drawer-tracking → overflow:hidden на документе и контент «замирает». */
         endAssistantDrawerTracking();
         clearAssistantDrawerInlineVisuals();
@@ -8688,6 +8719,15 @@
           col.addEventListener(
             'scroll',
             function () {
+              /** Тик-вибрация на каждое деление при прокрутке колеса (как нативный iOS time picker). */
+              try {
+                var cv = getSceneTimeWheelValue(col);
+                if (typeof col._lastTickV !== 'number') col._lastTickV = cv;
+                if (col._lastTickV !== cv) {
+                  col._lastTickV = cv;
+                  triggerHaptic('micro');
+                }
+              } catch (eTick) {}
               if (col._wheelNormTO) clearTimeout(col._wheelNormTO);
               col._wheelNormTO = setTimeout(function () {
                 col._wheelNormTO = null;
@@ -8695,6 +8735,7 @@
                 var nv = getSceneTimeWheelValue(col);
                 if (typeof col._lastCommittedV === 'number' && col._lastCommittedV !== nv) triggerHaptic('light');
                 col._lastCommittedV = nv;
+                col._lastTickV = nv;
               }, 130);
               if (dlg._flushSceneTimeTO) clearTimeout(dlg._flushSceneTimeTO);
               dlg._flushSceneTimeTO = setTimeout(function () {
@@ -8797,6 +8838,7 @@
         }
         cancelPendingSceneTimeDialogClose(dlg);
         dlg._sceneTimeClosing = true;
+        triggerHaptic('micro');
         function snapAndFlush() {
           dlg.querySelectorAll('.scene-time-wheel').forEach(function (col) {
             normalizeSceneTimeInfiniteWheel(col);
@@ -9669,9 +9711,11 @@
 
       function closeTeleprompter() {
         if (!teleprompterOverlay) return;
+        var wasOpen = teleprompterOverlay.classList.contains('open');
         teleprompterOverlay.classList.remove('open');
         teleprompterOverlay.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = '';
+        if (wasOpen) triggerHaptic('micro');
       }
 
       function renumberScenes() {
@@ -10654,6 +10698,11 @@
               clearPendingSelectBlur(s);
             });
           }
+          /** Микро-вибрация при открытии нативного выбора времени/даты. */
+          if (t && t.matches && t.matches('input[type="time"], input[type="date"], input[type="datetime-local"], input[type="month"], input[type="week"]')) {
+            triggerHaptic('micro');
+            return;
+          }
           if (!t || !t.matches || !t.matches('select')) return;
           if (t.closest && t.closest('.scene-main') && t.matches('select.scene-select')) return;
           triggerHaptic('light');
@@ -10717,7 +10766,13 @@
         }
         document.addEventListener('change', function (e) {
           var t = e.target;
-          if (!t || !t.matches || !t.matches('select')) return;
+          if (!t || !t.matches) return;
+          /** Лёгкая вибрация при подтверждении выбора в нативном time/date picker. */
+          if (t.matches('input[type="time"], input[type="date"], input[type="datetime-local"], input[type="month"], input[type="week"]')) {
+            triggerHaptic('light');
+            return;
+          }
+          if (!t.matches('select')) return;
           if (t.classList && t.classList.contains('shotlist-piece-digit')) return;
           scheduleSelectBlurAfterNativeChoice(t);
         }, true);
