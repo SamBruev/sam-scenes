@@ -1598,11 +1598,17 @@
       color: rgba(252, 249, 244, 0.62);
       text-shadow: none;
       opacity: 0.92;
-      transition: transform 0.18s ease;
+      transition: transform 0.18s ease, color 0.12s ease;
     }
 
     .scenario-hub:not([open]) > summary::after {
       transform: rotate(-90deg);
+    }
+
+    /* Визуальный отклик нажатия на summary — пользователь видит, что тап зарегистрирован. */
+    .scenario-hub > summary:active::after,
+    .daily-plan > summary:active::after {
+      color: rgba(255, 195, 110, 0.95);
     }
 
     .scenario-hub .scenario-hub-body {
@@ -5676,8 +5682,8 @@
        * Дублируйте те же поля в build-info.json — подпись внизу подгружает его с cache: no-store,
        * чтобы не залипала старая версия при закэшированной главной странице.
        */
-      var APP_VERSION = 'v290';
-      var BUILD_TIME = '2026-05-04 06:03 MSK';
+      var APP_VERSION = 'v291';
+      var BUILD_TIME = '2026-05-04 06:08 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -11028,21 +11034,74 @@
           return !!(el && el.closest && el.closest('a[href], button, input, select, textarea'));
         }
 
+        /*
+          iOS Safari устойчиво ломает связку «нативный toggle <details> + наш preventDefault на click»:
+          в одних билдах preventDefault на summary->click не отменяет дефолтный toggle, в других —
+          синтетический click после touchend приходит с задержкой и дублируется. Чтобы убрать гонку
+          целиком, переключаем состояние на pointerup (физический отпуск пальца), а сам click
+          подавляем в capture-фазе. Тогда нативный toggle не срабатывает вообще, а наша линия
+          одна и предсказуемая.
+        */
         function bindDetails(det) {
           if (!det || det._toggleBound) return;
           det._toggleBound = true;
           var sum = det.querySelector(':scope > summary');
           if (!sum) return;
 
-          /** Свой toggle: гасим дефолт, переключаем open сами — без гонок. */
-          sum.addEventListener('click', function (e) {
+          var down = null;
+
+          sum.addEventListener(
+            'pointerdown',
+            function (e) {
+              if (hitInteractiveInsideSummary(e.target) && e.target !== sum) {
+                down = null;
+                return;
+              }
+              down = { x: e.clientX, y: e.clientY, t: Date.now(), id: e.pointerId };
+            },
+            { passive: true }
+          );
+
+          sum.addEventListener('pointerup', function (e) {
+            if (!down) return;
+            var startedHere = down;
+            down = null;
+            if (startedHere.id != null && startedHere.id !== e.pointerId) return;
+            var dx = Math.abs(e.clientX - startedHere.x);
+            var dy = Math.abs(e.clientY - startedHere.y);
+            var dt = Date.now() - startedHere.t;
+            /** Палец сдвинулся или удерживался > 700 мс — не считать тапом (пользователь тянет/листает). */
+            if (dx > 12 || dy > 12 || dt > 700) return;
             if (hitInteractiveInsideSummary(e.target) && e.target !== sum) return;
-            e.preventDefault();
-            e.stopPropagation();
+            try {
+              e.preventDefault();
+            } catch (ePr) {}
             det.open = !det.open;
           });
 
-          /** Хаптик и сохранение — на нативном toggle (он же триггерится при нашем `det.open = …`). */
+          sum.addEventListener('pointercancel', function () {
+            down = null;
+          });
+
+          /*
+            Гасим click целиком (capture: true → раньше любого нативного дефолта и до того,
+            как он успеет дотянуться до toggle). pointerup уже сделал переключение.
+          */
+          sum.addEventListener(
+            'click',
+            function (e) {
+              if (hitInteractiveInsideSummary(e.target) && e.target !== sum) return;
+              try {
+                e.preventDefault();
+              } catch (ePc) {}
+              try {
+                e.stopPropagation();
+              } catch (eSp) {}
+            },
+            true
+          );
+
+          /** Хаптик на нативный toggle (он триггерится при нашем `det.open = …`). */
           det.addEventListener('toggle', function () {
             try {
               triggerHaptic('micro');
