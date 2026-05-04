@@ -2232,6 +2232,13 @@
       pointer-events: auto;
     }
 
+    /*
+      Play-кнопка стилизована «под объектив кинопроектора»: тёплая ламповая
+      «лужица» света сверху-внутри, золотой подсвет на внутреннем ободе,
+      глубокая чёрная канавка между ободом и корпусом и мягкая вольфрамовая
+      аура снаружи. Треугольник — тёплого янтарного цвета с лёгким огоньком
+      (drop-shadow), как просвет от лампы накаливания.
+    */
     .scene-time-wrap .scene-play-btn {
       flex-shrink: 0;
       box-sizing: border-box;
@@ -2239,10 +2246,11 @@
       height: var(--scene-play-size, 2.68rem);
       aspect-ratio: 1;
       border-radius: 50%;
-      /* Целый пиксель: 0.5px из .wrap давал «кривую» окружность на ретине/скейле */
-      border: 1px solid rgba(255, 120, 48, 0.55);
-      background: linear-gradient(180deg, #121212, #000000);
-      color: rgba(255, 188, 140, 0.98);
+      border: 1px solid rgba(220, 178, 112, 0.62);
+      background:
+        radial-gradient(circle at 50% 38%, rgba(255, 198, 130, 0.18), rgba(255, 198, 130, 0) 58%),
+        radial-gradient(circle at 50% 62%, #15110c 0%, #0a0805 58%, #050302 100%);
+      color: rgba(255, 205, 138, 0.96);
       font-weight: 800;
       line-height: 0;
       cursor: pointer;
@@ -2251,15 +2259,26 @@
       align-items: center;
       justify-content: center;
       overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+      box-shadow:
+        /* двойной ободок: чёрная канавка + золотой внутренний подсвет */
+        inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+        inset 0 0 0 2px rgba(232, 188, 122, 0.2),
+        /* мягкая тёплая «вольфрамовая» аура снаружи */
+        0 0 16px rgba(255, 165, 90, 0.2),
+        /* объём */
+        0 4px 12px rgba(0, 0, 0, 0.5);
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
       outline: none;
+      transition: transform 0.16s ease, box-shadow 0.18s ease;
     }
 
     .scene-time-wrap .scene-play-btn:focus-visible {
       box-shadow:
-        0 0 0 2px rgba(255, 140, 72, 0.55),
+        inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+        inset 0 0 0 2px rgba(255, 220, 150, 0.38),
+        0 0 0 2px rgba(255, 165, 90, 0.5),
+        0 0 22px rgba(255, 175, 100, 0.3),
         0 4px 14px rgba(0, 0, 0, 0.5);
     }
 
@@ -2268,10 +2287,21 @@
       height: calc(var(--scene-play-size) * 0.44);
       display: block;
       flex-shrink: 0;
+      /* «Огонёк» от треугольника — словно просвет проектора */
+      filter: drop-shadow(0 0 4px rgba(255, 175, 100, 0.55));
     }
 
     .scene-time-wrap .scene-play-btn:active {
-      transform: scale(0.97);
+      transform: scale(0.96);
+      box-shadow:
+        inset 0 0 0 1px rgba(0, 0, 0, 0.65),
+        inset 0 0 0 2px rgba(255, 230, 165, 0.42),
+        0 0 28px rgba(255, 175, 100, 0.42),
+        0 2px 8px rgba(0, 0, 0, 0.55);
+    }
+
+    .scene-time-wrap .scene-play-btn:active svg.scene-play-icon {
+      filter: drop-shadow(0 0 7px rgba(255, 195, 110, 0.85));
     }
 
     .scene-time-wrap .scene-done-label.scene-done-checkbox-only {
@@ -5671,8 +5701,8 @@
        * Дублируйте те же поля в build-info.json — подпись внизу подгружает его с cache: no-store,
        * чтобы не залипала старая версия при закэшированной главной странице.
        */
-      var APP_VERSION = 'v295';
-      var BUILD_TIME = '2026-05-04 06:50 MSK';
+      var APP_VERSION = 'v296';
+      var BUILD_TIME = '2026-05-04 06:53 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
