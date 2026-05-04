@@ -16,7 +16,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Sam Scenes (v284)</title>
+  <title>Sam Scenes (v285)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -3479,13 +3479,62 @@
       opacity: 1;
     }
 
+    /* Свайп правого края: радиальное свечение от края + волна, расходящаяся внутрь. */
     .pull-reload-flash.pull-reload-flash--from-edge {
       background: radial-gradient(
-        ellipse 85% 75% at 100% 42%,
-        rgba(255, 205, 155, 0.14),
-        rgba(240, 175, 115, 0.06) 45%,
-        transparent 60%
+        ellipse 95% 88% at 100% 50%,
+        rgba(255, 220, 170, 0.32) 0%,
+        rgba(255, 200, 140, 0.18) 18%,
+        rgba(220, 170, 130, 0.08) 42%,
+        rgba(150, 120, 200, 0.04) 60%,
+        transparent 78%
       );
+    }
+
+    .pull-reload-flash.pull-reload-flash--from-edge.pull-reload-flash--fire {
+      animation: pullEdgeFireFlash 0.46s cubic-bezier(0.16, 0.95, 0.3, 1) forwards;
+    }
+
+    @keyframes pullEdgeFireFlash {
+      0% {
+        opacity: 0;
+        background: radial-gradient(
+          ellipse 60% 40% at 100% 50%,
+          rgba(255, 240, 200, 0) 0%,
+          rgba(255, 200, 140, 0) 30%,
+          transparent 50%
+        );
+      }
+      35% {
+        opacity: 1;
+        background: radial-gradient(
+          ellipse 110% 95% at 100% 50%,
+          rgba(255, 240, 210, 0.55) 0%,
+          rgba(255, 215, 160, 0.32) 14%,
+          rgba(220, 180, 140, 0.16) 36%,
+          rgba(150, 120, 200, 0.08) 56%,
+          transparent 76%
+        );
+      }
+      70% {
+        opacity: 0.78;
+        background: radial-gradient(
+          ellipse 130% 110% at 100% 50%,
+          rgba(255, 235, 200, 0.34) 0%,
+          rgba(255, 200, 150, 0.18) 22%,
+          rgba(180, 150, 200, 0.08) 50%,
+          transparent 78%
+        );
+      }
+      100% {
+        opacity: 0;
+        background: radial-gradient(
+          ellipse 150% 140% at 100% 50%,
+          rgba(255, 230, 200, 0) 0%,
+          rgba(220, 180, 150, 0) 40%,
+          transparent 70%
+        );
+      }
     }
 
     .pull-swipe-hint {
@@ -3527,6 +3576,48 @@
     .pull-swipe-hint.pull-swipe-hint--ready.pull-swipe-hint--show {
       animation-name: pullSwipeSideGlowReady;
       animation-duration: 0.9s;
+    }
+
+    /* Финальная вспышка ровно в момент срабатывания обновления — перебивает breathe-анимацию. */
+    .pull-swipe-hint.pull-swipe-hint--fire {
+      animation: pullSwipeSideFire 0.46s cubic-bezier(0.18, 0.92, 0.26, 1) forwards !important;
+    }
+
+    @keyframes pullSwipeSideFire {
+      0% {
+        opacity: 1;
+        transform: translateX(0) scaleY(1);
+        filter:
+          drop-shadow(-7px 0 14px rgba(255, 255, 255, 0.28))
+          drop-shadow(-9px 0 20px rgba(145, 120, 210, 0.22))
+          drop-shadow(-15px 0 24px rgba(255, 230, 190, 0.14));
+      }
+      30% {
+        opacity: 1;
+        transform: translateX(-2px) scaleY(1.18);
+        filter:
+          drop-shadow(-12px 0 22px rgba(255, 250, 220, 0.78))
+          drop-shadow(-16px 0 36px rgba(255, 220, 170, 0.55))
+          drop-shadow(-26px 0 48px rgba(170, 130, 220, 0.42))
+          drop-shadow(-40px 0 64px rgba(255, 230, 190, 0.22));
+      }
+      60% {
+        opacity: 0.9;
+        transform: translateX(-3px) scaleY(1.32);
+        filter:
+          drop-shadow(-16px 0 28px rgba(255, 248, 220, 0.6))
+          drop-shadow(-24px 0 46px rgba(255, 218, 168, 0.4))
+          drop-shadow(-44px 0 72px rgba(180, 140, 220, 0.3))
+          drop-shadow(-72px 0 96px rgba(255, 230, 200, 0.16));
+      }
+      100% {
+        opacity: 0;
+        transform: translateX(-6px) scaleY(1.6);
+        filter:
+          drop-shadow(-22px 0 38px rgba(255, 248, 220, 0))
+          drop-shadow(-44px 0 64px rgba(255, 220, 175, 0))
+          drop-shadow(-90px 0 120px rgba(170, 130, 220, 0));
+      }
     }
 
     @keyframes pullSwipeSideGlow {
@@ -3594,6 +3685,10 @@
         animation: none !important;
       }
 
+      .pull-reload-flash.pull-reload-flash--from-edge.pull-reload-flash--fire {
+        animation: none !important;
+        opacity: 0.5;
+      }
     }
 
     /* Локации шотлиста — чёрный фон и золотая обводка как у всплывающих панелей */
@@ -5568,8 +5663,8 @@
        * Дублируйте те же поля в build-info.json — подпись внизу подгружает его с cache: no-store,
        * чтобы не залипала старая версия при закэшированной главной странице.
        */
-      var APP_VERSION = 'v284';
-      var BUILD_TIME = '2026-05-04 05:42 MSK';
+      var APP_VERSION = 'v285';
+      var BUILD_TIME = '2026-05-04 05:46 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -11072,9 +11167,6 @@
           if (now - pullReloadedAt < 1300) return;
           pullReloadedAt = now;
           try {
-            resetPullHint();
-          } catch (eRh) {}
-          try {
             flushSave();
           } catch (eFs) {}
           try {
@@ -11083,11 +11175,49 @@
           try {
             triggerHaptic('medium');
           } catch (e2) {}
-          resetSwipeHint();
           saveScrollForNextLoad();
-          requestAnimationFrame(function () {
+
+          var reduce = false;
+          try {
+            reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          } catch (eRm) {}
+
+          /** Cinema-вспышка: ~280мс на отыгрывание свечения, потом reload. С reduced-motion — без задержки. */
+          var FIRE_MS = reduce ? 0 : 280;
+          var flash = document.getElementById('pull-reload-flash');
+          var swipeHint = swipeHintEl();
+          var pullHint = pullHintEl();
+
+          if (opts.fromSwipe) {
+            /* Сваймом справа — оставляем полоску на месте, добавляем огненную вспышку */
+            if (swipeHint) {
+              swipeHint.classList.remove('pull-swipe-hint--ready');
+              swipeHint.classList.add('pull-swipe-hint--show', 'pull-swipe-hint--fire');
+            }
+            if (flash) {
+              flash.classList.add('pull-reload-flash--from-edge');
+              flash.classList.add('pull-reload-flash--show');
+              flash.classList.add('pull-reload-flash--fire');
+            }
+            /* Pull-hint (лампу) гасим — для свайпа она лишняя */
+            try {
+              resetPullHint();
+            } catch (eRhSw) {}
+          } else {
+            /* Pull-down (вертикальный) — оставляем лампу на пике, добавляем верхнюю радиальную вспышку */
+            if (pullHint) pullHint.classList.add('pull-reload-hint--ready');
+            if (flash) {
+              flash.classList.remove('pull-reload-flash--from-edge', 'pull-reload-flash--fire');
+              flash.classList.add('pull-reload-flash--show');
+            }
+            try {
+              resetSwipeHint();
+            } catch (eRshP) {}
+          }
+
+          setTimeout(function () {
             location.reload();
-          });
+          }, FIRE_MS);
         }
 
         document.addEventListener(
