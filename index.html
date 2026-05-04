@@ -494,7 +494,9 @@
     /* Шторка «открыть ассистента» слева: тёмно-синий карман, кобальтовый контур, фиолетовое свечение. */
     .assistant-open-strip {
       position: fixed;
-      left: max(4px, calc(env(safe-area-inset-left, 0px) + 4px));
+      /* Отступ от края экрана нужен, чтобы фиолетовый ореол было видно с ОБЕИХ сторон,
+         а не только с внутренней — иначе наружный край упирается в бордер браузера. */
+      left: max(12px, calc(env(safe-area-inset-left, 0px) + 12px));
       top: 50%;
       transform: translateY(calc(-50% + var(--pull-stack-y, 0px)));
       width: 16px;
@@ -516,10 +518,11 @@
         /* яркий кобальтовый контур */
         inset 0 0 0 1.5px rgba(82, 152, 255, 0.92),
         /* мягкая внешняя сине-фиолетовая обводка */
-        0 0 0 1px rgba(95, 145, 245, 0.45),
-        /* двухслойное фиолетовое свечение наружу */
-        0 0 18px rgba(140, 125, 230, 0.42),
-        0 0 36px rgba(110, 100, 220, 0.26),
+        0 0 0 1px rgba(95, 145, 245, 0.5),
+        /* трёхслойное фиолетовое свечение наружу — симметричное во все стороны */
+        0 0 14px rgba(150, 130, 240, 0.55),
+        0 0 28px rgba(130, 110, 230, 0.4),
+        0 0 52px rgba(110, 95, 225, 0.22),
         /* внутреннее фиолетовое свечение */
         inset 0 0 14px rgba(135, 120, 230, 0.34),
         /* глубокая тень для объёма */
@@ -552,9 +555,10 @@
     .assistant-open-strip:active {
       box-shadow:
         inset 0 0 0 1.8px rgba(125, 178, 255, 0.98),
-        0 0 0 1px rgba(140, 175, 255, 0.55),
-        0 0 24px rgba(165, 145, 240, 0.6),
-        0 0 44px rgba(120, 110, 230, 0.38),
+        0 0 0 1px rgba(140, 175, 255, 0.6),
+        0 0 18px rgba(170, 150, 245, 0.7),
+        0 0 36px rgba(140, 120, 240, 0.5),
+        0 0 60px rgba(115, 100, 230, 0.3),
         inset 0 0 20px rgba(160, 145, 240, 0.46),
         2px 0 16px rgba(0, 0, 0, 0.55);
     }
@@ -621,7 +625,11 @@
     */
     .assistant-drawer-dismiss-chevron {
       position: absolute;
-      right: 4px;
+      /* Отступ от правого края панели нужен, чтобы фиолетовый ореол был виден
+         с ОБЕИХ сторон шторки. При right: 4px наружный ореол упирается
+         в границу панели (с backdrop-filter в Safari подрезается) и читается
+         только внутренний край. */
+      right: 14px;
       top: 50%;
       transform: translateY(-50%);
       z-index: 6;
@@ -650,9 +658,11 @@
         );
       box-shadow:
         inset 0 0 0 1.5px rgba(82, 152, 255, 0.92),
-        0 0 0 1px rgba(95, 145, 245, 0.45),
-        0 0 18px rgba(140, 125, 230, 0.42),
-        0 0 36px rgba(110, 100, 220, 0.26),
+        0 0 0 1px rgba(95, 145, 245, 0.5),
+        /* трёхслойное фиолетовое свечение наружу — симметричное со всех сторон */
+        0 0 14px rgba(150, 130, 240, 0.55),
+        0 0 28px rgba(130, 110, 230, 0.4),
+        0 0 52px rgba(110, 95, 225, 0.22),
         inset 0 0 14px rgba(135, 120, 230, 0.34),
         -2px 0 14px rgba(0, 0, 0, 0.55);
       transition: opacity 0.2s ease, box-shadow 0.22s ease, transform 0.22s ease;
@@ -706,9 +716,10 @@
     .assistant-drawer-dismiss-chevron:active {
       box-shadow:
         inset 0 0 0 1.8px rgba(125, 178, 255, 0.98),
-        0 0 0 1px rgba(140, 175, 255, 0.55),
-        0 0 24px rgba(165, 145, 240, 0.6),
-        0 0 44px rgba(120, 110, 230, 0.38),
+        0 0 0 1px rgba(140, 175, 255, 0.6),
+        0 0 18px rgba(170, 150, 245, 0.7),
+        0 0 36px rgba(140, 120, 240, 0.5),
+        0 0 60px rgba(115, 100, 230, 0.3),
         inset 0 0 20px rgba(160, 145, 240, 0.46),
         -2px 0 16px rgba(0, 0, 0, 0.55);
     }
@@ -4546,7 +4557,7 @@
     class="app-build-chip"
     id="app-build-chip"
     role="status"
-    title="Версия и время сборки на странице — сравните с последним деплоем GitHub Pages"></div>
+    title="Версия приложения и время, когда эта страница была загружена браузером"></div>
   <div class="wrap">
     <div class="top-logo" id="top-logo-block">
       <div class="top-logo-brand">
@@ -5661,8 +5672,8 @@
        * Дублируйте те же поля в build-info.json — подпись внизу подгружает его с cache: no-store,
        * чтобы не залипала старая версия при закэшированной главной странице.
        */
-      var APP_VERSION = 'v288';
-      var BUILD_TIME = '2026-05-04 05:58 MSK';
+      var APP_VERSION = 'v289';
+      var BUILD_TIME = '2026-05-04 05:55 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -5671,7 +5682,16 @@
         });
       }
 
-      var APP_BUILD = formatDatesInDisplayString(APP_VERSION + ' · ' + BUILD_TIME);
+      /** Время загрузки страницы в браузере пользователя (его локальная зона). */
+      function formatAppLoadStamp(d) {
+        function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+        return pad2(d.getDate()) + '.' + pad2(d.getMonth() + 1) + '.' + d.getFullYear() +
+          ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+      }
+
+      var APP_LOAD_AT = new Date();
+      var APP_LOAD_TEXT = formatAppLoadStamp(APP_LOAD_AT);
+      var APP_BUILD = APP_VERSION + ' · загружено ' + APP_LOAD_TEXT;
       var BUILD_INFO_FILE = 'build-info.json';
       var lastSceneTimeTriggerTouchAt = 0;
       /** Открывать диалог времени только при коротком тапе; при скролле палец смещается сильнее. */
@@ -7659,20 +7679,15 @@
         if (buildChip) buildChip.textContent = stamp;
       }
 
+      /*
+        Раньше плашка перетиралась временем сборки из build-info.json — поэтому
+        пользователь видел не «когда мой телефон загрузил приложение», а «когда
+        автор сохранил билд». Теперь чип формируется один раз из APP_LOAD_TEXT
+        (момент загрузки в локальной зоне устройства). Авто-перезагрузка раз
+        в AUTO_PAGE_RELOAD_MS обновит и сборку, и время загрузки.
+      */
       function fetchLiveBuildStampForChip() {
-        try {
-          var url = new URL(BUILD_INFO_FILE, window.location.href).href;
-          fetch(url, { cache: 'no-store', credentials: 'same-origin' })
-            .then(function (r) {
-              if (!r.ok) return null;
-              return r.json();
-            })
-            .then(function (data) {
-              var stamp = formatBuildStampFromJson(data);
-              if (stamp) applyBuildStampToUi(stamp);
-            })
-            .catch(function () {});
-        } catch (e) {}
+        // no-op: чип фиксирует время загрузки этой страницы, а не серверный билд.
       }
 
       var ASSISTANT_SCENARIO_LONGPRESS_MS = 520;
