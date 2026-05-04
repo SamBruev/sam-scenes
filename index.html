@@ -494,9 +494,7 @@
     /* Шторка «открыть ассистента» слева: тёмно-синий карман, кобальтовый контур, фиолетовое свечение. */
     .assistant-open-strip {
       position: fixed;
-      /* Отступ от края экрана: фиолетовый ореол ~28px в радиусе должен быть виден
-         с ОБЕИХ сторон, иначе наружный край упирается в бордер вьюпорта. */
-      left: max(24px, calc(env(safe-area-inset-left, 0px) + 24px));
+      left: max(4px, calc(env(safe-area-inset-left, 0px) + 4px));
       top: 50%;
       transform: translateY(calc(-50% + var(--pull-stack-y, 0px)));
       width: 16px;
@@ -514,27 +512,17 @@
           rgba(12, 22, 58, 0.98) 50%,
           rgba(8, 14, 38, 0.95) 100%
         );
-      /* drop-shadow на отдельном слое (filter) даёт честный halo вокруг pill, который
-         не подрезается backdrop-filter родителя — в отличие от box-shadow. */
-      filter:
-        drop-shadow(0 0 4px rgba(150, 130, 240, 0.65))
-        drop-shadow(0 0 12px rgba(130, 110, 235, 0.5))
-        drop-shadow(0 0 22px rgba(110, 95, 230, 0.32));
       box-shadow:
-        /* яркий кобальтовый контур */
+        /* кобальтовый контур */
         inset 0 0 0 1.5px rgba(82, 152, 255, 0.92),
-        /* мягкая внешняя сине-фиолетовая обводка */
-        0 0 0 1px rgba(95, 145, 245, 0.5),
-        /* внутреннее фиолетовое свечение */
-        inset 0 0 14px rgba(135, 120, 230, 0.34),
-        /* глубокая тень для объёма */
-        2px 0 14px rgba(0, 0, 0, 0.55);
+        /* лёгкая тень для объёма (без неонового ореола) */
+        2px 0 10px rgba(0, 0, 0, 0.45);
       /* Выше .wrap (12) и дочерних слоёв сцен, но ниже teleprompter / pull-hint / drawer */
       z-index: 100;
       cursor: pointer;
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
-      transition: opacity 0.2s ease, box-shadow 0.22s ease, filter 0.22s ease, transform 0.22s ease;
+      transition: opacity 0.2s ease, box-shadow 0.22s ease, transform 0.22s ease;
     }
 
     .assistant-open-strip::before {
@@ -555,15 +543,9 @@
     }
 
     .assistant-open-strip:active {
-      filter:
-        drop-shadow(0 0 5px rgba(170, 150, 245, 0.85))
-        drop-shadow(0 0 16px rgba(140, 120, 240, 0.65))
-        drop-shadow(0 0 28px rgba(115, 100, 230, 0.42));
       box-shadow:
         inset 0 0 0 1.8px rgba(125, 178, 255, 0.98),
-        0 0 0 1px rgba(140, 175, 255, 0.6),
-        inset 0 0 20px rgba(160, 145, 240, 0.46),
-        2px 0 16px rgba(0, 0, 0, 0.55);
+        2px 0 12px rgba(0, 0, 0, 0.5);
     }
 
     .assistant-open-strip:active::before {
@@ -628,11 +610,7 @@
     */
     .assistant-drawer-dismiss-chevron {
       position: absolute;
-      /* Отступ от правого края панели: с backdrop-filter родителя box-shadow с большим
-         спрэдом подрезается на границе панели, и фиолет читался только с внутренней
-         стороны. Поэтому свечение перенесено на filter: drop-shadow (он не клипуется
-         backdrop-root родителя), а pill отодвинут от края, чтобы halo было место. */
-      right: 24px;
+      right: 4px;
       top: 50%;
       transform: translateY(-50%);
       z-index: 6;
@@ -659,16 +637,10 @@
           rgba(12, 22, 58, 0.98) 50%,
           rgba(8, 14, 38, 0.95) 100%
         );
-      filter:
-        drop-shadow(0 0 4px rgba(150, 130, 240, 0.65))
-        drop-shadow(0 0 12px rgba(130, 110, 235, 0.5))
-        drop-shadow(0 0 22px rgba(110, 95, 230, 0.32));
       box-shadow:
         inset 0 0 0 1.5px rgba(82, 152, 255, 0.92),
-        0 0 0 1px rgba(95, 145, 245, 0.5),
-        inset 0 0 14px rgba(135, 120, 230, 0.34),
-        -2px 0 14px rgba(0, 0, 0, 0.55);
-      transition: opacity 0.2s ease, box-shadow 0.22s ease, filter 0.22s ease, transform 0.22s ease;
+        -2px 0 10px rgba(0, 0, 0, 0.45);
+      transition: opacity 0.2s ease, box-shadow 0.22s ease, transform 0.22s ease;
     }
 
     /* Канал без видимой дорожки — только движущаяся стрелка › */
@@ -717,15 +689,9 @@
     }
 
     .assistant-drawer-dismiss-chevron:active {
-      filter:
-        drop-shadow(0 0 5px rgba(170, 150, 245, 0.85))
-        drop-shadow(0 0 16px rgba(140, 120, 240, 0.65))
-        drop-shadow(0 0 28px rgba(115, 100, 230, 0.42));
       box-shadow:
         inset 0 0 0 1.8px rgba(125, 178, 255, 0.98),
-        0 0 0 1px rgba(140, 175, 255, 0.6),
-        inset 0 0 20px rgba(160, 145, 240, 0.46),
-        -2px 0 16px rgba(0, 0, 0, 0.55);
+        -2px 0 12px rgba(0, 0, 0, 0.5);
     }
 
     .assistant-drawer-scroll {
@@ -5682,8 +5648,8 @@
        * Дублируйте те же поля в build-info.json — подпись внизу подгружает его с cache: no-store,
        * чтобы не залипала старая версия при закэшированной главной странице.
        */
-      var APP_VERSION = 'v291';
-      var BUILD_TIME = '2026-05-04 06:08 MSK';
+      var APP_VERSION = 'v292';
+      var BUILD_TIME = '2026-05-04 06:32 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
