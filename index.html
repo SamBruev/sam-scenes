@@ -16,7 +16,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>CURSOR · Sam Scenes (v275)</title>
+  <title>CURSOR · Sam Scenes (v276)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -1549,63 +1549,6 @@
       display: block;
       padding: 0;
       overflow: hidden;
-    }
-
-    /*
-      Подсказка у левого края карточки «Настройки сценариев»: тот же ритм и цвет, что у полоски шторки,
-      без тапа — напоминает, что слева есть боковое меню «План съёмок».
-    */
-    .scenario-hub-side-menu-hint {
-      position: absolute;
-      left: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 6;
-      width: 6px;
-      min-width: 5px;
-      height: min(168px, 46vh);
-      min-height: 72px;
-      margin: 0;
-      padding: 0;
-      border: none;
-      border-radius: 0 min(18px, 2.6vh) min(18px, 2.6vh) 0;
-      pointer-events: none;
-      background: linear-gradient(
-        90deg,
-        rgba(12, 10, 8, 0.76) 0%,
-        rgba(212, 175, 55, 0.11) 38%,
-        var(--assistant-hint-violet-mid) 62%,
-        rgba(212, 175, 55, 0.26) 100%
-      );
-      box-shadow:
-        inset -1px 0 7px var(--assistant-hint-violet-soft),
-        inset -1px 0 5px rgba(212, 175, 55, 0.1),
-        1px 0 10px rgba(0, 0, 0, 0.38),
-        0 0 16px var(--assistant-hint-violet-glow);
-      opacity: 0.95;
-      transition: opacity 0.2s ease;
-    }
-
-    .scenario-hub-side-menu-hint::before {
-      content: '\203A';
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 12px;
-      font-weight: 500;
-      line-height: 1;
-      color: var(--ui-violet);
-      pointer-events: none;
-      letter-spacing: -0.08em;
-      opacity: 0.88;
-      text-shadow:
-        0 0 10px var(--ui-violet-glow),
-        0 0 4px rgba(255, 255, 255, 0.1);
-    }
-
-    body.assistant-drawer-open .scenario-hub-side-menu-hint {
-      opacity: 0;
     }
 
     .scenario-hub > summary {
@@ -4589,7 +4532,6 @@
           <button class="btn btn-danger" id="btn-scenario-delete" type="button">Удалить</button>
         </div>
       </div>
-      <span class="scenario-hub-side-menu-hint" aria-hidden="true"></span>
     </details>
 
     <details class="card daily-plan" id="daily-plan" open>
@@ -5633,8 +5575,8 @@
        * Дублируйте те же поля в build-info.json — подпись внизу подгружает его с cache: no-store,
        * чтобы не залипала старая версия при закэшированной главной странице.
        */
-      var APP_VERSION = 'v275';
-      var BUILD_TIME = '2026-05-04 05:30 MSK';
+      var APP_VERSION = 'v276';
+      var BUILD_TIME = '2026-05-04 06:05 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
