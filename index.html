@@ -405,8 +405,8 @@
          панель за пределы видимой области (iOS считает их как полный экран
          с учётом скрытой URL-панели), и контент сверху/снизу уезжает за край. */
       height: auto;
-      /* Без полей сверху/снизу у стекла — фон до края экрана; safe-area на .assistant-drawer-scroll */
-      padding: 0 14px 0 calc(14px + env(safe-area-inset-left, 0px));
+      /* Без полей сверху/снизу у стекла; справа 0 — шторка-подсказка вплотную к краю панели; отступ текста в .assistant-drawer-scroll */
+      padding: 0 0 0 calc(14px + env(safe-area-inset-left, 0px));
       background: rgba(10, 9, 8, 0.82);
       backdrop-filter: blur(22px) saturate(108%);
       -webkit-backdrop-filter: blur(22px) saturate(108%);
@@ -523,16 +523,10 @@
       padding: 0;
       border: none;
       border-radius: 0 999px 999px 0;
-      background:
-        linear-gradient(
-          180deg,
-          rgba(8, 14, 38, 0.95) 0%,
-          rgba(12, 22, 58, 0.98) 50%,
-          rgba(8, 14, 38, 0.95) 100%
-        );
+      background: rgba(6, 6, 8, 0.78);
       box-shadow:
-        inset 0 0 0 1px rgba(82, 152, 255, 0.92),
-        1px 0 8px rgba(0, 0, 0, 0.42);
+        inset 0 0 0 1px rgba(212, 175, 95, 0.32),
+        1px 0 6px rgba(0, 0, 0, 0.35);
       /* Выше .wrap (12) и дочерних слоёв сцен, но ниже teleprompter / pull-hint / drawer */
       z-index: 100;
       cursor: pointer;
@@ -550,25 +544,21 @@
       font-size: 9px;
       font-weight: 500;
       line-height: 1;
-      color: rgba(195, 210, 255, 0.92);
+      color: rgba(220, 205, 175, 0.9);
       pointer-events: none;
       letter-spacing: -0.08em;
-      text-shadow:
-        0 0 9px rgba(110, 150, 255, 0.7),
-        0 0 4px rgba(255, 255, 255, 0.32);
+      text-shadow: none;
     }
 
     .assistant-open-strip:active {
       box-shadow:
-        inset 0 0 0 1.2px rgba(125, 178, 255, 0.98),
-        1px 0 10px rgba(0, 0, 0, 0.5);
+        inset 0 0 0 1px rgba(232, 201, 104, 0.45),
+        1px 0 8px rgba(0, 0, 0, 0.42);
     }
 
     .assistant-open-strip:active::before {
-      color: rgba(220, 230, 255, 0.98);
-      text-shadow:
-        0 0 12px rgba(140, 175, 255, 0.85),
-        0 0 5px rgba(255, 255, 255, 0.42);
+      color: rgba(245, 232, 210, 0.95);
+      text-shadow: none;
     }
 
     body.assistant-drawer-open .assistant-open-strip {
@@ -576,8 +566,14 @@
       pointer-events: none;
     }
 
+    /* Пока идёт закрытие панели — шторка и скролл-лочка как при «открыто», без мигания до конца анимации. */
+    body[data-assistant-drawer-closing='1'] .assistant-open-strip {
+      opacity: 0;
+      pointer-events: none;
+    }
+
     .assistant-drawer-host {
-      margin: 0 0 12px;
+      margin: 0 0 20px;
       padding: 0 2px 10px;
       text-align: center;
     }
@@ -606,6 +602,7 @@
     }
 
     .assistant-drawer-head {
+      margin-top: 6px;
       margin-bottom: 10px;
     }
 
@@ -625,7 +622,7 @@
     */
     .assistant-drawer-dismiss-chevron {
       position: absolute;
-      right: 4px;
+      right: 0;
       top: 50%;
       /* 180°: шеврон и скругления смотрят в противоположную сторону (зеркально к открытию слева) */
       transform: translateY(-50%) rotate(180deg);
@@ -647,16 +644,10 @@
       align-items: stretch;
       justify-content: stretch;
       box-sizing: border-box;
-      background:
-        linear-gradient(
-          180deg,
-          rgba(8, 14, 38, 0.95) 0%,
-          rgba(12, 22, 58, 0.98) 50%,
-          rgba(8, 14, 38, 0.95) 100%
-        );
+      background: rgba(6, 6, 8, 0.78);
       box-shadow:
-        inset 0 0 0 1px rgba(82, 152, 255, 0.92),
-        -1px 0 8px rgba(0, 0, 0, 0.42);
+        inset 0 0 0 1px rgba(212, 175, 95, 0.32),
+        -1px 0 6px rgba(0, 0, 0, 0.35);
       transition: opacity 0.2s ease, box-shadow 0.22s ease, transform 0.22s ease;
     }
 
@@ -687,15 +678,13 @@
       justify-content: center;
       pointer-events: none;
       transition: none;
-      color: rgba(195, 210, 255, 0.95);
+      color: rgba(220, 205, 175, 0.92);
       opacity: 0.95;
       font-size: 9px;
       font-weight: 500;
       line-height: 1;
       letter-spacing: -0.08em;
-      text-shadow:
-        0 0 9px rgba(110, 150, 255, 0.7),
-        0 0 4px rgba(255, 255, 255, 0.32);
+      text-shadow: none;
       user-select: none;
     }
 
@@ -707,8 +696,8 @@
 
     .assistant-drawer-dismiss-chevron:active {
       box-shadow:
-        inset 0 0 0 1.2px rgba(125, 178, 255, 0.98),
-        -1px 0 10px rgba(0, 0, 0, 0.5);
+        inset 0 0 0 1px rgba(232, 201, 104, 0.45),
+        -1px 0 8px rgba(0, 0, 0, 0.42);
     }
 
     .assistant-drawer-scroll {
@@ -720,7 +709,8 @@
       overscroll-behavior: contain;
       padding-top: env(safe-area-inset-top, 0px);
       padding-bottom: env(safe-area-inset-bottom, 0px);
-      /* Без системной полосы: положение прокрутки только у фиолетовой полоски › справа */
+      padding-right: 14px;
+      /* Без системной полосы: положение прокрутки у полоски › справа */
       scrollbar-width: none;
       -ms-overflow-style: none;
     }
@@ -779,7 +769,8 @@
       letter-spacing: 0.04em;
     }
 
-    .assistant-drawer-field--row {
+    .assistant-drawer-field--inline-pair .assistant-drawer-inline-inputs {
+      display: flex;
       flex-direction: row;
       flex-wrap: nowrap;
       align-items: stretch;
@@ -787,41 +778,25 @@
       min-width: 0;
     }
 
-    .assistant-drawer-field--row .assistant-drawer-field--grow {
+    .assistant-drawer-inline-inputs .assistant-drawer-input[type="date"] {
       flex: 1 1 0;
       min-width: 0;
-      margin-bottom: 0;
-      overflow: hidden;
+      width: 100%;
     }
 
-    .assistant-drawer-field--row .assistant-drawer-field--count {
-      flex: 0 0 6.75rem;
-      width: 6.75rem;
-      max-width: 34%;
-      min-width: 5.25rem;
-      margin-bottom: 0;
-      align-items: stretch;
+    .assistant-drawer-input--count-compact {
+      flex: 0 0 5.25rem;
+      max-width: 32%;
+      min-width: 4.75rem;
       text-align: center;
       box-sizing: border-box;
     }
 
-    .assistant-drawer-field--row .assistant-drawer-input--short {
-      width: 100%;
-      max-width: none;
-      box-sizing: border-box;
-    }
-
-    /* Одинаковая высота полей в строке «Дата / Роликов», чтобы колонки не «плясали» на разных движках */
-    .assistant-drawer-field--row .assistant-drawer-input {
+    /* Одинаковая высота полей в строке дата + число роликов */
+    .assistant-drawer-field--inline-pair .assistant-drawer-input {
       min-height: 44px;
       min-width: 0;
       max-width: 100%;
-    }
-
-    /* WebKit: у type=date большая интринсик-ширина — без этого колонка «Роликов» заезжает под дату */
-    .assistant-drawer-field--row .assistant-drawer-field--grow .assistant-drawer-input[type="date"] {
-      width: 100%;
-      min-width: 0;
     }
 
     .assistant-drawer-input {
@@ -1118,9 +1093,10 @@
     }
 
     .assistant-drawer-trash {
-      margin-top: 26px;
-      padding: 12px 0 4px;
+      margin-top: 32px;
+      padding: 20px 0 4px;
       border: none;
+      border-top: 1px solid rgba(212, 175, 95, 0.2);
       border-radius: 0;
       background: transparent;
       box-shadow: none;
@@ -1274,7 +1250,7 @@
       right: 0;
       margin-left: auto;
       margin-right: auto;
-      transform: none;
+      /* transform задаётся правилом .wrap > * — тот же translateY(--pull-stack-y), что у контента при pull-to-reload */
       width: min(980px, 100%);
       /* Симметричные отступы: иначе при разных safe-area L/R блок с логотипом визуально съезжает (часто вправо) */
       padding-left: max(14px, env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
@@ -2841,7 +2817,7 @@
       color: #f8eed1;
     }
 
-    /* Примечание / перебивка: подпись строкой 1; текст — на всю ширину блока (стр. 2). Нижний пунктир на всю ширину блока через ::after, не от колонки текста. */
+    /* Примечание / перебивка: подпись в .scene-note-heading фикс. ширины (ch) — пунктир справа одной длины. */
     .scene-main > .line-note .note-editable,
     .scene-main > .intercut .intercut-text {
       display: block;
@@ -2888,8 +2864,25 @@
       line-height: 1.25;
     }
 
+    .scene-main > .line-note > b .scene-note-heading,
+    .scene-main > .intercut > b .scene-note-heading {
+      flex: 0 0 12ch;
+      min-width: 0;
+      box-sizing: border-box;
+      font-family: var(--brand-serif);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: rgba(210, 192, 168, 0.95);
+    }
+
     .scene-main > .line-note > b::before,
-    .scene-main > .line-note > b::after {
+    .scene-main > .intercut > b::before {
+      content: none;
+      display: none;
+    }
+
+    .scene-main > .line-note > b::after,
+    .scene-main > .intercut > b::after {
       content: "";
       flex: 1 1 0;
       min-width: 0.25em;
@@ -2939,15 +2932,6 @@
       min-width: 0;
       white-space: nowrap;
       line-height: 1.25;
-    }
-
-    .scene-main > .intercut > b::before,
-    .scene-main > .intercut > b::after {
-      content: "";
-      flex: 1 1 0;
-      min-width: 0.25em;
-      height: 0;
-      border-bottom: 1px dashed rgba(200, 198, 195, 0.38);
     }
 
     .scene-main > .intercut .intercut-text {
@@ -3019,18 +3003,18 @@
     }
 
     .card-prep .prep-important-title {
-      font-size: 0.82rem;
-      font-weight: 700;
-      letter-spacing: 0.06em;
+      font-size: clamp(1rem, 2.8vw, 1.2rem);
+      font-weight: 800;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: rgba(245, 232, 210, 0.95);
+      color: rgba(245, 232, 210, 0.98);
     }
 
     .card-prep .prep-important-sub {
-      font-size: 0.78rem;
-      font-weight: 500;
-      line-height: 1.3;
-      color: rgba(210, 200, 188, 0.62);
+      font-size: 0.8rem;
+      font-weight: 600;
+      line-height: 1.35;
+      color: rgba(220, 208, 195, 0.72);
     }
 
     .card-prep .prep-important-options {
@@ -3046,23 +3030,23 @@
       margin: 0;
       padding: 10px 12px 10px 10px;
       border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.09);
+      border: none;
       background: rgba(0, 0, 0, 0.35);
       font-size: 0.88rem;
-      transition:
-        border-color 0.18s ease,
-        background 0.18s ease,
-        box-shadow 0.18s ease;
+      transition: background 0.18s ease, box-shadow 0.18s ease;
     }
 
     .card-prep .prep-important-options .prep-important-label:has(input:checked) {
-      border-color: rgba(232, 201, 104, 0.42);
-      background: rgba(232, 201, 104, 0.09);
-      box-shadow: 0 0 0 1px rgba(232, 201, 104, 0.12);
+      background: rgba(232, 201, 104, 0.12);
+      box-shadow: none;
     }
 
     .card-prep .prep-important-options .prep-important-label:hover {
-      border-color: rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .card-prep .prep-important-options .prep-important-label:has(input:checked):hover {
+      background: rgba(232, 201, 104, 0.16);
     }
 
     .teleprompter-overlay {
@@ -3731,7 +3715,7 @@
       inset: 0;
       z-index: 2147483646;
       pointer-events: none;
-      /* Центр вспышки при reload-свайпе — по центру #pull-swipe-hint (слева у края экрана) */
+      /* Центр вспышки при reload-свайпе — по центру #pull-swipe-hint (справа у края экрана) */
       --pull-flash-at-x: 0%;
       --pull-flash-at-y: 50%;
       background: radial-gradient(
@@ -3748,7 +3732,7 @@
       opacity: 1;
     }
 
-    /* Свайп перезагрузки (влево): свечение от полоски у левого края (положение по скроллу). */
+    /* Свайп перезагрузки (влево): свечение от полоски у правого края (положение по скроллу). */
     .pull-reload-flash.pull-reload-flash--from-edge {
       background: radial-gradient(
         ellipse 95% 88% at var(--pull-flash-at-x) var(--pull-flash-at-y),
@@ -3808,9 +3792,9 @@
 
     .pull-swipe-hint {
       position: fixed;
-      /* Вплотную к левому краю экрана (без max(6px)/safe-area — иначе виден зазор, как на скрине) */
-      left: 0;
-      right: auto;
+      /* Вплотную к правому краю — индикатор по вертикали совпадает с «ползунком» скролла страницы */
+      right: 0;
+      left: auto;
       /* Вертикальная позиция задаётся из JS по скроллу (как ползунок скроллбара) */
       top: 0;
       z-index: 2147483000;
@@ -3818,25 +3802,25 @@
       height: 52px;
       margin-top: 0;
       border-radius: 5px;
-      /* Полоска у левого края — прогресс свайпа влево (reload). */
+      /* Полоска у правого края — прогресс свайпа влево (reload). */
       background: linear-gradient(
-        80deg,
-        rgba(22, 18, 14, 0.58) 0%,
-        var(--assistant-hint-violet-mid) 36%,
-        rgba(255, 255, 255, 0.3) 58%,
-        rgba(255, 236, 190, 0.52) 82%,
-        rgba(255, 248, 230, 0.68) 100%
+        280deg,
+        rgba(255, 248, 230, 0.68) 0%,
+        rgba(255, 236, 190, 0.52) 18%,
+        rgba(255, 255, 255, 0.3) 42%,
+        var(--assistant-hint-violet-mid) 64%,
+        rgba(22, 18, 14, 0.58) 100%
       );
       opacity: 0;
       pointer-events: none;
-      transform: translateX(-10px) scaleY(0.88);
+      transform: translateX(10px) scaleY(0.88);
       box-shadow:
-        4px 0 14px rgba(255, 255, 255, 0.12),
-        2px 0 18px var(--assistant-hint-violet-soft),
-        inset 2px 0 8px rgba(255, 236, 190, 0.2);
+        -4px 0 14px rgba(255, 255, 255, 0.12),
+        -2px 0 18px var(--assistant-hint-violet-soft),
+        inset -2px 0 8px rgba(255, 236, 190, 0.2);
       filter:
-        drop-shadow(5px 0 10px rgba(255, 255, 255, 0.12))
-        drop-shadow(4px 0 14px var(--assistant-hint-violet-soft));
+        drop-shadow(-5px 0 10px rgba(255, 255, 255, 0.12))
+        drop-shadow(-4px 0 14px var(--assistant-hint-violet-soft));
       transition: opacity 0.2s ease, transform 0.24s cubic-bezier(0.22, 1, 0.36, 1), filter 0.24s ease, box-shadow 0.24s ease;
     }
 
@@ -3860,81 +3844,81 @@
         opacity: 1;
         transform: translateX(0) scaleY(1);
         filter:
-          drop-shadow(7px 0 14px rgba(255, 255, 255, 0.28))
-          drop-shadow(9px 0 20px rgba(212, 175, 95, 0.22))
-          drop-shadow(15px 0 24px rgba(255, 230, 190, 0.14));
+          drop-shadow(-7px 0 14px rgba(255, 255, 255, 0.28))
+          drop-shadow(-9px 0 20px rgba(212, 175, 95, 0.22))
+          drop-shadow(-15px 0 24px rgba(255, 230, 190, 0.14));
       }
       30% {
         opacity: 1;
-        transform: translateX(2px) scaleY(1.18);
+        transform: translateX(-2px) scaleY(1.18);
         filter:
-          drop-shadow(12px 0 22px rgba(255, 250, 220, 0.78))
-          drop-shadow(16px 0 36px rgba(255, 220, 170, 0.55))
-          drop-shadow(26px 0 48px rgba(200, 160, 95, 0.42))
-          drop-shadow(40px 0 64px rgba(255, 230, 190, 0.22));
+          drop-shadow(-12px 0 22px rgba(255, 250, 220, 0.78))
+          drop-shadow(-16px 0 36px rgba(255, 220, 170, 0.55))
+          drop-shadow(-26px 0 48px rgba(200, 160, 95, 0.42))
+          drop-shadow(-40px 0 64px rgba(255, 230, 190, 0.22));
       }
       60% {
         opacity: 0.9;
-        transform: translateX(3px) scaleY(1.32);
+        transform: translateX(-3px) scaleY(1.32);
         filter:
-          drop-shadow(16px 0 28px rgba(255, 248, 220, 0.6))
-          drop-shadow(24px 0 46px rgba(255, 218, 168, 0.4))
-          drop-shadow(44px 0 72px rgba(210, 165, 95, 0.3))
-          drop-shadow(72px 0 96px rgba(255, 230, 200, 0.16));
+          drop-shadow(-16px 0 28px rgba(255, 248, 220, 0.6))
+          drop-shadow(-24px 0 46px rgba(255, 218, 168, 0.4))
+          drop-shadow(-44px 0 72px rgba(210, 165, 95, 0.3))
+          drop-shadow(-72px 0 96px rgba(255, 230, 200, 0.16));
       }
       100% {
         opacity: 0;
-        transform: translateX(6px) scaleY(1.6);
+        transform: translateX(-6px) scaleY(1.6);
         filter:
-          drop-shadow(22px 0 38px rgba(255, 248, 220, 0))
-          drop-shadow(44px 0 64px rgba(255, 220, 175, 0))
-          drop-shadow(90px 0 120px rgba(200, 160, 95, 0));
+          drop-shadow(-22px 0 38px rgba(255, 248, 220, 0))
+          drop-shadow(-44px 0 64px rgba(255, 220, 175, 0))
+          drop-shadow(-90px 0 120px rgba(200, 160, 95, 0));
       }
     }
 
     @keyframes pullSwipeSideGlow {
       from {
         filter:
-          drop-shadow(4px 0 8px rgba(255, 255, 255, 0.14))
-          drop-shadow(5px 0 14px rgba(212, 175, 95, 0.14))
-          drop-shadow(10px 0 18px rgba(255, 220, 160, 0.06));
+          drop-shadow(-4px 0 8px rgba(255, 255, 255, 0.14))
+          drop-shadow(-5px 0 14px rgba(212, 175, 95, 0.14))
+          drop-shadow(-10px 0 18px rgba(255, 220, 160, 0.06));
         box-shadow:
-          3px 0 12px rgba(255, 255, 255, 0.12),
-          2px 0 16px var(--assistant-hint-violet-soft),
-          inset 1px 0 6px rgba(255, 236, 190, 0.16);
+          -3px 0 12px rgba(255, 255, 255, 0.12),
+          -2px 0 16px var(--assistant-hint-violet-soft),
+          inset -1px 0 6px rgba(255, 236, 190, 0.16);
       }
       to {
         filter:
-          drop-shadow(7px 0 14px rgba(255, 255, 255, 0.26))
-          drop-shadow(8px 0 20px rgba(212, 175, 95, 0.18))
-          drop-shadow(14px 0 22px rgba(255, 230, 190, 0.12));
+          drop-shadow(-7px 0 14px rgba(255, 255, 255, 0.26))
+          drop-shadow(-8px 0 20px rgba(212, 175, 95, 0.18))
+          drop-shadow(-14px 0 22px rgba(255, 230, 190, 0.12));
         box-shadow:
-          6px 0 20px rgba(255, 255, 255, 0.22),
-          4px 0 22px var(--assistant-hint-violet-soft),
-          inset 2px 0 11px rgba(255, 248, 220, 0.32);
+          -6px 0 20px rgba(255, 255, 255, 0.22),
+          -4px 0 22px var(--assistant-hint-violet-soft),
+          inset -2px 0 11px rgba(255, 248, 220, 0.32);
       }
     }
 
     @keyframes pullSwipeSideGlowReady {
       from {
         filter:
-          drop-shadow(5px 0 12px rgba(255, 255, 255, 0.22))
-          drop-shadow(6px 0 16px rgba(212, 175, 95, 0.16))
-          drop-shadow(12px 0 22px rgba(255, 224, 150, 0.1));
+          drop-shadow(-5px 0 12px rgba(255, 255, 255, 0.22))
+          drop-shadow(-6px 0 16px rgba(212, 175, 95, 0.16))
+          drop-shadow(-12px 0 22px rgba(255, 224, 150, 0.1));
         box-shadow:
-          4px 0 16px rgba(255, 255, 255, 0.18),
-          3px 0 20px var(--assistant-hint-violet-soft),
-          inset 2px 0 9px rgba(255, 240, 215, 0.26);
+          -4px 0 16px rgba(255, 255, 255, 0.18),
+          -3px 0 20px var(--assistant-hint-violet-soft),
+          inset -2px 0 9px rgba(255, 240, 215, 0.26);
       }
       to {
         filter:
-          drop-shadow(9px 0 18px rgba(255, 255, 255, 0.34))
-          drop-shadow(10px 0 22px rgba(212, 175, 95, 0.22))
-          drop-shadow(18px 0 28px rgba(255, 236, 200, 0.16));
+          drop-shadow(-9px 0 18px rgba(255, 255, 255, 0.34))
+          drop-shadow(-10px 0 22px rgba(212, 175, 95, 0.22))
+          drop-shadow(-18px 0 28px rgba(255, 236, 200, 0.16));
         box-shadow:
-          8px 0 26px rgba(255, 255, 255, 0.28),
-          6px 0 26px var(--assistant-hint-violet-soft),
-          inset 3px 0 14px rgba(255, 250, 235, 0.38);
+          -8px 0 26px rgba(255, 255, 255, 0.28),
+          -6px 0 26px var(--assistant-hint-violet-soft),
+          inset -3px 0 14px rgba(255, 250, 235, 0.38);
       }
     }
 
@@ -4163,7 +4147,7 @@
       justify-content: flex-end;
       align-items: center;
       gap: 10px;
-      margin: 18px 0 0;
+      margin: 28px 0 0;
       padding: 0;
       z-index: 25;
     }
@@ -4335,6 +4319,21 @@
       }
     }
 
+    /* Лёгкое постоянное свечение хлопушки в состоянии «Снято» (не во время щелчка take-mark-anim). */
+    @keyframes take-clapper-glow-pulse {
+      0% {
+        filter:
+          drop-shadow(0 0 3px rgba(255, 215, 160, 0.12))
+          drop-shadow(0 0 10px rgba(255, 185, 110, 0.06));
+      }
+      100% {
+        filter:
+          drop-shadow(0 0 8px rgba(255, 235, 205, 0.38))
+          drop-shadow(0 0 16px rgba(255, 195, 130, 0.14))
+          drop-shadow(0 2px 14px rgba(255, 220, 170, 0.1));
+      }
+    }
+
     @keyframes take-mark-pop {
       0% {
         transform: scale(1);
@@ -4380,6 +4379,19 @@
       animation: take-clapper-flash 0.52s ease-out;
     }
 
+    .scene-main
+      > .scene-toolbar
+      .scene-done-label.scene-done-checkbox-only:has(.scene-shot-checkbox:checked)
+      .camera-lens-shutter:not(.take-mark-anim)
+      .take-mark-icon.clapperboard-icon,
+    .scene-main
+      > .scene-toolbar
+      .scene-done-label.scene-done-checkbox-only.is-shot-checked
+      .camera-lens-shutter:not(.take-mark-anim)
+      .take-mark-icon.clapperboard-icon {
+      animation: take-clapper-glow-pulse 2.6s ease-in-out infinite alternate;
+    }
+
     @media (prefers-reduced-motion: reduce) {
       .scene-main > .scene-toolbar .scene-done-label.scene-done-checkbox-only:active .take-mark-icon {
         transform: none;
@@ -4399,6 +4411,20 @@
 
       .scene-main > .scene-toolbar .camera-lens-shutter.take-mark-anim .take-mark-icon.clapperboard-icon {
         animation: none !important;
+      }
+
+      .scene-main
+        > .scene-toolbar
+        .scene-done-label.scene-done-checkbox-only:has(.scene-shot-checkbox:checked)
+        .camera-lens-shutter:not(.take-mark-anim)
+        .take-mark-icon.clapperboard-icon,
+      .scene-main
+        > .scene-toolbar
+        .scene-done-label.scene-done-checkbox-only.is-shot-checked
+        .camera-lens-shutter:not(.take-mark-anim)
+        .take-mark-icon.clapperboard-icon {
+        animation: none !important;
+        filter: drop-shadow(0 0 6px rgba(255, 220, 175, 0.18));
       }
     }
 
@@ -4697,9 +4723,7 @@
       border-bottom-width: 0.5px;
     }
 
-    .wrap .scene-main > .line-note > b::before,
     .wrap .scene-main > .line-note > b::after,
-    .wrap .scene-main > .intercut > b::before,
     .wrap .scene-main > .intercut > b::after,
     .wrap .scene-main > .line-note::after,
     .wrap .scene-main > .intercut::after {
@@ -4784,21 +4808,23 @@
               maxlength="120"
               autocomplete="off" />
           </label>
-          <div class="assistant-drawer-field assistant-drawer-field--row">
-            <label class="assistant-drawer-field assistant-drawer-field--grow">
-              <span>Дата</span>
-              <input type="date" id="assistant-new-date" class="assistant-drawer-input" />
-            </label>
-            <label class="assistant-drawer-field assistant-drawer-field--count">
-              <span>Роликов</span>
+          <div class="assistant-drawer-field assistant-drawer-field--inline-pair">
+            <span>Дата и ролики</span>
+            <div class="assistant-drawer-inline-inputs">
+              <input
+                type="date"
+                id="assistant-new-date"
+                class="assistant-drawer-input"
+                aria-label="Дата съёмки" />
               <input
                 type="number"
                 id="assistant-new-count"
-                class="assistant-drawer-input assistant-drawer-input--short"
+                class="assistant-drawer-input assistant-drawer-input--count-compact"
                 min="1"
                 max="50"
-                placeholder="—" />
-            </label>
+                placeholder="шт."
+                aria-label="Количество роликов" />
+            </div>
           </div>
           <button type="button" class="btn-assistant-create" id="btn-assistant-new-scenario">+ Создать сценарий</button>
           <p class="assistant-drawer-tools-hint">
@@ -4990,8 +5016,8 @@
           <div class="prep-important-head" id="prep-important-heading">
             <span class="prep-important-mark" aria-hidden="true"></span>
             <span class="prep-important-title-wrap">
-              <span class="prep-important-title">На съёмке</span>
-              <span class="prep-important-sub">отметьте, если актуально</span>
+              <span class="prep-important-title">Важно</span>
+              <span class="prep-important-sub">Всё под контролем</span>
             </span>
           </div>
           <div class="prep-important-options">
@@ -4999,7 +5025,7 @@
               ><input type="checkbox" id="prep-important-clothes" /> одежда</label
             >
             <label class="prep-important-label"
-              ><input type="checkbox" id="prep-important-backstage" /> бэк-стейдж</label
+              ><input type="checkbox" id="prep-important-backstage" /> Backstage</label
             >
             <label class="prep-important-label"
               ><input type="checkbox" id="prep-important-light" /> свет</label
@@ -5019,10 +5045,6 @@
     <div class="scene-stack" id="scene-stack">
     <template id="scene-template">
       <div class="scene scene-main" data-main-scene="1" data-scene-role="body">
-        <div class="scene-toolbar">
-          <button class="btn mini btn-danger scene-remove" type="button" title="Удалить сцену">Удалить</button>
-        </div>
-
         <div class="scene-time-wrap">
           <div class="time-heading">
             <span class="time-heading-spacer" aria-hidden="true"></span>
@@ -5073,18 +5095,17 @@
           </select>
         </div>
         <div class="line line-say"><b>Говорю:</b><span class="say-editable" contenteditable="true" spellcheck="true"></span></div>
-        <div class="line line-note"><b>Примечание:</b> <span class="note-editable" contenteditable="true" spellcheck="true"></span></div>
-        <p class="intercut"><b>Перебивка:</b> <span class="intercut-text" contenteditable="true"></span></p>
+        <div class="line line-note"><b><span class="scene-note-heading">Примечание:</span></b> <span class="note-editable" contenteditable="true" spellcheck="true"></span></div>
+        <p class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <span class="intercut-text" contenteditable="true"></span></p>
+        <div class="scene-toolbar">
+          <button class="btn mini btn-danger scene-remove" type="button" title="Удалить сцену">Удалить</button>
+        </div>
         </div>
     </template>
 
 
 
       <div class="scene scene-main scene-role-intro" data-main-scene="1" data-scene-role="intro">
-        <div class="scene-toolbar">
-          <button class="btn mini btn-danger scene-remove" type="button" title="Удалить сцену">Удалить</button>
-        </div>
-
         <div class="scene-time-wrap" data-mm0="0" data-ss0="0" data-mm1="0" data-ss1="5">
           <div class="time-heading">
             <span class="time-heading-spacer" aria-hidden="true"></span>
@@ -5135,14 +5156,13 @@
           </select>
         </div>
         <div class="line line-say"><b>Говорю:</b><span class="say-editable" contenteditable="true" spellcheck="true">«16 и 17 мая, Хакасия, Абакан. Я проведу двухдневный мастер-классом по сведению и современному продакшену рок, поп и метал музыки!».</span></div>
-        <p class="intercut"><b>Перебивка:</b> <span class="intercut-text" contenteditable="true"></span></p>
-        </div>
-
-      <div class="scene scene-main" data-main-scene="1" data-scene-role="body">
+        <p class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <span class="intercut-text" contenteditable="true"></span>        </p>
         <div class="scene-toolbar">
           <button class="btn mini btn-danger scene-remove" type="button" title="Удалить сцену">Удалить</button>
         </div>
+        </div>
 
+      <div class="scene scene-main" data-main-scene="1" data-scene-role="body">
         <div class="scene-time-wrap" data-mm0="0" data-ss0="5" data-mm1="0" data-ss1="23">
           <div class="time-heading">
             <span class="time-heading-spacer" aria-hidden="true"></span>
@@ -5193,14 +5213,13 @@
           </select>
         </div>
         <div class="line line-say"><b>Говорю:</b><span class="say-editable" contenteditable="true" spellcheck="true">Меня зовут Семён Бруев, я профессиональный микс-инженер и музыкальный продюсер. 20 из 36 лет я занимаюсь музыкой. В 2017 году я окончил ИСИ в Москве, получив высшее образование по музыкальной звукорежиссере, потом онлайн учёба в Berklee College of Music, работа с Биланом, Трофимом, продюссерском центре MALFA Макса Фадеева и так далее</span></div>
-        <p class="intercut"><b>Перебивка:</b> <span class="intercut-text" contenteditable="true">СМАХИВАЮ В СТОРОНУ ПАЛЬЦЕМ - детские фото / средние фото / фото со студии, Левиным, Кругликовой, MALFA</span></p>
-        </div>
-
-      <div class="scene scene-main" data-main-scene="1" data-scene-role="body">
+        <p class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <span class="intercut-text" contenteditable="true">СМАХИВАЮ В СТОРОНУ ПАЛЬЦЕМ - детские фото / средние фото / фото со студии, Левиным, Кругликовой, MALFA</span>        </p>
         <div class="scene-toolbar">
           <button class="btn mini btn-danger scene-remove" type="button" title="Удалить сцену">Удалить</button>
         </div>
+        </div>
 
+      <div class="scene scene-main" data-main-scene="1" data-scene-role="body">
         <div class="scene-time-wrap" data-mm0="0" data-ss0="23" data-mm1="0" data-ss1="45">
           <div class="time-heading">
             <span class="time-heading-spacer" aria-hidden="true"></span>
@@ -5251,14 +5270,13 @@
           </select>
         </div>
         <div class="line line-say"><b>Говорю:</b><span class="say-editable" contenteditable="true" spellcheck="true">16 и 17 мая я лечу к своим друзьям в Минусинский колледж культуры и искусства на кафедру “Музыкальное звукооператорское мастерство” с двухдневным мастер-классом. Но вы тоже можете к нам присоединиться!».</span></div>
-        <p class="intercut"><b>Перебивка:</b> <span class="intercut-text" contenteditable="true">титры: Билан / MALFA</span></p>
-        </div>
-
-      <div class="scene scene-main" data-main-scene="1" data-scene-role="body">
+        <p class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <span class="intercut-text" contenteditable="true">титры: Билан / MALFA</span>        </p>
         <div class="scene-toolbar">
           <button class="btn mini btn-danger scene-remove" type="button" title="Удалить сцену">Удалить</button>
         </div>
+        </div>
 
+      <div class="scene scene-main" data-main-scene="1" data-scene-role="body">
         <div class="scene-time-wrap" data-mm0="0" data-ss0="45" data-mm1="1" data-ss1="8">
           <div class="time-heading">
             <span class="time-heading-spacer" aria-hidden="true"></span>
@@ -5309,14 +5327,13 @@
           </select>
         </div>
         <div class="line line-say"><b>Говорю:</b><span class="say-editable" contenteditable="true" spellcheck="true">Кроме тем вокального, гитарного и барабанного продакшена, мы подробно разберём ваши проекты, песни, сведения. Послушаем исходники барабанщика ARCHITECTS Дэна Сирли, разберем аранжировки Taylor Swift, Dua Lipa и развенчаем миф о неком русском стиле сведения музыки.</span></div>
-        <p class="intercut"><b>Перебивка:</b> <span class="intercut-text" contenteditable="true">Мосфильм / Левин / Кругликова / Хейден</span></p>
-        </div>
-
-      <div class="scene scene-main" data-main-scene="1" data-scene-role="body">
+        <p class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <span class="intercut-text" contenteditable="true">Мосфильм / Левин / Кругликова / Хейден</span>        </p>
         <div class="scene-toolbar">
           <button class="btn mini btn-danger scene-remove" type="button" title="Удалить сцену">Удалить</button>
         </div>
+        </div>
 
+      <div class="scene scene-main" data-main-scene="1" data-scene-role="body">
         <div class="scene-time-wrap" data-mm0="1" data-ss0="8" data-mm1="1" data-ss1="30">
           <div class="time-heading">
             <span class="time-heading-spacer" aria-hidden="true"></span>
@@ -5367,14 +5384,13 @@
           </select>
         </div>
         <div class="line line-say"><b>Говорю:</b><span class="say-editable" contenteditable="true" spellcheck="true">Однажды мне довелось пообщаться с музыкальным продюсером RAMMSTEIN и знаниями о работе в студии этой группы я тоже поделюсь. Всё это поможет вам яснее понять что делать, чтобы добиваться хорошего звучания. И деньги тут не при чём».</span></div>
-        <p class="intercut"><b>Перебивка:</b> <span class="intercut-text" contenteditable="true">экран проекта / дорожки вокала и барабанов</span></p>
-        </div>
-
-      <div class="scene scene-main" data-main-scene="1" data-scene-role="body">
+        <p class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <span class="intercut-text" contenteditable="true">экран проекта / дорожки вокала и барабанов</span>        </p>
         <div class="scene-toolbar">
           <button class="btn mini btn-danger scene-remove" type="button" title="Удалить сцену">Удалить</button>
         </div>
+        </div>
 
+      <div class="scene scene-main" data-main-scene="1" data-scene-role="body">
         <div class="scene-time-wrap" data-mm0="1" data-ss0="30" data-mm1="1" data-ss1="55">
           <div class="time-heading">
             <span class="time-heading-spacer" aria-hidden="true"></span>
@@ -5425,14 +5441,13 @@
           </select>
         </div>
         <div class="line line-say"><b>Говорю:</b><span class="say-editable" contenteditable="true" spellcheck="true">«В один из дней я обязательно научу вас пользоваться новейшими AI-инструментам Cursor и Claude Code. Вы будете шокированы! Но не переживайте, в доброжелательной компании приручать их будет одно удовольствие!».</span></div>
-        <p class="intercut"><b>Перебивка:</b> <span class="intercut-text" contenteditable="true">титры: Architects / Taylor Swift / Rammstein</span></p>
-        </div>
-
-      <div class="scene scene-main" data-main-scene="1" data-scene-role="body">
+        <p class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <span class="intercut-text" contenteditable="true">титры: Architects / Taylor Swift / Rammstein</span>        </p>
         <div class="scene-toolbar">
           <button class="btn mini btn-danger scene-remove" type="button" title="Удалить сцену">Удалить</button>
         </div>
+        </div>
 
+      <div class="scene scene-main" data-main-scene="1" data-scene-role="body">
         <div class="scene-time-wrap" data-mm0="1" data-ss0="55" data-mm1="2" data-ss1="17">
           <div class="time-heading">
             <span class="time-heading-spacer" aria-hidden="true"></span>
@@ -5483,14 +5498,13 @@
           </select>
         </div>
         <div class="line line-say"><b>Говорю:</b><span class="say-editable" contenteditable="true" spellcheck="true">«Короче тем у нас масса. Благо и времени целых два дня без особых ограничений на встречу! Но можно прийти и на один! ».</span></div>
-        <p class="intercut"><b>Перебивка:</b> <span class="intercut-text" contenteditable="true">скрин Cursor / Claude Code</span></p>
-        </div>
-
-      <div class="scene scene-main" data-main-scene="1" data-scene-role="body">
+        <p class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <span class="intercut-text" contenteditable="true">скрин Cursor / Claude Code</span>        </p>
         <div class="scene-toolbar">
           <button class="btn mini btn-danger scene-remove" type="button" title="Удалить сцену">Удалить</button>
         </div>
+        </div>
 
+      <div class="scene scene-main" data-main-scene="1" data-scene-role="body">
         <div class="scene-time-wrap" data-mm0="2" data-ss0="17" data-mm1="2" data-ss1="40">
           <div class="time-heading">
             <span class="time-heading-spacer" aria-hidden="true"></span>
@@ -5541,7 +5555,10 @@
           </select>
         </div>
         <div class="line line-say"><b>Говорю:</b><span class="say-editable" contenteditable="true" spellcheck="true">У нас уже есть открытый чатик для участников, поэтому добавляйтесь! Ссылочку вам пришлёт организатор Лиза.<br>30 мест. Абакан, Черногорск, Красноярск — приезжайте, будет интересно и весело!».</span></div>
-        <p class="intercut"><b>Перебивка:</b> <span class="intercut-text" contenteditable="true">CTA: 30 мест / ссылка / дата</span></p>
+        <p class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <span class="intercut-text" contenteditable="true">CTA: 30 мест / ссылка / дата</span>        </p>
+        <div class="scene-toolbar">
+          <button class="btn mini btn-danger scene-remove" type="button" title="Удалить сцену">Удалить</button>
+        </div>
         </div>
 
       
@@ -5562,10 +5579,6 @@
 
     <div class="scene-stack scene-stack-outro" id="scene-outro-stack">
       <div class="scene scene-main scene-role-outro" data-main-scene="1" data-scene-role="outro">
-              <div class="scene-toolbar">
-                <button class="btn mini btn-danger scene-remove" type="button" title="Удалить сцену">Удалить</button>
-              </div>
-
               <div class="scene-time-wrap" data-mm0="2" data-ss0="40" data-mm1="2" data-ss1="55">
                 <div class="time-heading">
             <span class="time-heading-spacer" aria-hidden="true"></span>
@@ -5616,7 +5629,10 @@
                 </select>
               </div>
               <div class="line line-say"><b>Говорю:</b><span class="say-editable" contenteditable="true" spellcheck="true">«Я еду к вам с практикой, разбором и реальными инструментами. Присоединяйтесь — сделаем звук плотным, громким и дорогим вместе».</span></div>
-              <p class="intercut"><b>Перебивка:</b> <span class="intercut-text" contenteditable="true">финальный экран: дата / место / 30 мест</span></p>
+              <p class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <span class="intercut-text" contenteditable="true">финальный экран: дата / место / 30 мест</span></p>
+              <div class="scene-toolbar">
+                <button class="btn mini btn-danger scene-remove" type="button" title="Удалить сцену">Удалить</button>
+              </div>
               </div>
     </div>
     </div>
@@ -7647,50 +7663,83 @@
         var bk = document.getElementById('assistant-drawer-backdrop');
         var finished = false;
 
-        function complete() {
+        function doneClosing() {
           if (finished) return;
-          if (document.body.classList.contains('assistant-drawer-open')) {
-            document.body.removeAttribute('data-assistant-drawer-closing');
-            clearAssistantDrawerCloseListeners();
-            endAssistantDrawerTracking();
-            return;
-          }
           finished = true;
+          try {
+            if (d) d.removeEventListener('transitionend', onDrawerTransitionEnd);
+          } catch (eRm) {}
+          if (assistantDrawerCloseSafetyTimer) {
+            try {
+              clearTimeout(assistantDrawerCloseSafetyTimer);
+            } catch (eT) {}
+            assistantDrawerCloseSafetyTimer = null;
+          }
+          assistantDrawerCloseEndHandler = null;
+          document.documentElement.classList.remove('assistant-drawer-open');
+          document.body.classList.remove('assistant-drawer-open');
+          document.body.removeAttribute('data-assistant-drawer-open');
           document.body.removeAttribute('data-assistant-drawer-closing');
+          if (d) d.setAttribute('aria-hidden', 'true');
+          if (bk) bk.setAttribute('aria-hidden', 'true');
+          clearAssistantDrawerInlineVisuals();
           clearAssistantDrawerCloseListeners();
           endAssistantDrawerTracking();
           unlockAssistantDrawerMainScroll();
-        }
-
-        document.body.setAttribute('data-assistant-drawer-closing', '1');
-        document.documentElement.classList.remove('assistant-drawer-open');
-        document.body.classList.remove('assistant-drawer-open');
-        document.body.removeAttribute('data-assistant-drawer-open');
-        if (d) d.setAttribute('aria-hidden', 'true');
-        if (bk) bk.setAttribute('aria-hidden', 'true');
-
-        if (!d) {
-          complete();
-          return;
-        }
-
-        if (assistantDrawerReducedMotion()) {
-          assistantDrawerCloseSafetyTimer = setTimeout(complete, 0);
-          return;
         }
 
         function onDrawerTransitionEnd(e) {
           if (!d || e.target !== d) return;
           var pn = e.propertyName || '';
           if (pn !== 'transform' && pn !== '-webkit-transform') return;
-          complete();
+          doneClosing();
         }
 
-        assistantDrawerCloseEndHandler = onDrawerTransitionEnd;
-        assistantDrawerCloseWrapEndHandler = null;
-        d.addEventListener('transitionend', onDrawerTransitionEnd);
-        /** Запас по таймауту чуть длиннее CSS 0.32s — на случай пропуска transitionend на iOS. */
-        assistantDrawerCloseSafetyTimer = setTimeout(complete, 420);
+        if (!d) {
+          document.documentElement.classList.remove('assistant-drawer-open');
+          document.body.classList.remove('assistant-drawer-open');
+          document.body.removeAttribute('data-assistant-drawer-open');
+          document.body.removeAttribute('data-assistant-drawer-closing');
+          clearAssistantDrawerCloseListeners();
+          endAssistantDrawerTracking();
+          unlockAssistantDrawerMainScroll();
+          return;
+        }
+
+        if (assistantDrawerReducedMotion()) {
+          document.documentElement.classList.remove('assistant-drawer-open');
+          document.body.classList.remove('assistant-drawer-open');
+          document.body.removeAttribute('data-assistant-drawer-open');
+          document.body.removeAttribute('data-assistant-drawer-closing');
+          if (d) d.setAttribute('aria-hidden', 'true');
+          if (bk) bk.setAttribute('aria-hidden', 'true');
+          clearAssistantDrawerInlineVisuals();
+          clearAssistantDrawerCloseListeners();
+          endAssistantDrawerTracking();
+          unlockAssistantDrawerMainScroll();
+          return;
+        }
+
+        document.body.setAttribute('data-assistant-drawer-closing', '1');
+
+        var Wc = assistantDrawerPxClosedOffset(d);
+        var closedTx = -Wc;
+        var dur = 280;
+        var ease = 'cubic-bezier(0.22, 0.9, 0.28, 1)';
+        d.style.transition = 'transform ' + dur + 'ms ' + ease;
+        if (bk) bk.style.transition = 'opacity ' + dur + 'ms ' + ease;
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            d.style.transform = 'translateX(' + closedTx + 'px)';
+            setAssistantDrawerBackdropVisual(0, bk);
+            setAssistantDrawerWrapBlurProgress(0);
+            assistantDrawerCloseEndHandler = onDrawerTransitionEnd;
+            d.addEventListener('transitionend', onDrawerTransitionEnd);
+            assistantDrawerCloseSafetyTimer = setTimeout(function () {
+              doneClosing();
+            }, dur + 160);
+          });
+        });
       }
 
       /** Свайп влево — закрыть: и по панели меню, и по правой зоне (backdrop), как у нативного sheet. */
@@ -9846,7 +9895,7 @@
           var tb = document.createElement('div');
           tb.className = 'scene-toolbar';
           tb.innerHTML = '<button class="btn mini btn-danger scene-remove" type="button" title="Удалить сцену">Удалить</button>';
-          el.insertBefore(tb, el.firstChild);
+          el.appendChild(tb);
         });
       }
 
@@ -10126,7 +10175,7 @@
           if (!sayLine || !sayLine.parentNode) return;
           var note = document.createElement('div');
           note.className = 'line line-note';
-          note.innerHTML = '<b>Примечание:</b> <span class="note-editable" contenteditable="true" spellcheck="true"></span>';
+          note.innerHTML = '<b><span class="scene-note-heading">Примечание:</span></b> <span class="note-editable" contenteditable="true" spellcheck="true"></span>';
           sayLine.parentNode.insertBefore(note, sayLine.nextSibling);
         });
       }
@@ -11612,7 +11661,7 @@
 
         var pullSwipeThumbRaf = null;
 
-        /** Вертикальная позиция полоски у левого края = «ползунок» относительно прокрутки страницы (индикатор reload-свайпа). */
+        /** Вертикальная позиция полоски у правого края = «ползунок» относительно прокрутки страницы (индикатор reload-свайпа). */
         function syncPullSwipeHintThumbFromScroll() {
           var sh = swipeHintEl();
           if (!sh) return;
@@ -11674,14 +11723,22 @@
           if (!pullArmed) {
             pullStackTargetPx = 0;
           }
-          var a = 0.3;
-          pullStackSmoothedPx += (pullStackTargetPx - pullStackSmoothedPx) * a;
+          var atTop = scrollTopNow() <= TOP_EPS;
+          var activeVerticalPull = pullArmed && atTop;
+          /* Пока тянем сверху — без rAF-сглаживания: иначе логотип и блоки «плывут» позади пальца. */
+          if (activeVerticalPull && pullStackTargetPx > 0) {
+            pullStackSmoothedPx = pullStackTargetPx;
+          } else {
+            var a = 0.42;
+            pullStackSmoothedPx += (pullStackTargetPx - pullStackSmoothedPx) * a;
+          }
           setPullStackPx(pullStackSmoothedPx);
-          if (pullStackSmoothedPx > 0.35) {
+          /* Сразу гасим 0.62s transition на .wrap > * (раньше ждали >0.35px — первые мм выглядели «масляно»). */
+          if (activeVerticalPull && (pullStackTargetPx > 0.15 || pullStackSmoothedPx > 0.02)) {
             try {
               document.documentElement.classList.add('pull-stack-dragging');
             } catch (eSd) {}
-          } else {
+          } else if (!activeVerticalPull && pullStackSmoothedPx < 0.45) {
             try {
               document.documentElement.classList.remove('pull-stack-dragging');
             } catch (eSe) {}
@@ -11787,7 +11844,7 @@
           var pullHint = pullHintEl();
 
           if (opts.fromSwipe) {
-            /* Свайпом reload (влево) — вспышка из центра полоски у левого края (позиция по скроллу). */
+            /* Свайпом reload (влево) — вспышка из центра полоски у правого края (позиция по скроллу). */
             try {
               syncPullSwipeHintThumbFromScroll();
             } catch (eSyn) {}
@@ -11971,7 +12028,7 @@
                   sh.style.opacity = String(0.18 + prog * 0.56);
                   /* Вертикаль — только положение «ползунка» по скроллу (syncPullSwipeHintThumbFromScroll). */
                   sh.style.transform =
-                    'translateX(' + (-12 + prog * 22) + 'px) scaleY(' + (0.9 + prog * 0.14) + ')';
+                    'translateX(' + (12 - prog * 22) + 'px) scaleY(' + (0.9 + prog * 0.14) + ')';
                   sh.classList.toggle('pull-swipe-hint--ready', prog >= 0.92);
                 }
               }
