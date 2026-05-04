@@ -340,15 +340,12 @@
     }
 
     /* Pull-from-top: логотип и карточки едут вниз; .wrap остаётся без transform.
-       Возврат с лёгким bounce-out — приятнее, чем чистое замедление. */
+       --pull-stack-y задаётся из JS каждый rAF — без transition на transform (иначе CSS
+       догоняет значение с задержкой и получается рывок / «двойное сглаживание»). */
     .wrap > * {
       transform: translateY(var(--pull-stack-y, 0px));
-      transition: transform 0.62s cubic-bezier(0.2, 1, 0.22, 1);
+      transition: none;
       will-change: transform;
-    }
-
-    html.pull-stack-dragging .wrap > * {
-      transition: transform 0s linear;
     }
 
     /* Пока открыт ассистент — без подстраховки iOS всё ещё тянет страницу под blur; доп. блокировка в JS */
@@ -540,7 +537,7 @@
       cursor: pointer;
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
-      transition: opacity 0.2s ease, box-shadow 0.22s ease, transform 0.22s ease;
+      transition: opacity 0.2s ease, box-shadow 0.22s ease;
     }
 
     .assistant-open-strip::before {
@@ -11776,19 +11773,12 @@
             pullStackSmoothedPx += (pullStackTargetPx - pullStackSmoothedPx) * a;
           }
           setPullStackPx(pullStackSmoothedPx);
-          /* Сразу гасим 0.62s transition на .wrap > * (раньше ждали >0.35px — первые мм выглядели «масляно»). */
-          if (activeVerticalPull && (pullStackTargetPx > 0.15 || pullStackSmoothedPx > 0.02)) {
-            try {
-              document.documentElement.classList.add('pull-stack-dragging');
-            } catch (eSd) {}
-          } else if (!activeVerticalPull && pullStackSmoothedPx < 0.45) {
-            try {
-              document.documentElement.classList.remove('pull-stack-dragging');
-            } catch (eSe) {}
-          }
           var dy = lastPullGestureDy;
           var hint = pullHintEl();
-          if (hint && pullArmed && scrollTopNow() <= TOP_EPS && dy > 8) {
+          /* Раньше dy>8: первые пиксели тяги шли с transition на .pull-reload-hint — лампа дёргалась. */
+          var pullVisual =
+            pullArmed && scrollTopNow() <= TOP_EPS && (pullStackTargetPx > 0.08 || pullStackSmoothedPx > 0.05);
+          if (hint && pullVisual) {
             hint.classList.add('pull-reload-hint--dragging');
             var lamp = hint.querySelector('.pull-reload-hint-video');
             if (lamp && typeof lamp.play === 'function' && lamp.paused) {
@@ -11796,7 +11786,8 @@
                 lamp.play().catch(function () {});
               } catch (eP) {}
             }
-            var pullRaw = Math.min(1, Math.max(0, (dy - 8) / (PULL_MIN - 8)));
+            var dyVis = Math.max(0, dy);
+            var pullRaw = Math.min(1, Math.max(0, (dyVis - 2) / (PULL_MIN - 2)));
             var pullSmooth = pullHintEase(pullRaw);
             var yShift = pullStackSmoothedPx * 0.62 + pullSmooth * 14;
             var s = 0.62 + pullSmooth * 0.46;
@@ -11828,9 +11819,6 @@
         }
 
         function resetPullStackVisual() {
-          try {
-            document.documentElement.classList.remove('pull-stack-dragging');
-          } catch (eC) {}
           setPullStackPx(0);
         }
 
@@ -12038,7 +12026,7 @@
             if (pullArmed) {
               if (scrollTopNow() <= TOP_EPS) {
                 if (dy > pullMaxDy) pullMaxDy = dy;
-                var pullEma = 0.36;
+                var pullEma = 0.52;
                 pullDySmoothed += (dy - pullDySmoothed) * pullEma;
                 lastPullGestureDy = pullDySmoothed;
                 pullStackTargetPx = pullDySmoothed > 2 ? pullStackShiftFromDy(pullDySmoothed) : 0;
