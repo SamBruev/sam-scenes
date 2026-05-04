@@ -159,8 +159,8 @@
       --script-font: "Pacifico", cursive;
       --brand-serif: "Roboto Slab", Georgia, "Times New Roman", serif;
       --top-logo-space: 28vh;
-      /* Панель ассистента: половина ширины экрана (не более 900px на очень широких дисплеях) */
-      --assistant-drawer-w: min(50vw, 900px);
+      /* Панель слева: ~85% ширины вьюпорта (раньше было 2/3) */
+      --assistant-drawer-w: min(calc(100vw * 0.85), 900px);
       /* Крайние полоски ассистента: золото + лёгкий аметист (как на стрелке «закрыть») */
       --assistant-hint-violet: rgba(200, 185, 255, 0.55);
       --assistant-hint-violet-mid: rgba(175, 155, 240, 0.22);
@@ -491,20 +491,21 @@
       }
     }
 
-    /* Шторка «открыть ассистента» слева: тёмно-синий карман, кобальтовый контур, фиолетовое свечение. */
+    /* Шторка «открыть ассистента» слева: узкая подсказка (~половина прежней ширины).
+       Полукруг только с внешней стороны (к краю экрана); внутренний край — ровный рез. */
     .assistant-open-strip {
       position: fixed;
       left: max(4px, calc(env(safe-area-inset-left, 0px) + 4px));
       top: 50%;
       transform: translateY(calc(-50% + var(--pull-stack-y, 0px)));
-      width: 16px;
-      min-width: 14px;
+      width: 8px;
+      min-width: 6px;
       height: min(176px, 48vh);
       min-height: 84px;
       margin: 0;
       padding: 0;
       border: none;
-      border-radius: 999px;
+      border-radius: 999px 0 0 999px;
       background:
         linear-gradient(
           180deg,
@@ -513,10 +514,8 @@
           rgba(8, 14, 38, 0.95) 100%
         );
       box-shadow:
-        /* кобальтовый контур */
-        inset 0 0 0 1.5px rgba(82, 152, 255, 0.92),
-        /* лёгкая тень для объёма (без неонового ореола) */
-        2px 0 10px rgba(0, 0, 0, 0.45);
+        inset 0 0 0 1px rgba(82, 152, 255, 0.92),
+        1px 0 8px rgba(0, 0, 0, 0.42);
       /* Выше .wrap (12) и дочерних слоёв сцен, но ниже teleprompter / pull-hint / drawer */
       z-index: 100;
       cursor: pointer;
@@ -531,7 +530,7 @@
       left: 50%;
       top: 50%;
       transform: translate(-50%, -50%);
-      font-size: 12px;
+      font-size: 9px;
       font-weight: 500;
       line-height: 1;
       color: rgba(195, 210, 255, 0.92);
@@ -544,8 +543,8 @@
 
     .assistant-open-strip:active {
       box-shadow:
-        inset 0 0 0 1.8px rgba(125, 178, 255, 0.98),
-        2px 0 12px rgba(0, 0, 0, 0.5);
+        inset 0 0 0 1.2px rgba(125, 178, 255, 0.98),
+        1px 0 10px rgba(0, 0, 0, 0.5);
     }
 
     .assistant-open-strip:active::before {
@@ -604,9 +603,8 @@
     }
 
     /*
-      Шторка «закрыть» справа в панели — зеркало левой шторки: тёмно-синий карман,
-      кобальтовый контур, фиолетовое свечение. Стрелка › плавает по высоте по позиции
-      прокрутки в .assistant-drawer-scroll.
+      Шторка «закрыть» справа: узкая полоска; полукруг только у внешнего края панели,
+      внутренний край — прямой рез (зеркально левой подсказке).
     */
     .assistant-drawer-dismiss-chevron {
       position: absolute;
@@ -614,14 +612,14 @@
       top: 50%;
       transform: translateY(-50%);
       z-index: 6;
-      width: 16px;
-      min-width: 14px;
+      width: 8px;
+      min-width: 6px;
       height: min(176px, 48vh);
       min-height: 84px;
       margin: 0;
       padding: 0;
       border: none;
-      border-radius: 999px;
+      border-radius: 0 999px 999px 0;
       cursor: pointer;
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
@@ -638,8 +636,8 @@
           rgba(8, 14, 38, 0.95) 100%
         );
       box-shadow:
-        inset 0 0 0 1.5px rgba(82, 152, 255, 0.92),
-        -2px 0 10px rgba(0, 0, 0, 0.45);
+        inset 0 0 0 1px rgba(82, 152, 255, 0.92),
+        -1px 0 8px rgba(0, 0, 0, 0.42);
       transition: opacity 0.2s ease, box-shadow 0.22s ease, transform 0.22s ease;
     }
 
@@ -672,7 +670,7 @@
       transition: none;
       color: rgba(195, 210, 255, 0.95);
       opacity: 0.95;
-      font-size: 12px;
+      font-size: 9px;
       font-weight: 500;
       line-height: 1;
       letter-spacing: -0.08em;
@@ -690,8 +688,8 @@
 
     .assistant-drawer-dismiss-chevron:active {
       box-shadow:
-        inset 0 0 0 1.8px rgba(125, 178, 255, 0.98),
-        -2px 0 12px rgba(0, 0, 0, 0.5);
+        inset 0 0 0 1.2px rgba(125, 178, 255, 0.98),
+        -1px 0 10px rgba(0, 0, 0, 0.5);
     }
 
     .assistant-drawer-scroll {
@@ -5773,7 +5771,7 @@
        * чтобы не залипала старая версия при закэшированной главной странице.
        */
       var APP_VERSION = 'v300';
-      var BUILD_TIME = '2026-05-04 07:08 MSK';
+      var BUILD_TIME = '2026-05-04 07:10 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
