@@ -16,7 +16,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Sam Scenes (v277)</title>
+  <title>Sam Scenes (v278)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -291,6 +291,11 @@
       }
     }
 
+    /*
+      ВАЖНО: на .wrap НЕ ставим transform — иначе .top-logo (position:fixed внутри .wrap)
+      получает .wrap как containing block и перестаёт быть приклеен к viewport
+      (логотип уезжает при скролле). Pull-сдвиг применяем к прямым детям .wrap.
+    */
     .wrap {
       max-width: 980px;
       margin: 0 auto;
@@ -307,17 +312,18 @@
       position: relative;
       z-index: 12;
       will-change: filter;
-      transform: translateY(var(--pull-stack-y, 0px));
       /* Тот же темп, что у панели ассистента — blur снимается плавно при закрытии */
-      transition:
-        filter 0.32s cubic-bezier(0.22, 0.9, 0.28, 1),
-        transform 0.44s cubic-bezier(0.22, 1, 0.36, 1);
+      transition: filter 0.32s cubic-bezier(0.22, 0.9, 0.28, 1);
     }
 
-    html.pull-stack-dragging .wrap {
-      transition:
-        filter 0.32s cubic-bezier(0.22, 0.9, 0.28, 1),
-        transform none;
+    /* Pull-from-top: логотип и карточки едут вниз; .wrap остаётся без transform. */
+    .wrap > * {
+      transform: translateY(var(--pull-stack-y, 0px));
+      transition: transform 0.44s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    html.pull-stack-dragging .wrap > * {
+      transition: transform 0s;
     }
 
     /* Пока открыт ассистент — без подстраховки iOS всё ещё тянет страницу под blur; доп. блокировка в JS */
@@ -330,25 +336,14 @@
     body.assistant-drawer-open .wrap {
       pointer-events: none;
       user-select: none;
-      transition:
-        filter 0.32s cubic-bezier(0.22, 0.9, 0.28, 1),
-        transform 0.44s cubic-bezier(0.22, 1, 0.36, 1);
+      transition: filter 0.32s cubic-bezier(0.22, 0.9, 0.28, 1);
       filter: blur(11px) saturate(102%);
       -webkit-filter: blur(11px) saturate(102%);
     }
 
-    html.pull-stack-dragging body.assistant-drawer-open .wrap {
-      transition:
-        filter 0.32s cubic-bezier(0.22, 0.9, 0.28, 1),
-        transform none;
-    }
-
     @media (prefers-reduced-motion: reduce) {
-      .wrap {
-        transition: none;
-      }
-
-      html.pull-stack-dragging .wrap {
+      .wrap,
+      .wrap > * {
         transition: none;
       }
 
@@ -5575,8 +5570,8 @@
        * Дублируйте те же поля в build-info.json — подпись внизу подгружает его с cache: no-store,
        * чтобы не залипала старая версия при закэшированной главной странице.
        */
-      var APP_VERSION = 'v277';
-      var BUILD_TIME = '2026-05-04 06:35 MSK';
+      var APP_VERSION = 'v278';
+      var BUILD_TIME = '2026-05-04 04:55 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
