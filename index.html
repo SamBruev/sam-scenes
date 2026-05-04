@@ -161,11 +161,11 @@
       --top-logo-space: 28vh;
       /* Панель слева: ~85% ширины вьюпорта (раньше было 2/3) */
       --assistant-drawer-w: min(calc(100vw * 0.85), 900px);
-      /* Крайние полоски ассистента: золото + лёгкий аметист (как на стрелке «закрыть») */
-      --assistant-hint-violet: rgba(200, 185, 255, 0.55);
-      --assistant-hint-violet-mid: rgba(175, 155, 240, 0.22);
-      --assistant-hint-violet-soft: rgba(165, 145, 235, 0.18);
-      --assistant-hint-violet-glow: rgba(145, 120, 210, 0.32);
+      /* Крайние полоски ассистента: тёплое золото (холодный аметист на #000 даёт «зеленоватый» каст) */
+      --assistant-hint-violet: rgba(232, 201, 104, 0.52);
+      --assistant-hint-violet-mid: rgba(212, 175, 95, 0.22);
+      --assistant-hint-violet-soft: rgba(212, 175, 95, 0.14);
+      --assistant-hint-violet-glow: rgba(212, 175, 95, 0.28);
       /* Удобный алиас для вторичных акцентов вне меню ассистента */
       --ui-violet: var(--assistant-hint-violet);
       --ui-violet-glow: var(--assistant-hint-violet-glow);
@@ -208,6 +208,21 @@
       color-scheme: dark;
     }
 
+    /*
+      Нативный <dialog>: без тёмного фона и color-scheme WebKit/Chrome иногда рисуют светлую панель
+      (поверх тёмной страницы с meta color-scheme=dark стиль UA всё равно может «перебить»).
+    */
+    dialog {
+      color-scheme: dark;
+      border: none;
+      background-color: rgba(6, 6, 8, 0.94);
+      color: var(--text);
+    }
+
+    dialog::backdrop {
+      background-color: rgba(0, 0, 0, 0.52);
+    }
+
     input,
     select,
     textarea,
@@ -233,8 +248,8 @@
     select:-webkit-autofill {
       -webkit-text-fill-color: var(--text) !important;
       caret-color: rgba(200, 198, 195, 0.92);
-      box-shadow: 0 0 0 1000px #0c0b09 inset !important;
-      -webkit-box-shadow: 0 0 0 1000px #0c0b09 inset !important;
+      box-shadow: 0 0 0 1000px #000000 inset !important;
+      -webkit-box-shadow: 0 0 0 1000px #000000 inset !important;
       transition: background-color 99999s ease-out 0s;
     }
 
@@ -253,7 +268,7 @@
       min-height: -webkit-fill-available;
       z-index: -1;
       pointer-events: none;
-      background-color: #0c0603;
+      background-color: #000000;
       /* Без вертикальной линии: одинаковый оттенок по ширине, затемнение только сверху-вниз */
       background-image:
         linear-gradient(
@@ -325,7 +340,7 @@
        Возврат с лёгким bounce-out — приятнее, чем чистое замедление. */
     .wrap > * {
       transform: translateY(var(--pull-stack-y, 0px));
-      transition: transform 0.56s cubic-bezier(0.16, 1.05, 0.32, 1);
+      transition: transform 0.62s cubic-bezier(0.2, 1, 0.22, 1);
       will-change: transform;
     }
 
@@ -491,10 +506,12 @@
       }
     }
 
-    /* Шторка слева: прямой край к краю экрана, скругление смотрит в меню (как «вкладка» в контент). */
+    /* Шторка слева: прямой край вплотную к левому краю экрана (fixed), скругление смотрит в меню. */
     .assistant-open-strip {
       position: fixed;
-      left: max(20px, calc(env(safe-area-inset-left, 0px) + 14px));
+      left: 0;
+      margin-left: 0;
+      padding-left: 0;
       right: auto;
       top: 50%;
       transform: translateY(calc(-50% + var(--pull-stack-y, 0px)));
@@ -610,7 +627,9 @@
       position: absolute;
       right: 4px;
       top: 50%;
-      transform: translateY(-50%);
+      /* 180°: шеврон и скругления смотрят в противоположную сторону (зеркально к открытию слева) */
+      transform: translateY(-50%) rotate(180deg);
+      transform-origin: center center;
       z-index: 6;
       width: 8px;
       min-width: 6px;
@@ -728,7 +747,7 @@
       border-radius: 16px;
       border: none;
       background: rgba(8, 7, 6, 0.42);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      box-shadow: none;
     }
 
     .assistant-drawer-tools-label {
@@ -850,6 +869,7 @@
       display: block;
       width: 100%;
       background: rgba(0, 0, 0, 0.32);
+      box-shadow: none;
     }
 
     .assistant-drawer-tools .btn-assistant-create:hover {
@@ -1254,8 +1274,9 @@
       margin-right: auto;
       transform: none;
       width: min(980px, 100%);
-      padding-left: max(14px, env(safe-area-inset-left));
-      padding-right: max(14px, env(safe-area-inset-right));
+      /* Симметричные отступы: иначе при разных safe-area L/R блок с логотипом визуально съезжает (часто вправо) */
+      padding-left: max(14px, env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
+      padding-right: max(14px, env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
       box-sizing: border-box;
       /* Выше карточек .wrap (у них z-index: 2), ниже .assistant-open-strip (100) */
       z-index: 10;
@@ -1343,7 +1364,8 @@
       /* Меньше зазор до карточки «Подготовка» ниже по странице */
       margin: 12px 0 6px;
       padding: 10px 12px 12px;
-      background: #000000;
+      /* Лёгкая прозрачность фона — текст без opacity */
+      background: rgba(0, 0, 0, 0.94);
       border: 1px solid rgba(255, 232, 175, 0.45);
       border-radius: 18px;
       box-shadow: none;
@@ -1405,7 +1427,7 @@
       padding: 12px 14px;
       margin: 0;
       border-radius: 15px;
-      background: #0c0c0c;
+      background: rgba(12, 12, 12, 0.92);
       border: 1px solid rgba(255, 255, 255, 0.12);
       line-height: 1.35;
       text-align: center;
@@ -1413,7 +1435,7 @@
 
     .title-row .title-subject:focus {
       border-color: var(--gold-soft);
-      background: #121212;
+      background: rgba(18, 18, 18, 0.94);
       box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12), 0 0 18px var(--ui-violet-soft);
     }
 
@@ -2144,87 +2166,18 @@
       font-size: clamp(34px, 9.5vw, 52px);
       color: rgba(255, 132, 62, 0.96);
     }
-    /*
-      INTRO и OUTRO — кино-маркеры. Делаем их визуально разными:
-      INTRO  — тёплое золото и мягкий «прогрев» лампы кинопроектора (intro-warmup).
-      OUTRO  — глубокий кино-красный «END / титры», медленное дыхание (outro-fade).
-      У обоих есть text-shadow в три слоя, чтобы цвет читался ярко на чёрном фоне.
-    */
-    .scene-main[data-scene-role="intro"] .scene-time-wrap .time-leading {
-      color: #ffd24a;
-      font-size: clamp(42px, 12vw, 68px);
-      font-weight: 800;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      text-shadow:
-        0 0 3px rgba(255, 230, 150, 0.95),
-        0 0 12px rgba(255, 200, 80, 0.75),
-        0 0 28px rgba(255, 160, 50, 0.45),
-        0 0 48px rgba(255, 130, 40, 0.28);
-      animation: intro-warmup 2.4s ease-in-out infinite;
-      will-change: filter, text-shadow;
-    }
-
+    /* INTRO и OUTRO: без свечения и анимации; тот же цвет, что у «СЦЕНА N». */
+    .scene-main[data-scene-role="intro"] .scene-time-wrap .time-leading,
     .scene-main[data-scene-role="outro"] .scene-time-wrap .time-leading {
-      color: #ff4d4d;
+      color: rgba(255, 132, 62, 0.96);
       font-size: clamp(42px, 12vw, 68px);
       font-weight: 800;
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      text-shadow:
-        0 0 3px rgba(255, 200, 200, 0.9),
-        0 0 12px rgba(255, 90, 90, 0.8),
-        0 0 28px rgba(255, 50, 50, 0.55),
-        0 0 46px rgba(255, 30, 30, 0.35);
-      animation: outro-fade 3.4s ease-in-out infinite;
-      will-change: opacity, text-shadow;
-    }
-
-    @keyframes intro-warmup {
-      0%,
-      100% {
-        text-shadow:
-          0 0 3px rgba(255, 230, 150, 0.95),
-          0 0 12px rgba(255, 200, 80, 0.75),
-          0 0 28px rgba(255, 160, 50, 0.45),
-          0 0 48px rgba(255, 130, 40, 0.28);
-        filter: brightness(1.02);
-      }
-      50% {
-        text-shadow:
-          0 0 4px rgba(255, 245, 200, 1),
-          0 0 16px rgba(255, 220, 120, 0.9),
-          0 0 36px rgba(255, 185, 80, 0.6),
-          0 0 56px rgba(255, 150, 55, 0.4);
-        filter: brightness(1.12);
-      }
-    }
-
-    @keyframes outro-fade {
-      0%,
-      100% {
-        opacity: 1;
-        text-shadow:
-          0 0 3px rgba(255, 200, 200, 0.9),
-          0 0 12px rgba(255, 90, 90, 0.8),
-          0 0 28px rgba(255, 50, 50, 0.55),
-          0 0 46px rgba(255, 30, 30, 0.35);
-      }
-      60% {
-        opacity: 0.94;
-        text-shadow:
-          0 0 5px rgba(255, 220, 220, 0.95),
-          0 0 18px rgba(255, 110, 110, 0.88),
-          0 0 40px rgba(255, 65, 65, 0.65),
-          0 0 58px rgba(255, 35, 35, 0.42);
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .scene-main[data-scene-role="intro"] .scene-time-wrap .time-leading,
-      .scene-main[data-scene-role="outro"] .scene-time-wrap .time-leading {
-        animation: none !important;
-      }
+      text-shadow: none;
+      animation: none;
+      filter: none;
+      will-change: auto;
     }
 
     .scene-time-wrap .scene-index {
@@ -2570,6 +2523,7 @@
       width: min(272px, 90vw);
       max-height: min(380px, 88vh);
       color-scheme: dark;
+      /* Непрозрачный тёмный слой + blur; без плотного фона WebKit иногда рисует светлое «стекло» */
       background: rgba(8, 8, 10, 0.88);
       color: var(--text);
       border: 1px solid var(--ui-select-border);
@@ -2643,7 +2597,7 @@
       cursor: pointer;
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
-      box-shadow: inset 0 1px 0 rgba(255, 140, 70, 0.12);
+      box-shadow: none;
     }
 
     .scene-time-dialog-done:focus {
@@ -2885,7 +2839,7 @@
       color: #f8eed1;
     }
 
-    /* Примечание и перебивка — одна схема пунктира; поле на всю ширину колонки сетки */
+    /* Примечание / перебивка: подпись строкой 1; текст — на всю ширину блока (стр. 2). Нижний пунктир на всю ширину блока через ::after, не от колонки текста. */
     .scene-main > .line-note .note-editable,
     .scene-main > .intercut .intercut-text {
       display: block;
@@ -2898,52 +2852,215 @@
       padding: 0 0 2px;
       margin: 0;
       box-sizing: border-box;
-      border-bottom: 1px dashed rgba(200, 198, 195, 0.38);
+      border-bottom: none;
     }
 
     .scene-main > .line-note .note-editable:focus,
     .scene-main > .intercut .intercut-text:focus {
       background: transparent;
       box-shadow: none;
-      border-bottom-color: rgba(200, 198, 195, 0.52);
     }
 
-    /* Пунктир только для пустых полей; при тексте подчёркивание убираем */
-    .scene-main > .line-note .note-editable.has-text,
-    .scene-main > .intercut .intercut-text.has-text {
-      border-bottom: none;
-    }
-
-    .scene-main > .line-note .note-editable.has-text:focus,
-    .scene-main > .intercut .intercut-text.has-text:focus {
-      border-bottom: none;
-      border-bottom-color: transparent;
-    }
-
-    /* Одна сетка для обеих строк: фикс. колонка под самый длинный лейбл → поля одинаковой ширины и одного правого края */
     .scene-main > .line-note {
       display: grid;
-      grid-template-columns: 14ch 1fr;
-      align-items: center;
-      column-gap: 0.4em;
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto;
+      row-gap: 0.32em;
+      align-items: start;
+      position: relative;
+      padding-bottom: 2px;
+      box-sizing: border-box;
       scroll-margin-top: 26vh;
       scroll-margin-bottom: 42vh;
     }
 
     .scene-main > .line-note > b {
+      grid-row: 1;
+      width: 100%;
+      display: flex;
+      /* center тянул боковой пунктир в середину по вертикали; flex-end — на уровне низа строки / подчёркивания */
+      align-items: flex-end;
+      gap: 0.42em;
+      min-width: 0;
       white-space: nowrap;
+      line-height: 1.25;
+    }
+
+    .scene-main > .line-note > b::before,
+    .scene-main > .line-note > b::after {
+      content: "";
+      flex: 1 1 0;
+      min-width: 0.25em;
+      height: 0;
+      border-bottom: 1px dashed rgba(200, 198, 195, 0.38);
+    }
+
+    .scene-main > .line-note .note-editable {
+      grid-row: 2;
+    }
+
+    .scene-main > .line-note::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-bottom: 1px dashed rgba(200, 198, 195, 0.38);
+      pointer-events: none;
+    }
+
+    .scene-main > .line-note:focus-within::after {
+      border-bottom-color: rgba(200, 198, 195, 0.52);
+    }
+
+    .scene-main > .line-note:has(.note-editable.has-text)::after {
+      display: none;
     }
 
     .scene-main > .intercut {
       display: grid;
-      grid-template-columns: 14ch 1fr;
-      align-items: center;
-      column-gap: 0.4em;
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto;
+      row-gap: 0.32em;
+      align-items: start;
+      position: relative;
+      padding-bottom: 2px;
+      box-sizing: border-box;
+    }
+
+    .scene-main > .intercut > b {
+      grid-row: 1;
+      width: 100%;
+      display: flex;
+      align-items: flex-end;
+      gap: 0.42em;
+      min-width: 0;
+      white-space: nowrap;
+      line-height: 1.25;
+    }
+
+    .scene-main > .intercut > b::before,
+    .scene-main > .intercut > b::after {
+      content: "";
+      flex: 1 1 0;
+      min-width: 0.25em;
+      height: 0;
+      border-bottom: 1px dashed rgba(200, 198, 195, 0.38);
+    }
+
+    .scene-main > .intercut .intercut-text {
+      grid-row: 2;
+    }
+
+    .scene-main > .intercut::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-bottom: 1px dashed rgba(200, 198, 195, 0.38);
+      pointer-events: none;
+    }
+
+    .scene-main > .intercut:focus-within::after {
+      border-bottom-color: rgba(200, 198, 195, 0.52);
+    }
+
+    .scene-main > .intercut:has(.intercut-text.has-text)::after {
+      display: none;
     }
 
     .field-prep-important {
       scroll-margin-top: 28vh;
       scroll-margin-bottom: 42vh;
+    }
+
+    /* Блок «важно»: спокойная карточка-напоминание, чипы вместо списка с отступами */
+    .card-prep .field-prep-important {
+      gap: 12px;
+      padding: 14px 14px 16px;
+      background:
+        linear-gradient(165deg, rgba(255, 224, 185, 0.06) 0%, transparent 42%),
+        rgba(6, 6, 6, 0.92);
+      border: 1px solid rgba(232, 201, 104, 0.14);
+      border-radius: 16px;
+    }
+
+    .card-prep .field-prep-important .prep-important-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0;
+      padding: 0;
+    }
+
+    .card-prep .prep-important-mark {
+      flex-shrink: 0;
+      width: 3px;
+      align-self: stretch;
+      min-height: 2.25rem;
+      border-radius: 999px;
+      background: linear-gradient(
+        180deg,
+        rgba(240, 200, 120, 0.95) 0%,
+        rgba(200, 150, 70, 0.45) 100%
+      );
+      box-shadow: 0 0 12px rgba(255, 185, 110, 0.18);
+    }
+
+    .card-prep .prep-important-title-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .card-prep .prep-important-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgba(245, 232, 210, 0.95);
+    }
+
+    .card-prep .prep-important-sub {
+      font-size: 0.78rem;
+      font-weight: 500;
+      line-height: 1.3;
+      color: rgba(210, 200, 188, 0.62);
+    }
+
+    .card-prep .prep-important-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: stretch;
+    }
+
+    .card-prep .prep-important-options .prep-important-label {
+      flex: 1 1 calc(33.333% - 8px);
+      min-width: min(100%, 120px);
+      margin: 0;
+      padding: 10px 12px 10px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      background: rgba(0, 0, 0, 0.35);
+      font-size: 0.88rem;
+      transition:
+        border-color 0.18s ease,
+        background 0.18s ease,
+        box-shadow 0.18s ease;
+    }
+
+    .card-prep .prep-important-options .prep-important-label:has(input:checked) {
+      border-color: rgba(232, 201, 104, 0.42);
+      background: rgba(232, 201, 104, 0.09);
+      box-shadow: 0 0 0 1px rgba(232, 201, 104, 0.12);
+    }
+
+    .card-prep .prep-important-options .prep-important-label:hover {
+      border-color: rgba(255, 255, 255, 0.14);
     }
 
     .teleprompter-overlay {
@@ -3262,15 +3379,14 @@
     }
 
     /*
-      Подготовка: у карточки .card общий outer-glow (--ui-violet-soft) на чёрном даёт холодный / «зеленоватый»
-      сдвиг у верха — здесь только тёплое свечение и янтарный верхний блик ::before.
+      Подготовка: общий outer-glow карточки — через тёплый --ui-violet-soft (золото на чёрном), без холодного аметиста.
+      Здесь только тёплое свечение и янтарный верхний блик ::before.
     */
     .card.card-prep {
       margin-bottom: 32px;
+      /* Без inset сверху/снизу — больше «воздуха» по вертикали, без тяжёлых горизонтальных каём */
       box-shadow:
         0 10px 28px rgba(0, 0, 0, 0.34),
-        inset 0 1px 0 rgba(255, 244, 220, 0.1),
-        inset 0 -1px 0 rgba(255, 255, 255, 0.055),
         0 0 34px -14px rgba(232, 201, 104, 0.07);
     }
 
@@ -3294,19 +3410,12 @@
       accent-color: var(--accent);
     }
 
-    .card-prep .field-prep-important .prep-important-head {
-      margin-bottom: 4px;
-    }
-
     .card-prep .prep-important-label {
       display: flex;
       align-items: center;
       gap: 10px;
-      margin: 8px 0 0;
-      padding: 0;
       cursor: pointer;
-      font-size: 0.95rem;
-      color: rgba(250, 246, 240, 0.92);
+      color: rgba(250, 246, 240, 0.9);
       user-select: none;
     }
 
@@ -3565,14 +3674,11 @@
         drop-shadow(0 0 10px rgba(255, 175, 95, 0.14));
     }
 
-    /* Во время перетаскивания — короткое сглаживание (16мс ≈ 1 кадр), чтобы лампа шла за пальцем
-       почти 1:1, но без джиттера от шумных touchmove. Резкий контроль вместо «плывущей» 0.45s. */
+    /* Во время перетаскивания — без transition на transform/opacity: значения меняются каждый rAF,
+       иначе CSS догоняет с задержкой и получается «двойное сглаживание» и рывки. */
     .pull-reload-hint.pull-reload-hint--dragging {
       will-change: opacity, transform, filter;
-      transition:
-        opacity 0.18s linear,
-        transform 0.12s linear,
-        filter 0.3s ease;
+      transition: none;
     }
 
     .pull-reload-hint.pull-reload-hint--ready {
@@ -3623,7 +3729,7 @@
       inset: 0;
       z-index: 2147483646;
       pointer-events: none;
-      /* Центр «кино»-вспышки при свайпе влево задаётся из JS по положению #pull-swipe-hint (слева) */
+      /* Центр вспышки при reload-свайпе — по центру #pull-swipe-hint (слева у края экрана) */
       --pull-flash-at-x: 0%;
       --pull-flash-at-y: 50%;
       background: radial-gradient(
@@ -3640,7 +3746,7 @@
       opacity: 1;
     }
 
-    /* Свайп левого края: свечение от точки «ползунка» у левого края (позиция полоски по скроллу). */
+    /* Свайп перезагрузки (влево): свечение от полоски у левого края (положение по скроллу). */
     .pull-reload-flash.pull-reload-flash--from-edge {
       background: radial-gradient(
         ellipse 95% 88% at var(--pull-flash-at-x) var(--pull-flash-at-y),
@@ -3700,7 +3806,8 @@
 
     .pull-swipe-hint {
       position: fixed;
-      left: max(6px, env(safe-area-inset-left, 0px));
+      /* Вплотную к левому краю экрана (без max(6px)/safe-area — иначе виден зазор, как на скрине) */
+      left: 0;
       right: auto;
       /* Вертикальная позиция задаётся из JS по скроллу (как ползунок скроллбара) */
       top: 0;
@@ -3709,10 +3816,10 @@
       height: 52px;
       margin-top: 0;
       border-radius: 5px;
-      /* Полоска у левого края — прогресс свайпа влево (обновление страницы); шторка ассистента чуть правее. */
+      /* Полоска у левого края — прогресс свайпа влево (reload). */
       background: linear-gradient(
         80deg,
-        rgba(42, 34, 56, 0.55) 0%,
+        rgba(22, 18, 14, 0.58) 0%,
         var(--assistant-hint-violet-mid) 36%,
         rgba(255, 255, 255, 0.3) 58%,
         rgba(255, 236, 190, 0.52) 82%,
@@ -3752,7 +3859,7 @@
         transform: translateX(0) scaleY(1);
         filter:
           drop-shadow(7px 0 14px rgba(255, 255, 255, 0.28))
-          drop-shadow(9px 0 20px rgba(145, 120, 210, 0.22))
+          drop-shadow(9px 0 20px rgba(212, 175, 95, 0.22))
           drop-shadow(15px 0 24px rgba(255, 230, 190, 0.14));
       }
       30% {
@@ -3761,7 +3868,7 @@
         filter:
           drop-shadow(12px 0 22px rgba(255, 250, 220, 0.78))
           drop-shadow(16px 0 36px rgba(255, 220, 170, 0.55))
-          drop-shadow(26px 0 48px rgba(170, 130, 220, 0.42))
+          drop-shadow(26px 0 48px rgba(200, 160, 95, 0.42))
           drop-shadow(40px 0 64px rgba(255, 230, 190, 0.22));
       }
       60% {
@@ -3770,7 +3877,7 @@
         filter:
           drop-shadow(16px 0 28px rgba(255, 248, 220, 0.6))
           drop-shadow(24px 0 46px rgba(255, 218, 168, 0.4))
-          drop-shadow(44px 0 72px rgba(180, 140, 220, 0.3))
+          drop-shadow(44px 0 72px rgba(210, 165, 95, 0.3))
           drop-shadow(72px 0 96px rgba(255, 230, 200, 0.16));
       }
       100% {
@@ -3779,7 +3886,7 @@
         filter:
           drop-shadow(22px 0 38px rgba(255, 248, 220, 0))
           drop-shadow(44px 0 64px rgba(255, 220, 175, 0))
-          drop-shadow(90px 0 120px rgba(170, 130, 220, 0));
+          drop-shadow(90px 0 120px rgba(200, 160, 95, 0));
       }
     }
 
@@ -3787,7 +3894,7 @@
       from {
         filter:
           drop-shadow(4px 0 8px rgba(255, 255, 255, 0.14))
-          drop-shadow(5px 0 14px rgba(145, 120, 210, 0.14))
+          drop-shadow(5px 0 14px rgba(212, 175, 95, 0.14))
           drop-shadow(10px 0 18px rgba(255, 220, 160, 0.06));
         box-shadow:
           3px 0 12px rgba(255, 255, 255, 0.12),
@@ -3797,7 +3904,7 @@
       to {
         filter:
           drop-shadow(7px 0 14px rgba(255, 255, 255, 0.26))
-          drop-shadow(8px 0 20px rgba(145, 120, 210, 0.18))
+          drop-shadow(8px 0 20px rgba(212, 175, 95, 0.18))
           drop-shadow(14px 0 22px rgba(255, 230, 190, 0.12));
         box-shadow:
           6px 0 20px rgba(255, 255, 255, 0.22),
@@ -3810,7 +3917,7 @@
       from {
         filter:
           drop-shadow(5px 0 12px rgba(255, 255, 255, 0.22))
-          drop-shadow(6px 0 16px rgba(145, 120, 210, 0.16))
+          drop-shadow(6px 0 16px rgba(212, 175, 95, 0.16))
           drop-shadow(12px 0 22px rgba(255, 224, 150, 0.1));
         box-shadow:
           4px 0 16px rgba(255, 255, 255, 0.18),
@@ -3820,7 +3927,7 @@
       to {
         filter:
           drop-shadow(9px 0 18px rgba(255, 255, 255, 0.34))
-          drop-shadow(10px 0 22px rgba(145, 120, 210, 0.22))
+          drop-shadow(10px 0 22px rgba(212, 175, 95, 0.22))
           drop-shadow(18px 0 28px rgba(255, 236, 200, 0.16));
         box-shadow:
           8px 0 26px rgba(255, 255, 255, 0.28),
@@ -4584,9 +4691,16 @@
       height: 1px;
     }
 
-    .wrap .scene-main > .line-note .note-editable,
-    .wrap .scene-main > .intercut .intercut-text,
     .wrap .scene-time-wrap .scene-title {
+      border-bottom-width: 0.5px;
+    }
+
+    .wrap .scene-main > .line-note > b::before,
+    .wrap .scene-main > .line-note > b::after,
+    .wrap .scene-main > .intercut > b::before,
+    .wrap .scene-main > .intercut > b::after,
+    .wrap .scene-main > .line-note::after,
+    .wrap .scene-main > .intercut::after {
       border-bottom-width: 0.5px;
     }
 
@@ -4716,7 +4830,7 @@
     class="app-build-chip"
     id="app-build-chip"
     role="status"
-    title="Версия приложения и время, когда эта страница была загружена браузером"></div>
+    title="Версия приложения и время последнего обновления сборки (build-info.json)"></div>
   <div class="wrap">
     <div class="top-logo" id="top-logo-block">
       <div class="top-logo-brand">
@@ -4870,17 +4984,25 @@
             </select>
           </div>
         </div>
-        <div class="field field-prep-important">
-          <div class="prep-important-head"><b>ВАЖНО:</b></div>
-          <label class="prep-important-label"
-            ><input type="checkbox" id="prep-important-clothes" /> одежда</label
-          >
-          <label class="prep-important-label"
-            ><input type="checkbox" id="prep-important-backstage" /> бэк-стейдж</label
-          >
-          <label class="prep-important-label"
-            ><input type="checkbox" id="prep-important-light" /> свет</label
-          >
+        <div class="field field-prep-important" role="group" aria-labelledby="prep-important-heading">
+          <div class="prep-important-head" id="prep-important-heading">
+            <span class="prep-important-mark" aria-hidden="true"></span>
+            <span class="prep-important-title-wrap">
+              <span class="prep-important-title">На съёмке</span>
+              <span class="prep-important-sub">отметьте, если актуально</span>
+            </span>
+          </div>
+          <div class="prep-important-options">
+            <label class="prep-important-label"
+              ><input type="checkbox" id="prep-important-clothes" /> одежда</label
+            >
+            <label class="prep-important-label"
+              ><input type="checkbox" id="prep-important-backstage" /> бэк-стейдж</label
+            >
+            <label class="prep-important-label"
+              ><input type="checkbox" id="prep-important-light" /> свет</label
+            >
+          </div>
         </div>
         <div class="field field-assistant">
           <div class="assistant-line">
@@ -5839,11 +5961,10 @@
 
       /**
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
-       * Дублируйте те же поля в build-info.json — подпись внизу подгружает его с cache: no-store,
-       * чтобы не залипала старая версия при закэшированной главной странице.
+       * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
       var APP_VERSION = 'v306';
-      var BUILD_TIME = '2026-05-04 07:10 MSK';
+      var BUILD_TIME = '2026-05-04 20:00 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -5852,16 +5973,16 @@
         });
       }
 
-      /** Время загрузки страницы в браузере пользователя (его локальная зона). */
-      function formatAppLoadStamp(d) {
-        function pad2(n) { return n < 10 ? '0' + n : '' + n; }
-        return pad2(d.getDate()) + '.' + pad2(d.getMonth() + 1) + '.' + d.getFullYear() +
-          ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+      /** Текст плашки: версия + время последнего обновления приложения (как в build-info). */
+      function formatAppBuildChipDisplay(version, buildWhen) {
+        return formatDatesInDisplayString(
+          String(version || '').trim() + ' · обновлено ' + String(buildWhen || '').trim()
+        );
       }
 
-      var APP_LOAD_AT = new Date();
-      var APP_LOAD_TEXT = formatAppLoadStamp(APP_LOAD_AT);
-      var APP_BUILD = APP_VERSION + ' · загружено ' + APP_LOAD_TEXT;
+      var APP_BUILD_CHIP = formatAppBuildChipDisplay(APP_VERSION, BUILD_TIME);
+      /** Сброс кеша вёрстки только при смене версии/времени сборки, не при каждой перезагрузке. */
+      var APP_BUILD_STAMP_KEY = APP_VERSION + '|' + BUILD_TIME;
       var BUILD_INFO_FILE = 'build-info.json';
       var lastSceneTimeTriggerTouchAt = 0;
       /** Открывать диалог времени только при коротком тапе; при скролле палец смещается сильнее. */
@@ -5936,13 +6057,18 @@
       // там все сценарии пользователя; иначе после каждого деплоя всё обнулялось.
       try {
         var savedBuild = localStorage.getItem(APP_BUILD_KEY);
-        if (savedBuild !== APP_BUILD) {
+        if (savedBuild !== APP_BUILD_STAMP_KEY) {
           [STORAGE_KEY].concat(LEGACY_STORAGE_KEYS).forEach(function (k) {
             try { localStorage.removeItem(k); } catch (e) {}
           });
-          localStorage.setItem(APP_BUILD_KEY, APP_BUILD);
+          localStorage.setItem(APP_BUILD_KEY, APP_BUILD_STAMP_KEY);
         }
       } catch (e) {}
+
+      try {
+        var chipEarly = document.getElementById('app-build-chip');
+        if (chipEarly) chipEarly.textContent = APP_BUILD_CHIP;
+      } catch (eChip0) {}
 
       var root = document.documentElement;
       // Нативный <input type="time"> (колёсико/компактный picker), скрытые select синхронизируются — без четырёх списков по 60 пунктов.
@@ -7083,13 +7209,15 @@
         var st = sc.scrollTop;
         var arrowH = Math.max(14, thumb.offsetHeight || 16);
         if (sh <= ch + 2) {
-          thumb.style.top = '0px';
+          var travelShort = Math.max(0, th - arrowH);
+          thumb.style.top = travelShort > 0 ? Math.round(travelShort) + 'px' : '0px';
           return;
         }
         var maxScroll = sh - ch;
         var scrollRatio = maxScroll > 0 ? st / maxScroll : 0;
         var travel = Math.max(0, th - arrowH);
-        thumb.style.top = Math.round(scrollRatio * travel) + 'px';
+        /* Кнопка с rotate(180deg): локальный «верх» стрелки — внизу трека; инвертируем от соотношения прокрутки */
+        thumb.style.top = Math.round((1 - scrollRatio) * travel) + 'px';
       }
 
       function wireAssistantDrawerScrollAxisThumb() {
@@ -7845,7 +7973,7 @@
         var v = obj.version != null ? String(obj.version) : '';
         var t = obj.build != null ? String(obj.build) : '';
         if (!v || !t) return '';
-        return formatDatesInDisplayString(v + ' · ' + t);
+        return formatAppBuildChipDisplay(v, t);
       }
 
       function applyBuildStampToUi(stamp) {
@@ -7854,15 +7982,33 @@
         if (buildChip) buildChip.textContent = stamp;
       }
 
-      /*
-        Раньше плашка перетиралась временем сборки из build-info.json — поэтому
-        пользователь видел не «когда мой телефон загрузил приложение», а «когда
-        автор сохранил билд». Теперь чип формируется один раз из APP_LOAD_TEXT
-        (момент загрузки в локальной зоне устройства). Авто-перезагрузка раз
-        в AUTO_PAGE_RELOAD_MS обновит и сборку, и время загрузки.
-      */
+      /** Актуальная версия и время сборки с сервера (обновить build-info.json при деплое). */
       function fetchLiveBuildStampForChip() {
-        // no-op: чип фиксирует время загрузки этой страницы, а не серверный билд.
+        fetch(BUILD_INFO_FILE + '?_=' + Date.now(), { cache: 'no-store' })
+          .then(function (r) {
+            if (!r.ok) throw new Error('build-info');
+            return r.json();
+          })
+          .then(function (obj) {
+            var stamp = formatBuildStampFromJson(obj);
+            if (stamp) applyBuildStampToUi(stamp);
+            try {
+              var v = obj.version != null ? String(obj.version) : '';
+              var b = obj.build != null ? String(obj.build) : '';
+              if (!v || !b) return;
+              var key = v + '|' + b;
+              var old = localStorage.getItem(APP_BUILD_KEY);
+              if (old !== key) {
+                [STORAGE_KEY].concat(LEGACY_STORAGE_KEYS).forEach(function (k) {
+                  try {
+                    localStorage.removeItem(k);
+                  } catch (eRm) {}
+                });
+                localStorage.setItem(APP_BUILD_KEY, key);
+              }
+            } catch (eK) {}
+          })
+          .catch(function () {});
       }
 
       var ASSISTANT_SCENARIO_LONGPRESS_MS = 520;
@@ -7875,7 +8021,7 @@
         try {
           readScenarioTrash();
         } catch (ePurge) {}
-        applyBuildStampToUi(APP_BUILD);
+        applyBuildStampToUi(APP_BUILD_CHIP);
         fetchLiveBuildStampForChip();
         var bd = document.getElementById('assistant-drawer-backdrop');
         var closeBtn = document.getElementById('assistant-drawer-close');
@@ -11405,6 +11551,13 @@
         var pullReloadedAt = 0;
         /** Один раз за жест — щелчок при переходе в «готово». */
         var pullReadyHapticFired = false;
+        /** Сглаживание pull-stack: цель из touchmove vs визуальное значение (rAF + lerp). */
+        var pullStackTargetPx = 0;
+        var pullStackSmoothedPx = 0;
+        var lastPullGestureDy = 0;
+        /** EMA по dy — убирает микродрожь touchmove; pullMaxDy по-прежнему от сырого dy. */
+        var pullDySmoothed = 0;
+        var pullStackLoopId = null;
 
         /** Smoothstep: мягкое нарастание видимости лампы при pull (без рывка по opacity). */
         function pullHintEase(t) {
@@ -11457,7 +11610,7 @@
 
         var pullSwipeThumbRaf = null;
 
-        /** Вертикальная позиция полоски у правого края = «ползунок» относительно прокрутки страницы. */
+        /** Вертикальная позиция полоски у левого края = «ползунок» относительно прокрутки страницы (индикатор reload-свайпа). */
         function syncPullSwipeHintThumbFromScroll() {
           var sh = swipeHintEl();
           if (!sh) return;
@@ -11503,7 +11656,73 @@
          */
         function pullStackShiftFromDy(dy) {
           if (dy <= 0) return 0;
-          return (dy * 0.5) / (1 + dy * 0.0032);
+          /* Чуть мягче асимптоты — меньше рывка при длинном тяге */
+          return (dy * 0.5) / (1 + dy * 0.00195);
+        }
+
+        function cancelPullStackLoop() {
+          if (pullStackLoopId) {
+            cancelAnimationFrame(pullStackLoopId);
+            pullStackLoopId = null;
+          }
+        }
+
+        function pullStackTick() {
+          pullStackLoopId = null;
+          if (!pullArmed) {
+            pullStackTargetPx = 0;
+          }
+          var a = 0.3;
+          pullStackSmoothedPx += (pullStackTargetPx - pullStackSmoothedPx) * a;
+          setPullStackPx(pullStackSmoothedPx);
+          if (pullStackSmoothedPx > 0.35) {
+            try {
+              document.documentElement.classList.add('pull-stack-dragging');
+            } catch (eSd) {}
+          } else {
+            try {
+              document.documentElement.classList.remove('pull-stack-dragging');
+            } catch (eSe) {}
+          }
+          var dy = lastPullGestureDy;
+          var hint = pullHintEl();
+          if (hint && pullArmed && scrollTopNow() <= TOP_EPS && dy > 8) {
+            hint.classList.add('pull-reload-hint--dragging');
+            var lamp = hint.querySelector('.pull-reload-hint-video');
+            if (lamp && typeof lamp.play === 'function' && lamp.paused) {
+              try {
+                lamp.play().catch(function () {});
+              } catch (eP) {}
+            }
+            var pullRaw = Math.min(1, Math.max(0, (dy - 8) / (PULL_MIN - 8)));
+            var pullSmooth = pullHintEase(pullRaw);
+            var yShift = pullStackSmoothedPx * 0.62 + pullSmooth * 14;
+            var s = 0.62 + pullSmooth * 0.46;
+            hint.style.setProperty('--pull-dot-y', yShift.toFixed(2) + 'px');
+            hint.style.setProperty('--pull-dot-s', s.toFixed(3));
+            hint.style.opacity = (0.04 + pullSmooth * 0.96).toFixed(3);
+            var ready = dy >= PULL_MIN * 0.92;
+            hint.classList.toggle('pull-reload-hint--ready', ready);
+            if (ready && !pullReadyHapticFired) {
+              pullReadyHapticFired = true;
+              try {
+                triggerHaptic('light');
+              } catch (eHr) {}
+            } else if (!ready && pullReadyHapticFired && dy < PULL_MIN * 0.78) {
+              pullReadyHapticFired = false;
+            }
+          }
+          var activePull = pullArmed && scrollTopNow() <= TOP_EPS;
+          var err = Math.abs(pullStackTargetPx - pullStackSmoothedPx);
+          if (activePull || err > 0.12 || pullStackSmoothedPx > 0.25) {
+            pullStackLoopId = requestAnimationFrame(pullStackTick);
+          }
+        }
+
+        function ensurePullStackLoop() {
+          if (!pullStackLoopId) {
+            pullStackLoopId = requestAnimationFrame(pullStackTick);
+          }
         }
 
         function resetPullStackVisual() {
@@ -11514,6 +11733,11 @@
         }
 
         function resetPullHint() {
+          cancelPullStackLoop();
+          pullStackTargetPx = 0;
+          pullStackSmoothedPx = 0;
+          lastPullGestureDy = 0;
+          pullDySmoothed = 0;
           resetPullStackVisual();
           pullReadyHapticFired = false;
           var hint = pullHintEl();
@@ -11561,7 +11785,7 @@
           var pullHint = pullHintEl();
 
           if (opts.fromSwipe) {
-            /* Свайпом reload слева — вспышка из центра полоски-ползунка (позиция по скроллу). */
+            /* Свайпом reload (влево) — вспышка из центра полоски у левого края (позиция по скроллу). */
             try {
               syncPullSwipeHintThumbFromScroll();
             } catch (eSyn) {}
@@ -11712,49 +11936,11 @@
             if (pullArmed) {
               if (scrollTopNow() <= TOP_EPS) {
                 if (dy > pullMaxDy) pullMaxDy = dy;
-                var stackPx = dy > 2 ? pullStackShiftFromDy(dy) : 0;
-                setPullStackPx(stackPx);
-                if (stackPx > 0.35) {
-                  try {
-                    document.documentElement.classList.add('pull-stack-dragging');
-                  } catch (eSd) {}
-                } else {
-                  try {
-                    document.documentElement.classList.remove('pull-stack-dragging');
-                  } catch (eSe) {}
-                }
-                var hint = pullHintEl();
-                if (hint && dy > 8) {
-                  hint.classList.add('pull-reload-hint--dragging');
-                  var lamp = hint.querySelector('.pull-reload-hint-video');
-                  if (lamp && typeof lamp.play === 'function' && lamp.paused) {
-                    try {
-                      lamp.play().catch(function () {});
-                    } catch (eP) {}
-                  }
-                  /** Прогресс жеста (0..1) с мягкой кривой. До PULL_MIN — наливаемся; после — лёгкий «толчок» вверх. */
-                  var pullRaw = Math.min(1, Math.max(0, (dy - 8) / (PULL_MIN - 8)));
-                  var pullSmooth = pullHintEase(pullRaw);
-                  /** Лампа едет дальше блоков (parallax): чуть быстрее, но мягче, чтобы не «прилипала». */
-                  var yShift = stackPx * 0.62 + pullSmooth * 14;
-                  /** Масштаб с лёгким overshoot к 1.06 у порога. */
-                  var s = 0.62 + pullSmooth * 0.46;
-                  hint.style.setProperty('--pull-dot-y', yShift.toFixed(2) + 'px');
-                  hint.style.setProperty('--pull-dot-s', s.toFixed(3));
-                  /** Прозрачность плавно из 0 до 1, начало раньше (с 0.04 при минимальном касании). */
-                  hint.style.opacity = (0.04 + pullSmooth * 0.96).toFixed(3);
-                  var ready = dy >= PULL_MIN * 0.92;
-                  hint.classList.toggle('pull-reload-hint--ready', ready);
-                  if (ready && !pullReadyHapticFired) {
-                    pullReadyHapticFired = true;
-                    try {
-                      triggerHaptic('light');
-                    } catch (eHr) {}
-                  } else if (!ready && pullReadyHapticFired && dy < PULL_MIN * 0.78) {
-                    /** При откате назад снимаем флаг — следующий заход даст щелчок снова. */
-                    pullReadyHapticFired = false;
-                  }
-                }
+                var pullEma = 0.36;
+                pullDySmoothed += (dy - pullDySmoothed) * pullEma;
+                lastPullGestureDy = pullDySmoothed;
+                pullStackTargetPx = pullDySmoothed > 2 ? pullStackShiftFromDy(pullDySmoothed) : 0;
+                ensurePullStackLoop();
               } else {
                 pullArmed = false;
                 resetPullHint();
@@ -12079,10 +12265,95 @@
         }, AUTO_PAGE_RELOAD_MS);
       }
 
+      /**
+       * Pinch-zoom на iOS ломает фиксированные блоки/диалоги. После отпускания всех пальцев
+       * принудительно возвращаем масштаб страницы к 100% (кратковременный maximum-scale=1 в meta viewport).
+       */
+      function wireViewportPinchZoomReset() {
+        if (wireViewportPinchZoomReset._done) return;
+        wireViewportPinchZoomReset._done = true;
+        var maxTouches = 0;
+        var restoring = false;
+
+        function viewportMeta() {
+          return document.querySelector('meta[name="viewport"]');
+        }
+
+        function isVisuallyZoomed() {
+          try {
+            var vv = window.visualViewport;
+            if (!vv) return false;
+            if (typeof vv.scale === 'number' && vv.scale > 1.04) return true;
+            if (vv.width > 0 && window.innerWidth > 0) {
+              var r = window.innerWidth / vv.width;
+              if (r > 1.04) return true;
+            }
+          } catch (eZ) {}
+          return false;
+        }
+
+        function noteTouchCount(e) {
+          try {
+            var n = e.touches ? e.touches.length : 0;
+            if (n > maxTouches) maxTouches = n;
+          } catch (eN) {}
+        }
+
+        function applyZoomOut() {
+          if (restoring) return;
+          var m = viewportMeta();
+          if (!m) return;
+          var orig = m.getAttribute('content') || 'width=device-width, initial-scale=1.0, viewport-fit=cover';
+          restoring = true;
+          try {
+            m.setAttribute(
+              'content',
+              'width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no'
+            );
+          } catch (eSet) {}
+          window.setTimeout(function () {
+            try {
+              m.setAttribute('content', orig);
+            } catch (eRestore) {}
+            restoring = false;
+            maxTouches = 0;
+          }, 55);
+        }
+
+        document.addEventListener('touchstart', noteTouchCount, { passive: true, capture: true });
+        document.addEventListener('touchmove', noteTouchCount, { passive: true, capture: true });
+
+        document.addEventListener(
+          'touchend',
+          function (e) {
+            if (restoring) return;
+            if (e.touches && e.touches.length > 0) return;
+            var hadMulti = maxTouches >= 2;
+            maxTouches = 0;
+            window.requestAnimationFrame(function () {
+              window.requestAnimationFrame(function () {
+                if (restoring) return;
+                if (hadMulti || isVisuallyZoomed()) applyZoomOut();
+              });
+            });
+          },
+          { passive: true, capture: true }
+        );
+
+        document.addEventListener(
+          'touchcancel',
+          function () {
+            maxTouches = 0;
+          },
+          { passive: true, capture: true }
+        );
+      }
+
       loadFromStorage();
       wireTopLogoScrollBlur();
       wireDetailsSummaryRowToggle();
       wirePullDownReload();
+      wireViewportPinchZoomReset();
       wireAssistantDrawer();
       wireAssistantDrawerScrollAxisThumb();
       wireAssistantDrawerCloseSwipe();
