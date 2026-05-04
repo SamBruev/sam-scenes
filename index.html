@@ -2804,10 +2804,25 @@
       border-bottom-color: transparent;
     }
 
-    /* Фокус на примечании + клавиатура iPhone: запас для scrollIntoView / программного центрирования */
+    /* Фокус на примечании + клавиатура iPhone: запас для scrollIntoView / программного центрирования.
+       Плюс flex-строка: лейбл «Примечание:» по своей ширине, поле тянется до правого края карточки —
+       чтобы пунктир уходил до конца, а не обрывался на ~10 символах. */
     .scene-main > .line-note {
+      display: flex;
+      align-items: baseline;
+      gap: 0.4em;
       scroll-margin-top: 26vh;
       scroll-margin-bottom: 42vh;
+    }
+
+    .scene-main > .line-note > b {
+      flex: 0 0 auto;
+      white-space: nowrap;
+    }
+
+    .scene-main > .line-note .note-editable {
+      flex: 1 1 auto;
+      min-width: 0;
     }
 
     #prep-note {
@@ -5656,8 +5671,8 @@
        * Дублируйте те же поля в build-info.json — подпись внизу подгружает его с cache: no-store,
        * чтобы не залипала старая версия при закэшированной главной странице.
        */
-      var APP_VERSION = 'v294';
-      var BUILD_TIME = '2026-05-04 06:46 MSK';
+      var APP_VERSION = 'v295';
+      var BUILD_TIME = '2026-05-04 06:50 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
