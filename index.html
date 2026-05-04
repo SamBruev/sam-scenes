@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- v220: единый пунктир у примечания и перебивки -->
-<html lang="ru" style="--logo-x: 0px; --logo-y: 0px; --logo-scale: 2.00; --top-logo-blur: 0px;">
+<html lang="ru" style="--logo-x: 0px; --logo-y: 0px; --logo-scale: 2.00; --top-logo-blur: 0px; --pull-stack-y: 0px;">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -16,7 +16,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>CURSOR · Sam Scenes (v273)</title>
+  <title>CURSOR · Sam Scenes (v274)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -307,8 +307,17 @@
       position: relative;
       z-index: 12;
       will-change: filter;
+      transform: translateY(var(--pull-stack-y, 0px));
       /* Тот же темп, что у панели ассистента — blur снимается плавно при закрытии */
-      transition: filter 0.32s cubic-bezier(0.22, 0.9, 0.28, 1);
+      transition:
+        filter 0.32s cubic-bezier(0.22, 0.9, 0.28, 1),
+        transform 0.44s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    html.pull-stack-dragging .wrap {
+      transition:
+        filter 0.32s cubic-bezier(0.22, 0.9, 0.28, 1),
+        transform none;
     }
 
     /* Пока открыт ассистент — без подстраховки iOS всё ещё тянет страницу под blur; доп. блокировка в JS */
@@ -321,13 +330,25 @@
     body.assistant-drawer-open .wrap {
       pointer-events: none;
       user-select: none;
-      transition: filter 0.32s cubic-bezier(0.22, 0.9, 0.28, 1);
+      transition:
+        filter 0.32s cubic-bezier(0.22, 0.9, 0.28, 1),
+        transform 0.44s cubic-bezier(0.22, 1, 0.36, 1);
       filter: blur(11px) saturate(102%);
       -webkit-filter: blur(11px) saturate(102%);
     }
 
+    html.pull-stack-dragging body.assistant-drawer-open .wrap {
+      transition:
+        filter 0.32s cubic-bezier(0.22, 0.9, 0.28, 1),
+        transform none;
+    }
+
     @media (prefers-reduced-motion: reduce) {
       .wrap {
+        transition: none;
+      }
+
+      html.pull-stack-dragging .wrap {
         transition: none;
       }
 
@@ -481,7 +502,7 @@
       position: fixed;
       left: env(safe-area-inset-left, 0px);
       top: 50%;
-      transform: translateY(-50%);
+      transform: translateY(calc(-50% + var(--pull-stack-y, 0px)));
       width: 6px;
       min-width: 5px;
       height: min(168px, 46vh);
@@ -1647,6 +1668,7 @@
       position: fixed;
       right: max(10px, env(safe-area-inset-right, 0px));
       bottom: max(10px, env(safe-area-inset-bottom, 0px));
+      transform: translateY(var(--pull-stack-y, 0px));
       z-index: 95;
       max-width: min(calc(100vw - 24px), 19rem);
       padding: 5px 10px;
@@ -3425,7 +3447,8 @@
       pointer-events: none;
       overflow: visible;
       /* Одна формула transform: без inline-анимации translate — иначе дёргается */
-      transform: translateY(calc(-22px + var(--pull-dot-y, 0px))) scale(var(--pull-dot-s, 0.85));
+      transform: translateY(calc(-22px + var(--pull-dot-y, 0px) + var(--pull-stack-y, 0px)))
+        scale(var(--pull-dot-s, 0.85));
       transition:
         opacity 0.42s cubic-bezier(0.22, 1, 0.36, 1),
         transform 0.48s cubic-bezier(0.22, 1, 0.36, 1),
@@ -5610,8 +5633,8 @@
        * Дублируйте те же поля в build-info.json — подпись внизу подгружает его с cache: no-store,
        * чтобы не залипала старая версия при закэшированной главной странице.
        */
-      var APP_VERSION = 'v273';
-      var BUILD_TIME = '2026-05-04 03:15 MSK';
+      var APP_VERSION = 'v274';
+      var BUILD_TIME = '2026-05-04 04:45 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -11088,7 +11111,30 @@
           } catch (eV) {}
         }
 
+        function setPullStackPx(px) {
+          try {
+            document.documentElement.style.setProperty('--pull-stack-y', px + 'px');
+          } catch (ePs) {}
+        }
+
+        /** Свайп вниз с верха: логотип и блоки едут вместе (резина + --pull-stack-y). */
+        function pullStackShiftFromDy(dy) {
+          if (dy <= 0) return 0;
+          var cap = 148;
+          var linear = dy * 0.5;
+          var extra = Math.min(36, Math.max(0, dy - 90) * 0.22);
+          return Math.min(cap, linear + extra);
+        }
+
+        function resetPullStackVisual() {
+          try {
+            document.documentElement.classList.remove('pull-stack-dragging');
+          } catch (eC) {}
+          setPullStackPx(0);
+        }
+
         function resetPullHint() {
+          resetPullStackVisual();
           var hint = pullHintEl();
           if (!hint) return;
           pausePullHintLamp(hint);
@@ -11111,6 +11157,9 @@
           var now = Date.now();
           if (now - pullReloadedAt < 1300) return;
           pullReloadedAt = now;
+          try {
+            resetPullHint();
+          } catch (eRh) {}
           try {
             flushSave();
           } catch (eFs) {}
@@ -11153,6 +11202,29 @@
             swipeMaxDx = 0;
           },
           { passive: true }
+        );
+
+        /** Вертикальный pull с верха: гасим нативный rubber-band, сдвиг ведёт --pull-stack-y (см. .wrap). */
+        document.addEventListener(
+          'touchmove',
+          function (e) {
+            if (!e.touches || !e.touches.length) return;
+            if (document.body.classList.contains('assistant-drawer-open')) return;
+            var t = e.touches[0];
+            var dx = t.clientX - startX;
+            var dy = t.clientY - startY;
+            if (
+              pullArmed &&
+              scrollTopNow() <= TOP_EPS &&
+              dy > 12 &&
+              Math.abs(dy) >= Math.abs(dx) * 0.88
+            ) {
+              try {
+                e.preventDefault();
+              } catch (pePull) {}
+            }
+          },
+          { passive: false, capture: true }
         );
 
         /**
@@ -11204,6 +11276,17 @@
             if (pullArmed) {
               if (scrollTopNow() <= TOP_EPS) {
                 if (dy > pullMaxDy) pullMaxDy = dy;
+                var stackPx = dy > 2 ? pullStackShiftFromDy(dy) : 0;
+                setPullStackPx(stackPx);
+                if (stackPx > 0.35) {
+                  try {
+                    document.documentElement.classList.add('pull-stack-dragging');
+                  } catch (eSd) {}
+                } else {
+                  try {
+                    document.documentElement.classList.remove('pull-stack-dragging');
+                  } catch (eSe) {}
+                }
                 var hint = pullHintEl();
                 if (hint && dy > 12) {
                   hint.classList.add('pull-reload-hint--dragging');
@@ -11248,7 +11331,18 @@
                   var prog = Math.min(1, Math.abs(swipeMinDx) / SWIPE_MIN);
                   sh.classList.add('pull-swipe-hint--show');
                   sh.style.opacity = String(0.18 + prog * 0.56);
-                  sh.style.transform = 'translateX(' + (12 - prog * 22) + 'px) scaleY(' + (0.9 + prog * 0.14) + ')';
+                  var pullY =
+                    (typeof getComputedStyle !== 'undefined' &&
+                      getComputedStyle(document.documentElement).getPropertyValue('--pull-stack-y')) ||
+                    '0px';
+                  sh.style.transform =
+                    'translate(' +
+                    (12 - prog * 22) +
+                    'px, ' +
+                    pullY.trim() +
+                    ') scaleY(' +
+                    (0.9 + prog * 0.14) +
+                    ')';
                   sh.classList.toggle('pull-swipe-hint--ready', prog >= 0.92);
                 }
               }
