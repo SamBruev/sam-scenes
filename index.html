@@ -1246,11 +1246,19 @@
     #daily-plan { order: 2; }
     .title-row { order: 3; }
 
-    /* Выше фиксированной шапки (.top-logo / .logo-bg до z-index 10), иначе тапы по заголовку улетают в логотип */
+    /*
+      Выше фиксированной шапки. .top-logo (z-index 10) → .logo-bg внутри неё с
+      transform: scale(2.0) создаёт свой stacking-контекст и в Safari иногда
+      «крадёт» хит-тест над верхней карточкой #scenario-hub. Высокий z-index +
+      isolation помогают, но окончательная страховка — document-level fallback
+      в JS (см. wireDetailsSummaryRowToggle), который через elementsFromPoint
+      находит summary на месте тапа.
+    */
     #scenario-hub,
     #daily-plan {
       position: relative;
-      z-index: 18;
+      z-index: 50;
+      isolation: isolate;
     }
 
     .top-logo {
@@ -5648,8 +5656,8 @@
        * Дублируйте те же поля в build-info.json — подпись внизу подгружает его с cache: no-store,
        * чтобы не залипала старая версия при закэшированной главной странице.
        */
-      var APP_VERSION = 'v292';
-      var BUILD_TIME = '2026-05-04 06:32 MSK';
+      var APP_VERSION = 'v293';
+      var BUILD_TIME = '2026-05-04 06:38 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -11076,6 +11084,83 @@
         }
 
         document.querySelectorAll('#scenario-hub, #daily-plan').forEach(bindDetails);
+
+        /*
+          Hit-test fallback на уровне document: если что-то с pointer-events: auto
+          (например .logo-bg при scale 2.0) визуально не закрывает summary, но
+          техники Safari отдают ей клик — мы всё равно ловим тап в координатах
+          и переключаем нужный <details>. Срабатывает, только если e.target НЕ
+          уже находится внутри summary (тогда штатный sum-binding обработает).
+        */
+        var fallbackDown = null;
+
+        function fallbackPickSummary(x, y) {
+          if (!document.elementsFromPoint) return null;
+          var els = document.elementsFromPoint(x, y);
+          for (var i = 0; i < els.length; i++) {
+            var el = els[i];
+            if (!el || el.tagName !== 'SUMMARY') continue;
+            var par = el.parentElement;
+            if (!par) continue;
+            if (par.id !== 'scenario-hub' && par.id !== 'daily-plan') continue;
+            return el;
+          }
+          return null;
+        }
+
+        document.addEventListener(
+          'pointerdown',
+          function (e) {
+            if (!e.isPrimary) return;
+            if (e.target && e.target.closest && e.target.closest('summary')) return;
+            var sum = fallbackPickSummary(e.clientX, e.clientY);
+            if (!sum) return;
+            if (hitInteractiveInsideSummary(e.target) && e.target !== sum) return;
+            fallbackDown = {
+              x: e.clientX,
+              y: e.clientY,
+              t: Date.now(),
+              id: e.pointerId,
+              sum: sum,
+            };
+          },
+          true
+        );
+
+        document.addEventListener(
+          'pointerup',
+          function (e) {
+            if (!fallbackDown) return;
+            var d = fallbackDown;
+            fallbackDown = null;
+            if (d.id !== e.pointerId) return;
+            var dx = Math.abs(e.clientX - d.x);
+            var dy = Math.abs(e.clientY - d.y);
+            var dt = Date.now() - d.t;
+            if (dx > 12 || dy > 12 || dt > 700) return;
+            /** Проверим, что отпустили палец всё ещё над тем же summary — иначе это уже дрэг. */
+            var stillSum = fallbackPickSummary(e.clientX, e.clientY);
+            if (stillSum !== d.sum) return;
+            var det = d.sum.parentElement;
+            if (!det) return;
+            try {
+              e.preventDefault();
+            } catch (eP) {}
+            try {
+              e.stopPropagation();
+            } catch (eS) {}
+            det.open = !det.open;
+          },
+          true
+        );
+
+        document.addEventListener(
+          'pointercancel',
+          function () {
+            fallbackDown = null;
+          },
+          true
+        );
       }
 
       function wirePullDownReload() {
