@@ -5,6 +5,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#000000">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -206,24 +207,66 @@
       color-scheme: dark;
     }
 
-    /* Нативные выпадающие списки: без явной схемы Safari/iOS часто рисует белый sheet поверх тёмной страницы. */
-    select {
+    /* Явная тёмная схема у контейнеров форм — часть движков привязывает нативные пикеры к ancestor. */
+    .field,
+    .card.card-prep,
+    #scenario-hub {
       color-scheme: dark;
     }
 
     /*
-      Нативный <dialog>: без тёмного фона и color-scheme WebKit/Chrome иногда рисуют светлую панель
-      (поверх тёмной страницы с meta color-scheme=dark стиль UA всё равно может «перебить»).
+      Нативные списки / option: без тёмной схемы на самих контролях Chrome/Android часто даёт белое окно;
+      iOS подсказывается через meta color-scheme + явный scheme на секциях форм (ниже).
     */
-    dialog {
+    select,
+    option,
+    optgroup {
       color-scheme: dark;
-      border: none;
-      background-color: rgba(6, 6, 8, 0.94);
+    }
+
+    option,
+    optgroup {
+      background-color: #08080a;
       color: var(--text);
     }
 
+    /*
+      Нативный <dialog>: WebKit/Chrome без плотного тёмного слоя + color-scheme иногда рисуют светлую панель.
+      Тот же «чёрный glass», что .scene-time-center-dialog.
+    */
+    dialog {
+      color-scheme: dark;
+      border-radius: 16px;
+      padding: 0;
+      background-color: rgba(8, 8, 10, 0.92);
+      color: var(--text);
+      border: 1px solid var(--ui-select-border);
+      box-shadow:
+        0 20px 56px rgba(0, 0, 0, 0.88),
+        inset 0 1px 0 rgba(255, 248, 235, 0.07);
+      -webkit-backdrop-filter: blur(22px) saturate(118%);
+      backdrop-filter: blur(22px) saturate(118%);
+    }
+
     dialog::backdrop {
-      background-color: rgba(0, 0, 0, 0.52);
+      background: rgba(0, 0, 0, 0.55);
+      -webkit-backdrop-filter: blur(14px) saturate(105%);
+      backdrop-filter: blur(14px) saturate(105%);
+    }
+
+    @media (prefers-reduced-transparency: reduce) {
+      dialog {
+        background: #000000;
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+        box-shadow: 0 20px 48px rgba(0, 0, 0, 0.85);
+      }
+
+      dialog::backdrop {
+        background: rgba(0, 0, 0, 0.72);
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+      }
     }
 
     input,
