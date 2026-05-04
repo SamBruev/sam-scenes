@@ -16,7 +16,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Sam Scenes (v282)</title>
+  <title>Sam Scenes (v283)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -3867,7 +3867,7 @@
       box-sizing: border-box;
     }
 
-    /* «Снято» — классическая хлопушка: белая доска + полосатый стик, шарнир слева */
+    /* «Снято» — классическая хлопушка без подложки: только сама SVG-иконка */
     .scene-main > .scene-toolbar .scene-done-label.scene-done-checkbox-only {
       display: inline-flex;
       align-items: center;
@@ -3883,12 +3883,8 @@
       box-sizing: border-box;
       border-radius: 14px;
       border: none;
-      background: linear-gradient(165deg, rgba(48, 44, 40, 0.45) 0%, rgba(14, 13, 11, 0.85) 48%, #070706 100%);
-      box-shadow:
-        0 6px 22px rgba(0, 0, 0, 0.58),
-        0 1px 0 rgba(255, 255, 255, 0.06),
-        inset 0 2px 3px rgba(255, 255, 255, 0.06),
-        inset 0 -10px 24px rgba(0, 0, 0, 0.45);
+      background: transparent;
+      box-shadow: none;
     }
 
     /* «Снято» — клик по label; чекбокс поверх зоны фокуса */
@@ -5567,8 +5563,8 @@
        * Дублируйте те же поля в build-info.json — подпись внизу подгружает его с cache: no-store,
        * чтобы не залипала старая версия при закэшированной главной странице.
        */
-      var APP_VERSION = 'v282';
-      var BUILD_TIME = '2026-05-04 05:36 MSK';
+      var APP_VERSION = 'v283';
+      var BUILD_TIME = '2026-05-04 05:38 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
