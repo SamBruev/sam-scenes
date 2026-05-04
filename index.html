@@ -16,7 +16,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Sam Scenes (v286)</title>
+  <title>Sam Scenes (v287)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -384,12 +384,12 @@
       z-index: 2147483639;
       box-sizing: border-box;
       margin: 0;
-      /* iOS: при position:fixed у body панель должна заполнять вьюпорт; иначе низ/верх визуально «срезаются». */
+      /* top:0 + bottom:0 уже задают точную видимую высоту вьюпорта.
+         Никаких min-height: 100vh/dvh/-webkit-fill-available — они растягивают
+         панель за пределы видимой области (iOS считает их как полный экран
+         с учётом скрытой URL-панели), и контент сверху/снизу уезжает за край. */
       height: auto;
-      min-height: 100vh;
-      min-height: 100dvh;
-      min-height: -webkit-fill-available;
-      padding: calc(16px + env(safe-area-inset-top, 0px)) 14px calc(30px + env(safe-area-inset-bottom, 0px))
+      padding: calc(10px + env(safe-area-inset-top, 0px)) 14px calc(18px + env(safe-area-inset-bottom, 0px))
         calc(14px + env(safe-area-inset-left, 0px));
       background: rgba(10, 9, 8, 0.82);
       backdrop-filter: blur(22px) saturate(108%);
@@ -572,8 +572,8 @@
     }
 
     .assistant-drawer-host {
-      margin: 0 0 18px;
-      padding: 8px 2px 16px;
+      margin: 0 0 12px;
+      padding: 0 2px 10px;
       text-align: center;
     }
 
@@ -735,7 +735,7 @@
 
     .assistant-drawer-inner {
       box-sizing: border-box;
-      padding-bottom: 8px;
+      padding-bottom: 4px;
     }
 
     .assistant-drawer-intro {
@@ -5663,8 +5663,8 @@
        * Дублируйте те же поля в build-info.json — подпись внизу подгружает его с cache: no-store,
        * чтобы не залипала старая версия при закэшированной главной странице.
        */
-      var APP_VERSION = 'v286';
-      var BUILD_TIME = '2026-05-04 05:50 MSK';
+      var APP_VERSION = 'v287';
+      var BUILD_TIME = '2026-05-04 05:54 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
