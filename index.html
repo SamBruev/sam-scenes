@@ -16,7 +16,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Sam Scenes (v285)</title>
+  <title>Sam Scenes (v286)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -5663,8 +5663,8 @@
        * Дублируйте те же поля в build-info.json — подпись внизу подгружает его с cache: no-store,
        * чтобы не залипала старая версия при закэшированной главной странице.
        */
-      var APP_VERSION = 'v285';
-      var BUILD_TIME = '2026-05-04 05:46 MSK';
+      var APP_VERSION = 'v286';
+      var BUILD_TIME = '2026-05-04 05:50 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -10998,9 +10998,10 @@
       }
 
       /**
-       * Раскрытие/закрытие <details>: полностью нативно. Никаких pointer-перехватов.
-       * Любой кастомный код только мешал на iOS (гонка click+pointerup, двойной toggle).
-       * Фильтруем только клики по интерактиву внутри summary, чтобы select/input не закрывали.
+       * Раскрытие/закрытие <details>: ручной toggle с preventDefault на нативном клике.
+       * Так надёжнее, чем доверять только нативному поведению — на некоторых WebKit-билдах
+       * клик по <span> внутри <summary> уходит в фокус и не даёт нативного toggle.
+       * Тут мы блокируем дефолтный toggle и сами переключаем det.open.
        */
       function wireDetailsSummaryRowToggle() {
         if (wireDetailsSummaryRowToggle._done) return;
@@ -11010,32 +11011,29 @@
           return !!(el && el.closest && el.closest('a[href], button, input, select, textarea'));
         }
 
-        document.addEventListener(
-          'click',
-          function (e) {
-            var t = e.target;
-            if (!t || !t.closest) return;
-            var det = t.closest('#scenario-hub, #daily-plan');
-            if (!det || det.tagName !== 'DETAILS') return;
-            var sum = det.querySelector(':scope > summary');
-            if (!sum || !sum.contains(t)) return;
-            /** Тап по select/input/button внутри summary — нативный <details> не должен схлопываться. */
-            if (hitInteractiveInsideSummary(t)) {
-              e.preventDefault();
-              e.stopPropagation();
-            }
-          },
-          true
-        );
+        function bindDetails(det) {
+          if (!det || det._toggleBound) return;
+          det._toggleBound = true;
+          var sum = det.querySelector(':scope > summary');
+          if (!sum) return;
 
-        /** Хаптик при нативном раскрытии/закрытии. */
-        document.querySelectorAll('#scenario-hub, #daily-plan').forEach(function (det) {
-          if (det._toggleHapticBound) return;
-          det._toggleHapticBound = true;
-          det.addEventListener('toggle', function () {
-            triggerHaptic('micro');
+          /** Свой toggle: гасим дефолт, переключаем open сами — без гонок. */
+          sum.addEventListener('click', function (e) {
+            if (hitInteractiveInsideSummary(e.target) && e.target !== sum) return;
+            e.preventDefault();
+            e.stopPropagation();
+            det.open = !det.open;
           });
-        });
+
+          /** Хаптик и сохранение — на нативном toggle (он же триггерится при нашем `det.open = …`). */
+          det.addEventListener('toggle', function () {
+            try {
+              triggerHaptic('micro');
+            } catch (eH) {}
+          });
+        }
+
+        document.querySelectorAll('#scenario-hub, #daily-plan').forEach(bindDetails);
       }
 
       function wirePullDownReload() {
