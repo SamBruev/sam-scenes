@@ -16,7 +16,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Sam Scenes (v280)</title>
+  <title>Sam Scenes (v281)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -5570,8 +5570,8 @@
        * Дублируйте те же поля в build-info.json — подпись внизу подгружает его с cache: no-store,
        * чтобы не залипала старая версия при закэшированной главной странице.
        */
-      var APP_VERSION = 'v280';
-      var BUILD_TIME = '2026-05-04 05:14 MSK';
+      var APP_VERSION = 'v281';
+      var BUILD_TIME = '2026-05-04 05:25 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -10923,130 +10923,45 @@
         updateTopLogoScrollBlur();
       }
 
-      /** Вся полоса заголовка переключает раскрытие. Делегирование на document + pointer: после замены DOM блоки новые; на iOS один только click иногда не приходит; z-index карточек выше шапки. */
+      /**
+       * Раскрытие/закрытие <details>: полностью нативно. Никаких pointer-перехватов.
+       * Любой кастомный код только мешал на iOS (гонка click+pointerup, двойной toggle).
+       * Фильтруем только клики по интерактиву внутри summary, чтобы select/input не закрывали.
+       */
       function wireDetailsSummaryRowToggle() {
         if (wireDetailsSummaryRowToggle._done) return;
         wireDetailsSummaryRowToggle._done = true;
-
-        var TAP_MAX_PX = 20;
-        var detailsToggleArm = null;
-        /** После программного toggle в pointerup браузер всё равно шлёт click — гасим только его, без окна по времени (иначе поздний click снова переворачивает open). */
-        var suppressDuplicateClickForDetails = null;
-        var suppressDupClearTimer = null;
 
         function hitInteractiveInsideSummary(el) {
           return !!(el && el.closest && el.closest('a[href], button, input, select, textarea'));
         }
 
-        function resolveDetailsToggleHit(raw) {
-          var el = raw && raw.nodeType === 1 ? raw : raw && raw.parentElement;
-          if (!el || !el.closest) return null;
-          var det = el.closest('#scenario-hub, #daily-plan');
-          if (!det || det.tagName !== 'DETAILS') return null;
-          var sum = det.querySelector(':scope > summary');
-          if (!sum || !sum.contains(el)) return null;
-          if (hitInteractiveInsideSummary(el)) return null;
-          return { det: det, sum: sum };
-        }
-
-        function applyToggle(det, nextOpen) {
-          det.open = nextOpen;
-          if (typeof requestAnimationFrame === 'function') {
-            requestAnimationFrame(function () {
-              det.open = nextOpen;
-            });
-          }
-        }
-
-        document.addEventListener(
-          'pointerdown',
-          function (e) {
-            if (e.pointerType === 'mouse' && e.button !== 0) return;
-            var hit = resolveDetailsToggleHit(e.target);
-            if (!hit) return;
-            detailsToggleArm = {
-              pid: e.pointerId,
-              x: e.clientX,
-              y: e.clientY,
-              det: hit.det,
-              sum: hit.sum
-            };
-          },
-          true
-        );
-
-        document.addEventListener(
-          'pointerup',
-          function (e) {
-            if (!detailsToggleArm || detailsToggleArm.pid !== e.pointerId) return;
-            var sx = detailsToggleArm.x;
-            var sy = detailsToggleArm.y;
-            var det = detailsToggleArm.det;
-            var sum = detailsToggleArm.sum;
-            detailsToggleArm = null;
-            if (Math.hypot(e.clientX - sx, e.clientY - sy) > TAP_MAX_PX) return;
-            /* Не полагаемся на elementFromPoint: под blur/логотипом/fixed-слоями WebKit часто отдаёт не summary — <details> не раскрывается. */
-            try {
-              e.preventDefault();
-            } catch (pe) {}
-            try {
-              e.stopPropagation();
-            } catch (se) {}
-            applyToggle(det, !det.open);
-            suppressDuplicateClickForDetails = det;
-            if (suppressDupClearTimer) clearTimeout(suppressDupClearTimer);
-            suppressDupClearTimer = setTimeout(function () {
-              suppressDupClearTimer = null;
-              suppressDuplicateClickForDetails = null;
-            }, 900);
-          },
-          true
-        );
-
-        document.addEventListener(
-          'pointercancel',
-          function (e) {
-            if (detailsToggleArm && detailsToggleArm.pid === e.pointerId) detailsToggleArm = null;
-          },
-          true
-        );
-
         document.addEventListener(
           'click',
           function (e) {
-            var hit = resolveDetailsToggleHit(e.target);
-            if (hit && suppressDuplicateClickForDetails === hit.det) {
-              if (suppressDupClearTimer) {
-                clearTimeout(suppressDupClearTimer);
-                suppressDupClearTimer = null;
-              }
-              suppressDuplicateClickForDetails = null;
-              try {
-                e.preventDefault();
-              } catch (p1) {}
-              try {
-                e.stopPropagation();
-              } catch (s1) {}
-              return;
-            }
-            if (hit) {
-              if (suppressDupClearTimer) {
-                clearTimeout(suppressDupClearTimer);
-                suppressDupClearTimer = null;
-              }
-              suppressDuplicateClickForDetails = null;
-            }
-            if (!hit) return;
-            try {
+            var t = e.target;
+            if (!t || !t.closest) return;
+            var det = t.closest('#scenario-hub, #daily-plan');
+            if (!det || det.tagName !== 'DETAILS') return;
+            var sum = det.querySelector(':scope > summary');
+            if (!sum || !sum.contains(t)) return;
+            /** Тап по select/input/button внутри summary — нативный <details> не должен схлопываться. */
+            if (hitInteractiveInsideSummary(t)) {
               e.preventDefault();
-            } catch (p2) {}
-            try {
               e.stopPropagation();
-            } catch (s2) {}
-            applyToggle(hit.det, !hit.det.open);
+            }
           },
           true
         );
+
+        /** Хаптик при нативном раскрытии/закрытии. */
+        document.querySelectorAll('#scenario-hub, #daily-plan').forEach(function (det) {
+          if (det._toggleHapticBound) return;
+          det._toggleHapticBound = true;
+          det.addEventListener('toggle', function () {
+            triggerHaptic('micro');
+          });
+        });
       }
 
       function wirePullDownReload() {
