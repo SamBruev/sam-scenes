@@ -2370,24 +2370,40 @@
       filter: drop-shadow(0 0 7px rgba(255, 195, 110, 0.85));
     }
 
-    .scene-time-wrap .scene-done-label.scene-done-checkbox-only {
+    .scene-time-wrap .scene-done-label.scene-done-checkbox-only,
+    .scene-time-wrap .scene-done-label.scene-done-checkbox-only:focus,
+    .scene-time-wrap .scene-done-label.scene-done-checkbox-only:focus-within,
+    .scene-time-wrap .scene-done-label.scene-done-checkbox-only:hover,
+    .scene-time-wrap .scene-done-label.scene-done-checkbox-only:active {
       grid-column: 3;
       display: inline-flex;
       justify-self: end;
       padding: 4px;
       margin: 0;
-      border: none;
-      background: transparent;
+      border: none !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      outline: none !important;
+      outline-offset: 0 !important;
       border-radius: 10px;
       min-width: 2rem;
       min-height: 2rem;
       align-items: center;
       justify-content: center;
+      -webkit-tap-highlight-color: transparent !important;
     }
 
-    .scene-time-wrap .scene-done-label.scene-done-checkbox-only .scene-shot-checkbox {
+    .scene-time-wrap .scene-done-label.scene-done-checkbox-only .scene-shot-checkbox,
+    .scene-time-wrap .scene-done-label.scene-done-checkbox-only .scene-shot-checkbox:focus,
+    .scene-time-wrap .scene-done-label.scene-done-checkbox-only .scene-shot-checkbox:focus-visible {
       width: 1.35rem;
       height: 1.35rem;
+      outline: none !important;
+      box-shadow: none !important;
+      -webkit-appearance: none !important;
+      appearance: none !important;
+      background: transparent !important;
+      border: none !important;
     }
 
     .scene-time-wrap .scene-done-label.scene-done-inline {
@@ -4106,9 +4122,32 @@
       flex: none;
     }
 
-    .scene-main > .scene-toolbar .scene-done-label.scene-done-checkbox-only:focus-within {
-      outline: 2px solid rgba(255, 255, 255, 0.38);
-      outline-offset: 3px;
+    /*
+      «Снято»: никакой рамки/обводки/фона — только сама хлопушка.
+      iOS Safari при тапе по нативному checkbox оставляет фокус, поэтому
+      :focus-within держал бы белую обводку даже после клика. Гасим всё
+      явно с !important, чтобы перебить любые наследуемые стили.
+    */
+    .scene-main > .scene-toolbar .scene-done-label.scene-done-checkbox-only:focus-within,
+    .scene-main > .scene-toolbar .scene-done-label.scene-done-checkbox-only:focus,
+    .scene-main > .scene-toolbar .scene-done-label.scene-done-checkbox-only:hover,
+    .scene-main > .scene-toolbar .scene-done-label.scene-done-checkbox-only {
+      outline: none !important;
+      outline-offset: 0 !important;
+      border: none !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      -webkit-tap-highlight-color: transparent !important;
+    }
+    .scene-main > .scene-toolbar .scene-done-label.scene-done-checkbox-only .scene-shot-checkbox,
+    .scene-main > .scene-toolbar .scene-done-label.scene-done-checkbox-only .scene-shot-checkbox:focus,
+    .scene-main > .scene-toolbar .scene-done-label.scene-done-checkbox-only .scene-shot-checkbox:focus-visible {
+      outline: none !important;
+      box-shadow: none !important;
+      -webkit-appearance: none !important;
+      appearance: none !important;
+      background: transparent !important;
+      border: none !important;
     }
 
     .scene-main > .scene-toolbar .scene-done-label.scene-done-checkbox-only:active .take-mark-icon {
@@ -5767,8 +5806,8 @@
        * Дублируйте те же поля в build-info.json — подпись внизу подгружает его с cache: no-store,
        * чтобы не залипала старая версия при закэшированной главной странице.
        */
-      var APP_VERSION = 'v297';
-      var BUILD_TIME = '2026-05-04 06:55 MSK';
+      var APP_VERSION = 'v298';
+      var BUILD_TIME = '2026-05-04 07:00 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
