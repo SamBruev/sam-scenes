@@ -5772,8 +5772,8 @@
        * Дублируйте те же поля в build-info.json — подпись внизу подгружает его с cache: no-store,
        * чтобы не залипала старая версия при закэшированной главной странице.
        */
-      var APP_VERSION = 'v298';
-      var BUILD_TIME = '2026-05-04 07:02 MSK';
+      var APP_VERSION = 'v299';
+      var BUILD_TIME = '2026-05-04 07:03 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -9772,7 +9772,12 @@
 
       function migrateShotCheckboxLensMarkup(root) {
         (root || document).querySelectorAll('label.scene-done-checkbox-only').forEach(function (lab) {
-          if (lab.querySelector('.camera-lens-shutter') && lab.querySelector('.take-mark-icon')) {
+          /* Старые сессии: SVG с удалённым .take-rim — принудительно пересобрать разметку */
+          if (
+            lab.querySelector('.camera-lens-shutter') &&
+            lab.querySelector('.take-mark-icon') &&
+            !lab.querySelector('.take-rim')
+          ) {
             syncShotLensLabelClass(lab);
             return;
           }
