@@ -11736,8 +11736,11 @@
         }
 
         function setPullStackPx(px) {
+          var n = Number(px);
+          if (!isFinite(n) || n < 0) n = 0;
+          if (n > 640) n = 640;
           try {
-            document.documentElement.style.setProperty('--pull-stack-y', px + 'px');
+            document.documentElement.style.setProperty('--pull-stack-y', n + 'px');
           } catch (ePs) {}
         }
 
@@ -11760,9 +11763,12 @@
 
         function pullStackTick() {
           pullStackLoopId = null;
+          try {
           if (!pullArmed) {
             pullStackTargetPx = 0;
           }
+          if (!isFinite(pullStackTargetPx)) pullStackTargetPx = 0;
+          if (!isFinite(pullStackSmoothedPx)) pullStackSmoothedPx = 0;
           var atTop = scrollTopNow() <= TOP_EPS;
           var activeVerticalPull = pullArmed && atTop;
           /* Пока тянем сверху — без rAF-сглаживания: иначе логотип и блоки «плывут» позади пальца. */
@@ -11771,6 +11777,11 @@
           } else {
             var a = 0.42;
             pullStackSmoothedPx += (pullStackTargetPx - pullStackSmoothedPx) * a;
+          }
+          /* Хвост без зацикливания rAF у порога: иначе остаётся «липкий» сдвиг и редкие NaN ломают transform. */
+          if (!pullArmed && pullStackSmoothedPx < 0.35) {
+            pullStackSmoothedPx = 0;
+            pullStackTargetPx = 0;
           }
           setPullStackPx(pullStackSmoothedPx);
           var dy = lastPullGestureDy;
@@ -11786,11 +11797,14 @@
                 lamp.play().catch(function () {});
               } catch (eP) {}
             }
-            var dyVis = Math.max(0, dy);
+            var dyVis = Math.max(0, isFinite(dy) ? dy : 0);
             var pullRaw = Math.min(1, Math.max(0, (dyVis - 2) / (PULL_MIN - 2)));
+            if (!isFinite(pullRaw)) pullRaw = 0;
             var pullSmooth = pullHintEase(pullRaw);
             var yShift = pullStackSmoothedPx * 0.62 + pullSmooth * 14;
             var s = 0.62 + pullSmooth * 0.46;
+            if (!isFinite(yShift)) yShift = 0;
+            if (!isFinite(s)) s = 0.85;
             hint.style.setProperty('--pull-dot-y', yShift.toFixed(2) + 'px');
             hint.style.setProperty('--pull-dot-s', s.toFixed(3));
             hint.style.opacity = (0.04 + pullSmooth * 0.96).toFixed(3);
@@ -11809,6 +11823,16 @@
           var err = Math.abs(pullStackTargetPx - pullStackSmoothedPx);
           if (activePull || err > 0.12 || pullStackSmoothedPx > 0.25) {
             pullStackLoopId = requestAnimationFrame(pullStackTick);
+          }
+          } catch (eTick) {
+            try {
+              cancelPullStackLoop();
+            } catch (eCan) {}
+            pullStackTargetPx = 0;
+            pullStackSmoothedPx = 0;
+            lastPullGestureDy = 0;
+            pullDySmoothed = 0;
+            setPullStackPx(0);
           }
         }
 
@@ -11929,6 +11953,7 @@
         document.addEventListener(
           'touchstart',
           function (e) {
+            if (!e.touches || !e.touches.length) return;
             resetPullHint();
             resetSwipeHint();
             swipeCancelled = false;
@@ -11947,6 +11972,8 @@
             var t0 = e.touches[0];
             startX = t0.clientX;
             startY = t0.clientY;
+            if (!isFinite(startX)) startX = 0;
+            if (!isFinite(startY)) startY = 0;
             pullMaxDy = 0;
             swipeMinDx = 0;
             swipeMaxDx = 0;
@@ -12018,18 +12045,22 @@
         document.addEventListener(
           'touchmove',
           function (e) {
-            if (!e.touches.length) return;
+            if (!e.touches || !e.touches.length) return;
             var t = e.touches[0];
             var dx = t.clientX - startX;
             var dy = t.clientY - startY;
+            if (!isFinite(dx)) dx = 0;
+            if (!isFinite(dy)) dy = 0;
 
             if (pullArmed) {
               if (scrollTopNow() <= TOP_EPS) {
                 if (dy > pullMaxDy) pullMaxDy = dy;
                 var pullEma = 0.52;
                 pullDySmoothed += (dy - pullDySmoothed) * pullEma;
+                if (!isFinite(pullDySmoothed)) pullDySmoothed = dy;
                 lastPullGestureDy = pullDySmoothed;
                 pullStackTargetPx = pullDySmoothed > 2 ? pullStackShiftFromDy(pullDySmoothed) : 0;
+                if (!isFinite(pullStackTargetPx)) pullStackTargetPx = 0;
                 ensurePullStackLoop();
               } else {
                 pullArmed = false;
@@ -12070,7 +12101,22 @@
 
         document.addEventListener(
           'touchend',
-          function () {
+          function (e) {
+            /* Палец отпущен, но на экране ещё касания — иначе сбрасываем жест и ломаем dy для оставшегося пальца. */
+            if (e.touches && e.touches.length > 0) {
+              resetPullHint();
+              pullArmed = false;
+              swipeIntentHorizontal = false;
+              var tR = e.touches[0];
+              startX = tR.clientX;
+              startY = tR.clientY;
+              if (!isFinite(startX)) startX = 0;
+              if (!isFinite(startY)) startY = 0;
+              pullMaxDy = 0;
+              swipeMinDx = 0;
+              swipeMaxDx = 0;
+              return;
+            }
             var didPull = pullArmed && scrollTopNow() <= TOP_EPS && pullMaxDy >= PULL_MIN;
             var didSwipeLeft = swipeArmed && !swipeCancelled && swipeMinDx <= -SWIPE_MIN;
             var didSwipeRight =
