@@ -405,8 +405,8 @@
          панель за пределы видимой области (iOS считает их как полный экран
          с учётом скрытой URL-панели), и контент сверху/снизу уезжает за край. */
       height: auto;
-      padding: env(safe-area-inset-top, 0px) 14px env(safe-area-inset-bottom, 0px)
-        calc(14px + env(safe-area-inset-left, 0px));
+      /* Без полей сверху/снизу у стекла — фон до края экрана; safe-area на .assistant-drawer-scroll */
+      padding: 0 14px 0 calc(14px + env(safe-area-inset-left, 0px));
       background: rgba(10, 9, 8, 0.82);
       backdrop-filter: blur(22px) saturate(108%);
       -webkit-backdrop-filter: blur(22px) saturate(108%);
@@ -718,6 +718,8 @@
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: contain;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
       /* Без системной полосы: положение прокрутки только у фиолетовой полоски › справа */
       scrollbar-width: none;
       -ms-overflow-style: none;
