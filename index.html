@@ -16,7 +16,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>Sam Scenes (v281)</title>
+  <title>Sam Scenes (v282)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -332,22 +332,16 @@
       overscroll-behavior: none;
     }
 
-    /* Панель «План съёмок» не сдвигает основной контент — только blur и блок кликов */
+    /* Панель «План съёмок» не сдвигает основной контент — только блок кликов.
+       Блюр перенесён на сам бэкдроп (одна GPU-композиция вместо filter+backdrop-filter одновременно). */
     body.assistant-drawer-open .wrap {
       pointer-events: none;
       user-select: none;
-      transition: filter 0.32s cubic-bezier(0.22, 0.9, 0.28, 1);
-      filter: blur(11px) saturate(102%);
-      -webkit-filter: blur(11px) saturate(102%);
     }
 
     @media (prefers-reduced-motion: reduce) {
       .wrap,
       .wrap > * {
-        transition: none;
-      }
-
-      body.assistant-drawer-open .wrap {
         transition: none;
       }
     }
@@ -361,13 +355,16 @@
       right: 0;
       z-index: 2147483638;
       /* WebKit: полностью прозрачный слой иногда не получает touch target; горизонтальный свайп — в JS */
-      background: rgba(0, 0, 0, 0.04);
+      background: rgba(10, 9, 8, 0.26);
+      backdrop-filter: blur(11px) saturate(102%);
+      -webkit-backdrop-filter: blur(11px) saturate(102%);
       touch-action: none;
       -webkit-tap-highlight-color: transparent;
       cursor: pointer;
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.32s cubic-bezier(0.22, 0.9, 0.28, 1);
+      will-change: opacity;
     }
 
     body.assistant-drawer-open .assistant-drawer-backdrop {
@@ -5570,8 +5567,8 @@
        * Дублируйте те же поля в build-info.json — подпись внизу подгружает его с cache: no-store,
        * чтобы не залипала старая версия при закэшированной главной странице.
        */
-      var APP_VERSION = 'v281';
-      var BUILD_TIME = '2026-05-04 05:25 MSK';
+      var APP_VERSION = 'v282';
+      var BUILD_TIME = '2026-05-04 05:36 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -6048,6 +6045,11 @@
       function writeScenarioBundle(bundle) {
         try {
           localStorage.setItem(SCENARIO_STORAGE_KEY, JSON.stringify(bundle));
+          try {
+            if (typeof invalidateAssistantDrawerListCache === 'function') {
+              invalidateAssistantDrawerListCache();
+            }
+          } catch (eInv) {}
           return true;
         } catch (e) {
           console.warn('writeScenarioBundle failed', e);
@@ -6923,21 +6925,12 @@
         bk.style.pointerEvents = p > 0.04 ? 'auto' : 'none';
       }
 
+      /** Блюр теперь на бэкдропе (см. CSS). Сам wrap не трогаем — это и убирает «дёрганья». */
       function setAssistantDrawerWrapBlurProgress(progress) {
-        var wrap = document.querySelector('body > .wrap');
-        if (!wrap) return;
+        var bk = document.getElementById('assistant-drawer-backdrop');
+        if (!bk) return;
         var p = Math.max(0, Math.min(1, progress));
-        if (p <= 0.001) {
-          /* Не сбрасываем transition — иначе snap-close не анимирует filter и висит на таймауте. */
-          wrap.style.filter = 'blur(0px) saturate(100%)';
-          wrap.style.webkitFilter = 'blur(0px) saturate(100%)';
-          return;
-        }
-        var blur = 11 * p;
-        var sat = 100 + 2 * p;
-        var f = 'blur(' + blur + 'px) saturate(' + sat + '%)';
-        wrap.style.filter = f;
-        wrap.style.webkitFilter = f;
+        bk.style.opacity = String(p);
       }
 
       function beginAssistantDrawerTracking() {
@@ -6951,7 +6944,6 @@
       function clearAssistantDrawerInlineVisuals() {
         var d = document.getElementById('assistant-drawer');
         var bk = document.getElementById('assistant-drawer-backdrop');
-        var wrap = document.querySelector('body > .wrap');
         if (d) {
           d.style.transform = '';
           d.style.transition = '';
@@ -6962,21 +6954,14 @@
           bk.style.pointerEvents = '';
           bk.style.transition = '';
         }
-        if (wrap) {
-          wrap.style.filter = '';
-          wrap.style.webkitFilter = '';
-          wrap.style.transition = '';
-        }
       }
 
       function openAssistantDrawerCoreAfterSnap() {
-        renderAssistantDrawerList();
-        try {
-          renderAssistantTrashList();
-        } catch (eTrOpen) {}
+        /** ШТО делаем: сначала запускаем CSS-анимацию (класс + lock), потом отложенно тяжёлый рендер.
+            Иначе renderAssistantDrawerList() пересобирает DOM ДО старта transform → панель «дёргается»,
+            ощущение «обновляется». Рендер откладываем на 1 frame после старта слайда. */
         var hostNameEl = document.getElementById('assistant-drawer-host-name');
         if (hostNameEl) hostNameEl.textContent = 'Анна Непряхина';
-        resetAssistantDrawerScrollToTop();
         var ad = document.getElementById('assistant-new-date');
         if (ad && !ad.value) {
           try {
@@ -6995,26 +6980,65 @@
         try {
           triggerHaptic('micro');
         } catch (eH) {}
+        /** Рендер списка только если данные изменились (по дайджесту bundle), и только после старта анимации. */
         requestAnimationFrame(function () {
-          resetAssistantDrawerScrollToTop();
-          var c = document.getElementById('assistant-drawer-close');
-          if (c) c.focus();
-          try {
-            updateAssistantDrawerScrollThumb();
-          } catch (eTh) {}
           requestAnimationFrame(function () {
+            try {
+              renderAssistantDrawerListIfDirty();
+            } catch (eRl) {}
             resetAssistantDrawerScrollToTop();
+            var c = document.getElementById('assistant-drawer-close');
+            if (c) c.focus();
             try {
               updateAssistantDrawerScrollThumb();
-            } catch (eTh2) {}
+            } catch (eTh) {}
           });
         });
+      }
+
+      /** Хэш свежей пачки сценариев. Чтобы не перерисовывать список, если ничего не поменялось. */
+      var assistantDrawerListLastDigest = '';
+
+      function assistantDrawerBundleDigest() {
+        try {
+          var bundle = readScenarioBundle();
+          var items = bundle && bundle.items ? bundle.items : [];
+          var activeId = bundle && bundle.activeId ? bundle.activeId : '';
+          var orderIds = bundle && bundle.assistantOrderIds ? bundle.assistantOrderIds.join('|') : '';
+          var parts = [activeId, orderIds, String(items.length)];
+          for (var i = 0; i < items.length; i++) {
+            var it = items[i] || {};
+            parts.push(
+              (it.id || '') + ':' + (it.name || '') + ':' + (it.date || '') +
+              ':' + (it.targetCount || '') + ':' + (it.status || '') +
+              ':' + (it.shootBlock || '')
+            );
+          }
+          return parts.join('§');
+        } catch (eDig) {
+          return String(Date.now());
+        }
+      }
+
+      function renderAssistantDrawerListIfDirty(force) {
+        var dig = assistantDrawerBundleDigest();
+        var host = document.getElementById('assistant-drawer-list');
+        if (!force && host && host.firstChild && dig === assistantDrawerListLastDigest) return;
+        renderAssistantDrawerList();
+        assistantDrawerListLastDigest = dig;
+      }
+
+      /** При изменении сценариев: помечаем кеш «грязным», но НЕ перерисовываем — это отложит до следующего открытия. */
+      function invalidateAssistantDrawerListCache() {
+        assistantDrawerListLastDigest = '';
+        if (document.body.classList.contains('assistant-drawer-open')) {
+          renderAssistantDrawerListIfDirty(true);
+        }
       }
 
       function assistantDrawerSnapOpenFromDrag(fromTx, Wc) {
         var d = document.getElementById('assistant-drawer');
         var bk = document.getElementById('assistant-drawer-backdrop');
-        var wrap = document.querySelector('body > .wrap');
         if (!d) {
           endAssistantDrawerTracking();
           clearAssistantDrawerInlineVisuals();
@@ -7026,7 +7050,6 @@
         var ease = 'cubic-bezier(0.22, 0.9, 0.28, 1)';
         d.style.transition = 'transform ' + dur + 'ms ' + ease;
         if (bk) bk.style.transition = 'opacity ' + dur + 'ms ' + ease;
-        if (wrap) wrap.style.transition = 'filter ' + dur + 'ms ' + ease;
         requestAnimationFrame(function () {
           requestAnimationFrame(function () {
             d.style.transform = 'translateX(0px)';
@@ -7057,7 +7080,6 @@
       function assistantDrawerSnapCancelOpenDrag(fromTx, Wc) {
         var d = document.getElementById('assistant-drawer');
         var bk = document.getElementById('assistant-drawer-backdrop');
-        var wrap = document.querySelector('body > .wrap');
         if (!d || !Wc || Wc < 1) {
           endAssistantDrawerTracking();
           clearAssistantDrawerInlineVisuals();
@@ -7068,7 +7090,6 @@
         var closedTx = -Wc;
         d.style.transition = 'transform ' + dur + 'ms ' + ease;
         if (bk) bk.style.transition = 'opacity ' + dur + 'ms ' + ease;
-        if (wrap) wrap.style.transition = 'filter ' + dur + 'ms ' + ease;
         requestAnimationFrame(function () {
           requestAnimationFrame(function () {
             d.style.transform = 'translateX(' + closedTx + 'px)';
@@ -7099,7 +7120,6 @@
         clearAssistantDrawerCloseListeners();
         var d = document.getElementById('assistant-drawer');
         var bk = document.getElementById('assistant-drawer-backdrop');
-        var wrap = document.querySelector('body > .wrap');
         if (!d) {
           endAssistantDrawerTracking();
           clearAssistantDrawerInlineVisuals();
@@ -7116,24 +7136,18 @@
         document.body.setAttribute('data-assistant-drawer-closing', '1');
         d.style.transition = 'transform ' + dur + 'ms ' + ease;
         if (bk) bk.style.transition = 'opacity ' + dur + 'ms ' + ease;
-        if (wrap) wrap.style.transition = 'filter ' + dur + 'ms ' + ease;
         requestAnimationFrame(function () {
           requestAnimationFrame(function () {
             d.style.transform = 'translateX(' + closedTx + 'px)';
             setAssistantDrawerBackdropVisual(0, bk);
             setAssistantDrawerWrapBlurProgress(0);
             var doneCalled = false;
-            var gotShutT = false;
-            var gotShutF = !wrap;
             function done() {
               if (doneCalled) return;
               doneCalled = true;
               try {
                 d.removeEventListener('transitionend', onShutDrawerEnd);
               } catch (eRm3) {}
-              try {
-                if (wrap) wrap.removeEventListener('transitionend', onShutWrapEnd);
-              } catch (eRm3b) {}
               document.documentElement.classList.remove('assistant-drawer-open');
               document.body.classList.remove('assistant-drawer-open');
               document.body.removeAttribute('data-assistant-drawer-open');
@@ -7144,27 +7158,13 @@
               endAssistantDrawerTracking();
               unlockAssistantDrawerMainScroll();
             }
-            function tryShutDone() {
-              if (doneCalled) return;
-              if (!gotShutT || !gotShutF) return;
-              done();
-            }
             function onShutDrawerEnd(e) {
               if (e.target !== d) return;
               var pn = e.propertyName || '';
               if (pn !== 'transform' && pn !== '-webkit-transform') return;
-              gotShutT = true;
-              tryShutDone();
-            }
-            function onShutWrapEnd(e) {
-              if (!wrap || e.target !== wrap) return;
-              var pn = e.propertyName || '';
-              if (pn !== 'filter' && pn !== '-webkit-filter') return;
-              gotShutF = true;
-              tryShutDone();
+              done();
             }
             d.addEventListener('transitionend', onShutDrawerEnd);
-            if (wrap) wrap.addEventListener('transitionend', onShutWrapEnd);
             setTimeout(done, dur + 160);
           });
         });
@@ -7173,7 +7173,6 @@
       function assistantDrawerSnapReopenFromDrag(fromTx, Wc) {
         var d = document.getElementById('assistant-drawer');
         var bk = document.getElementById('assistant-drawer-backdrop');
-        var wrap = document.querySelector('body > .wrap');
         if (!d) {
           endAssistantDrawerTracking();
           clearAssistantDrawerInlineVisuals();
@@ -7183,7 +7182,6 @@
         var ease = 'cubic-bezier(0.22, 0.9, 0.28, 1)';
         d.style.transition = 'transform ' + dur + 'ms ' + ease;
         if (bk) bk.style.transition = 'opacity ' + dur + 'ms ' + ease;
-        if (wrap) wrap.style.transition = 'filter ' + dur + 'ms ' + ease;
         requestAnimationFrame(function () {
           requestAnimationFrame(function () {
             d.style.transform = 'translateX(0px)';
@@ -7228,7 +7226,6 @@
         clearAssistantDrawerCloseListeners();
         var d = document.getElementById('assistant-drawer');
         var bk = document.getElementById('assistant-drawer-backdrop');
-        var wrap = document.querySelector('body > .wrap');
         var finished = false;
 
         function complete() {
@@ -7263,36 +7260,17 @@
           return;
         }
 
-        var gotTransform = false;
-        var gotFilter = !wrap;
-
-        function tryDone() {
-          if (finished) return;
-          if (!gotTransform || !gotFilter) return;
-          complete();
-        }
-
         function onDrawerTransitionEnd(e) {
           if (!d || e.target !== d) return;
           var pn = e.propertyName || '';
           if (pn !== 'transform' && pn !== '-webkit-transform') return;
-          gotTransform = true;
-          tryDone();
-        }
-
-        function onWrapTransitionEnd(e) {
-          if (!wrap || e.target !== wrap) return;
-          var pn = e.propertyName || '';
-          if (pn !== 'filter' && pn !== '-webkit-filter') return;
-          gotFilter = true;
-          tryDone();
+          complete();
         }
 
         assistantDrawerCloseEndHandler = onDrawerTransitionEnd;
-        assistantDrawerCloseWrapEndHandler = onWrapTransitionEnd;
+        assistantDrawerCloseWrapEndHandler = null;
         d.addEventListener('transitionend', onDrawerTransitionEnd);
-        if (wrap) wrap.addEventListener('transitionend', onWrapTransitionEnd);
-        /** Ждём и панель, и снятие blur с .wrap — иначе scroll-lock снимается раньше анимации и даёт рывок. Запас по таймауту чуть длиннее CSS 0.32s. */
+        /** Запас по таймауту чуть длиннее CSS 0.32s — на случай пропуска transitionend на iOS. */
         assistantDrawerCloseSafetyTimer = setTimeout(complete, 420);
       }
 
