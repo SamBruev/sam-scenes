@@ -491,11 +491,12 @@
       }
     }
 
-    /* Шторка «открыть ассистента» слева: узкая подсказка (~половина прежней ширины).
+    /* Шторка «открыть ассистента» справа: узкая подсказка (~половина прежней ширины).
        Полукруг только с внешней стороны (к краю экрана); внутренний край — ровный рез. */
     .assistant-open-strip {
       position: fixed;
-      left: max(4px, calc(env(safe-area-inset-left, 0px) + 4px));
+      right: max(4px, calc(env(safe-area-inset-right, 0px) + 4px));
+      left: auto;
       top: 50%;
       transform: translateY(calc(-50% + var(--pull-stack-y, 0px)));
       width: 8px;
@@ -505,7 +506,7 @@
       margin: 0;
       padding: 0;
       border: none;
-      border-radius: 999px 0 0 999px;
+      border-radius: 0 999px 999px 0;
       background:
         linear-gradient(
           180deg,
@@ -515,7 +516,7 @@
         );
       box-shadow:
         inset 0 0 0 1px rgba(82, 152, 255, 0.92),
-        1px 0 8px rgba(0, 0, 0, 0.42);
+        -1px 0 8px rgba(0, 0, 0, 0.42);
       /* Выше .wrap (12) и дочерних слоёв сцен, но ниже teleprompter / pull-hint / drawer */
       z-index: 100;
       cursor: pointer;
@@ -525,7 +526,7 @@
     }
 
     .assistant-open-strip::before {
-      content: '\203A';
+      content: '\2039';
       position: absolute;
       left: 50%;
       top: 50%;
@@ -544,7 +545,7 @@
     .assistant-open-strip:active {
       box-shadow:
         inset 0 0 0 1.2px rgba(125, 178, 255, 0.98),
-        1px 0 10px rgba(0, 0, 0, 0.5);
+        -1px 0 10px rgba(0, 0, 0, 0.5);
     }
 
     .assistant-open-strip:active::before {
@@ -603,8 +604,8 @@
     }
 
     /*
-      Шторка «закрыть» справа: узкая полоска; полукруг только у внешнего края панели,
-      внутренний край — прямой рез (зеркально левой подсказке).
+      Шторка «закрыть» у правого края панели: узкая полоска; полукруг у внешнего края,
+      внутренний — прямой рез (та же сторона, что и шторка открытия у правого края экрана).
     */
     .assistant-drawer-dismiss-chevron {
       position: absolute;
@@ -1097,35 +1098,13 @@
 
     .assistant-drawer-trash {
       margin-top: 26px;
-      padding: 18px 0 4px;
+      padding: 12px 0 4px;
       border: none;
       border-radius: 0;
       background: transparent;
       box-shadow: none;
       box-sizing: border-box;
       min-width: 0;
-      position: relative;
-    }
-
-    /* Одна линия от плана: тёплый крем без отдельного «цветного» блока */
-    .assistant-drawer-trash::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 0;
-      height: 1px;
-      border-radius: 999px;
-      pointer-events: none;
-      background: linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(255, 244, 220, 0.07) 14%,
-        rgba(255, 236, 200, 0.34) 50%,
-        rgba(255, 244, 220, 0.07) 86%,
-        transparent 100%
-      );
-      box-shadow: 0 0 14px rgba(255, 230, 195, 0.12);
     }
 
     .assistant-drawer-trash-title {
@@ -2113,7 +2092,7 @@
       box-shadow: none;
       outline: none;
       display: grid;
-      /* Одна колонка: «СЦЕНА …», под ней ▶ play, затем время по центру */
+      /* Одна колонка: «СЦЕНА …», под ней иконка телесуфлера, затем время по центру */
       grid-template-columns: minmax(0, 1fr);
       align-items: center;
       column-gap: 0;
@@ -2297,11 +2276,11 @@
     }
 
     /*
-      Play-кнопка стилизована «под объектив кинопроектора»: тёплая ламповая
+      Кнопка телесуфлера стилизована «под объектив кинопроектора»: тёплая ламповая
       «лужица» света сверху-внутри, золотой подсвет на внутреннем ободе,
       глубокая чёрная канавка между ободом и корпусом и мягкая вольфрамовая
-      аура снаружи. Треугольник — тёплого янтарного цвета с лёгким огоньком
-      (drop-shadow), как просвет от лампы накаливания.
+      аура снаружи. Иконка экрана с строками — тёплого янтарного тона с лёгким
+      свечением (drop-shadow).
     */
     .scene-time-wrap .scene-play-btn {
       flex-shrink: 0;
@@ -2347,11 +2326,11 @@
     }
 
     .scene-time-wrap .scene-play-btn svg.scene-play-icon {
-      width: calc(var(--scene-play-size) * 0.44);
-      height: calc(var(--scene-play-size) * 0.44);
+      width: calc(var(--scene-play-size) * 0.5);
+      height: calc(var(--scene-play-size) * 0.5);
       display: block;
       flex-shrink: 0;
-      /* «Огонёк» от треугольника — словно просвет проектора */
+      /* Лёгкое свечение иконки телесуфлера */
       filter: drop-shadow(0 0 4px rgba(255, 175, 100, 0.55));
     }
 
@@ -2803,10 +2782,10 @@
 
     .scene-main > .line-say {
       display: grid;
-      /* Строка 1: «Говорю:» + растяжка + «Заменить»; ▶ — между «СЦЕНА …» и временем */
+      /* Строка 1: «Говорю:» + растяжка + «Заменить»; телесуфлер — между «СЦЕНА …» и временем */
       grid-template-columns: auto minmax(0, 1fr) auto;
       grid-template-rows: auto auto;
-      align-items: center;
+      align-items: start;
       column-gap: 10px;
       row-gap: 8px;
     }
@@ -2814,8 +2793,9 @@
     .scene-main > .line-say > b {
       grid-column: 1;
       grid-row: 1;
-      align-self: center;
+      align-self: baseline;
       white-space: nowrap;
+      line-height: 1.25;
     }
 
     .scene-main > .line-say .say-editable {
@@ -2837,21 +2817,23 @@
       grid-column: 3;
       grid-row: 1;
       justify-self: end;
-      align-self: center;
-      display: inline-flex;
+      align-self: baseline;
+      display: inline-block;
       margin: 0;
-      vertical-align: middle;
       border: 1px solid rgba(160, 150, 128, 0.18);
       background: var(--ui-select-bg);
       color: rgba(212, 198, 170, 0.78);
       border-radius: 999px;
-      padding: 5px 11px;
-      font-size: 11px;
+      padding: 3px 11px;
+      font: inherit;
+      font-size: 12px;
       font-weight: 600;
+      line-height: 1.25;
       letter-spacing: 0.01em;
       text-transform: none;
       cursor: pointer;
       box-shadow: none;
+      vertical-align: baseline;
     }
 
     .scene-main > .line-say .say-editable:focus {
@@ -2864,23 +2846,24 @@
       color: #f8eed1;
     }
 
-    /* Примечание и перебивка — одна схема пунктира (как у названия сцены) */
+    /* Примечание и перебивка — одна схема пунктира; поле на всю ширину колонки сетки */
     .scene-main > .line-note .note-editable,
-    .intercut .intercut-text {
-      display: inline-block;
+    .scene-main > .intercut .intercut-text {
+      display: block;
       min-height: 1.35em;
-      min-width: min(100%, 10ch);
+      min-width: 0;
+      width: 100%;
       max-width: 100%;
       outline: none;
       border-radius: 0;
       padding: 0 0 2px;
       margin: 0;
-      vertical-align: bottom;
+      box-sizing: border-box;
       border-bottom: 1px dashed rgba(200, 198, 195, 0.38);
     }
 
     .scene-main > .line-note .note-editable:focus,
-    .intercut .intercut-text:focus {
+    .scene-main > .intercut .intercut-text:focus {
       background: transparent;
       box-shadow: none;
       border-bottom-color: rgba(200, 198, 195, 0.52);
@@ -2888,38 +2871,38 @@
 
     /* Пунктир только для пустых полей; при тексте подчёркивание убираем */
     .scene-main > .line-note .note-editable.has-text,
-    .intercut .intercut-text.has-text {
+    .scene-main > .intercut .intercut-text.has-text {
       border-bottom: none;
     }
 
     .scene-main > .line-note .note-editable.has-text:focus,
-    .intercut .intercut-text.has-text:focus {
+    .scene-main > .intercut .intercut-text.has-text:focus {
       border-bottom: none;
       border-bottom-color: transparent;
     }
 
-    /* Фокус на примечании + клавиатура iPhone: запас для scrollIntoView / программного центрирования.
-       Плюс flex-строка: лейбл «Примечание:» по своей ширине, поле тянется до правого края карточки —
-       чтобы пунктир уходил до конца, а не обрывался на ~10 символах. */
+    /* Одна сетка для обеих строк: фикс. колонка под самый длинный лейбл → поля одинаковой ширины и одного правого края */
     .scene-main > .line-note {
-      display: flex;
-      align-items: baseline;
-      gap: 0.4em;
+      display: grid;
+      grid-template-columns: 14ch 1fr;
+      align-items: center;
+      column-gap: 0.4em;
       scroll-margin-top: 26vh;
       scroll-margin-bottom: 42vh;
     }
 
     .scene-main > .line-note > b {
-      flex: 0 0 auto;
       white-space: nowrap;
     }
 
-    .scene-main > .line-note .note-editable {
-      flex: 1 1 auto;
-      min-width: 0;
+    .scene-main > .intercut {
+      display: grid;
+      grid-template-columns: 14ch 1fr;
+      align-items: center;
+      column-gap: 0.4em;
     }
 
-    #prep-note {
+    .field-prep-important {
       scroll-margin-top: 28vh;
       scroll-margin-bottom: 42vh;
     }
@@ -3258,8 +3241,28 @@
       accent-color: var(--accent);
     }
 
-    .card-prep #prep-note::placeholder {
-      color: rgba(232, 201, 104, 0.45);
+    .card-prep .field-prep-important .prep-important-head {
+      margin-bottom: 4px;
+    }
+
+    .card-prep .prep-important-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 8px 0 0;
+      padding: 0;
+      cursor: pointer;
+      font-size: 0.95rem;
+      color: rgba(250, 246, 240, 0.92);
+      user-select: none;
+    }
+
+    .card-prep .prep-important-label input[type='checkbox'] {
+      width: 1.05rem;
+      height: 1.05rem;
+      margin: 0;
+      flex-shrink: 0;
+      accent-color: var(--accent);
     }
 
     .card-prep .field.field-assistant input.assistant-name::placeholder {
@@ -3567,6 +3570,9 @@
       inset: 0;
       z-index: 2147483646;
       pointer-events: none;
+      /* Центр «кино»-вспышки при свайпе влево задаётся из JS по положению #pull-swipe-hint (слева) */
+      --pull-flash-at-x: 0%;
+      --pull-flash-at-y: 50%;
       background: radial-gradient(
         ellipse 120% 55% at 50% 0%,
         rgba(255, 215, 165, 0.11),
@@ -3581,10 +3587,10 @@
       opacity: 1;
     }
 
-    /* Свайп правого края: радиальное свечение от края + волна, расходящаяся внутрь. */
+    /* Свайп левого края: свечение от точки «ползунка» у левого края (позиция полоски по скроллу). */
     .pull-reload-flash.pull-reload-flash--from-edge {
       background: radial-gradient(
-        ellipse 95% 88% at 100% 50%,
+        ellipse 95% 88% at var(--pull-flash-at-x) var(--pull-flash-at-y),
         rgba(255, 220, 170, 0.32) 0%,
         rgba(255, 200, 140, 0.18) 18%,
         rgba(220, 170, 130, 0.08) 42%,
@@ -3601,7 +3607,7 @@
       0% {
         opacity: 0;
         background: radial-gradient(
-          ellipse 60% 40% at 100% 50%,
+          ellipse 60% 40% at var(--pull-flash-at-x) var(--pull-flash-at-y),
           rgba(255, 240, 200, 0) 0%,
           rgba(255, 200, 140, 0) 30%,
           transparent 50%
@@ -3610,7 +3616,7 @@
       35% {
         opacity: 1;
         background: radial-gradient(
-          ellipse 110% 95% at 100% 50%,
+          ellipse 110% 95% at var(--pull-flash-at-x) var(--pull-flash-at-y),
           rgba(255, 240, 210, 0.55) 0%,
           rgba(255, 215, 160, 0.32) 14%,
           rgba(220, 180, 140, 0.16) 36%,
@@ -3621,7 +3627,7 @@
       70% {
         opacity: 0.78;
         background: radial-gradient(
-          ellipse 130% 110% at 100% 50%,
+          ellipse 130% 110% at var(--pull-flash-at-x) var(--pull-flash-at-y),
           rgba(255, 235, 200, 0.34) 0%,
           rgba(255, 200, 150, 0.18) 22%,
           rgba(180, 150, 200, 0.08) 50%,
@@ -3631,7 +3637,7 @@
       100% {
         opacity: 0;
         background: radial-gradient(
-          ellipse 150% 140% at 100% 50%,
+          ellipse 150% 140% at var(--pull-flash-at-x) var(--pull-flash-at-y),
           rgba(255, 230, 200, 0) 0%,
           rgba(220, 180, 150, 0) 40%,
           transparent 70%
@@ -3641,16 +3647,18 @@
 
     .pull-swipe-hint {
       position: fixed;
-      right: max(6px, env(safe-area-inset-right, 0px));
-      top: 50%;
+      left: max(6px, env(safe-area-inset-left, 0px));
+      right: auto;
+      /* Вертикальная позиция задаётся из JS по скроллу (как ползунок скроллбара) */
+      top: 0;
       z-index: 2147483000;
       width: 5px;
       height: 52px;
-      margin-top: -26px;
+      margin-top: 0;
       border-radius: 5px;
-      /* Полоска у края: золото + тот же аметист, что у полоски ассистента */
+      /* Полоска у края: золото + тот же аметист (зеркально правой шторке ассистента) */
       background: linear-gradient(
-        100deg,
+        80deg,
         rgba(42, 34, 56, 0.55) 0%,
         var(--assistant-hint-violet-mid) 36%,
         rgba(255, 255, 255, 0.3) 58%,
@@ -3659,14 +3667,14 @@
       );
       opacity: 0;
       pointer-events: none;
-      transform: translateX(10px) scaleY(0.88);
+      transform: translateX(-10px) scaleY(0.88);
       box-shadow:
-        -4px 0 14px rgba(255, 255, 255, 0.12),
-        -2px 0 18px var(--assistant-hint-violet-soft),
-        inset -2px 0 8px rgba(255, 236, 190, 0.2);
+        4px 0 14px rgba(255, 255, 255, 0.12),
+        2px 0 18px var(--assistant-hint-violet-soft),
+        inset 2px 0 8px rgba(255, 236, 190, 0.2);
       filter:
-        drop-shadow(-5px 0 10px rgba(255, 255, 255, 0.12))
-        drop-shadow(-4px 0 14px var(--assistant-hint-violet-soft));
+        drop-shadow(5px 0 10px rgba(255, 255, 255, 0.12))
+        drop-shadow(4px 0 14px var(--assistant-hint-violet-soft));
       transition: opacity 0.2s ease, transform 0.24s cubic-bezier(0.22, 1, 0.36, 1), filter 0.24s ease, box-shadow 0.24s ease;
     }
 
@@ -3690,81 +3698,81 @@
         opacity: 1;
         transform: translateX(0) scaleY(1);
         filter:
-          drop-shadow(-7px 0 14px rgba(255, 255, 255, 0.28))
-          drop-shadow(-9px 0 20px rgba(145, 120, 210, 0.22))
-          drop-shadow(-15px 0 24px rgba(255, 230, 190, 0.14));
+          drop-shadow(7px 0 14px rgba(255, 255, 255, 0.28))
+          drop-shadow(9px 0 20px rgba(145, 120, 210, 0.22))
+          drop-shadow(15px 0 24px rgba(255, 230, 190, 0.14));
       }
       30% {
         opacity: 1;
-        transform: translateX(-2px) scaleY(1.18);
+        transform: translateX(2px) scaleY(1.18);
         filter:
-          drop-shadow(-12px 0 22px rgba(255, 250, 220, 0.78))
-          drop-shadow(-16px 0 36px rgba(255, 220, 170, 0.55))
-          drop-shadow(-26px 0 48px rgba(170, 130, 220, 0.42))
-          drop-shadow(-40px 0 64px rgba(255, 230, 190, 0.22));
+          drop-shadow(12px 0 22px rgba(255, 250, 220, 0.78))
+          drop-shadow(16px 0 36px rgba(255, 220, 170, 0.55))
+          drop-shadow(26px 0 48px rgba(170, 130, 220, 0.42))
+          drop-shadow(40px 0 64px rgba(255, 230, 190, 0.22));
       }
       60% {
         opacity: 0.9;
-        transform: translateX(-3px) scaleY(1.32);
+        transform: translateX(3px) scaleY(1.32);
         filter:
-          drop-shadow(-16px 0 28px rgba(255, 248, 220, 0.6))
-          drop-shadow(-24px 0 46px rgba(255, 218, 168, 0.4))
-          drop-shadow(-44px 0 72px rgba(180, 140, 220, 0.3))
-          drop-shadow(-72px 0 96px rgba(255, 230, 200, 0.16));
+          drop-shadow(16px 0 28px rgba(255, 248, 220, 0.6))
+          drop-shadow(24px 0 46px rgba(255, 218, 168, 0.4))
+          drop-shadow(44px 0 72px rgba(180, 140, 220, 0.3))
+          drop-shadow(72px 0 96px rgba(255, 230, 200, 0.16));
       }
       100% {
         opacity: 0;
-        transform: translateX(-6px) scaleY(1.6);
+        transform: translateX(6px) scaleY(1.6);
         filter:
-          drop-shadow(-22px 0 38px rgba(255, 248, 220, 0))
-          drop-shadow(-44px 0 64px rgba(255, 220, 175, 0))
-          drop-shadow(-90px 0 120px rgba(170, 130, 220, 0));
+          drop-shadow(22px 0 38px rgba(255, 248, 220, 0))
+          drop-shadow(44px 0 64px rgba(255, 220, 175, 0))
+          drop-shadow(90px 0 120px rgba(170, 130, 220, 0));
       }
     }
 
     @keyframes pullSwipeSideGlow {
       from {
         filter:
-          drop-shadow(-4px 0 8px rgba(255, 255, 255, 0.14))
-          drop-shadow(-5px 0 14px rgba(145, 120, 210, 0.14))
-          drop-shadow(-10px 0 18px rgba(255, 220, 160, 0.06));
+          drop-shadow(4px 0 8px rgba(255, 255, 255, 0.14))
+          drop-shadow(5px 0 14px rgba(145, 120, 210, 0.14))
+          drop-shadow(10px 0 18px rgba(255, 220, 160, 0.06));
         box-shadow:
-          -3px 0 12px rgba(255, 255, 255, 0.12),
-          -2px 0 16px var(--assistant-hint-violet-soft),
-          inset -1px 0 6px rgba(255, 236, 190, 0.16);
+          3px 0 12px rgba(255, 255, 255, 0.12),
+          2px 0 16px var(--assistant-hint-violet-soft),
+          inset 1px 0 6px rgba(255, 236, 190, 0.16);
       }
       to {
         filter:
-          drop-shadow(-7px 0 14px rgba(255, 255, 255, 0.26))
-          drop-shadow(-8px 0 20px rgba(145, 120, 210, 0.18))
-          drop-shadow(-14px 0 22px rgba(255, 230, 190, 0.12));
+          drop-shadow(7px 0 14px rgba(255, 255, 255, 0.26))
+          drop-shadow(8px 0 20px rgba(145, 120, 210, 0.18))
+          drop-shadow(14px 0 22px rgba(255, 230, 190, 0.12));
         box-shadow:
-          -6px 0 20px rgba(255, 255, 255, 0.22),
-          -4px 0 22px var(--assistant-hint-violet-soft),
-          inset -2px 0 11px rgba(255, 248, 220, 0.32);
+          6px 0 20px rgba(255, 255, 255, 0.22),
+          4px 0 22px var(--assistant-hint-violet-soft),
+          inset 2px 0 11px rgba(255, 248, 220, 0.32);
       }
     }
 
     @keyframes pullSwipeSideGlowReady {
       from {
         filter:
-          drop-shadow(-5px 0 12px rgba(255, 255, 255, 0.22))
-          drop-shadow(-6px 0 16px rgba(145, 120, 210, 0.16))
-          drop-shadow(-12px 0 22px rgba(255, 224, 150, 0.1));
+          drop-shadow(5px 0 12px rgba(255, 255, 255, 0.22))
+          drop-shadow(6px 0 16px rgba(145, 120, 210, 0.16))
+          drop-shadow(12px 0 22px rgba(255, 224, 150, 0.1));
         box-shadow:
-          -4px 0 16px rgba(255, 255, 255, 0.18),
-          -3px 0 20px var(--assistant-hint-violet-soft),
-          inset -2px 0 9px rgba(255, 240, 215, 0.26);
+          4px 0 16px rgba(255, 255, 255, 0.18),
+          3px 0 20px var(--assistant-hint-violet-soft),
+          inset 2px 0 9px rgba(255, 240, 215, 0.26);
       }
       to {
         filter:
-          drop-shadow(-9px 0 18px rgba(255, 255, 255, 0.34))
-          drop-shadow(-10px 0 22px rgba(145, 120, 210, 0.22))
-          drop-shadow(-18px 0 28px rgba(255, 236, 200, 0.16));
+          drop-shadow(9px 0 18px rgba(255, 255, 255, 0.34))
+          drop-shadow(10px 0 22px rgba(145, 120, 210, 0.22))
+          drop-shadow(18px 0 28px rgba(255, 236, 200, 0.16));
         box-shadow:
-          -8px 0 26px rgba(255, 255, 255, 0.28),
-          -6px 0 26px var(--assistant-hint-violet-soft),
-          inset -3px 0 14px rgba(255, 250, 235, 0.38);
+          8px 0 26px rgba(255, 255, 255, 0.28),
+          6px 0 26px var(--assistant-hint-violet-soft),
+          inset 3px 0 14px rgba(255, 250, 235, 0.38);
       }
     }
 
@@ -3993,7 +4001,7 @@
       justify-content: flex-end;
       align-items: center;
       gap: 10px;
-      margin: 10px 0 0;
+      margin: 18px 0 0;
       padding: 0;
       z-index: 25;
     }
@@ -4423,7 +4431,7 @@
         background-position: center center;
       }
     @media (max-width: 520px) {
-      /* Play не уменьшаем на узком экране: Intro / Outro / сцены — одинаковая крупная кнопка у края */
+      /* Кнопку телесуфлера не уменьшаем на узком экране: Intro / Outro / сцены — одинаковая крупная у края */
       .scene-time-wrap .time-heading {
         --scene-play-size: min(3.22rem, 16vw);
         --scene-play-corner-pad: 4px;
@@ -4513,7 +4521,6 @@
     .wrap .field input,
     .wrap .field select,
     .wrap .field textarea,
-    .wrap #prep-note,
     .wrap .scene-time-ios input[type="time"],
     .wrap .scene-time-trigger {
       border-width: 0.5px;
@@ -4809,7 +4816,18 @@
             </select>
           </div>
         </div>
-        <div class="field"><b>Примечание:</b><input id="prep-note" type="text" placeholder="Что важно не забыть"></div>
+        <div class="field field-prep-important">
+          <div class="prep-important-head"><b>ВАЖНО:</b></div>
+          <label class="prep-important-label"
+            ><input type="checkbox" id="prep-important-clothes" /> одежда</label
+          >
+          <label class="prep-important-label"
+            ><input type="checkbox" id="prep-important-backstage" /> бэк-стейдж</label
+          >
+          <label class="prep-important-label"
+            ><input type="checkbox" id="prep-important-light" /> свет</label
+          >
+        </div>
         <div class="field field-assistant">
           <div class="assistant-line">
             <span class="assistant-role">Ассистент</span>
@@ -5770,7 +5788,7 @@
        * Дублируйте те же поля в build-info.json — подпись внизу подгружает его с cache: no-store,
        * чтобы не залипала старая версия при закэшированной главной странице.
        */
-      var APP_VERSION = 'v300';
+      var APP_VERSION = 'v306';
       var BUILD_TIME = '2026-05-04 07:10 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
@@ -5812,8 +5830,13 @@
         'input, textarea, select, button, summary, details, a, .time-leading, [contenteditable="true"]';
       /** Вертикальный pull: с .logo-bg разрешён (шапка «Збруев»); слайдер масштаба — по-прежнему исключить. */
       var PULL_SKIP_INTERACTIVE = PULL_SKIP_INTERACTIVE_BASE + ', .logo-controls';
-      /** Свайп «ассистент» вправо: можно с фона шапки и с .logo-bg; слайдер масштаба — по-прежнему исключить. */
-      var ASSIST_SWIPE_SKIP_INTERACTIVE = PULL_SKIP_INTERACTIVE_BASE + ', .logo-controls';
+      /**
+       * Свайп вправо по основному блоку (.wrap) — открыть ассистента.
+       * Без селектора `details`: иначе `closest('details')` гасил жест на всём теле карточек
+       * «Настройки сценариев» / «План дня». Заголовок раскрытия — по-прежнему `summary`.
+       */
+      var ASSIST_SWIPE_SKIP_INTERACTIVE =
+        'input, textarea, select, button, summary, a, .time-leading, [contenteditable="true"], .logo-controls';
 
       /** Тап по пробелу между блоками даёт Text/node без .closest — жесты не включались. */
       function normalizeGestureTarget(el) {
@@ -5907,7 +5930,8 @@
       var prepIds = [
         'prep-hook-location', 'prep-main-location', 'prep-date',
         'prep-format-aspect', 'prep-format-quality', 'prep-format-fps',
-        'prep-note', 'prep-assistant'
+        'prep-important-clothes', 'prep-important-backstage', 'prep-important-light',
+        'prep-assistant'
       ];
 
       /** Дефолт формата кадра в подготовке (не опираться только на порядок option в сохранённом HTML). */
@@ -8325,6 +8349,9 @@
 
           var freshPrep = getPrep();
           var mergedPrep = Object.assign({}, current.prep || {}, freshPrep);
+          try {
+            delete mergedPrep['prep-note'];
+          } catch (ePrepLegacy) {}
 
           var state = {
             v: 12.0,
@@ -8544,9 +8571,26 @@
         var prep = {};
         prepIds.forEach(function (id) {
           var el = document.getElementById(id);
-          prep[id] = el ? el.value : '';
+          if (!el) {
+            prep[id] = '';
+            return;
+          }
+          if (el.type === 'checkbox') {
+            prep[id] = el.checked ? '1' : '';
+          } else {
+            prep[id] = el.value;
+          }
         });
         return prep;
+      }
+
+      function applyPrepFieldFromStored(el, raw) {
+        if (!el) return;
+        if (el.type === 'checkbox') {
+          el.checked = raw === true || raw === 1 || raw === '1';
+        } else {
+          el.value = raw !== undefined && raw !== null ? String(raw) : '';
+        }
       }
 
       function parseTimeToken(tok) {
@@ -9631,7 +9675,9 @@
             if (sc && sc.prep) {
               prepIds.forEach(function (id) {
                 var el = document.getElementById(id);
-                if (el && sc.prep[id] !== undefined && sc.prep[id] !== null) el.value = String(sc.prep[id]);
+                if (el && sc.prep[id] !== undefined && sc.prep[id] !== null) {
+                  applyPrepFieldFromStored(el, sc.prep[id]);
+                }
               });
             }
             try {
@@ -9684,7 +9730,9 @@
             if (state.prep) {
               prepIds.forEach(function (id) {
                 var el = document.getElementById(id);
-                if (el && state.prep[id] !== undefined && state.prep[id] !== null) el.value = String(state.prep[id]);
+                if (el && state.prep[id] !== undefined && state.prep[id] !== null) {
+                  applyPrepFieldFromStored(el, state.prep[id]);
+                }
               });
             }
             try {
@@ -9833,6 +9881,13 @@
         });
       }
 
+      /** SVG: экран с строками текста + подставка — иконка телесуфлера вместо «play». */
+      var SCENE_TELEPROMPTER_ICON_SVG =
+        '<svg class="scene-play-icon" viewBox="0 0 24 24" aria-hidden="true">' +
+        '<path fill="currentColor" d="M5 4.5h14c.83 0 1.5.67 1.5 1.5v8.5c0 .83-.67 1.5-1.5 1.5H5c-.83 0-1.5-.67-1.5-1.5V6c0-.83.67-1.5 1.5-1.5zm1.5 2V14h11V6.5h-11zm2 1.75h7v1h-7v-1zm0 2h7v1h-7v-1zm0 2h4.5v1h-4.5v-1z"/>' +
+        '<path fill="currentColor" d="M10.25 17.5h3.5v2h2.25v1H8v-1h2.25v-2z"/>' +
+        '</svg>';
+
       function ensureScenePlayButtons(scope) {
         var rootScope = scope || document;
         rootScope.querySelectorAll('.scene-main').forEach(function (scene) {
@@ -9858,14 +9913,7 @@
             btn.setAttribute('aria-label', 'Открыть телесуфлер');
             spacer.insertBefore(btn, spacer.firstChild);
           }
-          var svgIc = btn.querySelector('svg.scene-play-icon');
-          if (!svgIc) {
-            btn.innerHTML =
-              '<svg class="scene-play-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 8 L9 16 L18 12 Z"/></svg>';
-          } else {
-            var pth = svgIc.querySelector('path');
-            if (pth) pth.setAttribute('d', 'M9 8 L9 16 L18 12 Z');
-          }
+          btn.innerHTML = SCENE_TELEPROMPTER_ICON_SVG;
         });
       }
 
@@ -10451,9 +10499,6 @@
               scrollTargetToVisualViewportCenter(t);
               return;
             }
-            if (t.id === 'prep-note') {
-              scrollTargetToVisualViewportCenter(t);
-            }
           },
           true
         );
@@ -10467,8 +10512,6 @@
                 var ae = document.activeElement;
                 if (!ae) return;
                 if (ae.classList && ae.classList.contains('note-editable')) {
-                  scrollTargetToVisualViewportCenter(ae);
-                } else if (ae.id === 'prep-note') {
                   scrollTargetToVisualViewportCenter(ae);
                 }
               }, 120);
@@ -11052,7 +11095,11 @@
         if (wrap) {
           function prepFieldDirtyTarget(t) {
             if (!t || !t.matches) return false;
-            if (t.matches('#prep-hook-location, #prep-main-location, #prep-date, #prep-note, #prep-assistant'))
+            if (
+              t.matches(
+                '#prep-hook-location, #prep-main-location, #prep-date, #prep-important-clothes, #prep-important-backstage, #prep-important-light, #prep-assistant'
+              )
+            )
               return true;
             if (t.matches('#prep-format-aspect, #prep-format-quality, #prep-format-fps')) return true;
             if (t.classList.contains('prep-select') || t.classList.contains('format-select')) return true;
@@ -11323,7 +11370,7 @@
           return false;
         }
 
-        /** Для горизонтального свайпа — только модалки; иначе select/button блокировали любой жест */
+        /** Для горизонтального свайпа — только основной блок .wrap; модалки и интерактив как в ASSIST_SWIPE_SKIP_INTERACTIVE */
         function skipHorizontalSwipe(el) {
           el = normalizeGestureTarget(el);
           if (!el || !el.closest) return true;
@@ -11332,6 +11379,7 @@
           var tp = document.getElementById('teleprompter-overlay');
           if (tp && tp.classList.contains('open') && el.closest('.teleprompter-overlay')) return true;
           if (el.closest('.assistant-drawer')) return true;
+          if (!el.closest('.wrap')) return true;
           if (el.closest(ASSIST_SWIPE_SKIP_INTERACTIVE)) return true;
           return false;
         }
@@ -11351,6 +11399,33 @@
 
         function swipeHintEl() {
           return document.getElementById('pull-swipe-hint');
+        }
+
+        var pullSwipeThumbRaf = null;
+
+        /** Вертикальная позиция полоски у правого края = «ползунок» относительно прокрутки страницы. */
+        function syncPullSwipeHintThumbFromScroll() {
+          var sh = swipeHintEl();
+          if (!sh) return;
+          var vv = window.visualViewport;
+          var vh = vv ? vv.height : window.innerHeight;
+          var vt = vv ? vv.offsetTop : 0;
+          var sc = document.scrollingElement || document.documentElement;
+          var st = window.scrollY || sc.scrollTop || 0;
+          var scrollH = sc.scrollHeight;
+          var maxS = Math.max(1, scrollH - vh);
+          var ratio = Math.min(1, Math.max(0, st / maxS));
+          var thumb = 52;
+          sh.style.top = vt + ratio * Math.max(0, vh - thumb) + 'px';
+          sh.style.marginTop = '0';
+        }
+
+        function schedulePullSwipeThumbSync() {
+          if (pullSwipeThumbRaf) return;
+          pullSwipeThumbRaf = requestAnimationFrame(function () {
+            pullSwipeThumbRaf = null;
+            syncPullSwipeHintThumbFromScroll();
+          });
         }
 
         function pausePullHintLamp(hint) {
@@ -11432,12 +11507,28 @@
           var pullHint = pullHintEl();
 
           if (opts.fromSwipe) {
-            /* Сваймом справа — оставляем полоску на месте, добавляем огненную вспышку */
+            /* Свайпом reload слева — вспышка из центра полоски-ползунка (позиция по скроллу). */
+            try {
+              syncPullSwipeHintThumbFromScroll();
+            } catch (eSyn) {}
             if (swipeHint) {
               swipeHint.classList.remove('pull-swipe-hint--ready');
               swipeHint.classList.add('pull-swipe-hint--show', 'pull-swipe-hint--fire');
             }
             if (flash) {
+              try {
+                var rx = 0;
+                var ry = 50;
+                if (swipeHint) {
+                  var br = swipeHint.getBoundingClientRect();
+                  var iw = window.innerWidth || 1;
+                  var ih = window.innerHeight || 1;
+                  rx = (((br.left + br.right) / 2 / iw) * 100).toFixed(2);
+                  ry = (((br.top + br.bottom) / 2 / ih) * 100).toFixed(2);
+                }
+                flash.style.setProperty('--pull-flash-at-x', rx + '%');
+                flash.style.setProperty('--pull-flash-at-y', ry + '%');
+              } catch (eFl) {}
               flash.classList.add('pull-reload-flash--from-edge');
               flash.classList.add('pull-reload-flash--show');
               flash.classList.add('pull-reload-flash--fire');
@@ -11450,6 +11541,10 @@
             /* Pull-down (вертикальный) — оставляем лампу на пике, добавляем верхнюю радиальную вспышку */
             if (pullHint) pullHint.classList.add('pull-reload-hint--ready');
             if (flash) {
+              try {
+                flash.style.removeProperty('--pull-flash-at-x');
+                flash.style.removeProperty('--pull-flash-at-y');
+              } catch (eRm) {}
               flash.classList.remove('pull-reload-flash--from-edge', 'pull-reload-flash--fire');
               flash.classList.add('pull-reload-flash--show');
             }
@@ -11632,18 +11727,9 @@
                   var prog = Math.min(1, Math.abs(swipeMinDx) / SWIPE_MIN);
                   sh.classList.add('pull-swipe-hint--show');
                   sh.style.opacity = String(0.18 + prog * 0.56);
-                  var pullY =
-                    (typeof getComputedStyle !== 'undefined' &&
-                      getComputedStyle(document.documentElement).getPropertyValue('--pull-stack-y')) ||
-                    '0px';
+                  /* Вертикаль — только положение «ползунка» по скроллу (syncPullSwipeHintThumbFromScroll). */
                   sh.style.transform =
-                    'translate(' +
-                    (12 - prog * 22) +
-                    'px, ' +
-                    pullY.trim() +
-                    ') scaleY(' +
-                    (0.9 + prog * 0.14) +
-                    ')';
+                    'translateX(' + (-12 + prog * 22) + 'px) scaleY(' + (0.9 + prog * 0.14) + ')';
                   sh.classList.toggle('pull-swipe-hint--ready', prog >= 0.92);
                 }
               }
@@ -11697,6 +11783,14 @@
           },
           { passive: true }
         );
+
+        document.addEventListener('scroll', schedulePullSwipeThumbSync, { passive: true });
+        window.addEventListener('resize', schedulePullSwipeThumbSync);
+        if (window.visualViewport) {
+          window.visualViewport.addEventListener('scroll', schedulePullSwipeThumbSync, { passive: true });
+          window.visualViewport.addEventListener('resize', schedulePullSwipeThumbSync);
+        }
+        schedulePullSwipeThumbSync();
       }
 
       /** Свайп вправо: Pointer Events (iOS/Safari надёжнее document-touch). Без Pointer API остаётся жест в wirePullDownReload. */
@@ -11738,6 +11832,7 @@
           if (el.closest('.assistant-drawer')) return true;
           var tpOv = document.getElementById('teleprompter-overlay');
           if (tpOv && tpOv.classList.contains('open') && el.closest('.teleprompter-overlay')) return true;
+          if (!el.closest('.wrap')) return true;
           if (el.closest(ASSIST_SWIPE_SKIP_INTERACTIVE)) return true;
           if (el.closest('.assistant-open-strip')) return true;
           return false;
