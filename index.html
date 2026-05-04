@@ -16,7 +16,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 
-  <title>CURSOR · Sam Scenes (v272)</title>
+  <title>CURSOR · Sam Scenes (v273)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -5610,8 +5610,8 @@
        * Дублируйте те же поля в build-info.json — подпись внизу подгружает его с cache: no-store,
        * чтобы не залипала старая версия при закэшированной главной странице.
        */
-      var APP_VERSION = 'v272';
-      var BUILD_TIME = '2026-05-03 22:05 MSK';
+      var APP_VERSION = 'v273';
+      var BUILD_TIME = '2026-05-04 03:15 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -10890,7 +10890,9 @@
 
         var TAP_MAX_PX = 20;
         var detailsToggleArm = null;
-        var detailsToggleLastMs = 0;
+        /** После программного toggle в pointerup браузер всё равно шлёт click — гасим только его, без окна по времени (иначе поздний click снова переворачивает open). */
+        var suppressDuplicateClickForDetails = null;
+        var suppressDupClearTimer = null;
 
         function hitInteractiveInsideSummary(el) {
           return !!(el && el.closest && el.closest('a[href], button, input, select, textarea'));
@@ -10914,7 +10916,6 @@
               det.open = nextOpen;
             });
           }
-          detailsToggleLastMs = Date.now();
         }
 
         document.addEventListener(
@@ -10952,6 +10953,12 @@
               e.stopPropagation();
             } catch (se) {}
             applyToggle(det, !det.open);
+            suppressDuplicateClickForDetails = det;
+            if (suppressDupClearTimer) clearTimeout(suppressDupClearTimer);
+            suppressDupClearTimer = setTimeout(function () {
+              suppressDupClearTimer = null;
+              suppressDuplicateClickForDetails = null;
+            }, 900);
           },
           true
         );
@@ -10968,8 +10975,12 @@
           'click',
           function (e) {
             var hit = resolveDetailsToggleHit(e.target);
-            /* Раньше гасили любой click 450 ms — ломало остальной UI; только дубликат после pointerup по summary. */
-            if (hit && Date.now() - detailsToggleLastMs < 450) {
+            if (hit && suppressDuplicateClickForDetails === hit.det) {
+              if (suppressDupClearTimer) {
+                clearTimeout(suppressDupClearTimer);
+                suppressDupClearTimer = null;
+              }
+              suppressDuplicateClickForDetails = null;
               try {
                 e.preventDefault();
               } catch (p1) {}
@@ -10977,6 +10988,13 @@
                 e.stopPropagation();
               } catch (s1) {}
               return;
+            }
+            if (hit) {
+              if (suppressDupClearTimer) {
+                clearTimeout(suppressDupClearTimer);
+                suppressDupClearTimer = null;
+              }
+              suppressDuplicateClickForDetails = null;
             }
             if (!hit) return;
             try {
