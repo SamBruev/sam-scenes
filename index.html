@@ -10832,13 +10832,12 @@
           function (e) {
             var t = e.target;
             if (!t || !t.classList) return;
-            if (
-              !t.classList.contains('note-editable') &&
-              !t.classList.contains('say-editable') &&
-              !t.classList.contains('intercut-text')
-            ) {
-              return;
-            }
+            /*
+              Примечание (.note-editable): программный scrollBy конфликтует с нативной подкруткой к каретке
+              в contenteditable — при наборе страница «пилит». Говорю / перебивка оставляем с подстройкой.
+            */
+            if (t.classList.contains('note-editable')) return;
+            if (!t.classList.contains('say-editable') && !t.classList.contains('intercut-text')) return;
             var now = Date.now();
             /* Выделение и «Вставить» шлют несколько focusin подряд — без паузы страница «пилит» scrollBy. */
             if (lastVcEl === t && now - lastVcAt < 900) return;
