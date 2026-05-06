@@ -2865,6 +2865,8 @@
       display: block;
       min-height: 1.35em;
       min-width: 0;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
       outline: none;
       border-radius: 0;
       padding: 0;
@@ -2914,6 +2916,8 @@
       min-width: 0;
       width: 100%;
       max-width: 100%;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
       outline: none;
       border-radius: 0;
       padding: 0 0 2px;
@@ -9675,8 +9679,31 @@
         span.addEventListener('paste', function (e) {
           e.preventDefault();
           var text = (e.clipboardData || window.clipboardData).getData('text/plain') || '';
-          var cur = span.textContent || '';
-          span.textContent = cur + text;
+          var ok = false;
+          try {
+            ok = document.execCommand('insertText', false, text);
+          } catch (eIns) {}
+          if (!ok) {
+            var sel = window.getSelection();
+            if (sel.rangeCount) {
+              var range = sel.getRangeAt(0);
+              var anc = range.commonAncestorContainer;
+              if (span.contains(anc) || anc === span) {
+                range.deleteContents();
+                var tn = document.createTextNode(text);
+                range.insertNode(tn);
+                range.setStartAfter(tn);
+                range.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(range);
+              } else {
+                span.textContent = (span.textContent || '') + text;
+              }
+            } else {
+              span.textContent = (span.textContent || '') + text;
+            }
+          }
+          clipSaySpan(span);
           markDirty();
         });
       }
@@ -10274,7 +10301,7 @@
         if (!scene) return '';
         var say = scene.querySelector('.say-editable');
         var text = say ? (say.textContent || '') : '';
-        return text.replace(/_+/g, ' ').replace(/\s{2,}/g, ' ').trim();
+        return text.replace(/_+/g, ' ').trim();
       }
 
       /**
@@ -10912,7 +10939,7 @@
         var raw = String(el.textContent || '').replace(/\u00a0/g, ' ');
         var meaningful = false;
         if (el.classList.contains('intercut-text')) {
-          meaningful = raw.replace(/_+/g, '').replace(/\s{2,}/g, ' ').trim().length > 0;
+          meaningful = raw.replace(/_+/g, '').trim().length > 0;
         } else {
           meaningful = raw.trim().length > 0;
         }
@@ -10947,7 +10974,7 @@
           if (!el || !el.classList.contains('intercut-text')) return;
           var t = el.textContent || '';
           if (!/_/.test(t)) return;
-          el.textContent = t.replace(/_+/g, '').replace(/\s{2,}/g, ' ').trim();
+          el.textContent = t.replace(/_+/g, '').trim();
         }
         function restoreUnderscoresIfEmpty(el) {
           if (!el || !el.classList || !el.classList.contains('intercut-text')) return;
