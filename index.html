@@ -10792,6 +10792,11 @@
       /** Примечание в сцене / prep: при фокусе держим блок в центре видимой области (учёт клавиатуры visualViewport). */
       function scrollTargetToVisualViewportCenter(el) {
         if (!el || !el.getBoundingClientRect) return;
+        var prevT = scrollTargetToVisualViewportCenter._pendingTimeouts;
+        if (prevT && prevT.length) {
+          for (var ti = 0; ti < prevT.length; ti++) clearTimeout(prevT[ti]);
+        }
+        scrollTargetToVisualViewportCenter._pendingTimeouts = [];
         function step() {
           var rect = el.getBoundingClientRect();
           if (rect.height < 2 && el.classList && el.classList.contains('note-editable')) {
@@ -10813,9 +10818,8 @@
         requestAnimationFrame(function () {
           requestAnimationFrame(step);
         });
-        setTimeout(step, 100);
-        setTimeout(step, 350);
-        setTimeout(step, 600);
+        scrollTargetToVisualViewportCenter._pendingTimeouts.push(setTimeout(step, 120));
+        scrollTargetToVisualViewportCenter._pendingTimeouts.push(setTimeout(step, 380));
       }
 
       function wireNoteFocusViewportCenter() {
@@ -10835,17 +10839,25 @@
         );
         if (window.visualViewport) {
           var vvResizeTimer = null;
+          var lastNoteVvAdjustAt = 0;
           window.visualViewport.addEventListener(
             'resize',
             function () {
               clearTimeout(vvResizeTimer);
               vvResizeTimer = setTimeout(function () {
                 var ae = document.activeElement;
-                if (!ae) return;
-                if (ae.classList && ae.classList.contains('note-editable')) {
-                  scrollTargetToVisualViewportCenter(ae);
-                }
-              }, 120);
+                if (!ae || !ae.classList || !ae.classList.contains('note-editable')) return;
+                var vv = window.visualViewport;
+                if (!vv || typeof vv.height !== 'number') return;
+                var ih = window.innerHeight || document.documentElement.clientHeight || 0;
+                if (ih < 120) return;
+                /* Трансляции экрана (Power Mirror и др.) часто дергают vv без клавиатуры — не прокручиваем по шуму. */
+                if (vv.height > ih * 0.92) return;
+                var now = Date.now();
+                if (now - lastNoteVvAdjustAt < 560) return;
+                lastNoteVvAdjustAt = now;
+                scrollTargetToVisualViewportCenter(ae);
+              }, 280);
             },
             { passive: true }
           );
@@ -12450,6 +12462,7 @@
         wireViewportPinchZoomReset._done = true;
         var maxTouches = 0;
         var restoring = false;
+        var lastZoomResetAt = 0;
 
         function viewportMeta() {
           return document.querySelector('meta[name="viewport"]');
@@ -12459,10 +12472,11 @@
           try {
             var vv = window.visualViewport;
             if (!vv) return false;
-            if (typeof vv.scale === 'number' && vv.scale > 1.04) return true;
+            /* Раньше 1.04 ловил дрожание vv при зеркалировании экрана → ложный reset viewport и скачки скролла. */
+            if (typeof vv.scale === 'number' && vv.scale > 1.12) return true;
             if (vv.width > 0 && window.innerWidth > 0) {
               var r = window.innerWidth / vv.width;
-              if (r > 1.04) return true;
+              if (r > 1.12) return true;
             }
           } catch (eZ) {}
           return false;
@@ -12477,8 +12491,11 @@
 
         function applyZoomOut() {
           if (restoring) return;
+          var nowMs = Date.now();
+          if (nowMs - lastZoomResetAt < 850) return;
           var m = viewportMeta();
           if (!m) return;
+          lastZoomResetAt = nowMs;
           var orig = m.getAttribute('content') || 'width=device-width, initial-scale=1.0, viewport-fit=cover';
           restoring = true;
           try {
