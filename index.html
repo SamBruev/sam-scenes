@@ -2908,6 +2908,13 @@
       color: #f8eed1;
     }
 
+    /* Старые вставки с блоками <div>: визуальный зазор между абзацами. */
+    .scene-main > .line-say .say-editable > div:not(:last-child),
+    .scene-main > .line-note .note-editable > div:not(:last-child),
+    .scene-main > .intercut .intercut-text > div:not(:last-child) {
+      margin-bottom: 0.42em;
+    }
+
     /* Примечание / перебивка: подпись в .scene-note-heading фикс. ширины (ch) — пунктир справа одной длины. */
     .scene-main > .line-note .note-editable,
     .scene-main > .intercut .intercut-text {
@@ -9668,6 +9675,38 @@
         if (!span) return;
       }
 
+      /** Только text/plain при вставке — сохраняем символы новой строки из буфера (LF); их отображает white-space: pre-wrap. */
+      function pastePlainIntoContentEditable(host, e) {
+        if (!host || !e) return;
+        e.preventDefault();
+        var text = (e.clipboardData || window.clipboardData).getData('text/plain') || '';
+        text = String(text).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+        var ok = false;
+        try {
+          ok = document.execCommand('insertText', false, text);
+        } catch (eIns) {}
+        if (!ok) {
+          var sel = window.getSelection();
+          if (sel.rangeCount) {
+            var range = sel.getRangeAt(0);
+            var anc = range.commonAncestorContainer;
+            if (host.contains(anc) || anc === host) {
+              range.deleteContents();
+              var tn = document.createTextNode(text);
+              range.insertNode(tn);
+              range.setStartAfter(tn);
+              range.collapse(true);
+              sel.removeAllRanges();
+              sel.addRange(range);
+            } else {
+              host.textContent = (host.textContent || '') + text;
+            }
+          } else {
+            host.textContent = (host.textContent || '') + text;
+          }
+        }
+      }
+
       function bindSayLimit(span) {
         if (!span || span.getAttribute('data-say-bound') === '1') return;
         span.setAttribute('data-say-bound', '1');
@@ -9677,32 +9716,7 @@
           markDirty();
         });
         span.addEventListener('paste', function (e) {
-          e.preventDefault();
-          var text = (e.clipboardData || window.clipboardData).getData('text/plain') || '';
-          var ok = false;
-          try {
-            ok = document.execCommand('insertText', false, text);
-          } catch (eIns) {}
-          if (!ok) {
-            var sel = window.getSelection();
-            if (sel.rangeCount) {
-              var range = sel.getRangeAt(0);
-              var anc = range.commonAncestorContainer;
-              if (span.contains(anc) || anc === span) {
-                range.deleteContents();
-                var tn = document.createTextNode(text);
-                range.insertNode(tn);
-                range.setStartAfter(tn);
-                range.collapse(true);
-                sel.removeAllRanges();
-                sel.addRange(range);
-              } else {
-                span.textContent = (span.textContent || '') + text;
-              }
-            } else {
-              span.textContent = (span.textContent || '') + text;
-            }
-          }
+          pastePlainIntoContentEditable(span, e);
           clipSaySpan(span);
           markDirty();
         });
@@ -9710,6 +9724,17 @@
 
       function bindAllSayLimits(root) {
         (root || document).querySelectorAll('.say-editable').forEach(bindSayLimit);
+      }
+
+      function bindNoteIntercutPastePlain(root) {
+        (root || document).querySelectorAll('.note-editable, .intercut-text').forEach(function (el) {
+          if (el.getAttribute('data-paste-plain-bound') === '1') return;
+          el.setAttribute('data-paste-plain-bound', '1');
+          el.addEventListener('paste', function (e) {
+            pastePlainIntoContentEditable(el, e);
+            markDirty();
+          });
+        });
       }
 
       function normalizeSayLineWhitespaceNodes(line) {
@@ -10323,13 +10348,24 @@
           note.innerHTML = '<b><span class="scene-note-heading">Примечание:</span></b> <div class="note-editable" contenteditable="true" spellcheck="true"></div>';
           sayLine.parentNode.insertBefore(note, sayLine.nextSibling);
         });
+        bindNoteIntercutPastePlain(scope || document);
       }
 
       function readSceneSayText(scene) {
         if (!scene) return '';
         var say = scene.querySelector('.say-editable');
-        var text = say ? (say.textContent || '') : '';
-        return text.replace(/_+/g, ' ').trim();
+        if (!say) return '';
+        /*
+          textContent склеивает соседние блоки (<div> и т.д.) без перевода строки между абзацами — телесуфлер становился одной строкой.
+          innerText даёт разрывы строк по границам блоков (близко к тому, что видно на экране).
+        */
+        var text = '';
+        try {
+          text = say.innerText != null ? String(say.innerText) : String(say.textContent || '');
+        } catch (eIt) {
+          text = String(say.textContent || '');
+        }
+        return text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').replace(/_+/g, ' ').trim();
       }
 
       /**
@@ -11273,6 +11309,7 @@
         }
         renumberScenes();
         bindAllSayLimits(node);
+        bindNoteIntercutPastePlain(node);
         ensureSayReplaceButtons(node);
         markDirty();
       }
@@ -12798,6 +12835,7 @@
       if (wrap) migrateSceneEditableHostsToDiv(wrap);
       upgradeSayLines();
       bindAllSayLimits(document);
+      bindNoteIntercutPastePlain(document);
       migrateBundledSayLinesFromJson();
       ensureShotCheckboxInHeading();
       migrateShotCheckboxLensMarkup(document);
