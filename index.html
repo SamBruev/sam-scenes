@@ -94,10 +94,7 @@
             apply();
             requestAnimationFrame(function () {
               apply();
-              requestAnimationFrame(function () {
-                apply();
-                reveal();
-              });
+              reveal();
             });
           });
         }
@@ -185,7 +182,6 @@
       overflow-x: hidden;
       overflow-x: clip;
       overscroll-behavior-x: none;
-      overflow-anchor: none;
       color-scheme: dark;
       accent-color: var(--gold);
     }
@@ -12711,8 +12707,8 @@
       setStatus('Готово (автосохранение)', false);
       requestAnimationFrame(function () {
         try {
-          window.dispatchEvent(new Event('scroll'));
-        } catch (eSyncScroll) {}
+          updateTopLogoScrollBlur();
+        } catch (eSyncBlur) {}
       });
     })();
   </script>
