@@ -2274,7 +2274,7 @@
       align-items: stretch;
       justify-content: flex-start;
       gap: 0;
-      margin-bottom: -10px;
+      margin-bottom: -4px;
       min-width: 0;
       width: 100%;
       grid-column: 1 / -1;
@@ -2448,7 +2448,8 @@
       flex: 1 1 auto;
       min-width: 0;
       width: 100%;
-      margin-top: -24px !important;
+      /* Раньше -24px залезало на телесуфлер; шрифт/цифры селектов не меняем. */
+      margin-top: -8px !important;
       overflow-x: auto;
       overflow-y: hidden;
       -webkit-overflow-scrolling: touch;
@@ -2831,7 +2832,7 @@
       display: flex;
       position: relative;
       z-index: 20;
-      margin-top: -24px;
+      margin-top: -8px;
       padding-top: 0;
       pointer-events: none;
     }
@@ -4731,7 +4732,7 @@
       }
 
       .scene-time-wrap .time-pickers {
-        margin-top: -18px;
+        margin-top: -6px;
       }
 
       .scene-time-wrap .time-pickers {
@@ -4740,7 +4741,7 @@
       }
 
       .ios-wheel-time .scene-time-wrap .scene-time-ios {
-        margin-top: -18px;
+        margin-top: -6px;
       }
 
       .scene-time-ios {
