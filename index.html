@@ -10789,20 +10789,22 @@
         }
       }
 
-      /** Примечание в сцене / prep: при фокусе держим блок в центре видимой области (учёт клавиатуры visualViewport). */
+      /** Одноразово подвинуть contenteditable к центру видимой области (без smooth — иначе цепочки анимаций при выделении/вставке). */
       function scrollTargetToVisualViewportCenter(el) {
         if (!el || !el.getBoundingClientRect) return;
-        var prevT = scrollTargetToVisualViewportCenter._pendingTimeouts;
-        if (prevT && prevT.length) {
-          for (var ti = 0; ti < prevT.length; ti++) clearTimeout(prevT[ti]);
-        }
-        scrollTargetToVisualViewportCenter._pendingTimeouts = [];
         function step() {
-          var rect = el.getBoundingClientRect();
-          if (rect.height < 2 && el.classList && el.classList.contains('note-editable')) {
-            var row = el.closest('.line-note');
-            if (row) el = row;
-            rect = el.getBoundingClientRect();
+          var measureEl = el;
+          var rect = measureEl.getBoundingClientRect();
+          if (
+            rect.height < 2 &&
+            measureEl.classList &&
+            measureEl.classList.contains('note-editable')
+          ) {
+            var row = measureEl.closest('.line-note');
+            if (row) {
+              measureEl = row;
+              rect = measureEl.getBoundingClientRect();
+            }
           }
           var vv = window.visualViewport;
           var elMid = rect.top + rect.height / 2;
@@ -10812,56 +10814,39 @@
           } else {
             dy = elMid - window.innerHeight / 2;
           }
-          if (Math.abs(dy) < 3) return;
-          window.scrollBy({ top: dy, left: 0, behavior: 'smooth' });
+          /* Небольшой «мёртвый ход»: полоски выделения / IME дергают координаты на пару пикселей. */
+          if (Math.abs(dy) < 14) return;
+          window.scrollBy({ top: dy, left: 0, behavior: 'auto' });
         }
-        requestAnimationFrame(function () {
-          requestAnimationFrame(step);
-        });
-        scrollTargetToVisualViewportCenter._pendingTimeouts.push(setTimeout(step, 120));
-        scrollTargetToVisualViewportCenter._pendingTimeouts.push(setTimeout(step, 380));
+        requestAnimationFrame(step);
       }
 
       function wireNoteFocusViewportCenter() {
         if (wireNoteFocusViewportCenter._done) return;
         wireNoteFocusViewportCenter._done = true;
+        var lastVcEl = null;
+        var lastVcAt = 0;
         document.addEventListener(
           'focusin',
           function (e) {
             var t = e.target;
-            if (!t) return;
-            if (t.classList && t.classList.contains('note-editable')) {
-              scrollTargetToVisualViewportCenter(t);
+            if (!t || !t.classList) return;
+            if (
+              !t.classList.contains('note-editable') &&
+              !t.classList.contains('say-editable') &&
+              !t.classList.contains('intercut-text')
+            ) {
               return;
             }
+            var now = Date.now();
+            /* Выделение и «Вставить» шлют несколько focusin подряд — без паузы страница «пилит» scrollBy. */
+            if (lastVcEl === t && now - lastVcAt < 900) return;
+            lastVcEl = t;
+            lastVcAt = now;
+            scrollTargetToVisualViewportCenter(t);
           },
           true
         );
-        if (window.visualViewport) {
-          var vvResizeTimer = null;
-          var lastNoteVvAdjustAt = 0;
-          window.visualViewport.addEventListener(
-            'resize',
-            function () {
-              clearTimeout(vvResizeTimer);
-              vvResizeTimer = setTimeout(function () {
-                var ae = document.activeElement;
-                if (!ae || !ae.classList || !ae.classList.contains('note-editable')) return;
-                var vv = window.visualViewport;
-                if (!vv || typeof vv.height !== 'number') return;
-                var ih = window.innerHeight || document.documentElement.clientHeight || 0;
-                if (ih < 120) return;
-                /* Трансляции экрана (Power Mirror и др.) часто дергают vv без клавиатуры — не прокручиваем по шуму. */
-                if (vv.height > ih * 0.92) return;
-                var now = Date.now();
-                if (now - lastNoteVvAdjustAt < 560) return;
-                lastNoteVvAdjustAt = now;
-                scrollTargetToVisualViewportCenter(ae);
-              }, 280);
-            },
-            { passive: true }
-          );
-        }
       }
 
       function syncNoteIntercutHasTextClass(el) {
