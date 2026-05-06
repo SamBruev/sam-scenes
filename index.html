@@ -3145,6 +3145,8 @@
       justify-content: center;
       padding: max(16px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
       box-sizing: border-box;
+      overflow: hidden;
+      overscroll-behavior: none;
     }
 
     .teleprompter-overlay.open {
@@ -3173,7 +3175,12 @@
     .teleprompter-text {
       width: min(96vw, 1100px);
       max-height: calc(100vh - 96px);
+      min-height: 0;
+      flex: 0 1 auto;
       overflow: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
       color: #fff2cd;
       text-align: center;
       font-weight: 800;
@@ -6201,6 +6208,8 @@
       var teleprompterOverlay = document.getElementById('teleprompter-overlay');
       var teleprompterText = document.getElementById('teleprompter-text');
       var teleprompterClose = document.getElementById('teleprompter-close');
+      var teleprompterLockScrollY = 0;
+      var teleprompterOwnedScrollLock = false;
 
       var x = { value: 0 };
       var y = { value: 0 };
@@ -10268,13 +10277,61 @@
         return text.replace(/_+/g, ' ').replace(/\s{2,}/g, ' ').trim();
       }
 
+      /**
+       * Блокируем скролл документа под оверлеем (иначе на iOS/Android жест уходит в страницу).
+       * Если body уже position:fixed (например drawer) — не трогаем стили, только помечаем что лок мы не владелец.
+       */
+      function lockMainScrollForTeleprompter() {
+        var alreadyLocked = document.body.style.position === 'fixed';
+        if (!alreadyLocked) {
+          teleprompterLockScrollY =
+            window.pageYOffset ||
+            (document.documentElement && document.documentElement.scrollTop) ||
+            (document.body && document.body.scrollTop) ||
+            0;
+          teleprompterLockScrollY = Math.max(0, teleprompterLockScrollY);
+          document.documentElement.style.overflow = 'hidden';
+          document.body.style.overflow = 'hidden';
+          document.body.style.position = 'fixed';
+          document.body.style.top = '-' + teleprompterLockScrollY + 'px';
+          document.body.style.left = '0';
+          document.body.style.right = '0';
+          document.body.style.width = '100%';
+          teleprompterOwnedScrollLock = true;
+        } else {
+          teleprompterOwnedScrollLock = false;
+        }
+      }
+
+      function unlockMainScrollForTeleprompter() {
+        if (!teleprompterOwnedScrollLock) return;
+        var y = teleprompterLockScrollY;
+        if (typeof y !== 'number' || !isFinite(y) || y < 0) y = 0;
+        document.documentElement.style.overflow = '';
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
+        document.body.style.width = '';
+        teleprompterOwnedScrollLock = false;
+        try {
+          window.scrollTo(0, y);
+        } catch (eSc) {}
+        requestAnimationFrame(function () {
+          try {
+            window.scrollTo(0, y);
+          } catch (eSc2) {}
+        });
+      }
+
       function openTeleprompterForScene(scene) {
         if (!teleprompterOverlay || !teleprompterText) return;
         var text = readSceneSayText(scene);
         teleprompterText.textContent = text || 'Текст «Говорю» пока пуст.';
         teleprompterOverlay.classList.add('open');
         teleprompterOverlay.setAttribute('aria-hidden', 'false');
-        document.body.style.overflow = 'hidden';
+        lockMainScrollForTeleprompter();
         triggerHaptic('micro');
       }
 
@@ -10283,7 +10340,7 @@
         var wasOpen = teleprompterOverlay.classList.contains('open');
         teleprompterOverlay.classList.remove('open');
         teleprompterOverlay.setAttribute('aria-hidden', 'true');
-        document.body.style.overflow = '';
+        unlockMainScrollForTeleprompter();
         if (wasOpen) triggerHaptic('micro');
       }
 
