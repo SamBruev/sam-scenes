@@ -6057,6 +6057,50 @@
         })();
       } catch (eMig) {}
 
+      /**
+       * Откатная миграция: возвращает inline html из временного split-формата (samscenes-html-*)
+       * обратно в bundle.items[i].html. Нужна, чтобы пользователи, у кого PWA уже частично
+       * мигрировала в split-формат, не потеряли html сценариев после отката.
+       *
+       * Идемпотентно: если split-ключей нет — no-op.
+       */
+      try {
+        (function restoreInlineHtmlFromSplit() {
+          try {
+            var L = typeof localStorage !== 'undefined' ? localStorage : null;
+            if (!L) return;
+            var raw = L.getItem('samscenes-scenarios-v2');
+            if (!raw) return;
+            var bundle;
+            try { bundle = JSON.parse(raw); } catch (eP) { return; }
+            if (!bundle || !Array.isArray(bundle.items)) return;
+            var changed = false;
+            var keysToRemove = [];
+            for (var i = 0; i < bundle.items.length; i++) {
+              var it = bundle.items[i];
+              if (!it || !it.id) continue;
+              var splitKey = 'samscenes-html-' + it.id;
+              var stored = null;
+              try { stored = L.getItem(splitKey); } catch (eG) {}
+              if (stored == null) continue; /* split-ключа нет — этот сценарий не был мигрирован */
+              if (typeof it.html !== 'string') {
+                /* inline html отсутствует — восстанавливаем из split */
+                it.html = String(stored);
+                changed = true;
+              }
+              keysToRemove.push(splitKey);
+            }
+            if (changed) {
+              try { L.setItem('samscenes-scenarios-v2', JSON.stringify(bundle)); } catch (eW) {}
+            }
+            /* Чистим split-ключи в любом случае (они избыточны, занимают квоту). */
+            keysToRemove.forEach(function (k) {
+              try { L.removeItem(k); } catch (eR) {}
+            });
+          } catch (e) {}
+        })();
+      } catch (eRev) {}
+
       var PULL_RELOAD_FLAG = 'samscenes-pull-reload-flag';
       var SAMSCENES_RESTORE_SCROLL_KEY = 'samscenes-restore-scroll-y';
       try {
@@ -6440,113 +6484,12 @@
         return box.innerHTML;
       }
 
-      /** Префикс ключа per-scenario HTML. ID берётся из bundle.items[i].id. */
-      function scenarioHtmlKey(id) { return 'samscenes-html-' + id; }
-
-      /** Сырой HTML сценария (или '' при отсутствии). HTML хранится как строка, без JSON-обёртки. */
-      function readScenarioHtml(id) {
-        if (!id) return '';
-        try {
-          var raw = localStorage.getItem(scenarioHtmlKey(id));
-          return raw == null ? '' : String(raw);
-        } catch (e) { return ''; }
-      }
-
-      function writeScenarioHtml(id, html) {
-        if (!id) return false;
-        return safeSetItem(scenarioHtmlKey(id), String(html == null ? '' : html));
-      }
-
-      function removeScenarioHtml(id) {
-        if (!id) return;
-        try { localStorage.removeItem(scenarioHtmlKey(id)); } catch (e) {}
-      }
-
-      /** Перенос inline html (старый формат bundle) в отдельные ключи. Идемпотентно. */
-      function migrateScenarioHtmlInline(bundle) {
-        if (!bundle || !Array.isArray(bundle.items)) return false;
-        var moved = 0;
-        for (var i = 0; i < bundle.items.length; i++) {
-          var it = bundle.items[i];
-          if (!it || !it.id) continue;
-          if (typeof it.html !== 'string') continue;
-          /* Не перетираем уже сохранённый per-scenario html (на случай, если миграция уже частично прошла). */
-          var existing = null;
-          try { existing = localStorage.getItem(scenarioHtmlKey(it.id)); } catch (eG) {}
-          if (existing == null) {
-            if (!writeScenarioHtml(it.id, it.html)) continue; /* квота — оставляем inline, попробуем позже */
-          }
-          delete it.html;
-          moved++;
-        }
-        if (moved > 0) {
-          try { localStorage.setItem(SCENARIO_STORAGE_KEY, JSON.stringify(bundle)); } catch (eW) {}
-        }
-        return moved > 0;
-      }
-
-      /** Безопасная запись в localStorage с обработкой квоты. true = записано, false = ошибка. */
-      function safeSetItem(key, value) {
-        try {
-          localStorage.setItem(key, value);
-          return true;
-        } catch (e) {
-          var isQuota = e && (
-            e.code === 22 || e.code === 1014 ||
-            e.name === 'QuotaExceededError' ||
-            e.name === 'NS_ERROR_DOM_QUOTA_REACHED'
-          );
-          if (isQuota) {
-            try { onStorageQuotaExceeded(key); } catch (eQ) {}
-          } else {
-            try { console.warn('localStorage.setItem failed', key, e); } catch (eL) {}
-          }
-          return false;
-        }
-      }
-
-      /** Дребезг уведомлений о квоте: один alert в минуту. */
-      var _quotaAlertCooldownUntil = 0;
-
-      function onStorageQuotaExceeded(key) {
-        try { setStatus('Память браузера переполнена', true); } catch (eS) {}
-        var now = Date.now();
-        if (now < _quotaAlertCooldownUntil) return;
-        _quotaAlertCooldownUntil = now + 60000;
-        var usage = '';
-        try { usage = ' (≈ ' + estimateLocalStorageUsageMb() + ' МБ занято)'; } catch (eU) {}
-        try {
-          alert(
-            'Браузер исчерпал память для сценариев' + usage + '.\n\n' +
-            'Что сделать прямо сейчас:\n' +
-            '• Удалить старые сценарии — свайпом влево по строке в панели «План».\n' +
-            '• Очистить корзину — кнопка «Удалить навсегда» в самом низу панели ассистента.\n\n' +
-            'Текущее изменение НЕ сохранено. После очистки потяни вниз для перезагрузки.'
-          );
-        } catch (eA) {}
-      }
-
-      function estimateLocalStorageUsageMb() {
-        try {
-          var total = 0;
-          for (var i = 0; i < localStorage.length; i++) {
-            var k = localStorage.key(i);
-            if (!k) continue;
-            var v = localStorage.getItem(k);
-            total += (k.length + (v ? v.length : 0)) * 2; /* UTF-16, 2 байта/символ */
-          }
-          return (total / 1048576).toFixed(2);
-        } catch (e) { return '?'; }
-      }
-
       function readScenarioBundle() {
         try {
           var raw = localStorage.getItem(SCENARIO_STORAGE_KEY);
           if (!raw) return null;
           var parsed = JSON.parse(raw);
           if (!parsed || !Array.isArray(parsed.items)) return null;
-          /* Lazy-миграция inline html → samscenes-html-<id>. После полной миграции цикл no-op. */
-          migrateScenarioHtmlInline(parsed);
           return parsed;
         } catch (e) { return null; }
       }
@@ -6679,22 +6622,18 @@
       }
 
       function writeScenarioBundle(bundle) {
-        var ok = false;
         try {
-          ok = safeSetItem(SCENARIO_STORAGE_KEY, JSON.stringify(bundle));
-        } catch (eS) {
-          /* JSON.stringify сам бросает при циклах — крайне маловероятно, но защищаемся */
-          console.warn('writeScenarioBundle stringify failed', eS);
-          ok = false;
-        }
-        if (ok) {
+          localStorage.setItem(SCENARIO_STORAGE_KEY, JSON.stringify(bundle));
           try {
             if (typeof invalidateAssistantDrawerListCache === 'function') {
               invalidateAssistantDrawerListCache();
             }
           } catch (eInv) {}
+          return true;
+        } catch (e) {
+          console.warn('writeScenarioBundle failed', e);
+          return false;
         }
-        return ok;
       }
 
       function readScenarioTrashRaw() {
@@ -6720,31 +6659,20 @@
       }
 
       function writeScenarioTrash(trash) {
-        var payload;
-        try { payload = JSON.stringify(trash); }
-        catch (eS) { console.warn('writeScenarioTrash stringify failed', eS); return false; }
-        return safeSetItem(SCENARIO_TRASH_STORAGE_KEY, payload);
+        try {
+          localStorage.setItem(SCENARIO_TRASH_STORAGE_KEY, JSON.stringify(trash));
+          return true;
+        } catch (e) {
+          console.warn('writeScenarioTrash failed', e);
+          return false;
+        }
       }
 
       /** Читает корзину и выбрасывает записи старше 30 суток. */
       function readScenarioTrash() {
         var t = readScenarioTrashRaw();
-        var purgedIds = [];
-        if (t && Array.isArray(t.items)) {
-          var now = Date.now();
-          var kept = [];
-          for (var i = 0; i < t.items.length; i++) {
-            var e = t.items[i];
-            var alive = e && typeof e.deletedAt === 'number' && (now - e.deletedAt) < SCENARIO_TRASH_RETENTION_MS;
-            if (alive) kept.push(e);
-            else if (e && e.scenario && e.scenario.id) purgedIds.push(e.scenario.id);
-          }
-          if (kept.length !== t.items.length) {
-            t.items = kept;
-            writeScenarioTrash(t);
-            purgedIds.forEach(function (sid) { removeScenarioHtml(sid); });
-          }
-        }
+        var removed = purgeExpiredTrashEntries(t);
+        if (removed > 0) writeScenarioTrash(t);
         return t;
       }
 
@@ -6771,24 +6699,20 @@
         if (!confirm('Удалить сценарий из корзины без возможности восстановления?')) return false;
         var trash = readScenarioTrash();
         var n = trash.items.length;
-        /* Запомним id удаляемых сценариев, чтобы снести их html-ключи. */
-        var killedIds = [];
         trash.items = trash.items.filter(function (e) {
-          if (e.trashId === trashId) {
-            if (e && e.scenario && e.scenario.id) killedIds.push(e.scenario.id);
-            return false;
-          }
-          return true;
+          return e.trashId !== trashId;
         });
         if (trash.items.length === n) return false;
         if (!writeScenarioTrash(trash)) {
           alert('Не удалось сохранить корзину.');
           return false;
         }
-        /* Чистим осиротевшие per-scenario html-ключи. Делаем после успешной записи trash. */
-        killedIds.forEach(function (sid) { removeScenarioHtml(sid); });
-        try { renderAssistantTrashList(); } catch (eR) {}
-        try { markDirty(); } catch (eM) {}
+        try {
+          renderAssistantTrashList();
+        } catch (eR) {}
+        try {
+          markDirty();
+        } catch (eM) {}
         return true;
       }
 
@@ -6823,29 +6747,10 @@
         } catch (eJ) {
           return false;
         }
-        var oldScenId = scen.id;
         var idBusy = bundle.items.some(function (it) {
           return it.id === scen.id;
         });
         if (idBusy) scen.id = uid();
-        /* Если id поменялся — ренеймим html-ключ. */
-        if (oldScenId && scen.id !== oldScenId) {
-          var oldHtml = readScenarioHtml(oldScenId);
-          /* Учитываем legacy-снапшоты trash: если html лежал inline в scenario.html, возьмём его. */
-          if (!oldHtml && typeof entry.scenario.html === 'string') oldHtml = entry.scenario.html;
-          if (oldHtml) {
-            if (!writeScenarioHtml(scen.id, oldHtml)) {
-              alert('Не удалось восстановить сценарий (память браузера).');
-              return false;
-            }
-            removeScenarioHtml(oldScenId);
-          }
-        } else if (typeof entry.scenario.html === 'string') {
-          /* Legacy: html лежал inline в trash, в per-scenario ключе пусто. Перенесём. */
-          var inlineHtml = readScenarioHtml(scen.id);
-          if (!inlineHtml) writeScenarioHtml(scen.id, entry.scenario.html);
-        }
-        if (typeof scen.html === 'string') { try { delete scen.html; } catch (eDr) { scen.html = undefined; } }
         scen.updatedAt = Date.now();
         bundle.items.push(scen);
         appendAssistantOrderId(bundle, scen.id);
@@ -6992,19 +6897,10 @@
         copy.id = uid();
         copy.name = String(copy.name || 'Сценарий').trim() + ' (копия)';
         copy.updatedAt = Date.now();
-        /* Скопировать HTML из per-scenario ключа src -> новый ключ copy. */
-        var srcHtml = readScenarioHtml(src.id);
-        if (!srcHtml && typeof src.html === 'string') srcHtml = src.html; /* pre-migration fallback */
-        if (!writeScenarioHtml(copy.id, srcHtml || '')) {
-          alert('Не удалось сохранить копию (память браузера).');
-          return false;
-        }
-        if (typeof copy.html === 'string') { try { delete copy.html; } catch (eDc) { copy.html = undefined; } }
         bundle.items.push(copy);
         insertAssistantOrderAfter(bundle, copy.id, scenarioId);
         bundle.activeId = copy.id;
         if (!writeScenarioBundle(bundle)) {
-          removeScenarioHtml(copy.id); /* откатим осиротевший html-ключ */
           alert('Не удалось сохранить копию. Освободите память сайта (кэш/данные) и попробуйте снова.');
           return false;
         }
@@ -7105,18 +7001,15 @@
           var bundle = readScenarioBundle();
           var sc = currentScenarioMeta(bundle);
           if (bundle && sc) {
-            writeScenarioHtml(sc.id, prevHtml);
-            if (typeof sc.html === 'string') { try { delete sc.html; } catch (eDhU) { sc.html = undefined; } }
+            sc.html = prevHtml;
             sc.updatedAt = Date.now();
             writeScenarioBundle(bundle);
           }
           var state = localStorage.getItem(STORAGE_KEY);
           if (state) {
-            try {
-              var parsed = JSON.parse(state);
-              parsed.html = prevHtml;
-              safeSetItem(STORAGE_KEY, JSON.stringify(parsed));
-            } catch (ePu) {}
+            var parsed = JSON.parse(state);
+            parsed.html = prevHtml;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
           }
         } catch (e) {}
         triggerHaptic('medium');
@@ -7140,26 +7033,8 @@
         if (tit && tit !== DEFAULT_SCENARIO_TITLE) scenarioName.value = tit;
       }
 
-      var _renderDailyPlanSig = null;
-
-      function _dailyPlanSignature(bundle) {
-        if (!bundle || !Array.isArray(bundle.items)) return '';
-        var parts = [];
-        for (var i = 0; i < bundle.items.length; i++) {
-          var it = bundle.items[i];
-          if (!it) continue;
-          parts.push((it.date || '') + '' + (it.targetCount || '') + '' + (it.status || ''));
-        }
-        return parts.join('');
-      }
-
-      function invalidateDailyPlanSignature() { _renderDailyPlanSig = null; }
-
       function renderDailyPlan(bundle) {
         if (!planSummary || !planList) return;
-        var sig = _dailyPlanSignature(bundle);
-        if (sig === _renderDailyPlanSig) return;
-        _renderDailyPlanSig = sig;
         var items = (bundle && bundle.items) ? bundle.items.slice() : [];
         if (!items.length) {
           planSummary.textContent = 'Нет данных.';
@@ -7244,37 +7119,8 @@
         if (!restored) scenarioBlockFilter.value = '';
       }
 
-      var _renderScenarioListSig = null;
-
-      function _scenarioListSignature(bundle) {
-        if (!bundle || !Array.isArray(bundle.items)) return '';
-        /*  — между полями записи,  — между записями. Никогда не встретится в пользовательском вводе. */
-        var parts = [bundle.activeId || ''];
-        parts.push(scenarioFilter ? scenarioFilter.value : '');
-        parts.push(scenarioBlockFilter ? scenarioBlockFilter.value : '');
-        for (var i = 0; i < bundle.items.length; i++) {
-          var it = bundle.items[i];
-          if (!it) continue;
-          parts.push(
-            (it.id || '') + '' +
-            (it.name || '') + '' +
-            (it.date || '') + '' +
-            (it.targetCount || '') + '' +
-            (it.status || '') + '' +
-            (it.shootBlock || '')
-          );
-        }
-        if (Array.isArray(bundle.assistantOrderIds)) parts.push(bundle.assistantOrderIds.join('|'));
-        return parts.join('');
-      }
-
-      function invalidateScenarioListSignature() { _renderScenarioListSig = null; }
-
       function renderScenarioList(bundle) {
         if (!scenarioSelect) return;
-        var sig = _scenarioListSignature(bundle);
-        if (sig === _renderScenarioListSig) return;
-        _renderScenarioListSig = sig;
         function isInCurrentWeek(dateStr) {
           if (!dateStr) return false;
           var d = new Date(dateStr + 'T00:00:00');
@@ -8922,17 +8768,9 @@
             logo: { x: x.value, y: y.value, scale: s.value },
             prep: mergedPrep
           };
-          if (!safeSetItem(STORAGE_KEY, JSON.stringify(state))) {
-            setStatus('Не удалось сохранить (память браузера)', true);
-            return;
-          }
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 
-          /* Per-scenario HTML — отдельный ключ, не блоб целиком. Bundle хранит только метаданные. */
-          if (!writeScenarioHtml(current.id, state.html)) {
-            setStatus('Не удалось сохранить (память браузера)', true);
-            return;
-          }
-          if (typeof current.html === 'string') { try { delete current.html; } catch (eDh) { current.html = undefined; } }
+          current.html = state.html;
           current.logo = state.logo;
           current.prep = mergedPrep;
           current.updatedAt = Date.now();
@@ -8997,19 +8835,15 @@
           targetCount: targetCount,
           status: 'draft',
           shootBlock: shootBlock,
+          html: buildEmptyScenarioHtml(wrap ? wrap.innerHTML : ''),
           logo: { x: x.value, y: y.value, scale: s.value },
           prep: getPrep(),
           updatedAt: Date.now()
         };
-        if (!writeScenarioHtml(id, buildEmptyScenarioHtml(wrap ? wrap.innerHTML : ''))) {
-          alert('Не удалось создать шаблон (память браузера).');
-          return false;
-        }
         bundle.items.push(sc);
         appendAssistantOrderId(bundle, id);
         bundle.activeId = id;
         if (!writeScenarioBundle(bundle)) {
-          removeScenarioHtml(id); /* осиротевший html-ключ */
           alert('Не удалось создать шаблон. Освободите память сайта (кэш/данные) и попробуйте снова.');
           return false;
         }
@@ -10304,11 +10138,8 @@
               applyLogo();
             }
             if (sc && wrap) {
-              /* Сначала per-scenario ключ; fallback на sc.html (старый bundle, до миграции). */
-              var htmlBlob = readScenarioHtml(sc.id);
-              if (!htmlBlob && typeof sc.html === 'string') htmlBlob = sc.html;
-              htmlBlob = htmlBlob && String(htmlBlob).trim();
-              wrap.innerHTML = htmlBlob ? htmlBlob : buildEmptyScenarioHtml(wrap.innerHTML);
+              var htmlBlob = sc.html && String(sc.html).trim();
+              wrap.innerHTML = htmlBlob ? sc.html : buildEmptyScenarioHtml(wrap.innerHTML);
               migrateSceneEditableHostsToDiv(wrap);
               refreshDomRefs();
               ensureMainSceneUI();
@@ -10395,11 +10226,11 @@
             targetCount: '',
             status: 'draft',
             shootBlock: '',
+            html: buildEmptyScenarioHtml(wrap ? wrap.innerHTML : ''),
             logo: { x: x.value, y: y.value, scale: s.value },
             prep: getPrep(),
             updatedAt: Date.now()
           };
-          writeScenarioHtml(first.id, buildEmptyScenarioHtml(wrap ? wrap.innerHTML : ''));
           var initialBundle = { activeId: first.id, items: [first] };
           writeScenarioBundle(initialBundle);
           renderScenarioList(initialBundle);
