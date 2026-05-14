@@ -6057,6 +6057,130 @@
         })();
       } catch (eMig) {}
 
+      /* ===== ДИАГНОСТИКА (только наблюдение, не меняет логику) ===== */
+      try {
+        (function setupCrashDiagnostics() {
+          var LOG_KEY = 'samscenes-diag-log-v1';
+          var MAX_LOGS = 200;
+          var L = typeof localStorage !== 'undefined' ? localStorage : null;
+          if (!L) return;
+
+          function nowIso() {
+            try { return new Date().toISOString(); } catch (e) { return ''; }
+          }
+
+          function memMB() {
+            try {
+              if (performance && performance.memory && performance.memory.usedJSHeapSize) {
+                return +(performance.memory.usedJSHeapSize / 1048576).toFixed(1);
+              }
+            } catch (e) {}
+            return null;
+          }
+
+          function lsMB() {
+            try {
+              var total = 0;
+              for (var i = 0; i < L.length; i++) {
+                var k = L.key(i);
+                if (!k) continue;
+                var v = L.getItem(k);
+                total += (k.length + (v ? v.length : 0)) * 2;
+              }
+              return +(total / 1048576).toFixed(2);
+            } catch (e) { return null; }
+          }
+
+          function push(kind, data) {
+            try {
+              var raw = L.getItem(LOG_KEY);
+              var logs;
+              try { logs = raw ? JSON.parse(raw) : []; } catch (eP) { logs = []; }
+              if (!Array.isArray(logs)) logs = [];
+              logs.push({ t: nowIso(), k: kind, d: data || null, m: memMB(), ls: lsMB() });
+              while (logs.length > MAX_LOGS) logs.shift();
+              L.setItem(LOG_KEY, JSON.stringify(logs));
+            } catch (e) {}
+          }
+
+          window._samDiag = { push: push, mem: memMB, ls: lsMB };
+
+          push('boot', {
+            url: location.href.slice(0, 200),
+            ua: (navigator.userAgent || '').slice(0, 200),
+            standalone: !!(window.navigator && window.navigator.standalone),
+            online: navigator.onLine,
+            visibility: document.visibilityState
+          });
+
+          window.addEventListener('error', function (e) {
+            push('error', {
+              msg: ((e && e.message) || '').slice(0, 300),
+              src: ((e && e.filename) || '').slice(0, 200),
+              ln: (e && e.lineno) || 0,
+              col: (e && e.colno) || 0,
+              stack: (e && e.error && e.error.stack) ? String(e.error.stack).slice(0, 800) : ''
+            });
+          });
+
+          window.addEventListener('unhandledrejection', function (e) {
+            push('promiseRejection', {
+              reason: String((e && e.reason) || '').slice(0, 500)
+            });
+          });
+
+          window.addEventListener('pagehide', function (e) {
+            push('pagehide', { persisted: !!(e && e.persisted) });
+          });
+
+          window.addEventListener('beforeunload', function () {
+            push('beforeunload', null);
+          });
+
+          document.addEventListener('visibilitychange', function () {
+            push('visibility', { state: document.visibilityState });
+          });
+
+          /* heartbeat — каждые 10 сек, если страница видима */
+          setInterval(function () {
+            if (document.hidden) return;
+            push('heartbeat', null);
+          }, 10000);
+
+          /* сэмплированный скролл (не чаще раз в 2 сек) */
+          var scrollLastLogTs = 0;
+          window.addEventListener('scroll', function () {
+            var now = Date.now();
+            if (now - scrollLastLogTs < 2000) return;
+            scrollLastLogTs = now;
+            push('scroll', { y: window.pageYOffset || 0 });
+          }, { passive: true });
+
+          /* Просмотр логов: открыть https://sambruev.github.io/abakan-script/#diag-log */
+          if (location.hash === '#diag-log') {
+            setTimeout(function () {
+              try {
+                var raw = L.getItem(LOG_KEY) || '[]';
+                var pretty;
+                try { pretty = JSON.stringify(JSON.parse(raw), null, 2); }
+                catch (eP) { pretty = raw; }
+                document.documentElement.innerHTML =
+                  '<body style="margin:0;background:#000;color:#0f0;font:11px Menlo,monospace;padding:10px;">' +
+                  '<div style="position:fixed;top:0;right:0;padding:6px 10px;background:#222;color:#fff;font-size:12px;border-bottom-left-radius:6px">' +
+                    '<button onclick="localStorage.removeItem(\'' + LOG_KEY + '\');location.reload()" style="background:#900;color:#fff;border:0;padding:4px 8px;border-radius:4px;font:11px monospace">CLEAR</button>' +
+                    '<button onclick="(function(){var t=document.querySelector(\'pre\').textContent;navigator.clipboard&&navigator.clipboard.writeText(t)})()" style="background:#06c;color:#fff;border:0;padding:4px 8px;border-radius:4px;font:11px monospace;margin-left:6px">COPY</button>' +
+                  '</div>' +
+                  '<pre style="white-space:pre-wrap;word-break:break-all;margin:40px 0 0">' +
+                    pretty.replace(/[&<>]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]; }) +
+                  '</pre>' +
+                  '</body>';
+              } catch (e) {}
+            }, 50);
+          }
+        })();
+      } catch (eDiag) {}
+      /* ===== /ДИАГНОСТИКА ===== */
+
       /**
        * Откатная миграция: возвращает inline html из временного split-формата (samscenes-html-*)
        * обратно в bundle.items[i].html. Нужна, чтобы пользователи, у кого PWA уже частично
