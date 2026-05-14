@@ -16,6 +16,7 @@
   <meta name="description" content="Sam Scenes — сценарий съёмки (одна страница для GitHub Pages).">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
+  <link rel="manifest" href="manifest.json">
 
   <title>Sam Scenes (v288)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
@@ -6307,7 +6308,7 @@
       }
 
       var autosaveTO = null;
-      var AUTOSAVE_MS = 40;
+      var AUTOSAVE_MS = 1500;
       var undoSnapshotTO = null;
       var UNDO_SNAPSHOT_DEBOUNCE_MS = 450;
       var undoHistory = [];
@@ -6940,6 +6941,19 @@
         }
         var prevHtml = undoHistory.pop();
         try {
+          // Применяем HTML прямо в DOM — без перезагрузки страницы
+          if (wrap) {
+            wrap.innerHTML = prevHtml;
+            refreshDomRefs();
+            ensureMainSceneUI();
+            Array.prototype.forEach.call(document.querySelectorAll('.scene-time-wrap[data-time-filled]'), function (el) { el.removeAttribute('data-time-filled'); });
+            repairSceneTimeSelectsInDom(wrap);
+            ensureShotlistLocationsMinCount(4);
+            migrateShotlistPiecesMarkup(wrap);
+            ensureShotlistPieceSelectOptions(wrap);
+            wireSceneStackTimelineContinuity();
+            upgradeSayLines();
+          }
           var bundle = readScenarioBundle();
           var sc = currentScenarioMeta(bundle);
           if (bundle && sc) {
@@ -6955,8 +6969,7 @@
           }
         } catch (e) {}
         triggerHaptic('medium');
-        saveScrollForNextLoad();
-        location.reload();
+        setStatus('Отменено', false);
       }
 
       function currentScenarioMeta(bundle) {
@@ -12577,6 +12590,8 @@
           var tpOv = document.getElementById('teleprompter-overlay');
           if (tpOv && tpOv.classList.contains('open')) return;
           if (document.querySelector('dialog[open]')) return;
+          var ae = document.activeElement;
+          if (ae && (ae.isContentEditable || ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.tagName === 'SELECT')) return;
           try {
             flushSave();
           } catch (eFlush) {}
@@ -12864,6 +12879,14 @@
         } catch (eSyncBlur) {}
       });
     })();
+  </script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('sw.js').catch(function () {});
+      });
+    }
   </script>
 
 </body>
