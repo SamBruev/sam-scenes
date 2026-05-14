@@ -2537,7 +2537,9 @@
       font-weight: 700;
       padding: 7px 14px;
       color-scheme: dark;
-      min-width: min(17rem, 76vw);
+      min-width: 0;
+      width: auto;
+      max-width: 100%;
       text-align: center;
       box-shadow: none;
       outline: none;
@@ -2554,13 +2556,13 @@
       align-items: center;
       justify-content: center;
       gap: 8px 16px;
-      flex-wrap: wrap;
-      width: 100%;
+      flex-wrap: nowrap;
+      width: auto;
       max-width: 100%;
-      margin: 0;
-      padding: 6px 18px 8px;
+      margin: 0 auto;
+      padding: 6px 14px 8px;
       box-sizing: border-box;
-      border-radius: 0;
+      border-radius: 12px;
       border: none;
       background: transparent;
       color: rgba(246, 242, 236, 0.96);
@@ -8989,10 +8991,31 @@
         return true;
       }
 
+      /* Метка последнего пользовательского взаимодействия — чтобы autosave/undo-snapshot не
+         блокировали main thread, пока пользователь активно тыкает в выпадашки и поля. */
+      var _lastUiInteractionTs = 0;
+      function _markUiInteraction() { _lastUiInteractionTs = Date.now(); }
+      try {
+        document.addEventListener('touchstart', _markUiInteraction, { passive: true, capture: true });
+        document.addEventListener('pointerdown', _markUiInteraction, { passive: true, capture: true });
+        document.addEventListener('change', _markUiInteraction, { passive: true, capture: true });
+        document.addEventListener('focusin', _markUiInteraction, { capture: true });
+      } catch (eUiTrack) {}
+      var UI_QUIESCE_MS = 1200; /* «тишина» от пользователя до того как разрешено серьёзное сохранение */
+
       function scheduleAutosave() {
         clearTimeout(autosaveTO);
         autosaveTO = setTimeout(function () {
           autosaveTO = null;
+          /* Если пользователь только что что-то тыкнул — отложить (не блокировать UI JSON.stringify-ом).
+             Также пропускаем autosave если фокус на интерактивном элементе (открыта выпадашка/ввод). */
+          var idleFor = Date.now() - _lastUiInteractionTs;
+          var ae = document.activeElement;
+          var aeBusy = ae && (ae.isContentEditable || ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.tagName === 'SELECT');
+          if (idleFor < UI_QUIESCE_MS || aeBusy) {
+            scheduleAutosave();
+            return;
+          }
           requestAnimationFrame(function () {
             requestAnimationFrame(function () {
               try {
@@ -9003,12 +9026,23 @@
         }, AUTOSAVE_MS);
       }
 
+      function _doUndoSnapshotIfIdle() {
+        undoSnapshotTO = null;
+        /* Undo-снапшот делает wrap.innerHTML — это может занять 100-300мс на большом DOM.
+           Откладываем если пользователь активно работает. */
+        var idleFor = Date.now() - _lastUiInteractionTs;
+        var ae = document.activeElement;
+        var aeBusy = ae && (ae.isContentEditable || ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.tagName === 'SELECT');
+        if (idleFor < UI_QUIESCE_MS || aeBusy) {
+          undoSnapshotTO = setTimeout(_doUndoSnapshotIfIdle, UNDO_SNAPSHOT_DEBOUNCE_MS);
+          return;
+        }
+        rememberUndoState();
+      }
+
       function markDirty() {
         if (undoSnapshotTO) clearTimeout(undoSnapshotTO);
-        undoSnapshotTO = setTimeout(function () {
-          undoSnapshotTO = null;
-          rememberUndoState();
-        }, UNDO_SNAPSHOT_DEBOUNCE_MS);
+        undoSnapshotTO = setTimeout(_doUndoSnapshotIfIdle, UNDO_SNAPSHOT_DEBOUNCE_MS);
         setStatus('Сохраню…', true);
         scheduleAutosave();
       }
