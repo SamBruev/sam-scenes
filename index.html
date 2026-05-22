@@ -6289,6 +6289,8 @@
       /** Авто-перезагрузка страницы: подтягивает свежую версию с сервера; данные сценариев — из localStorage этой же вкладки. */
       var AUTO_PAGE_RELOAD_ENABLED = false;
       var AUTO_PAGE_RELOAD_MS = 3 * 60 * 1000;
+      /** Свайп сверху вниз (pull-down) — перезагрузка выкл.; остаётся свайп влево. */
+      var PULL_DOWN_RELOAD_ENABLED = false;
       /** Не перехватывать вертикальный pull на интерактиве; иначе <summary> в <details> не раскрывается. */
       var PULL_SKIP_INTERACTIVE_BASE =
         'input, textarea, select, button, summary, details, a, .time-leading, [contenteditable="true"], .field-prep-date, .prep-date-wrap';
@@ -12361,7 +12363,7 @@
             swipeCancelled = false;
             swipeIntentHorizontal = false;
             var tgt = gestureHitTargetFromTouchLike(e);
-            if (skipPull(tgt)) {
+            if (skipPull(tgt) || !PULL_DOWN_RELOAD_ENABLED) {
               pullArmed = false;
             } else {
               pullArmed = scrollTopNow() <= TOP_EPS;
@@ -12393,6 +12395,7 @@
             var dx = t.clientX - startX;
             var dy = t.clientY - startY;
             if (
+              PULL_DOWN_RELOAD_ENABLED &&
               pullArmed &&
               scrollTopNow() <= TOP_EPS &&
               dy > 12 &&
@@ -12530,7 +12533,7 @@
               didSwipeLeft && !didSwipeRight && Math.abs(swipeMinDx) > swipeMaxDx + 6;
             pullArmed = false;
             swipeArmed = false;
-            if (didPull) scheduleReloadAfterPullGesture({ fromSwipe: false });
+            if (didPull && PULL_DOWN_RELOAD_ENABLED) scheduleReloadAfterPullGesture({ fromSwipe: false });
             else if (didSwipeRight) {
               resetPullHint();
               resetSwipeHint();
