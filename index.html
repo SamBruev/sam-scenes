@@ -6287,6 +6287,7 @@
       var SCENARIO_TRASH_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
       var LEGACY_SCENARIO_KEYS = ['samscenes-scenarios-v1'];
       /** Авто-перезагрузка страницы: подтягивает свежую версию с сервера; данные сценариев — из localStorage этой же вкладки. */
+      var AUTO_PAGE_RELOAD_ENABLED = false;
       var AUTO_PAGE_RELOAD_MS = 3 * 60 * 1000;
       /** Не перехватывать вертикальный pull на интерактиве; иначе <summary> в <details> не раскрывается. */
       var PULL_SKIP_INTERACTIVE_BASE =
@@ -12784,6 +12785,7 @@
       }
 
       function wirePeriodicPageReload() {
+        if (!AUTO_PAGE_RELOAD_ENABLED) return;
         if (wirePeriodicPageReload._done) return;
         wirePeriodicPageReload._done = true;
         setInterval(function () {
