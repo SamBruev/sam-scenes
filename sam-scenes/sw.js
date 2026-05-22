@@ -1,11 +1,13 @@
 // Sam Scenes — Service Worker
 // Стратегия: Network-first для index.html (всегда свежий), Cache-first для остальных файлов
 
-var CACHE_NAME = 'samscenes-v1';
+var CACHE_NAME = 'samscenes-v308';
 var CORE_FILES = [
-  '/abakan-script/',
-  '/abakan-script/index.html',
-  '/abakan-script/manifest.json'
+  '/abakan-script/sam-scenes/',
+  '/abakan-script/sam-scenes/index.html',
+  '/abakan-script/sam-scenes/manifest.json',
+  '/abakan-script/sam-scenes/apple-touch-icon.png',
+  '/abakan-script/sam-scenes/favicon-192.png'
 ];
 
 self.addEventListener('install', function (e) {
@@ -41,7 +43,7 @@ self.addEventListener('fetch', function (e) {
         })
         .catch(function () {
           return caches.match(e.request).then(function (cached) {
-            return cached || caches.match('/abakan-script/index.html');
+            return cached || caches.match('/abakan-script/sam-scenes/index.html');
           });
         })
     );

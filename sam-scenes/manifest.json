@@ -2,8 +2,8 @@
   "name": "Sam Scenes",
   "short_name": "Sam Scenes",
   "description": "Сценарий съёмки — быстро и удобно",
-  "start_url": "/abakan-script/",
-  "scope": "/abakan-script/",
+  "start_url": "/abakan-script/sam-scenes/",
+  "scope": "/abakan-script/sam-scenes/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#000000",
@@ -14,7 +14,7 @@
       "src": "favicon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "apple-touch-icon.png",

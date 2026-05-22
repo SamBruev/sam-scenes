@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v288)</title>
+  <title>Sam Scenes (v308)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -7126,6 +7126,12 @@
             ensureShotlistPieceSelectOptions(wrap);
             wireSceneStackTimelineContinuity();
             upgradeSayLines();
+            // P0-fix: ребайндинг paste-хендлеров на новый DOM после undo
+            migrateSceneEditableHostsToDiv(wrap);
+            bindAllSayLimits(wrap);
+            bindNoteIntercutPastePlain(wrap);
+            ensureSayReplaceButtons(wrap);
+            refreshNoteIntercutHasTextClasses(wrap);
           }
           var bundle = readScenarioBundle();
           var sc = currentScenarioMeta(bundle);
@@ -10309,6 +10315,11 @@
               ensureShotlistLocationsMinCount(4);
               migrateShotlistPiecesMarkup(wrap);
               ensureShotlistPieceSelectOptions(wrap);
+              // P0-fix: ребайндинг paste-хендлеров на новый DOM (skipReload-путь)
+              bindAllSayLimits(wrap);
+              bindNoteIntercutPastePlain(wrap);
+              ensureSayReplaceButtons(wrap);
+              refreshNoteIntercutHasTextClasses(wrap);
             }
             if (sc && sc.prep) {
               prepIds.forEach(function (id) {
@@ -12538,8 +12549,18 @@
               resetPullHint();
               resetSwipeHint();
               openAssistantDrawer();
-            } else if (didSwipeLeftDom) scheduleReloadAfterPullGesture({ fromSwipe: true });
-            else {
+            } else if (didSwipeLeftDom) {
+              // P1-fix: не перезагружать если курсор в contenteditable / input (IME-composition)
+              var aeSwipe = document.activeElement;
+              var editingNow = aeSwipe && (aeSwipe.isContentEditable ||
+                aeSwipe.tagName === 'INPUT' || aeSwipe.tagName === 'TEXTAREA' ||
+                aeSwipe.tagName === 'SELECT');
+              if (editingNow) {
+                resetSwipeHint();
+              } else {
+                scheduleReloadAfterPullGesture({ fromSwipe: true });
+              }
+            } else {
               resetPullHint();
               resetSwipeHint();
             }
