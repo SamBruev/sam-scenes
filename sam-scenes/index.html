@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v308)</title>
+  <title>Sam Scenes (v314)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -385,6 +385,9 @@
     .wrap > * {
       transform: translateY(var(--pull-stack-y, 0px));
       transition: none;
+    }
+
+    html.pull-stack-active .wrap > * {
       will-change: transform;
     }
 
@@ -447,9 +450,10 @@
       height: auto;
       /* Без полей сверху/снизу у стекла; справа 0 — шторка-подсказка вплотную к краю панели; отступ текста в .assistant-drawer-scroll */
       padding: 0 0 0 calc(14px + env(safe-area-inset-left, 0px));
-      background: rgba(10, 9, 8, 0.82);
-      backdrop-filter: blur(22px) saturate(108%);
-      -webkit-backdrop-filter: blur(22px) saturate(108%);
+      /* v313 — эксперимент: у шторки убрано живое размытие (backdrop-filter blur).
+         Именно постоянный пересчёт размытия ронял слайд до ~12 кадров на iOS Safari.
+         Панель теперь плотная, без «стекла». */
+      background: var(--ui-popup-bg);
       border-right: 1px solid var(--ui-select-border);
       border-radius: 0;
       box-shadow: 10px 0 48px rgba(0, 0, 0, 0.2);
@@ -468,6 +472,15 @@
     html.assistant-drawer-tracking {
       overflow: hidden;
       overscroll-behavior: none;
+    }
+
+    /* Пока тянем шторку — глушим выделение текста/голубую подсветку iOS на всём экране. */
+    html.assistant-drawer-tracking,
+    html.assistant-drawer-tracking * {
+      -webkit-user-select: none !important;
+      user-select: none !important;
+      -webkit-touch-callout: none;
+      -webkit-tap-highlight-color: transparent;
     }
 
     html.assistant-drawer-tracking .assistant-drawer {
@@ -577,7 +590,19 @@
       cursor: pointer;
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+      /* #5: кнопка-шторка — без фокус-обводки (голубоватая рамка при тапе на iOS). */
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
       transition: opacity 0.2s ease, box-shadow 0.22s ease;
+    }
+
+    .assistant-open-strip:focus,
+    .assistant-open-strip:focus-visible {
+      outline: none;
     }
 
     .assistant-open-strip::before {
@@ -690,6 +715,12 @@
       cursor: pointer;
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
       display: flex;
       flex-direction: column;
       align-items: stretch;
@@ -749,6 +780,13 @@
       content: '\203A';
       display: block;
       line-height: 1;
+    }
+
+    /* Шторка закрытия — стрелка статична по центру, как «›» у шторки открытия. */
+    .assistant-drawer-dismiss-chevron .assistant-drawer-scroll-arrow {
+      top: 50% !important;
+      bottom: auto !important;
+      transform: translate(-50%, -50%) !important;
     }
 
     .assistant-drawer-dismiss-chevron:active {
@@ -2859,6 +2897,24 @@
       align-self: baseline;
       white-space: nowrap;
       line-height: 1.25;
+      font-size: 1.2em;
+    }
+
+    /* Пунктир на одной строке со словом «Говорю» — как у «Примечание» / «Перебивка». */
+    .scene-main > .line-say::after {
+      content: "\200B";
+      grid-column: 2;
+      grid-row: 1;
+      align-self: baseline;
+      min-width: 0.25em;
+      font-size: 1.2em;
+      line-height: 1.25;
+      border-bottom: 1px dashed rgba(200, 198, 195, 0.38);
+      pointer-events: none;
+    }
+
+    .scene-main > .line-say:focus-within::after {
+      border-bottom-color: rgba(200, 198, 195, 0.52);
     }
 
     .scene-main > .line-say .say-editable {
@@ -2990,28 +3046,22 @@
       flex: 1 1 0;
       min-width: 0.25em;
       height: 0;
+      /* Пунктир на одной строке со словом-меткой («Примечание» / «Перебивка»). */
       border-bottom: 1px dashed rgba(200, 198, 195, 0.38);
+    }
+
+    .scene-main > .line-note:focus-within > b::after,
+    .scene-main > .intercut:focus-within > b::after {
+      border-bottom-color: rgba(200, 198, 195, 0.52);
     }
 
     .scene-main > .line-note .note-editable {
       grid-row: 2;
     }
 
+    /* Нижний пунктир под полем убран — подчёркивание теперь на строке метки (см. > b::after). */
     .scene-main > .line-note::after {
-      content: "";
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      border-bottom: 1px dashed rgba(200, 198, 195, 0.38);
-      pointer-events: none;
-    }
-
-    .scene-main > .line-note:focus-within::after {
-      border-bottom-color: rgba(200, 198, 195, 0.52);
-    }
-
-    .scene-main > .line-note:has(.note-editable.has-text)::after {
+      content: none;
       display: none;
     }
 
@@ -3041,21 +3091,9 @@
       grid-row: 2;
     }
 
+    /* Нижний пунктир под полем убран — подчёркивание теперь на строке метки (см. > b::after). */
     .scene-main > .intercut::after {
-      content: "";
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      border-bottom: 1px dashed rgba(200, 198, 195, 0.38);
-      pointer-events: none;
-    }
-
-    .scene-main > .intercut:focus-within::after {
-      border-bottom-color: rgba(200, 198, 195, 0.52);
-    }
-
-    .scene-main > .intercut:has(.intercut-text.has-text)::after {
+      content: none;
       display: none;
     }
 
@@ -3065,7 +3103,7 @@
     }
 
     /* Блок «важно»: спокойная карточка-напоминание, чипы вместо списка с отступами */
-    .card-prep .field-prep-important {
+    .field-prep-important {
       gap: 12px;
       padding: 14px 14px 16px;
       background: rgba(0, 0, 0, 0.45);
@@ -3073,7 +3111,177 @@
       border-radius: 16px;
     }
 
-    .card-prep .field-prep-important .prep-important-head {
+    /* Карточка «Подготовка» не должна быть containing block (transform/will-change),
+       иначе position:fixed у закреплённого блока «Важно» считается от карточки, а не от экрана. */
+    .card.card-prep {
+      transform: none;
+      will-change: auto;
+    }
+
+    /* Блок «Важно» закреплён поверх страницы, пока чеклист не заполнен полностью. */
+    .field-prep-important.prep-important-pinned {
+      position: fixed;
+      left: max(12px, env(safe-area-inset-left));
+      right: max(12px, env(safe-area-inset-right));
+      bottom: calc(env(safe-area-inset-bottom) + 12px);
+      width: auto;
+      margin: 0 auto;
+      max-width: 956px;
+      box-sizing: border-box;
+      z-index: 1000;
+      background: rgba(8, 7, 6, 0.97);
+      box-shadow:
+        0 -10px 30px rgba(0, 0, 0, 0.62),
+        0 0 0 1px rgba(255, 255, 255, 0.06);
+    }
+
+    body.assistant-drawer-open .field-prep-important.prep-important-pinned {
+      /* visibility вместо display:none — не вызывает reflow при открытии/закрытии меню (без дёрганья). */
+      visibility: hidden;
+    }
+
+    /* #4: анимация блока «Важно» в момент, когда отмечены все пункты. */
+    @keyframes prepImportantDonePulse {
+      0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(120, 220, 150, 0);
+        border-color: rgba(255, 255, 255, 0.08);
+      }
+      30% {
+        transform: scale(1.04);
+        box-shadow: 0 0 0 3px rgba(120, 220, 150, 0.5), 0 0 32px 8px rgba(120, 220, 150, 0.5);
+        border-color: rgba(120, 220, 150, 0.78);
+      }
+      62% {
+        transform: scale(1.008);
+      }
+      100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(120, 220, 150, 0);
+        border-color: rgba(255, 255, 255, 0.08);
+      }
+    }
+
+    .field-prep-important.prep-important-done-pulse {
+      animation: prepImportantDonePulse 1.05s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* #2: короткая подсветка блока «Важно» при переходе по тапу на значок-напоминание. */
+    @keyframes prepImportantAttention {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(255, 95, 85, 0);
+        border-color: rgba(255, 255, 255, 0.08);
+      }
+      32% {
+        box-shadow: 0 0 0 3px rgba(255, 95, 85, 0.52), 0 0 26px 5px rgba(255, 95, 85, 0.32);
+        border-color: rgba(255, 95, 85, 0.72);
+      }
+    }
+
+    .field-prep-important.prep-important-attention {
+      animation: prepImportantAttention 1.05s ease-in-out;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .field-prep-important.prep-important-done-pulse,
+      .field-prep-important.prep-important-attention {
+        animation: none;
+      }
+    }
+
+    /* #2: плавающий значок-напоминание — виден везде, пока чеклист «Важно» не заполнен. */
+    .prep-important-reminder {
+      position: fixed;
+      left: 50%;
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
+      transform: translateX(-50%) translateY(12px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+      padding: 8px 13px;
+      border: 1px solid rgba(255, 95, 85, 0.5);
+      border-radius: 999px;
+      background: rgba(22, 13, 12, 0.94);
+      color: #ff6a5f;
+      font-family: var(--brand-serif, inherit);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      max-width: calc(100vw - 24px);
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+      -webkit-tap-highlight-color: transparent;
+      -webkit-user-select: none;
+      user-select: none;
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.26s ease, transform 0.26s cubic-bezier(0.22, 0.9, 0.28, 1);
+    }
+
+    .prep-important-reminder.is-visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(-50%) translateY(0);
+      animation: prepReminderPulse 2.6s ease-in-out infinite;
+    }
+
+    .prep-important-reminder:active {
+      transform: translateX(-50%) translateY(0) scale(0.96);
+    }
+
+    .prep-important-reminder-icon {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    .prep-important-reminder-text {
+      line-height: 1;
+    }
+
+    .prep-important-reminder-count {
+      min-width: 18px;
+      height: 18px;
+      box-sizing: border-box;
+      padding: 0 5px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      background: #ff5046;
+      color: #1a0c0b;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    @keyframes prepReminderPulse {
+      0%, 100% { box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55), 0 0 0 0 rgba(255, 80, 70, 0); }
+      50% { box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55), 0 0 0 7px rgba(255, 80, 70, 0.13); }
+    }
+
+    /* Пока открыта/закрывается шторка ассистента — напоминание не висит над меню. */
+    body.assistant-drawer-open .prep-important-reminder,
+    body[data-assistant-drawer-closing='1'] .prep-important-reminder {
+      opacity: 0 !important;
+      pointer-events: none !important;
+      animation: none !important;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .prep-important-reminder.is-visible {
+        animation: none;
+      }
+    }
+
+    .field-prep-important .prep-important-head {
       display: flex;
       align-items: center;
       gap: 12px;
@@ -3081,17 +3289,17 @@
       padding: 0;
     }
 
-    .card-prep .prep-important-mark {
+    .prep-important-mark {
       flex-shrink: 0;
       width: 3px;
       align-self: stretch;
       min-height: 2.25rem;
       border-radius: 999px;
-      background: linear-gradient(180deg, rgba(200, 200, 200, 0.55) 0%, rgba(90, 90, 90, 0.35) 100%);
-      box-shadow: 0 0 8px rgba(255, 255, 255, 0.08);
+      background: linear-gradient(180deg, rgba(255, 95, 85, 0.95) 0%, rgba(190, 40, 40, 0.78) 100%);
+      box-shadow: 0 0 8px rgba(255, 80, 70, 0.32);
     }
 
-    .card-prep .prep-important-title-wrap {
+    .prep-important-title-wrap {
       display: flex;
       flex-direction: column;
       align-items: flex-start;
@@ -3099,29 +3307,29 @@
       min-width: 0;
     }
 
-    .card-prep .prep-important-title {
+    .prep-important-title {
       font-size: clamp(1rem, 2.8vw, 1.2rem);
       font-weight: 800;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: rgba(245, 232, 210, 0.98);
+      color: #ff4d4d;
     }
 
-    .card-prep .prep-important-sub {
+    .prep-important-sub {
       font-size: 0.8rem;
       font-weight: 600;
       line-height: 1.35;
       color: rgba(220, 208, 195, 0.72);
     }
 
-    .card-prep .prep-important-options {
+    .prep-important-options {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
       align-items: stretch;
     }
 
-    .card-prep .prep-important-options .prep-important-label {
+    .prep-important-options .prep-important-label {
       flex: 1 1 calc(33.333% - 8px);
       min-width: min(100%, 120px);
       margin: 0;
@@ -3133,16 +3341,16 @@
       transition: background 0.18s ease, box-shadow 0.18s ease;
     }
 
-    .card-prep .prep-important-options .prep-important-label:has(input:checked) {
+    .prep-important-options .prep-important-label:has(input:checked) {
       background: rgba(232, 201, 104, 0.12);
       box-shadow: none;
     }
 
-    .card-prep .prep-important-options .prep-important-label:hover {
+    .prep-important-options .prep-important-label:hover {
       background: rgba(255, 255, 255, 0.05);
     }
 
-    .card-prep .prep-important-options .prep-important-label:has(input:checked):hover {
+    .prep-important-options .prep-important-label:has(input:checked):hover {
       background: rgba(232, 201, 104, 0.16);
     }
 
@@ -3498,7 +3706,7 @@
       accent-color: var(--accent);
     }
 
-    .card-prep .prep-important-label {
+    .prep-important-label {
       display: flex;
       align-items: center;
       gap: 10px;
@@ -3507,7 +3715,7 @@
       user-select: none;
     }
 
-    .card-prep .prep-important-label input[type='checkbox'] {
+    .prep-important-label input[type='checkbox'] {
       width: 1.05rem;
       height: 1.05rem;
       margin: 0;
@@ -3581,10 +3789,17 @@
       font-weight: 700;
     }
 
-    /* Карточка сцены: плотнее блок «Локация кадра» → «План» → «Кадр» (не трогаем шотлист .shotlist-loc) */
+    /* Карточка сцены: плотнее блок «Локация» → «План» → «Кадр» (не трогаем шотлист .shotlist-loc) */
     .scene-main > .loc-line.scene-loc-row {
       margin-top: 8px;
       gap: 8px 12px;
+      flex-wrap: nowrap;
+    }
+
+    /* #1 — селект локации остаётся на одной строке с подписью «Локация». */
+    .scene-main > .loc-line.scene-loc-row select.scene-loc-select {
+      min-width: 0;
+      flex: 1 1 120px;
     }
 
     .scene-main > .line.scene-line-select-row {
@@ -3832,6 +4047,82 @@
 
     .pull-reload-flash.pull-reload-flash--show {
       opacity: 1;
+    }
+
+    /* Вспышка камеры при обновлении свайпом — резкий белый кадр, затем затухание. */
+    @keyframes cameraReloadFlash {
+      0% { opacity: 0; }
+      14% { opacity: 1; }
+      32% { opacity: 0.9; }
+      100% { opacity: 0; }
+    }
+
+    .pull-reload-flash.pull-reload-flash--camera {
+      background: #ffffff;
+      animation: cameraReloadFlash 0.34s ease-out forwards;
+    }
+
+    /* #5 — обновление: световая волна справа налево + плавное затемнение под reload. */
+    .reload-cinematic {
+      position: fixed;
+      inset: 0;
+      z-index: 2147483646;
+      pointer-events: none;
+      background-color: rgba(0, 0, 0, 0);
+    }
+
+    .reload-cinematic.is-playing {
+      animation: reloadWaveDim 0.64s ease-in forwards;
+    }
+
+    @keyframes reloadWaveDim {
+      0%   { background-color: rgba(0, 0, 0, 0); }
+      38%  { background-color: rgba(0, 0, 0, 0.16); }
+      72%  { background-color: rgba(0, 0, 0, 0.96); }
+      100% { background-color: rgba(0, 0, 0, 1); }
+    }
+
+    /* Световая волна — широкая вертикальная полоса тёплого света, идёт справа налево. */
+    .reload-cinematic-line {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      width: 52%;
+      opacity: 0;
+      transform: translateX(125%);
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 240, 205, 0.2) 30%,
+        rgba(255, 244, 214, 0.85) 50%,
+        rgba(255, 234, 192, 0.2) 72%,
+        transparent 100%
+      );
+      will-change: transform, opacity;
+    }
+
+    .reload-cinematic.is-playing .reload-cinematic-line {
+      animation: reloadWaveSweep 0.64s cubic-bezier(0.4, 0, 0.3, 1) forwards;
+    }
+
+    @keyframes reloadWaveSweep {
+      0%   { transform: translateX(125%); opacity: 0; }
+      18%  { opacity: 1; }
+      82%  { opacity: 1; }
+      100% { transform: translateX(-190%); opacity: 0; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .reload-cinematic.is-playing,
+      .reload-cinematic.is-playing .reload-cinematic-line {
+        animation: none;
+      }
+    }
+
+    /* Полоска-ползунок reload-свайпа убрана — остаётся только вспышка камеры. */
+    .pull-swipe-hint {
+      display: none !important;
     }
 
     /* Свайп перезагрузки (влево): свечение от полоски у правого края (положение по скроллу). */
@@ -4323,6 +4614,10 @@
       min-height: 38px;
       padding: 8px 14px;
       box-sizing: border-box;
+      /* Центр кнопки «Удалить» — по вертикали к визуальному центру хлопушки «СНЯТО». */
+      align-self: center;
+      position: relative;
+      top: 11px;
     }
 
     /* «Снято» — только хлопушка: label = чистый #000 как фон сцены, без скругления/тени/обводки
@@ -4956,11 +5251,18 @@
   </div>
   <div id="pull-swipe-hint" class="pull-swipe-hint" aria-hidden="true"></div>
   <div id="pull-reload-flash" class="pull-reload-flash" aria-hidden="true"></div>
-  <div
-    class="app-build-chip"
-    id="app-build-chip"
-    role="status"
-    title="Версия приложения и время последнего обновления сборки (build-info.json)"></div>
+  <div id="reload-cinematic" class="reload-cinematic" aria-hidden="true">
+    <div class="reload-cinematic-line"></div>
+  </div>
+  <button type="button" id="prep-important-reminder" class="prep-important-reminder" aria-label="Всё под контролем? — открыть блок «Важно»">
+    <svg class="prep-important-reminder-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 3.4 1.8 21h20.4L12 3.4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"></path>
+      <path d="M12 9.6v4.8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path>
+      <circle cx="12" cy="17.7" r="1.35" fill="currentColor"></circle>
+    </svg>
+    <span class="prep-important-reminder-text">Всё под контролем?</span>
+    <span class="prep-important-reminder-count" id="prep-important-reminder-count">0</span>
+  </button>
   <div class="wrap">
     <div class="top-logo" id="top-logo-block">
       <div class="top-logo-brand">
@@ -5114,12 +5416,12 @@
             </select>
           </div>
         </div>
-        <div class="field field-prep-important" role="group" aria-labelledby="prep-important-heading">
+        <div class="field field-prep-important" id="prep-important-block" role="group" aria-labelledby="prep-important-heading">
           <div class="prep-important-head" id="prep-important-heading">
             <span class="prep-important-mark" aria-hidden="true"></span>
             <span class="prep-important-title-wrap">
               <span class="prep-important-title">Важно</span>
-              <span class="prep-important-sub">Всё под контролем</span>
+              <span class="prep-important-sub">Всё под контролем?</span>
             </span>
           </div>
           <div class="prep-important-options">
@@ -5131,6 +5433,30 @@
             >
             <label class="prep-important-label"
               ><input type="checkbox" id="prep-important-light" /> свет</label
+            >
+            <label class="prep-important-label"
+              ><input type="checkbox" id="prep-important-guitar" /> гитара</label
+            >
+            <label class="prep-important-label"
+              ><input type="checkbox" id="prep-important-guitar-light" /> фонарь на гитару</label
+            >
+            <label class="prep-important-label"
+              ><input type="checkbox" id="prep-important-table-lamp" /> лампа в центре стола</label
+            >
+            <label class="prep-important-label"
+              ><input type="checkbox" id="prep-important-clean-frame" /> Нет лишнего в кадре</label
+            >
+            <label class="prep-important-label"
+              ><input type="checkbox" id="prep-important-dup-screen" /> Дублирующий экран включён</label
+            >
+            <label class="prep-important-label"
+              ><input type="checkbox" id="prep-important-cam-to-screen" /> Камера подключена к доп. экрану</label
+            >
+            <label class="prep-important-label"
+              ><input type="checkbox" id="prep-important-camo" /> Открыто Camo Studio</label
+            >
+            <label class="prep-important-label"
+              ><input type="checkbox" id="prep-important-macbook" /> Настроено управление с MacBook</label
             >
           </div>
         </div>
@@ -5162,8 +5488,8 @@
             <select class="scene-time-select st-ss1" aria-label="Конец, секунды"></select>
           </div>
         </div>
-        <p class="loc-line scene-loc-row"><b>Локация кадра:</b>
-          <select class="scene-select scene-loc-select" aria-label="Локация кадра">
+        <p class="loc-line scene-loc-row"><b>Локация:</b>
+          <select class="scene-select scene-loc-select" aria-label="Локация">
             <option value="" selected>— выберите —</option>
             <option value="desk">Рабочий стол</option>
             <option value="corner">Угол студии</option>
@@ -5257,7 +5583,7 @@
             <option value="extra">Дополнительный акцент / аутро</option>
           </select>
         </div>
-        <div class="line line-say"><b>Говорю:</b><div class="say-editable" contenteditable="true" spellcheck="true">«16 и 17 мая, Хакасия, Абакан. Я проведу двухдневный мастер-классом по сведению и современному продакшену рок, поп и метал музыки!».</div></div>
+        <div class="line line-say"><b>Говорю:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
         <div class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <div class="intercut-text" contenteditable="true"></div></div>
         <div class="scene-toolbar">
           <button class="btn mini btn-danger scene-remove" type="button" title="Удалить сцену">Удалить</button>
@@ -5280,8 +5606,8 @@
             <select class="scene-time-select st-ss1" aria-label="Конец, секунды"></select>
           </div>
         </div>
-        <p class="loc-line scene-loc-row"><b>Локация кадра:</b>
-          <select class="scene-select scene-loc-select" aria-label="Локация кадра">
+        <p class="loc-line scene-loc-row"><b>Локация:</b>
+          <select class="scene-select scene-loc-select" aria-label="Локация">
             <option value="" selected>— выберите —</option>
             <option value="desk">Рабочий стол</option>
             <option value="corner">Угол студии</option>
@@ -5314,8 +5640,8 @@
             <option value="extra">Дополнительный акцент / аутро</option>
           </select>
         </div>
-        <div class="line line-say"><b>Говорю:</b><div class="say-editable" contenteditable="true" spellcheck="true">Меня зовут Семён Бруев, я профессиональный микс-инженер и музыкальный продюсер. 20 из 36 лет я занимаюсь музыкой. В 2017 году я окончил ИСИ в Москве, получив высшее образование по музыкальной звукорежиссере, потом онлайн учёба в Berklee College of Music, работа с Биланом, Трофимом, продюссерском центре MALFA Макса Фадеева и так далее</div></div>
-        <div class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <div class="intercut-text" contenteditable="true">СМАХИВАЮ В СТОРОНУ ПАЛЬЦЕМ - детские фото / средние фото / фото со студии, Левиным, Кругликовой, MALFA</div></div>
+        <div class="line line-say"><b>Говорю:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
+        <div class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <div class="intercut-text" contenteditable="true"></div></div>
         <div class="scene-toolbar">
           <button class="btn mini btn-danger scene-remove" type="button" title="Удалить сцену">Удалить</button>
         </div>
@@ -5337,8 +5663,8 @@
             <select class="scene-time-select st-ss1" aria-label="Конец, секунды"></select>
           </div>
         </div>
-        <p class="loc-line scene-loc-row"><b>Локация кадра:</b>
-          <select class="scene-select scene-loc-select" aria-label="Локация кадра">
+        <p class="loc-line scene-loc-row"><b>Локация:</b>
+          <select class="scene-select scene-loc-select" aria-label="Локация">
             <option value="" selected>— выберите —</option>
             <option value="desk">Рабочий стол</option>
             <option value="corner">Угол студии</option>
@@ -5371,8 +5697,8 @@
             <option value="extra">Дополнительный акцент / аутро</option>
           </select>
         </div>
-        <div class="line line-say"><b>Говорю:</b><div class="say-editable" contenteditable="true" spellcheck="true">16 и 17 мая я лечу к своим друзьям в Минусинский колледж культуры и искусства на кафедру “Музыкальное звукооператорское мастерство” с двухдневным мастер-классом. Но вы тоже можете к нам присоединиться!».</div></div>
-        <div class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <div class="intercut-text" contenteditable="true">титры: Билан / MALFA</div></div>
+        <div class="line line-say"><b>Говорю:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
+        <div class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <div class="intercut-text" contenteditable="true"></div></div>
         <div class="scene-toolbar">
           <button class="btn mini btn-danger scene-remove" type="button" title="Удалить сцену">Удалить</button>
         </div>
@@ -5394,8 +5720,8 @@
             <select class="scene-time-select st-ss1" aria-label="Конец, секунды"></select>
           </div>
         </div>
-        <p class="loc-line scene-loc-row"><b>Локация кадра:</b>
-          <select class="scene-select scene-loc-select" aria-label="Локация кадра">
+        <p class="loc-line scene-loc-row"><b>Локация:</b>
+          <select class="scene-select scene-loc-select" aria-label="Локация">
             <option value="" selected>— выберите —</option>
             <option value="desk">Рабочий стол</option>
             <option value="corner">Угол студии</option>
@@ -5428,8 +5754,8 @@
             <option value="extra">Дополнительный акцент / аутро</option>
           </select>
         </div>
-        <div class="line line-say"><b>Говорю:</b><div class="say-editable" contenteditable="true" spellcheck="true">Кроме тем вокального, гитарного и барабанного продакшена, мы подробно разберём ваши проекты, песни, сведения. Послушаем исходники барабанщика ARCHITECTS Дэна Сирли, разберем аранжировки Taylor Swift, Dua Lipa и развенчаем миф о неком русском стиле сведения музыки.</div></div>
-        <div class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <div class="intercut-text" contenteditable="true">Мосфильм / Левин / Кругликова / Хейден</div></div>
+        <div class="line line-say"><b>Говорю:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
+        <div class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <div class="intercut-text" contenteditable="true"></div></div>
         <div class="scene-toolbar">
           <button class="btn mini btn-danger scene-remove" type="button" title="Удалить сцену">Удалить</button>
         </div>
@@ -5451,8 +5777,8 @@
             <select class="scene-time-select st-ss1" aria-label="Конец, секунды"></select>
           </div>
         </div>
-        <p class="loc-line scene-loc-row"><b>Локация кадра:</b>
-          <select class="scene-select scene-loc-select" aria-label="Локация кадра">
+        <p class="loc-line scene-loc-row"><b>Локация:</b>
+          <select class="scene-select scene-loc-select" aria-label="Локация">
             <option value="" selected>— выберите —</option>
             <option value="desk">Рабочий стол</option>
             <option value="corner">Угол студии</option>
@@ -5485,8 +5811,8 @@
             <option value="extra">Дополнительный акцент / аутро</option>
           </select>
         </div>
-        <div class="line line-say"><b>Говорю:</b><div class="say-editable" contenteditable="true" spellcheck="true">Однажды мне довелось пообщаться с музыкальным продюсером RAMMSTEIN и знаниями о работе в студии этой группы я тоже поделюсь. Всё это поможет вам яснее понять что делать, чтобы добиваться хорошего звучания. И деньги тут не при чём».</div></div>
-        <div class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <div class="intercut-text" contenteditable="true">экран проекта / дорожки вокала и барабанов</div></div>
+        <div class="line line-say"><b>Говорю:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
+        <div class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <div class="intercut-text" contenteditable="true"></div></div>
         <div class="scene-toolbar">
           <button class="btn mini btn-danger scene-remove" type="button" title="Удалить сцену">Удалить</button>
         </div>
@@ -5508,8 +5834,8 @@
             <select class="scene-time-select st-ss1" aria-label="Конец, секунды"></select>
           </div>
         </div>
-        <p class="loc-line scene-loc-row"><b>Локация кадра:</b>
-          <select class="scene-select scene-loc-select" aria-label="Локация кадра">
+        <p class="loc-line scene-loc-row"><b>Локация:</b>
+          <select class="scene-select scene-loc-select" aria-label="Локация">
             <option value="" selected>— выберите —</option>
             <option value="desk">Рабочий стол</option>
             <option value="corner">Угол студии</option>
@@ -5542,8 +5868,8 @@
             <option value="extra">Дополнительный акцент / аутро</option>
           </select>
         </div>
-        <div class="line line-say"><b>Говорю:</b><div class="say-editable" contenteditable="true" spellcheck="true">«В один из дней я обязательно научу вас пользоваться новейшими AI-инструментам Cursor и Claude Code. Вы будете шокированы! Но не переживайте, в доброжелательной компании приручать их будет одно удовольствие!».</div></div>
-        <div class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <div class="intercut-text" contenteditable="true">титры: Architects / Taylor Swift / Rammstein</div></div>
+        <div class="line line-say"><b>Говорю:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
+        <div class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <div class="intercut-text" contenteditable="true"></div></div>
         <div class="scene-toolbar">
           <button class="btn mini btn-danger scene-remove" type="button" title="Удалить сцену">Удалить</button>
         </div>
@@ -5565,8 +5891,8 @@
             <select class="scene-time-select st-ss1" aria-label="Конец, секунды"></select>
           </div>
         </div>
-        <p class="loc-line scene-loc-row"><b>Локация кадра:</b>
-          <select class="scene-select scene-loc-select" aria-label="Локация кадра">
+        <p class="loc-line scene-loc-row"><b>Локация:</b>
+          <select class="scene-select scene-loc-select" aria-label="Локация">
             <option value="" selected>— выберите —</option>
             <option value="desk">Рабочий стол</option>
             <option value="corner">Угол студии</option>
@@ -5599,8 +5925,8 @@
             <option value="extra">Дополнительный акцент / аутро</option>
           </select>
         </div>
-        <div class="line line-say"><b>Говорю:</b><div class="say-editable" contenteditable="true" spellcheck="true">«Короче тем у нас масса. Благо и времени целых два дня без особых ограничений на встречу! Но можно прийти и на один! ».</div></div>
-        <div class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <div class="intercut-text" contenteditable="true">скрин Cursor / Claude Code</div></div>
+        <div class="line line-say"><b>Говорю:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
+        <div class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <div class="intercut-text" contenteditable="true"></div></div>
         <div class="scene-toolbar">
           <button class="btn mini btn-danger scene-remove" type="button" title="Удалить сцену">Удалить</button>
         </div>
@@ -5622,8 +5948,8 @@
             <select class="scene-time-select st-ss1" aria-label="Конец, секунды"></select>
           </div>
         </div>
-        <p class="loc-line scene-loc-row"><b>Локация кадра:</b>
-          <select class="scene-select scene-loc-select" aria-label="Локация кадра">
+        <p class="loc-line scene-loc-row"><b>Локация:</b>
+          <select class="scene-select scene-loc-select" aria-label="Локация">
             <option value="" selected>— выберите —</option>
             <option value="desk">Рабочий стол</option>
             <option value="corner">Угол студии</option>
@@ -5656,8 +5982,8 @@
             <option value="extra">Дополнительный акцент / аутро</option>
           </select>
         </div>
-        <div class="line line-say"><b>Говорю:</b><div class="say-editable" contenteditable="true" spellcheck="true">У нас уже есть открытый чатик для участников, поэтому добавляйтесь! Ссылочку вам пришлёт организатор Лиза.<br>30 мест. Абакан, Черногорск, Красноярск — приезжайте, будет интересно и весело!».</div></div>
-        <div class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <div class="intercut-text" contenteditable="true">CTA: 30 мест / ссылка / дата</div></div>
+        <div class="line line-say"><b>Говорю:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
+        <div class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <div class="intercut-text" contenteditable="true"></div></div>
         <div class="scene-toolbar">
           <button class="btn mini btn-danger scene-remove" type="button" title="Удалить сцену">Удалить</button>
         </div>
@@ -5696,8 +6022,8 @@
                   <select class="scene-time-select st-ss1" aria-label="Конец, секунды"></select>
                 </div>
               </div>
-              <p class="loc-line scene-loc-row"><b>Локация кадра:</b>
-                <select class="scene-select scene-loc-select" aria-label="Локация кадра">
+              <p class="loc-line scene-loc-row"><b>Локация:</b>
+                <select class="scene-select scene-loc-select" aria-label="Локация">
                   <option value="" selected>— выберите —</option>
                   <option value="desk">Рабочий стол</option>
                   <option value="corner">Угол студии</option>
@@ -5730,8 +6056,8 @@
                   <option value="extra">Дополнительный акцент / аутро</option>
                 </select>
               </div>
-              <div class="line line-say"><b>Говорю:</b><div class="say-editable" contenteditable="true" spellcheck="true">«Я еду к вам с практикой, разбором и реальными инструментами. Присоединяйтесь — сделаем звук плотным, громким и дорогим вместе».</div></div>
-              <div class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <div class="intercut-text" contenteditable="true">финальный экран: дата / место / 30 мест</div></div>
+              <div class="line line-say"><b>Говорю:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
+              <div class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <div class="intercut-text" contenteditable="true"></div></div>
               <div class="scene-toolbar">
                 <button class="btn mini btn-danger scene-remove" type="button" title="Удалить сцену">Удалить</button>
               </div>
@@ -6030,7 +6356,7 @@
     <div class="teleprompter-text" id="teleprompter-text"></div>
   </div>
 
-  <script type="application/json" id="samscenes-say-lines-json">["«16 и 17 мая, Хакасия, Абакан. Я проведу двухдневный мастер-классом по сведению и современному продакшену рок, поп и метал музыки!».","Меня зовут Семён Бруев, я профессиональный микс-инженер и музыкальный продюсер. 20 из 36 лет я занимаюсь музыкой. В 2017 году я окончил ИСИ в Москве, получив высшее образование по музыкальной звукорежиссере, потом онлайн учёба в Berklee College of Music, работа с Биланом, Трофимом, продюссерском центре MALFA Макса Фадеева и так далее","16 и 17 мая я лечу к своим друзьям в Минусинский колледж культуры и искусства на кафедру “Музыкальное звукооператорское мастерство” с двухдневным мастер-классом. Но вы тоже можете к нам присоединиться!».","Кроме тем вокального, гитарного и барабанного продакшена, мы подробно разберём ваши проекты, песни, сведения. Послушаем исходники барабанщика ARCHITECTS Дэна Сирли, разберем аранжировки Taylor Swift, Dua Lipa и развенчаем миф о неком русском стиле сведения музыки.","Однажды мне довелось пообщаться с музыкальным продюсером RAMMSTEIN и знаниями о работе в студии этой группы я тоже поделюсь. Всё это поможет вам яснее понять что делать, чтобы добиваться хорошего звучания. И деньги тут не при чём».","«В один из дней я обязательно научу вас пользоваться новейшими AI-инструментам Cursor и Claude Code. Вы будете шокированы! Но не переживайте, в доброжелательной компании приручать их будет одно удовольствие!».","«Короче тем у нас масса. Благо и времени целых два дня без особых ограничений на встречу! Но можно прийти и на один! ».","У нас уже есть открытый чатик для участников, поэтому добавляйтесь! Ссылочку вам пришлёт организатор Лиза.<br>30 мест. Абакан, Черногорск, Красноярск — приезжайте, будет интересно и весело!».","«Я еду к вам с практикой, разбором и реальными инструментами. Присоединяйтесь — сделаем звук плотным, громким и дорогим вместе»."]</script>
+  <script type="application/json" id="samscenes-say-lines-json">[]</script>
 
   <script>
     (function () {
@@ -6251,8 +6577,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v308';
-      var BUILD_TIME = '2026-05-06 19:38 MSK';
+      var APP_VERSION = 'v314';
+      var BUILD_TIME = '2026-05-25 01:30 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -6404,6 +6730,10 @@
         'prep-hook-location', 'prep-main-location', 'prep-date',
         'prep-format-aspect', 'prep-format-quality', 'prep-format-fps',
         'prep-important-clothes', 'prep-important-backstage', 'prep-important-light',
+        'prep-important-guitar', 'prep-important-guitar-light',
+        'prep-important-table-lamp', 'prep-important-clean-frame',
+        'prep-important-dup-screen', 'prep-important-cam-to-screen',
+        'prep-important-camo', 'prep-important-macbook',
         'prep-assistant'
       ];
 
@@ -6610,6 +6940,8 @@
         box.querySelectorAll('.say-editable, .note-editable, .intercut-text, .scene-title').forEach(function (el) { el.textContent = ''; });
         box.querySelectorAll('.scene-shot-checkbox').forEach(function (cb) { cb.checked = false; });
         box.querySelectorAll('.scene-main').forEach(function (sc) { sc.classList.remove('scene-shot-complete'); });
+        var titEl = box.querySelector('.title-subject');
+        if (titEl) titEl.textContent = '';
         return box.innerHTML;
       }
 
@@ -6996,8 +7328,16 @@
           alert('Не удалось удалить сценарий. Освободите память сайта (кэш/данные) и попробуйте снова.');
           return false;
         }
-        saveScrollForNextLoad();
-        location.reload();
+        /* #6 — без location.reload(): не выбрасываем пользователя в основной блок.
+           Удалили активный — подгружаем новый активный на месте; иначе только обновляем списки.
+           Меню ассистента (если открыто) остаётся открытым. */
+        if (wasActive) {
+          loadFromStorage();
+          try { updatePrepImportantPin(); } catch (ePin) {}
+        }
+        try { renderScenarioList(bundle); } catch (eRsl) {}
+        try { renderDailyPlan(bundle); } catch (eRdp) {}
+        try { invalidateAssistantDrawerListCache(); } catch (eInv) {}
         return true;
       }
 
@@ -7132,6 +7472,8 @@
             bindNoteIntercutPastePlain(wrap);
             ensureSayReplaceButtons(wrap);
             refreshNoteIntercutHasTextClasses(wrap);
+            migratePrepImportantBlock(wrap);
+            migrateSceneLocLabels(wrap);
           }
           var bundle = readScenarioBundle();
           var sc = currentScenarioMeta(bundle);
@@ -7157,9 +7499,22 @@
       }
 
       function syncTitleSubject(name) {
+        if (!titleSubject || !titleSubject.isConnected) {
+          titleSubject = document.querySelector('.title-row .title-subject');
+        }
         if (!titleSubject) return;
         var next = (name || '').trim();
         titleSubject.textContent = next || DEFAULT_SCENARIO_TITLE;
+      }
+
+      /** Заголовок «Sam Scenes» и поле «Название» — одно имя сценария; после смены DOM в .wrap обновляем оба. */
+      function syncActiveScenarioTitleFromBundle(bundle) {
+        refreshDomRefs();
+        var b = bundle || readScenarioBundle();
+        var sc = b ? currentScenarioMeta(b) : null;
+        var name = sc && sc.name ? String(sc.name) : '';
+        if (scenarioName) scenarioName.value = name;
+        syncTitleSubject(name);
       }
 
       function mergeScenarioNameFromTitleSubject() {
@@ -7590,45 +7945,37 @@
       }
 
       function lockAssistantDrawerMainScroll() {
-        /** Если уже заблокировано (re-open во время закрытия) — не перечитываем scrollY: он сейчас 0 и savedY испортится. */
-        var alreadyLocked = document.body.style.position === 'fixed';
-        if (!alreadyLocked) {
-          assistantDrawerLockScrollY =
-            window.pageYOffset ||
-            (document.documentElement && document.documentElement.scrollTop) ||
-            (document.body && document.body.scrollTop) ||
-            0;
-          assistantDrawerLockScrollY = Math.max(0, assistantDrawerLockScrollY);
-        }
-        document.documentElement.style.overflow = 'hidden';
-        document.body.style.overflow = 'hidden';
-        document.body.style.position = 'fixed';
-        document.body.style.top = '-' + assistantDrawerLockScrollY + 'px';
-        document.body.style.left = '0';
-        document.body.style.right = '0';
-        document.body.style.width = '100%';
+        /** Без position:fixed — на iOS Safari смена fixed→static даёт кадр-рывок (виден справа от шторки 85%). */
+        if (!document.documentElement.classList.contains('assistant-drawer-open')) return;
+        assistantDrawerLockScrollY =
+          window.pageYOffset ||
+          (document.documentElement && document.documentElement.scrollTop) ||
+          (document.body && document.body.scrollTop) ||
+          0;
+        assistantDrawerLockScrollY = Math.max(0, assistantDrawerLockScrollY);
       }
 
       function unlockAssistantDrawerMainScroll() {
-        var y = assistantDrawerLockScrollY;
-        if (typeof y !== 'number' || !isFinite(y) || y < 0) y = 0;
-        document.documentElement.style.overflow = '';
-        document.body.style.overflow = '';
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.left = '';
-        document.body.style.right = '';
-        document.body.style.width = '';
-        /** Синхронно: иначе iOS успевает нарисовать кадр со scrollY=0 и закрытие выглядит «дёрганым». */
-        try {
-          window.scrollTo(0, y);
-        } catch (eSc) {}
-        /** iOS Safari иногда игнорирует синхронный scrollTo сразу после смены position: дублируем в rAF. */
-        requestAnimationFrame(function () {
+        /** No-op: скролл не фиксировали через body.position — восстанавливать нечего. */
+        if (document.body.style.position === 'fixed') {
+          var y = assistantDrawerLockScrollY;
+          if (typeof y !== 'number' || !isFinite(y) || y < 0) y = 0;
+          document.documentElement.style.overflow = '';
+          document.body.style.overflow = '';
+          document.body.style.position = '';
+          document.body.style.top = '';
+          document.body.style.left = '';
+          document.body.style.right = '';
+          document.body.style.width = '';
           try {
             window.scrollTo(0, y);
-          } catch (eSc2) {}
-        });
+          } catch (eSc) {}
+          requestAnimationFrame(function () {
+            try {
+              window.scrollTo(0, y);
+            } catch (eSc2) {}
+          });
+        }
       }
 
       function assistantDrawerReducedMotion() {
@@ -7669,6 +8016,26 @@
         document.documentElement.classList.remove('assistant-drawer-tracking');
       }
 
+      /** #1: на время CSS-анимации открытия/закрытия шторки держим класс assistant-drawer-anim
+          (снимает backdrop-filter, см. CSS). Снимаем по таймеру — длительность анимации ~280–320мс. */
+      var assistantDrawerAnimTimer = null;
+      /** #2 — id отложенной (на конец слайда) фикс-блокировки скролла; сбрасывается при закрытии. */
+      var assistantDrawerDeferLockTimer = null;
+      function cancelDeferredAssistantDrawerLock() {
+        if (assistantDrawerDeferLockTimer) {
+          clearTimeout(assistantDrawerDeferLockTimer);
+          assistantDrawerDeferLockTimer = null;
+        }
+      }
+      function beginAssistantDrawerAnim() {
+        document.documentElement.classList.add('assistant-drawer-anim');
+        if (assistantDrawerAnimTimer) clearTimeout(assistantDrawerAnimTimer);
+        assistantDrawerAnimTimer = setTimeout(function () {
+          document.documentElement.classList.remove('assistant-drawer-anim');
+          assistantDrawerAnimTimer = null;
+        }, 380);
+      }
+
       function clearAssistantDrawerInlineVisuals() {
         var d = document.getElementById('assistant-drawer');
         var bk = document.getElementById('assistant-drawer-backdrop');
@@ -7685,9 +8052,9 @@
       }
 
       function openAssistantDrawerCoreAfterSnap() {
-        /** ШТО делаем: сначала запускаем CSS-анимацию (класс + lock), потом отложенно тяжёлый рендер.
-            Иначе renderAssistantDrawerList() пересобирает DOM ДО старта transform → панель «дёргается»,
-            ощущение «обновляется». Рендер откладываем на 1 frame после старта слайда. */
+        /** ЧТО делаем: тяжёлый рендер списка выполняем ДО показа панели — пока она уведена
+            за левый край (translateX(-102%)), пересборка DOM не видна. Класс открытия
+            (старт CSS-слайда) добавляем уже с готовым содержимым → нет «мигания» после открытия. */
         var hostNameEl = document.getElementById('assistant-drawer-host-name');
         if (hostNameEl) hostNameEl.textContent = 'Анна Непряхина';
         var ad = document.getElementById('assistant-new-date');
@@ -7696,31 +8063,32 @@
             ad.value = new Date().toISOString().slice(0, 10);
           } catch (eD) {}
         }
+        var d = document.getElementById('assistant-drawer');
+        var bk = document.getElementById('assistant-drawer-backdrop');
+        /** Рендер списка только если данные изменились (по дайджесту bundle) — панель ещё за краем. */
+        try {
+          renderAssistantDrawerListIfDirty();
+        } catch (eRl) {}
+        resetAssistantDrawerScrollToTop();
+        if (d) d.setAttribute('aria-hidden', 'false');
+        if (bk) bk.setAttribute('aria-hidden', 'false');
         document.body.removeAttribute('data-assistant-drawer-closing');
+        beginAssistantDrawerAnim();
         document.documentElement.classList.add('assistant-drawer-open');
         document.body.classList.add('assistant-drawer-open');
         document.body.setAttribute('data-assistant-drawer-open', '1');
+        /** Скролл держит html.assistant-drawer-open { overflow:hidden } — без body.position:fixed (iOS jitter). */
+        cancelDeferredAssistantDrawerLock();
         lockAssistantDrawerMainScroll();
-        var d = document.getElementById('assistant-drawer');
-        var bk = document.getElementById('assistant-drawer-backdrop');
-        if (d) d.setAttribute('aria-hidden', 'false');
-        if (bk) bk.setAttribute('aria-hidden', 'false');
         try {
           triggerHaptic('micro');
         } catch (eH) {}
-        /** Рендер списка только если данные изменились (по дайджесту bundle), и только после старта анимации. */
         requestAnimationFrame(function () {
-          requestAnimationFrame(function () {
-            try {
-              renderAssistantDrawerListIfDirty();
-            } catch (eRl) {}
-            resetAssistantDrawerScrollToTop();
-            var c = document.getElementById('assistant-drawer-close');
-            if (c) c.focus();
-            try {
-              updateAssistantDrawerScrollThumb();
-            } catch (eTh) {}
-          });
+          var c = document.getElementById('assistant-drawer-close');
+          if (c) c.focus();
+          try {
+            updateAssistantDrawerScrollThumb();
+          } catch (eTh) {}
         });
       }
 
@@ -7862,6 +8230,10 @@
         var ease = 'cubic-bezier(0.22, 0.9, 0.28, 1)';
         var closedTx = -Wc;
         document.body.setAttribute('data-assistant-drawer-closing', '1');
+        /** #2 — отменяем отложенную фикс-блокировку, если она ещё не сработала. */
+        cancelDeferredAssistantDrawerLock();
+        /** #4: без body.position:fixed ранний unlock не нужен. */
+        cancelDeferredAssistantDrawerLock();
         d.style.transition = 'transform ' + dur + 'ms ' + ease;
         if (bk) bk.style.transition = 'opacity ' + dur + 'ms ' + ease;
         requestAnimationFrame(function () {
@@ -8014,6 +8386,12 @@
         }
 
         document.body.setAttribute('data-assistant-drawer-closing', '1');
+        beginAssistantDrawerAnim();
+        /** #2 — отменяем отложенную фикс-блокировку, если она ещё не сработала. */
+        cancelDeferredAssistantDrawerLock();
+
+        /** #4: position:fixed снят — unlock не нужен; overflow снимется в doneClosing. */
+        cancelDeferredAssistantDrawerLock();
 
         var Wc = assistantDrawerPxClosedOffset(d);
         var closedTx = -Wc;
@@ -8516,10 +8894,15 @@
             var id = btn.getAttribute('data-scenario-id');
             if (!id) return;
             closeAssistantDrawer();
-            scenarioSelect.value = id;
-            try {
-              scenarioSelect.dispatchEvent(new Event('change', { bubbles: true }));
-            } catch (eCh) {}
+            /* #5 — даём шторке плавно закрыться, затем подменяем сценарий на месте
+               (тяжёлый loadFromStorage не конкурирует с анимацией закрытия). */
+            setTimeout(function () {
+              if (!scenarioSelect) return;
+              scenarioSelect.value = id;
+              try {
+                scenarioSelect.dispatchEvent(new Event('change', { bubbles: true }));
+              } catch (eCh) {}
+            }, 300);
           });
           list.addEventListener(
             'pointerdown',
@@ -8870,14 +9253,10 @@
 
           var bundle = readScenarioBundle();
           if (!bundle) bundle = { activeId: null, items: [] };
-          if (
-            scenarioSelect &&
-            scenarioSelect.value &&
-            bundle.items &&
-            bundle.items.some(function (it) { return it.id === scenarioSelect.value; })
-          ) {
-            bundle.activeId = scenarioSelect.value;
-          }
+          /* #3 — НЕ синхронизируем activeId из scenarioSelect.value: при переключении
+             селект уже указывает на новый сценарий, а DOM ещё показывает старый —
+             из-за этого правки (имя/разметка) уходили в соседний сценарий.
+             Сохраняем всегда в текущий отображаемый сценарий (bundle.activeId). */
           var current = currentScenarioMeta(bundle);
           if (!current) {
             current = { id: uid(), name: 'Новый сценарий', date: '', targetCount: '', status: 'draft', shootBlock: '', html: '', logo: {}, prep: {}, updatedAt: Date.now() };
@@ -8931,11 +9310,12 @@
         try {
           persistToStorage('Сохранено');
         } catch (e) {}
+        mergeScenarioNameFromTitleSubject();
         var bundle = readScenarioBundle() || { activeId: null, items: [] };
         var baseName;
         if (opts.name != null && String(opts.name).trim()) {
           baseName = String(opts.name).trim();
-        } else if (scenarioName && scenarioName.value.trim()) {
+        } else if (opts.useCurrentSettingsName && scenarioName && scenarioName.value.trim()) {
           baseName = scenarioName.value.trim();
         } else {
           baseName = 'Новый сценарий';
@@ -8965,7 +9345,7 @@
         var id = uid();
         var sc = {
           id: id,
-          name: baseName + ' (шаблон)',
+          name: baseName,
           date: date,
           targetCount: targetCount,
           status: 'draft',
@@ -8987,11 +9367,20 @@
             loadFromStorage();
           } catch (eLoad) {}
           try {
+            syncActiveScenarioTitleFromBundle(readScenarioBundle());
+          } catch (eTit) {}
+          try {
+            updatePrepImportantPin();
+          } catch (ePin) {}
+          try {
             renderAssistantTrashList();
           } catch (eTrash2) {}
           try {
             updateAssistantDrawerScrollThumb();
           } catch (eTh3) {}
+          try {
+            invalidateAssistantDrawerListCache();
+          } catch (eInv) {}
           setStatus('Сценарий создан', false);
           return true;
         }
@@ -9012,27 +9401,12 @@
       } catch (eUiTrack) {}
       var UI_QUIESCE_MS = 1200; /* «тишина» от пользователя до того как разрешено серьёзное сохранение */
 
+      /** #4 — фоновое автосохранение отключено по просьбе пользователя.
+          Сохранение остаётся «безопасным»: при переключении сценариев (persistToStorage)
+          и при сворачивании/закрытии/обновлении приложения (flushSave). */
       function scheduleAutosave() {
         clearTimeout(autosaveTO);
-        autosaveTO = setTimeout(function () {
-          autosaveTO = null;
-          /* Если пользователь только что что-то тыкнул — отложить (не блокировать UI JSON.stringify-ом).
-             Также пропускаем autosave если фокус на интерактивном элементе (открыта выпадашка/ввод). */
-          var idleFor = Date.now() - _lastUiInteractionTs;
-          var ae = document.activeElement;
-          var aeBusy = ae && (ae.isContentEditable || ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.tagName === 'SELECT');
-          if (idleFor < UI_QUIESCE_MS || aeBusy) {
-            scheduleAutosave();
-            return;
-          }
-          requestAnimationFrame(function () {
-            requestAnimationFrame(function () {
-              try {
-                persistToStorage('Сохранено автоматически');
-              } catch (eSave) {}
-            });
-          });
-        }, AUTOSAVE_MS);
+        autosaveTO = null;
       }
 
       function _doUndoSnapshotIfIdle() {
@@ -9052,8 +9426,7 @@
       function markDirty() {
         if (undoSnapshotTO) clearTimeout(undoSnapshotTO);
         undoSnapshotTO = setTimeout(_doUndoSnapshotIfIdle, UNDO_SNAPSHOT_DEBOUNCE_MS);
-        setStatus('Сохраню…', true);
-        scheduleAutosave();
+        /* #4 — фоновое автосохранение отключено: статус «Сохраню…» и scheduleAutosave убраны. */
       }
 
       function saveToStorage() {
@@ -10320,6 +10693,8 @@
               bindNoteIntercutPastePlain(wrap);
               ensureSayReplaceButtons(wrap);
               refreshNoteIntercutHasTextClasses(wrap);
+              migratePrepImportantBlock(wrap);
+              migrateSceneLocLabels(wrap);
             }
             if (sc && sc.prep) {
               prepIds.forEach(function (id) {
@@ -10329,6 +10704,7 @@
                 }
               });
             }
+            try { updatePrepImportantPin(); } catch (ePin0) {}
             try {
               syncPrepDateDisplayRow();
             } catch (eSyncPd0) {}
@@ -10340,12 +10716,8 @@
             if (scenarioCount) scenarioCount.value = sc && sc.targetCount ? sc.targetCount : '';
             if (scenarioStatus) scenarioStatus.value = sc && sc.status ? sc.status : 'draft';
             if (scenarioShootBlock) scenarioShootBlock.value = sc && sc.shootBlock ? String(sc.shootBlock) : '';
-            mergeScenarioNameFromTitleSubject();
-            syncTitleSubject(
-              scenarioName && scenarioName.value.trim()
-                ? scenarioName.value.trim()
-                : (sc && sc.name ? sc.name : '')
-            );
+            /* Заголовок «Sam Scenes» = имя активного сценария (не текст из сохранённого wrap.innerHTML). */
+            syncActiveScenarioTitleFromBundle(bundle);
             return;
           }
 
@@ -11354,6 +11726,250 @@
         ].join('\r\n');
       }
 
+      /** Блок «Важно»: пока не отмечены все чек-боксы — закреплён поверх страницы и следует за прокруткой. */
+      function prepImportantAllChecked() {
+        var block = document.getElementById('prep-important-block');
+        if (!block) return true;
+        var boxes = block.querySelectorAll('input[type="checkbox"]');
+        if (!boxes.length) return true;
+        for (var i = 0; i < boxes.length; i++) {
+          if (!boxes[i].checked) return false;
+        }
+        return true;
+      }
+
+      function playPrepImportantDone(block) {
+        if (!block) return;
+        block.classList.remove('prep-important-done-pulse');
+        void block.offsetWidth;
+        block.classList.add('prep-important-done-pulse');
+        setTimeout(function () {
+          block.classList.remove('prep-important-done-pulse');
+        }, 1000);
+      }
+
+      function updatePrepImportantPin() {
+        updatePrepImportantReminder();
+        var block = document.getElementById('prep-important-block');
+        if (!block) return;
+        /* Закрепление отключено — блок «Важно» остаётся обычным блоком в карточке «Подготовка». */
+        block.classList.remove('prep-important-pinned');
+      }
+
+      /** #4: было ли «всё отмечено» на прошлой проверке — чтобы поймать момент завершения. */
+      var prepImportantWasAllChecked = true;
+
+      /** #2/#3: значок-напоминание внизу по центру — появляется, когда блок «Важно»
+          не заполнен И уже пролистан выше экрана (пользователь прошёл мимо, не отметив). */
+      function updatePrepImportantReminder() {
+        var badge = document.getElementById('prep-important-reminder');
+        if (!badge) return;
+        var block = document.getElementById('prep-important-block');
+        var remaining = 0;
+        var scrolledPast = false;
+        if (block) {
+          var boxes = block.querySelectorAll('input[type="checkbox"]');
+          for (var i = 0; i < boxes.length; i++) {
+            if (!boxes[i].checked) remaining++;
+          }
+          /* Блок целиком ушёл выше верхнего края экрана — значит пользователь его пролистнул. */
+          var rect = block.getBoundingClientRect();
+          scrolledPast = rect.bottom < 4;
+        }
+        prepImportantWasAllChecked = (remaining === 0);
+        if (remaining > 0 && scrolledPast) {
+          var cnt = document.getElementById('prep-important-reminder-count');
+          if (cnt) cnt.textContent = String(remaining);
+          badge.classList.add('is-visible');
+        } else {
+          badge.classList.remove('is-visible');
+        }
+      }
+
+      /** #3: пересчёт видимости значка при прокрутке — троттлинг через requestAnimationFrame. */
+      var prepReminderScrollScheduled = false;
+      function schedulePrepImportantReminderUpdate() {
+        if (prepReminderScrollScheduled) return;
+        prepReminderScrollScheduled = true;
+        requestAnimationFrame(function () {
+          prepReminderScrollScheduled = false;
+          updatePrepImportantReminder();
+        });
+      }
+
+      /** Канонический внутренний HTML блока «Важно» — источник правды для миграции. */
+      function prepImportantCanonicalInnerHtml() {
+        var items = [
+          ['prep-important-clothes', 'одежда'],
+          ['prep-important-backstage', 'Backstage'],
+          ['prep-important-light', 'свет'],
+          ['prep-important-guitar', 'гитара'],
+          ['prep-important-guitar-light', 'фонарь на гитару'],
+          ['prep-important-table-lamp', 'лампа в центре стола'],
+          ['prep-important-clean-frame', 'Нет лишнего в кадре'],
+          ['prep-important-dup-screen', 'Дублирующий экран включён'],
+          ['prep-important-cam-to-screen', 'Камера подключена к доп. экрану'],
+          ['prep-important-camo', 'Открыто Camo Studio'],
+          ['prep-important-macbook', 'Настроено управление с MacBook']
+        ];
+        var labels = '';
+        for (var i = 0; i < items.length; i++) {
+          labels += '<label class="prep-important-label"><input type="checkbox" id="' +
+            items[i][0] + '" /> ' + items[i][1] + '</label>';
+        }
+        return '<div class="prep-important-head" id="prep-important-heading">' +
+          '<span class="prep-important-mark" aria-hidden="true"></span>' +
+          '<span class="prep-important-title-wrap">' +
+          '<span class="prep-important-title">Важно</span>' +
+          '<span class="prep-important-sub">Всё под контролем?</span>' +
+          '</span></div><div class="prep-important-options">' + labels + '</div>';
+      }
+
+      /** Приводит блок «Важно» из сохранённого сценария к актуальному шаблону (новые чек-боксы, id). */
+      function migratePrepImportantBlock(root) {
+        try {
+          root = root || document;
+          var block = root.querySelector('.field-prep-important');
+          if (!block) return;
+          var checkedState = {};
+          var oldBoxes = block.querySelectorAll('input[type="checkbox"]');
+          for (var i = 0; i < oldBoxes.length; i++) {
+            if (oldBoxes[i].id) checkedState[oldBoxes[i].id] = oldBoxes[i].checked;
+          }
+          block.id = 'prep-important-block';
+          block.setAttribute('role', 'group');
+          block.setAttribute('aria-labelledby', 'prep-important-heading');
+          var canonical = prepImportantCanonicalInnerHtml();
+          if (block.innerHTML.replace(/\s+/g, '') !== canonical.replace(/\s+/g, '')) {
+            block.innerHTML = canonical;
+          }
+          var newBoxes = block.querySelectorAll('input[type="checkbox"]');
+          for (var j = 0; j < newBoxes.length; j++) {
+            if (newBoxes[j].id && checkedState[newBoxes[j].id]) newBoxes[j].checked = true;
+          }
+        } catch (eMig) {}
+      }
+
+      /** #1 — старые сохранённые сцены: подпись «Локация кадра:» → «Локация:». */
+      function migrateSceneLocLabels(root) {
+        try {
+          (root || document).querySelectorAll('.loc-line.scene-loc-row > b').forEach(function (b) {
+            var t = (b.textContent || '').replace(/\s+/g, ' ').trim();
+            if (t === 'Локация кадра:') b.textContent = 'Локация:';
+          });
+        } catch (eLoc) {}
+      }
+
+      function wirePrepImportantPin() {
+        if (wirePrepImportantPin._done) return;
+        wirePrepImportantPin._done = true;
+        /* Делегирование на document — переживает перестройку wrap.innerHTML при смене сценария. */
+        document.addEventListener('change', function (e) {
+          var t = e.target;
+          if (!(t && t.closest && t.closest('#prep-important-block'))) return;
+          /* #4: поймали момент «отмечен последний пункт» — проигрываем анимацию завершения. */
+          var allNow = prepImportantAllChecked();
+          if (allNow && !prepImportantWasAllChecked) {
+            playPrepImportantDone(document.getElementById('prep-important-block'));
+          }
+          updatePrepImportantPin();
+        }, false);
+        var reminderBadge = document.getElementById('prep-important-reminder');
+        if (reminderBadge) {
+          reminderBadge.addEventListener('click', function () {
+            var block = document.getElementById('prep-important-block');
+            if (!block) return;
+            try {
+              block.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } catch (eSc) {
+              try { block.scrollIntoView(); } catch (eSc2) {}
+            }
+            /* #2: короткая подсветка блока — чтобы переход по тапу был очевиден. */
+            block.classList.remove('prep-important-attention');
+            void block.offsetWidth;
+            block.classList.add('prep-important-attention');
+            setTimeout(function () {
+              block.classList.remove('prep-important-attention');
+            }, 1150);
+            try { triggerHaptic('light'); } catch (eHap) {}
+          });
+        }
+        /* #3: значок появляется только после того, как блок «Важно» пролистан мимо. */
+        document.addEventListener('scroll', schedulePrepImportantReminderUpdate, { passive: true });
+        window.addEventListener('resize', schedulePrepImportantReminderUpdate);
+        if (window.visualViewport) {
+          window.visualViewport.addEventListener('scroll', schedulePrepImportantReminderUpdate, { passive: true });
+        }
+        migratePrepImportantBlock(document);
+        updatePrepImportantPin();
+      }
+
+      /** #7 — плавная прокрутка основного экрана в самое начало (к названию сценария / первым блокам). */
+      function scrollMainToTopSmooth() {
+        try {
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+              try {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              } catch (eSmooth) {
+                window.scrollTo(0, 0);
+              }
+            });
+          });
+        } catch (eScroll) {}
+      }
+
+      /** Переключение на соседний сценарий (свайп влево/вправо в середине экрана). dir: +1 след., -1 пред. */
+      function goToAdjacentScenario(dir) {
+        try {
+          var bundle = readScenarioBundle();
+          if (!bundle || !bundle.items || bundle.items.length < 2) {
+            setStatus('Доступен только один сценарий', false);
+            return;
+          }
+          var ids = bundle.items.map(function (it) { return it.id; });
+          var idx = ids.indexOf(bundle.activeId);
+          if (idx < 0) idx = 0;
+          var nextIdx = (idx + dir + ids.length) % ids.length;
+          if (nextIdx === idx) return;
+          try { persistToStorage('Сохранено'); } catch (eSave) {}
+          bundle = readScenarioBundle();
+          if (!bundle) return;
+          bundle.activeId = ids[nextIdx];
+          if (!writeScenarioBundle(bundle)) return;
+          loadFromStorage();
+          try { updatePrepImportantPin(); } catch (ePin) {}
+          var meta = currentScenarioMeta(bundle);
+          setStatus('Сценарий: ' + (meta && meta.name ? meta.name : ''), false);
+          try { triggerHaptic('light'); } catch (eHap) {}
+          /** #7 — после переключения свайпом плавно прокручиваем в самое начало. */
+          scrollMainToTopSmooth();
+        } catch (e) {}
+      }
+
+      /** Тап в любом месте строки «Примечание»/«Перебивка» — курсор в поле ввода. */
+      function wireNoteIntercutTapToFocus() {
+        if (wireNoteIntercutTapToFocus._done) return;
+        wireNoteIntercutTapToFocus._done = true;
+        document.addEventListener('click', function (e) {
+          var t = e.target;
+          if (!t || !t.closest) return;
+          var host = t.closest('.line-note, .intercut');
+          if (!host) return;
+          var editable = host.querySelector('.note-editable, .intercut-text');
+          if (!editable || t === editable || editable.contains(t)) return;
+          try {
+            editable.focus();
+            var r = document.createRange();
+            r.selectNodeContents(editable);
+            r.collapse(false);
+            var sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(r);
+          } catch (eFocus) {}
+        }, false);
+      }
+
       function wirePrepDateUiHint() {
         var inp = document.getElementById('prep-date');
         if (!inp || inp.getAttribute('data-prep-date-ui') === '1') return;
@@ -11474,9 +12090,10 @@
             updateAllShotlistProgress();
             return;
           }
-          /* Постановка «Снято»: 1) анимация хлопушки → 2) затемнение сцены → 3) скролл к следующей */
-          var SHOT_TAKE_ICON_MS = 540;
-          var SHOT_AFTER_DIM_MS = 380;
+          /* Постановка «Снято»: 1) анимация хлопушки → 2) затемнение сцены → 3) скролл к следующей.
+             Тайминги уменьшены — переход к следующей сцене ощутимо быстрее. */
+          var SHOT_TAKE_ICON_MS = 220;
+          var SHOT_AFTER_DIM_MS = 60;
           var tDim = setTimeout(function () {
             syncShotClassForScene(scene);
             updateAllShotlistProgress();
@@ -11773,15 +12390,20 @@
             var bundle = readScenarioBundle();
             if (!bundle) return;
             bundle.activeId = scenarioSelect.value;
-            writeScenarioBundle(bundle);
-            saveScrollForNextLoad();
-            location.reload();
+            if (!writeScenarioBundle(bundle)) return;
+            /* #5 — без location.reload(): подмена сценария на месте, меню ассистента
+               сразу доступно для повторного открытия. */
+            loadFromStorage();
+            try { updatePrepImportantPin(); } catch (ePin) {}
+            var meta = currentScenarioMeta(bundle);
+            setStatus('Сценарий: ' + (meta && meta.name ? meta.name : ''), false);
+            scrollMainToTopSmooth();
           });
         }
 
         if (btnScenarioNew) {
           bindIntentTap(btnScenarioNew, function () {
-            createNewScenarioTemplate();
+            createNewScenarioTemplate({ skipReload: true });
           });
         }
 
@@ -11848,7 +12470,8 @@
         var range = 180;
         var maxBlur = 11;
         var t = Math.max(0, Math.min(1, (y - start) / range));
-        root.style.setProperty('--top-logo-blur', (t * maxBlur).toFixed(2) + 'px');
+        /* Квантуем блюр до целых пикселей: меньше микро-обновлений за кадр — плавнее, без дёрганья. */
+        root.style.setProperty('--top-logo-blur', Math.round(t * maxBlur) + 'px');
       }
       function wireTopLogoScrollBlur() {
         if (wireTopLogoScrollBlur._done) return;
@@ -12048,6 +12671,10 @@
         var swipeMinDx = 0;
         var swipeMaxDx = 0;
         var swipeIntentHorizontal = false;
+        var swipeFromLeftEdge = false;
+        var swipeFromRightEdge = false;
+        /** Ширина краевой зоны для edge-свайпов: reload (правый край) и меню ассистента (левый край). */
+        var EDGE_SWIPE_ZONE = 34;
         var TOP_EPS = 10;
         var PULL_MIN = 76;
         /** Свайп влево — перезагрузка */
@@ -12092,6 +12719,7 @@
           var tp = document.getElementById('teleprompter-overlay');
           if (tp && tp.classList.contains('open') && el.closest('.teleprompter-overlay')) return true;
           if (el.closest('.assistant-drawer')) return true;
+          if (el.closest('.assistant-open-strip')) return false;
           if (!el.closest('.wrap')) return true;
           if (el.closest(ASSIST_SWIPE_SKIP_INTERACTIVE)) return true;
           return false;
@@ -12123,13 +12751,9 @@
           var vv = window.visualViewport;
           var vh = vv ? vv.height : window.innerHeight;
           var vt = vv ? vv.offsetTop : 0;
-          var sc = document.scrollingElement || document.documentElement;
-          var st = window.scrollY || sc.scrollTop || 0;
-          var scrollH = sc.scrollHeight;
-          var maxS = Math.max(1, scrollH - vh);
-          var ratio = Math.min(1, Math.max(0, st / maxS));
           var thumb = 52;
-          sh.style.top = vt + ratio * Math.max(0, vh - thumb) + 'px';
+          /* Индикатор reload-свайпа стоит статично по центру экрана и не следует за ползунком скролла. */
+          sh.style.top = vt + Math.max(0, (vh - thumb) / 2) + 'px';
           sh.style.marginTop = '0';
         }
 
@@ -12156,6 +12780,7 @@
           if (n > 640) n = 640;
           try {
             document.documentElement.style.setProperty('--pull-stack-y', n + 'px');
+            document.documentElement.classList.toggle('pull-stack-active', n > 0.5);
           } catch (ePs) {}
         }
 
@@ -12307,43 +12932,26 @@
             reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
           } catch (eRm) {}
 
-          /** Cinema-вспышка: ~280мс на отыгрывание свечения, потом reload. С reduced-motion — без задержки. */
-          var FIRE_MS = reduce ? 0 : 280;
+          /** #5 — световая волна + затемнение ~640мс, затем reload. reduced-motion — без задержки. */
+          var FIRE_MS = reduce ? 0 : (opts.fromSwipe ? 600 : 280);
           var flash = document.getElementById('pull-reload-flash');
           var swipeHint = swipeHintEl();
           var pullHint = pullHintEl();
 
           if (opts.fromSwipe) {
-            /* Свайпом reload (влево) — вспышка из центра полоски у правого края (позиция по скроллу). */
+            /* #5 — обновление свайпом: кинематографическое затемнение + золотая световая линия. */
             try {
-              syncPullSwipeHintThumbFromScroll();
+              resetSwipeHint();
             } catch (eSyn) {}
-            if (swipeHint) {
-              swipeHint.classList.remove('pull-swipe-hint--ready');
-              swipeHint.classList.add('pull-swipe-hint--show', 'pull-swipe-hint--fire');
-            }
-            if (flash) {
-              try {
-                var rx = 0;
-                var ry = 50;
-                if (swipeHint) {
-                  var br = swipeHint.getBoundingClientRect();
-                  var iw = window.innerWidth || 1;
-                  var ih = window.innerHeight || 1;
-                  rx = (((br.left + br.right) / 2 / iw) * 100).toFixed(2);
-                  ry = (((br.top + br.bottom) / 2 / ih) * 100).toFixed(2);
-                }
-                flash.style.setProperty('--pull-flash-at-x', rx + '%');
-                flash.style.setProperty('--pull-flash-at-y', ry + '%');
-              } catch (eFl) {}
-              flash.classList.add('pull-reload-flash--from-edge');
-              flash.classList.add('pull-reload-flash--show');
-              flash.classList.add('pull-reload-flash--fire');
-            }
-            /* Pull-hint (лампу) гасим — для свайпа она лишняя */
             try {
               resetPullHint();
             } catch (eRhSw) {}
+            var cine = document.getElementById('reload-cinematic');
+            if (cine && !reduce) {
+              cine.classList.remove('is-playing');
+              void cine.offsetWidth;
+              cine.classList.add('is-playing');
+            }
           } else {
             /* Pull-down (вертикальный) — оставляем лампу на пике, добавляем верхнюю радиальную вспышку */
             if (pullHint) pullHint.classList.add('pull-reload-hint--ready');
@@ -12389,6 +12997,10 @@
             startY = t0.clientY;
             if (!isFinite(startX)) startX = 0;
             if (!isFinite(startY)) startY = 0;
+            /* Reload — свайп влево только от правого края экрана; меню ассистента — свайп вправо только от левого края. */
+            var vwEdge = window.innerWidth || document.documentElement.clientWidth || 0;
+            swipeFromLeftEdge = startX <= EDGE_SWIPE_ZONE;
+            swipeFromRightEdge = vwEdge > 0 && vwEdge - startX <= EDGE_SWIPE_ZONE;
             pullMaxDy = 0;
             swipeMinDx = 0;
             swipeMaxDx = 0;
@@ -12500,11 +13112,12 @@
                 resetSwipeHint();
               } else {
                 var sh = swipeHintEl();
-                if (sh && dx < -8) {
+                if (sh && dx < -8 && swipeFromRightEdge) {
                   var prog = Math.min(1, Math.abs(swipeMinDx) / SWIPE_MIN);
+                  syncPullSwipeHintThumbFromScroll();
                   sh.classList.add('pull-swipe-hint--show');
                   sh.style.opacity = String(0.18 + prog * 0.56);
-                  /* Вертикаль — только положение «ползунка» по скроллу (syncPullSwipeHintThumbFromScroll). */
+                  /* Вертикаль — статично по центру экрана (syncPullSwipeHintThumbFromScroll). */
                   sh.style.transform =
                     'translateX(' + (12 - prog * 22) + 'px) scaleY(' + (0.9 + prog * 0.14) + ')';
                   sh.classList.toggle('pull-swipe-hint--ready', prog >= 0.92);
@@ -12538,17 +13151,26 @@
             var didSwipeRight =
               swipeArmed &&
               !swipeCancelled &&
+              swipeFromLeftEdge &&
               swipeMaxDx >= ASSIST_SWIPE_MIN &&
               swipeMaxDx + 4 >= Math.abs(swipeMinDx);
             var didSwipeLeftDom =
-              didSwipeLeft && !didSwipeRight && Math.abs(swipeMinDx) > swipeMaxDx + 6;
+              didSwipeLeft && !didSwipeRight && swipeFromRightEdge && Math.abs(swipeMinDx) > swipeMaxDx + 6;
+            /* Свайп в середине экрана (не от края) — переключение сценариев. */
+            var didSwipeLeftMid =
+              didSwipeLeft && !didSwipeRight && !swipeFromRightEdge && Math.abs(swipeMinDx) > swipeMaxDx + 6;
+            var didSwipeRightMid =
+              swipeArmed && !swipeCancelled && !swipeFromLeftEdge &&
+              swipeMaxDx >= SWIPE_MIN && swipeMaxDx > Math.abs(swipeMinDx) + 6;
             pullArmed = false;
             swipeArmed = false;
             if (didPull && PULL_DOWN_RELOAD_ENABLED) scheduleReloadAfterPullGesture({ fromSwipe: false });
             else if (didSwipeRight) {
+              /* Открытие меню ассистента обрабатывает pointer-хендлер
+                 (wireAssistantDrawerOpenGestures). Здесь ничего не делаем —
+                 иначе двойной вызов openAssistantDrawer и дёрганье. */
               resetPullHint();
               resetSwipeHint();
-              openAssistantDrawer();
             } else if (didSwipeLeftDom) {
               // P1-fix: не перезагружать если курсор в contenteditable / input (IME-composition)
               var aeSwipe = document.activeElement;
@@ -12560,6 +13182,14 @@
               } else {
                 scheduleReloadAfterPullGesture({ fromSwipe: true });
               }
+            } else if (didSwipeLeftMid) {
+              resetPullHint();
+              resetSwipeHint();
+              goToAdjacentScenario(1);
+            } else if (didSwipeRightMid) {
+              resetPullHint();
+              resetSwipeHint();
+              goToAdjacentScenario(-1);
             } else {
               resetPullHint();
               resetSwipeHint();
@@ -12619,6 +13249,9 @@
         var minDx = 0;
         var maxAbsDy = 0;
         var OPEN_MIN = 40;
+        /* Меню ассистента открывается свайпом от левого края экрана (зона шире — надёжнее ловит жест). */
+        var OPEN_EDGE_ZONE = 64;
+        var openFromLeftEdge = false;
         var openDragVisual = false;
         var openDragLastTx = 0;
         var openDragLastX = 0;
@@ -12649,6 +13282,7 @@
           activePid = e.pointerId;
           sx = e.clientX;
           sy = e.clientY;
+          openFromLeftEdge = e.clientX <= OPEN_EDGE_ZONE;
           maxDx = 0;
           minDx = 0;
           maxAbsDy = 0;
@@ -12720,7 +13354,7 @@
           ) {
             var adxr = Math.abs(dx);
             var adyr = Math.abs(dy);
-            if (dx > 2 && adxr >= adyr * 0.78) {
+            if (openFromLeftEdge && dx > 2 && adxr >= adyr * 0.78) {
               var del = document.getElementById('assistant-drawer');
               if (del) {
                 if (!openDragVisual) {
@@ -12781,7 +13415,7 @@
           var finDy = Math.abs(e.clientY - sy);
           var useDx = Math.max(maxDx, finDx);
           var useDy = Math.max(maxAbsDy, finDy);
-          if (useDx >= OPEN_MIN && useDx + 8 >= Math.abs(minDx) && useDx >= useDy * 0.82) {
+          if (openFromLeftEdge && useDx >= OPEN_MIN && useDx + 8 >= Math.abs(minDx) && useDx >= useDy * 0.82) {
             openAssistantDrawer();
           }
         }
@@ -13095,6 +13729,8 @@
       wireShotlistPiecesManualInput();
       wireShotlistPiecesRemove();
       wirePrepDateUiHint();
+      wirePrepImportantPin();
+      wireNoteIntercutTapToFocus();
       wireShootDateToCalendar();
       updateShotlistLocationHeadings(document);
       updateAllShotlistProgress();
