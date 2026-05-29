@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v320)</title>
+  <title>Sam Scenes (v321)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -2905,15 +2905,28 @@
     .line { margin-top: 8px; color: var(--label); }
     .line b { color: var(--time); font-weight: 700; }
 
-    /* Говорю / Примечание / Перебивка — единый макет: подпись и поле ввода на одной
-       строке (текст сразу после слова), одинаковый пунктир-подчёркивание под полем. */
-    .scene-main > .line-say,
+    /* Говорю / Примечание / Перебивка: строка 1 — подпись + пунктир; строка 2 — текст
+       на всю ширину (переносы идут под словами метки, не только под линией справа). */
+    .scene-main > .line-say {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      grid-template-rows: auto auto;
+      align-items: start;
+      column-gap: 10px;
+      row-gap: 0.32em;
+      margin-top: 8px;
+      position: relative;
+      box-sizing: border-box;
+      padding: 0 0 2px;
+    }
+
     .scene-main > .line-note,
     .scene-main > .intercut {
-      display: flex;
-      flex-wrap: nowrap;
-      align-items: baseline;
-      column-gap: 0.5em;
+      display: grid;
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto;
+      row-gap: 0.32em;
+      align-items: start;
       margin-top: 8px;
       position: relative;
       box-sizing: border-box;
@@ -2925,12 +2938,9 @@
       scroll-margin-bottom: 42vh;
     }
 
-    /* Подписи — одинаковая типографика у всех трёх. */
-    .scene-main > .line-say > b,
-    .scene-main > .line-note > b,
-    .scene-main > .intercut > b {
-      flex: 0 0 auto;
-      display: inline-block;
+    .scene-main > .line-say > b {
+      grid-column: 1;
+      grid-row: 1;
       align-self: baseline;
       white-space: nowrap;
       line-height: 1.35;
@@ -2939,31 +2949,82 @@
       color: var(--time);
     }
 
+    .scene-main > .line-say::after {
+      content: "\200B";
+      grid-column: 2;
+      grid-row: 1;
+      align-self: baseline;
+      min-width: 0.25em;
+      font-size: 1.2em;
+      line-height: 1.35;
+      border-bottom: 1px dashed rgba(200, 198, 195, 0.38);
+      pointer-events: none;
+    }
+
+    .scene-main > .line-say:focus-within::after {
+      border-bottom-color: rgba(200, 198, 195, 0.52);
+    }
+
+    .scene-main > .line-note > b,
+    .scene-main > .intercut > b {
+      grid-row: 1;
+      grid-column: 1;
+      width: 100%;
+      display: flex;
+      align-items: flex-end;
+      gap: 0.42em;
+      min-width: 0;
+      white-space: nowrap;
+      line-height: 1.35;
+      font-weight: 700;
+      color: var(--time);
+    }
+
     .scene-main > .line-note > b .scene-note-heading,
     .scene-main > .intercut > b .scene-note-heading {
-      display: inline;
+      flex: 0 0 auto;
+      min-width: 0;
+      box-sizing: border-box;
       font: inherit;
+      font-size: 1.2em;
+      font-weight: 700;
       letter-spacing: 0.02em;
       color: inherit;
     }
 
-    /* Поле ввода — сразу после подписи на той же строке; одинаковый пунктир снизу. */
+    .scene-main > .line-note > b::after,
+    .scene-main > .intercut > b::after {
+      content: "";
+      flex: 1 1 0;
+      min-width: 0.25em;
+      height: 0;
+      border-bottom: 1px dashed rgba(200, 198, 195, 0.38);
+    }
+
+    .scene-main > .line-note:focus-within > b::after,
+    .scene-main > .intercut:focus-within > b::after {
+      border-bottom-color: rgba(200, 198, 195, 0.52);
+    }
+
     .scene-main > .line-say .say-editable,
     .scene-main > .line-note .note-editable,
     .scene-main > .intercut .intercut-text {
-      flex: 1 1 8ch;
-      min-width: 0;
-      align-self: stretch;
+      grid-column: 1 / -1;
+      grid-row: 2;
+      align-self: start;
       display: block;
-      min-height: 1.4em;
+      min-height: 1.35em;
+      min-width: 0;
+      width: 100%;
+      max-width: 100%;
       line-height: 1.35;
       white-space: pre-wrap;
       overflow-wrap: anywhere;
       outline: none;
       border: none;
-      border-bottom: 1px dashed rgba(200, 198, 195, 0.38);
+      border-bottom: none;
       border-radius: 0;
-      padding: 0 0 2px;
+      padding: 0;
       margin: 0;
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
@@ -2974,7 +3035,6 @@
     .scene-main > .intercut .intercut-text:focus {
       background: transparent;
       box-shadow: none;
-      border-bottom-color: rgba(200, 198, 195, 0.52);
     }
 
     .scene-main > .line-say .say-editable::selection,
@@ -2986,11 +3046,12 @@
 
     /* «Заменить» — компактная кнопка справа на строке «Говорю». */
     .scene-main > .line-say .say-replace-btn {
-      flex: 0 0 auto;
-      order: 5;
-      margin-left: 0.5em;
+      grid-column: 3;
+      grid-row: 1;
+      justify-self: end;
       align-self: baseline;
       display: inline-block;
+      margin: 0;
       border: 1px solid rgba(160, 150, 128, 0.18);
       background: var(--ui-select-bg);
       color: rgba(212, 198, 170, 0.78);
@@ -6618,8 +6679,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v320';
-      var BUILD_TIME = '2026-05-30 01:22 MSK';
+      var APP_VERSION = 'v321';
+      var BUILD_TIME = '2026-05-30 01:28 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
