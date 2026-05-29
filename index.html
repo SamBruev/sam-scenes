@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v318)</title>
+  <title>Sam Scenes (v319)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -3264,12 +3264,28 @@
       box-shadow: none;
     }
 
-    .prep-important-options .prep-important-label:hover {
+    .prep-important-options .prep-important-label {
+      touch-action: pan-y;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Подсветка только при осмысленном тапе (класс ставит JS), не при скролле мимо. */
+    .prep-important-options .prep-important-label.prep-important-tap-armed:not(.prep-important-scroll-gesture) {
       background: rgba(255, 255, 255, 0.05);
     }
 
-    .prep-important-options .prep-important-label:has(input:checked):hover {
+    .prep-important-options .prep-important-label.prep-important-tap-armed:has(input:checked):not(.prep-important-scroll-gesture) {
       background: rgba(232, 201, 104, 0.16);
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .prep-important-options .prep-important-label:hover {
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      .prep-important-options .prep-important-label:has(input:checked):hover {
+        background: rgba(232, 201, 104, 0.16);
+      }
     }
 
     .teleprompter-overlay {
@@ -6506,8 +6522,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v318';
-      var BUILD_TIME = '2026-05-30 01:05 MSK';
+      var APP_VERSION = 'v319';
+      var BUILD_TIME = '2026-05-30 01:12 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -11853,9 +11869,94 @@
         } catch (eLoc) {}
       }
 
+      /** Чекбоксы «Важно»: при скролле палец не должен подсвечивать/переключать пункт. */
+      function wirePrepImportantScrollSafeTap() {
+        if (wirePrepImportantScrollSafeTap._done) return;
+        wirePrepImportantScrollSafeTap._done = true;
+        var tapStart = null;
+        var suppressPrepImportantClick = false;
+
+        function prepImportantLabelFromTarget(t) {
+          return t && t.closest && t.closest('#prep-important-block .prep-important-label');
+        }
+
+        function clearPrepImportantTapClasses(lab) {
+          if (!lab) return;
+          lab.classList.remove('prep-important-tap-armed', 'prep-important-scroll-gesture');
+        }
+
+        function prepImportantTapMoved(e) {
+          if (!tapStart || e.pointerId !== tapStart.id) return false;
+          return Math.hypot(e.clientX - tapStart.x, e.clientY - tapStart.y) > INTENT_TAP_MAX_PX;
+        }
+
+        document.addEventListener(
+          'pointerdown',
+          function (e) {
+            var lab = prepImportantLabelFromTarget(e.target);
+            if (!lab) return;
+            if (e.pointerType === 'mouse' && e.button !== 0) return;
+            suppressPrepImportantClick = false;
+            clearPrepImportantTapClasses(lab);
+            lab.classList.add('prep-important-tap-armed');
+            tapStart = { lab: lab, x: e.clientX, y: e.clientY, id: e.pointerId };
+          },
+          true
+        );
+
+        document.addEventListener(
+          'pointermove',
+          function (e) {
+            if (!tapStart || e.pointerId !== tapStart.id) return;
+            if (prepImportantTapMoved(e)) {
+              suppressPrepImportantClick = true;
+              tapStart.lab.classList.add('prep-important-scroll-gesture');
+            }
+          },
+          true
+        );
+
+        document.addEventListener(
+          'pointerup',
+          function (e) {
+            if (!tapStart || e.pointerId !== tapStart.id) return;
+            var lab = tapStart.lab;
+            if (prepImportantTapMoved(e)) suppressPrepImportantClick = true;
+            tapStart = null;
+            clearPrepImportantTapClasses(lab);
+          },
+          true
+        );
+
+        document.addEventListener(
+          'pointercancel',
+          function (e) {
+            if (!tapStart || e.pointerId !== tapStart.id) return;
+            var lab = tapStart.lab;
+            tapStart = null;
+            suppressPrepImportantClick = true;
+            clearPrepImportantTapClasses(lab);
+          },
+          true
+        );
+
+        document.addEventListener(
+          'click',
+          function (e) {
+            if (!prepImportantLabelFromTarget(e.target)) return;
+            if (!suppressPrepImportantClick) return;
+            e.preventDefault();
+            e.stopPropagation();
+            suppressPrepImportantClick = false;
+          },
+          true
+        );
+      }
+
       function wirePrepImportantPin() {
         if (wirePrepImportantPin._done) return;
         wirePrepImportantPin._done = true;
+        wirePrepImportantScrollSafeTap();
         /* Делегирование на document — переживает перестройку wrap.innerHTML при смене сценария. */
         document.addEventListener('change', function (e) {
           var t = e.target;
