@@ -2,7 +2,7 @@
 // Стратегия: Network-first с тайм-аутом для index.html (свежий, но без зависания
 // на медленной сети), Cache-first для остальных файлов — приложение работает офлайн.
 
-var CACHE_NAME = 'samscenes-v319';
+var CACHE_NAME = 'samscenes-v320';
 var CORE_FILES = [
   '/sam-scenes/',
   '/sam-scenes/index.html',

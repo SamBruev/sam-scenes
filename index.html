@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v319)</title>
+  <title>Sam Scenes (v320)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -3199,6 +3199,89 @@
       }
     }
 
+    /* Все пункты отмечены — компактная плашка вместо чеклиста. */
+    .field-prep-important.prep-important-collapsed {
+      padding: 10px 12px;
+      gap: 0;
+      background: rgba(0, 0, 0, 0.52);
+      border-color: rgba(120, 200, 140, 0.32);
+    }
+
+    .field-prep-important.prep-important-collapsed .prep-important-head,
+    .field-prep-important.prep-important-collapsed .prep-important-options,
+    .field-prep-important.prep-important-collapsed .prep-important-collapse-btn {
+      display: none !important;
+    }
+
+    .field-prep-important.prep-important-collapsed .prep-important-done {
+      display: flex;
+    }
+
+    .prep-important-done {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      border: none;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .prep-important-done-icon {
+      flex-shrink: 0;
+      width: 1.65rem;
+      height: 1.65rem;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(120, 200, 140, 0.18);
+      color: rgba(170, 235, 185, 0.98);
+      font-size: 0.95rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .prep-important-done-text {
+      flex: 1 1 auto;
+      min-width: 0;
+      margin: 0;
+      font-size: 0.92rem;
+      font-weight: 700;
+      line-height: 1.35;
+      color: rgba(230, 248, 235, 0.96);
+      letter-spacing: 0.02em;
+    }
+
+    .prep-important-collapse-btn {
+      display: none;
+      margin: 10px 0 0;
+      padding: 0;
+      border: none;
+      background: transparent;
+      color: rgba(232, 201, 104, 0.82);
+      font: inherit;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .field-prep-important.prep-important-all-done:not(.prep-important-collapsed) .prep-important-collapse-btn {
+      display: inline-block;
+    }
+
     .field-prep-important .prep-important-head {
       display: flex;
       align-items: center;
@@ -5404,6 +5487,19 @@
               ><input type="checkbox" id="prep-important-macbook" /> Настроено управление с MacBook</label
             >
           </div>
+          <button type="button" class="prep-important-collapse-btn" id="prep-important-collapse-btn">
+            Свернуть
+          </button>
+          <button
+            type="button"
+            class="prep-important-done"
+            id="prep-important-done"
+            hidden
+            aria-label="Всё готово к съёмке — открыть чеклист"
+          >
+            <span class="prep-important-done-icon" aria-hidden="true">✓</span>
+            <span class="prep-important-done-text">Всё готово к съёмке</span>
+          </button>
         </div>
         <div class="field field-assistant">
           <div class="assistant-line">
@@ -6522,8 +6618,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v319';
-      var BUILD_TIME = '2026-05-30 01:12 MSK';
+      var APP_VERSION = 'v320';
+      var BUILD_TIME = '2026-05-30 01:22 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -11757,12 +11853,38 @@
         }, 1000);
       }
 
+      /** Развёрнут ли чеклист после заполнения (иначе — компактная плашка «готово»). */
+      var prepImportantExpanded = false;
+
       function updatePrepImportantPin() {
         updatePrepImportantReminder();
         var block = document.getElementById('prep-important-block');
         if (!block) return;
         /* Закрепление отключено — блок «Важно» остаётся обычным блоком в карточке «Подготовка». */
         block.classList.remove('prep-important-pinned');
+        var allDone = prepImportantAllChecked();
+        if (!allDone) prepImportantExpanded = false;
+        block.classList.toggle('prep-important-all-done', allDone);
+        block.classList.toggle('prep-important-collapsed', allDone && !prepImportantExpanded);
+        var doneBtn = document.getElementById('prep-important-done');
+        if (doneBtn) doneBtn.hidden = !allDone || prepImportantExpanded;
+        var collapseBtn = document.getElementById('prep-important-collapse-btn');
+        if (collapseBtn) collapseBtn.hidden = !(allDone && prepImportantExpanded);
+      }
+
+      function expandPrepImportantChecklist() {
+        prepImportantExpanded = true;
+        updatePrepImportantPin();
+        try {
+          var block = document.getElementById('prep-important-block');
+          if (block) block.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } catch (eSc) {}
+      }
+
+      function collapsePrepImportantChecklist() {
+        if (!prepImportantAllChecked()) return;
+        prepImportantExpanded = false;
+        updatePrepImportantPin();
       }
 
       /** #4: было ли «всё отмечено» на прошлой проверке — чтобы поймать момент завершения. */
@@ -11831,7 +11953,11 @@
           '<span class="prep-important-title-wrap">' +
           '<span class="prep-important-title">Важно</span>' +
           '<span class="prep-important-sub">Всё под контролем?</span>' +
-          '</span></div><div class="prep-important-options">' + labels + '</div>';
+          '</span></div><div class="prep-important-options">' + labels + '</div>' +
+          '<button type="button" class="prep-important-collapse-btn" id="prep-important-collapse-btn">Свернуть</button>' +
+          '<button type="button" class="prep-important-done" id="prep-important-done" hidden aria-label="Всё готово к съёмке — открыть чеклист">' +
+          '<span class="prep-important-done-icon" aria-hidden="true">✓</span>' +
+          '<span class="prep-important-done-text">Всё готово к съёмке</span></button>';
       }
 
       /** Приводит блок «Важно» из сохранённого сценария к актуальному шаблону (новые чек-боксы, id). */
@@ -11851,6 +11977,16 @@
           var canonical = prepImportantCanonicalInnerHtml();
           if (block.innerHTML.replace(/\s+/g, '') !== canonical.replace(/\s+/g, '')) {
             block.innerHTML = canonical;
+          } else {
+            if (!block.querySelector('#prep-important-done')) {
+              var tmp = document.createElement('div');
+              tmp.innerHTML =
+                '<button type="button" class="prep-important-collapse-btn" id="prep-important-collapse-btn">Свернуть</button>' +
+                '<button type="button" class="prep-important-done" id="prep-important-done" hidden aria-label="Всё готово к съёмке — открыть чеклист">' +
+                '<span class="prep-important-done-icon" aria-hidden="true">✓</span>' +
+                '<span class="prep-important-done-text">Всё готово к съёмке</span></button>';
+              while (tmp.firstChild) block.appendChild(tmp.firstChild);
+            }
           }
           var newBoxes = block.querySelectorAll('input[type="checkbox"]');
           for (var j = 0; j < newBoxes.length; j++) {
@@ -11968,11 +12104,27 @@
           }
           updatePrepImportantPin();
         }, false);
+        var doneOpenBtn = document.getElementById('prep-important-done');
+        if (doneOpenBtn) {
+          doneOpenBtn.addEventListener('click', function () {
+            expandPrepImportantChecklist();
+            try { triggerHaptic('light'); } catch (eH) {}
+          });
+        }
+        var collapseBtn = document.getElementById('prep-important-collapse-btn');
+        if (collapseBtn) {
+          collapseBtn.addEventListener('click', function () {
+            collapsePrepImportantChecklist();
+            try { triggerHaptic('micro'); } catch (eH2) {}
+          });
+        }
         var reminderBadge = document.getElementById('prep-important-reminder');
         if (reminderBadge) {
           reminderBadge.addEventListener('click', function () {
             var block = document.getElementById('prep-important-block');
             if (!block) return;
+            prepImportantExpanded = true;
+            updatePrepImportantPin();
             try {
               block.scrollIntoView({ behavior: 'smooth', block: 'start' });
             } catch (eSc) {
