@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v321)</title>
+  <title>Sam Scenes (v322)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -169,9 +169,13 @@
       --assistant-hint-violet-mid: rgba(212, 175, 95, 0.22);
       --assistant-hint-violet-soft: rgba(212, 175, 95, 0.14);
       --assistant-hint-violet-glow: rgba(212, 175, 95, 0.28);
-      /* Шторки: фиолет у внешнего края; к контенту — прозрачно (шторка «закрыть» + rotate(180deg)). */
+      /* Шторки-подсказки (открыть слева экрана / закрыть у края панели): одинаковые размеры и градиент. */
       --assistant-strip-edge-purple: rgba(168, 132, 212, 0.3);
       --assistant-strip-edge-purple-soft: rgba(168, 132, 212, 0.1);
+      --assistant-hint-strip-width: 20px;
+      --assistant-hint-strip-min-width: 18px;
+      --assistant-hint-strip-height: min(176px, 48vh);
+      --assistant-hint-strip-min-height: 84px;
       /* Удобный алиас для вторичных акцентов вне меню ассистента */
       --ui-violet: var(--assistant-hint-violet);
       --ui-violet-glow: var(--assistant-hint-violet-glow);
@@ -583,22 +587,36 @@
       }
     }
 
-    /* Шторка слева: прямой край вплотную к левому краю экрана (fixed), скругление смотрит в меню. */
-    .assistant-open-strip {
-      position: fixed;
-      left: 0;
-      margin-left: 0;
-      padding-left: 0;
-      right: auto;
-      top: 50%;
-      transform: translateY(calc(-50% + var(--pull-stack-y, 0px)));
-      width: 20px;
-      min-width: 18px;
-      height: min(176px, 48vh);
-      min-height: 84px;
+    /* Общая база фиолетовых шторок-подсказок (экран ↔ панель ассистента). */
+    .assistant-open-strip,
+    .assistant-drawer-dismiss-chevron {
+      width: var(--assistant-hint-strip-width);
+      min-width: var(--assistant-hint-strip-min-width);
+      height: var(--assistant-hint-strip-height);
+      min-height: var(--assistant-hint-strip-min-height);
       margin: 0;
       padding: 0;
       border: none;
+      cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+      box-sizing: border-box;
+      transition: opacity 0.2s ease, box-shadow 0.22s ease, background 0.2s ease;
+    }
+
+    /* Шторка слева экрана: фиолет у левого края, скругление в сторону контента. */
+    .assistant-open-strip {
+      position: fixed;
+      left: 0;
+      right: auto;
+      top: 50%;
+      transform: translateY(calc(-50% + var(--pull-stack-y, 0px)));
       border-radius: 0 999px 999px 0;
       background: linear-gradient(
         to right,
@@ -609,23 +627,13 @@
       box-shadow:
         -1px 0 10px rgba(168, 132, 212, 0.08),
         1px 0 8px rgba(0, 0, 0, 0.14);
-      /* Выше .wrap (12) и дочерних слоёв сцен, но ниже teleprompter / pull-hint / drawer */
       z-index: 100;
-      cursor: pointer;
-      touch-action: manipulation;
-      -webkit-tap-highlight-color: transparent;
-      -webkit-user-select: none;
-      user-select: none;
-      -webkit-touch-callout: none;
-      /* #5: кнопка-шторка — без фокус-обводки (голубоватая рамка при тапе на iOS). */
-      outline: none;
-      -webkit-appearance: none;
-      appearance: none;
-      transition: opacity 0.2s ease, box-shadow 0.22s ease;
     }
 
     .assistant-open-strip:focus,
-    .assistant-open-strip:focus-visible {
+    .assistant-open-strip:focus-visible,
+    .assistant-drawer-dismiss-chevron:focus,
+    .assistant-drawer-dismiss-chevron:focus-visible {
       outline: none;
     }
 
@@ -717,42 +725,23 @@
     }
 
     /*
-      Шторка «закрыть» у правого края панели: узкая полоска; полукруг у внешнего края,
-      внутренний — прямой рез (та же сторона, что и шторка открытия у правого края экрана).
+      Шторка у правого края панели ассистента — зеркало .assistant-open-strip:
+      фиолет у внешнего края (к основному меню), тот же размер и градиент.
     */
     .assistant-drawer-dismiss-chevron {
       position: absolute;
       right: 0;
       top: 50%;
-      /* 180°: шеврон и скругления смотрят в противоположную сторону (зеркально к открытию слева) */
-      transform: translateY(-50%) rotate(180deg);
+      transform: translateY(-50%);
       transform-origin: center center;
       z-index: 6;
-      width: 8px;
-      min-width: 6px;
-      height: min(176px, 48vh);
-      min-height: 84px;
-      margin: 0;
-      padding: 0;
-      border: none;
-      border-radius: 0 999px 999px 0;
-      cursor: pointer;
-      touch-action: manipulation;
-      -webkit-tap-highlight-color: transparent;
-      -webkit-user-select: none;
-      user-select: none;
-      -webkit-touch-callout: none;
-      outline: none;
-      -webkit-appearance: none;
-      appearance: none;
       display: flex;
       flex-direction: column;
       align-items: stretch;
       justify-content: stretch;
-      box-sizing: border-box;
-      /* Same gradient as .assistant-open-strip; rotate(180deg) puts purple on the outer edge. */
+      border-radius: 999px 0 0 999px;
       background: linear-gradient(
-        to right,
+        to left,
         var(--assistant-strip-edge-purple) 0%,
         var(--assistant-strip-edge-purple-soft) 40%,
         transparent 78%
@@ -760,7 +749,6 @@
       box-shadow:
         1px 0 10px rgba(168, 132, 212, 0.08),
         -1px 0 8px rgba(0, 0, 0, 0.14);
-      transition: opacity 0.2s ease, box-shadow 0.22s ease, transform 0.22s ease;
     }
 
     /* Канал без видимой дорожки — только движущаяся стрелка › */
@@ -790,10 +778,10 @@
       justify-content: center;
       pointer-events: none;
       transition: none;
-      color: rgba(220, 205, 175, 0.92);
+      color: rgba(220, 205, 175, 0.9);
       opacity: 0.95;
-      font-size: 9px;
-      font-weight: 500;
+      font-size: 15px;
+      font-weight: 600;
       line-height: 1;
       letter-spacing: -0.08em;
       text-shadow: none;
@@ -806,16 +794,20 @@
       line-height: 1;
     }
 
-    /* Шторка закрытия — стрелка статична по центру, как «›» у шторки открытия. */
+    /* Шторка закрытия — стрелка по центру, как у шторки открытия (‹ к панели). */
     .assistant-drawer-dismiss-chevron .assistant-drawer-scroll-arrow {
       top: 50% !important;
       bottom: auto !important;
       transform: translate(-50%, -50%) !important;
     }
 
+    .assistant-drawer-dismiss-chevron .assistant-drawer-scroll-arrow::before {
+      content: '\2039';
+    }
+
     .assistant-drawer-dismiss-chevron:active {
       background: linear-gradient(
-        to right,
+        to left,
         rgba(188, 152, 228, 0.38) 0%,
         rgba(168, 132, 212, 0.16) 42%,
         transparent 80%
@@ -823,6 +815,10 @@
       box-shadow:
         1px 0 12px rgba(168, 132, 212, 0.11),
         -1px 0 8px rgba(0, 0, 0, 0.18);
+    }
+
+    .assistant-drawer-dismiss-chevron:active .assistant-drawer-scroll-arrow {
+      color: rgba(245, 232, 210, 0.95);
     }
 
     .assistant-drawer-scroll {
@@ -6679,8 +6675,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v321';
-      var BUILD_TIME = '2026-05-30 01:28 MSK';
+      var APP_VERSION = 'v322';
+      var BUILD_TIME = '2026-05-30 01:35 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
