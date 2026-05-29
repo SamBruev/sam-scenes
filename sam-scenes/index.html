@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v315)</title>
+  <title>Sam Scenes (v316)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -148,6 +148,10 @@
       /* Выпадающие списки и модальные панели: чёрный фон + золотая кайма (как в эталонном макете). */
       --ui-select-bg: #000000;
       --ui-popup-bg: #000000;
+      /* Фон шторки ассистента — полупрозрачный чёрный (контент за панелью просвечивает).
+         Без живого backdrop-blur: размытие роняло слайд на iOS (см. v313), а альфа даёт
+         «полупрозрачность» без затрат на пересчёт фильтра каждый кадр. */
+      --assistant-drawer-bg: rgba(0, 0, 0, 0.72);
       --ui-select-border: rgba(212, 175, 95, 0.42);
       --ui-select-border-focus: rgba(232, 201, 104, 0.72);
       --border: rgba(255, 255, 255, 0.2);
@@ -451,8 +455,8 @@
       padding: 0 0 0 calc(14px + env(safe-area-inset-left, 0px));
       /* v313 — эксперимент: у шторки убрано живое размытие (backdrop-filter blur).
          Именно постоянный пересчёт размытия ронял слайд до ~12 кадров на iOS Safari.
-         Панель теперь плотная, без «стекла». */
-      background: var(--ui-popup-bg);
+         Панель остаётся без живого blur, но фон снова полупрозрачный (см. --assistant-drawer-bg). */
+      background: var(--assistant-drawer-bg);
       border-right: 1px solid var(--ui-select-border);
       border-radius: 0;
       box-shadow: 10px 0 48px rgba(0, 0, 0, 0.2);
@@ -572,8 +576,8 @@
       right: auto;
       top: 50%;
       transform: translateY(calc(-50% + var(--pull-stack-y, 0px)));
-      width: 8px;
-      min-width: 6px;
+      width: 20px;
+      min-width: 18px;
       height: min(176px, 48vh);
       min-height: 84px;
       margin: 0;
@@ -615,8 +619,8 @@
       left: 50%;
       top: 50%;
       transform: translate(-50%, -50%);
-      font-size: 9px;
-      font-weight: 500;
+      font-size: 15px;
+      font-weight: 600;
       line-height: 1;
       color: rgba(220, 205, 175, 0.9);
       pointer-events: none;
@@ -2885,66 +2889,92 @@
     .line { margin-top: 8px; color: var(--label); }
     .line b { color: var(--time); font-weight: 700; }
 
-    .scene-main > .line-say {
-      display: grid;
-      /* Строка 1: «Говорю:» + растяжка + «Заменить»; телесуфлер — между «СЦЕНА …» и временем */
-      grid-template-columns: auto minmax(0, 1fr) auto;
-      grid-template-rows: auto auto;
-      align-items: start;
-      column-gap: 10px;
-      row-gap: 8px;
+    /* Говорю / Примечание / Перебивка — единый макет: подпись и поле ввода на одной
+       строке (текст сразу после слова), одинаковый пунктир-подчёркивание под полем. */
+    .scene-main > .line-say,
+    .scene-main > .line-note,
+    .scene-main > .intercut {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: baseline;
+      column-gap: 0.5em;
+      margin-top: 8px;
+      position: relative;
+      box-sizing: border-box;
+      padding: 0 0 2px;
     }
 
-    .scene-main > .line-say > b {
-      grid-column: 1;
-      grid-row: 1;
+    .scene-main > .line-note {
+      scroll-margin-top: 26vh;
+      scroll-margin-bottom: 42vh;
+    }
+
+    /* Подписи — одинаковая типографика у всех трёх. */
+    .scene-main > .line-say > b,
+    .scene-main > .line-note > b,
+    .scene-main > .intercut > b {
+      flex: 0 0 auto;
+      display: inline-block;
       align-self: baseline;
       white-space: nowrap;
-      line-height: 1.25;
+      line-height: 1.35;
       font-size: 1.2em;
+      font-weight: 700;
+      color: var(--time);
     }
 
-    /* Пунктир на одной строке со словом «Говорю» — как у «Примечание» / «Перебивка». */
-    .scene-main > .line-say::after {
-      content: "\200B";
-      grid-column: 2;
-      grid-row: 1;
-      align-self: baseline;
-      min-width: 0.25em;
-      font-size: 1.2em;
-      line-height: 1.25;
-      border-bottom: 1px dashed rgba(200, 198, 195, 0.38);
-      pointer-events: none;
+    .scene-main > .line-note > b .scene-note-heading,
+    .scene-main > .intercut > b .scene-note-heading {
+      display: inline;
+      font: inherit;
+      letter-spacing: 0.02em;
+      color: inherit;
     }
 
-    .scene-main > .line-say:focus-within::after {
-      border-bottom-color: rgba(200, 198, 195, 0.52);
-    }
-
-    .scene-main > .line-say .say-editable {
-      grid-column: 1 / -1;
-      grid-row: 2;
-      align-self: start;
-      display: block;
-      min-height: 1.35em;
+    /* Поле ввода — сразу после подписи на той же строке; одинаковый пунктир снизу. */
+    .scene-main > .line-say .say-editable,
+    .scene-main > .line-note .note-editable,
+    .scene-main > .intercut .intercut-text {
+      flex: 1 1 8ch;
       min-width: 0;
+      align-self: stretch;
+      display: block;
+      min-height: 1.4em;
+      line-height: 1.35;
       white-space: pre-wrap;
       overflow-wrap: anywhere;
       outline: none;
+      border: none;
+      border-bottom: 1px dashed rgba(200, 198, 195, 0.38);
       border-radius: 0;
-      padding: 0;
+      padding: 0 0 2px;
       margin: 0;
+      box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
-      border-bottom: none;
     }
 
+    .scene-main > .line-say .say-editable:focus,
+    .scene-main > .line-note .note-editable:focus,
+    .scene-main > .intercut .intercut-text:focus {
+      background: transparent;
+      box-shadow: none;
+      border-bottom-color: rgba(200, 198, 195, 0.52);
+    }
+
+    .scene-main > .line-say .say-editable::selection,
+    .scene-main > .line-note .note-editable::selection,
+    .scene-main > .intercut .intercut-text::selection {
+      background: rgba(255, 255, 255, 0.22);
+      color: #f8eed1;
+    }
+
+    /* «Заменить» — компактная кнопка справа на строке «Говорю». */
     .scene-main > .line-say .say-replace-btn {
-      grid-column: 3;
-      grid-row: 1;
-      justify-self: end;
+      flex: 0 0 auto;
+      order: 5;
+      margin-left: 0.5em;
       align-self: baseline;
       display: inline-block;
-      margin: 0;
       border: 1px solid rgba(160, 150, 128, 0.18);
       background: var(--ui-select-bg);
       color: rgba(212, 198, 170, 0.78);
@@ -2961,16 +2991,6 @@
       vertical-align: baseline;
     }
 
-    .scene-main > .line-say .say-editable:focus {
-      background: transparent;
-      box-shadow: none;
-    }
-
-    .scene-main > .line-say .say-editable::selection {
-      background: rgba(255, 255, 255, 0.22);
-      color: #f8eed1;
-    }
-
     /* Старые вставки с блоками <div>: визуальный зазор между абзацами. */
     .scene-main > .line-say .say-editable > div:not(:last-child),
     .scene-main > .line-note .note-editable > div:not(:last-child),
@@ -2978,128 +2998,6 @@
       margin-bottom: 0.42em;
     }
 
-    /* Примечание / перебивка: подпись в .scene-note-heading фикс. ширины (ch) — пунктир справа одной длины. */
-    .scene-main > .line-note .note-editable,
-    .scene-main > .intercut .intercut-text {
-      display: block;
-      min-height: 1.35em;
-      min-width: 0;
-      width: 100%;
-      max-width: 100%;
-      white-space: pre-wrap;
-      overflow-wrap: anywhere;
-      outline: none;
-      border-radius: 0;
-      padding: 0 0 2px;
-      margin: 0;
-      box-sizing: border-box;
-      border-bottom: none;
-    }
-
-    .scene-main > .line-note .note-editable:focus,
-    .scene-main > .intercut .intercut-text:focus {
-      background: transparent;
-      box-shadow: none;
-    }
-
-    .scene-main > .line-note {
-      display: grid;
-      grid-template-columns: 1fr;
-      grid-template-rows: auto auto;
-      row-gap: 0.32em;
-      align-items: start;
-      position: relative;
-      padding-bottom: 2px;
-      box-sizing: border-box;
-      scroll-margin-top: 26vh;
-      scroll-margin-bottom: 42vh;
-    }
-
-    .scene-main > .line-note > b {
-      grid-row: 1;
-      width: 100%;
-      display: flex;
-      /* center тянул боковой пунктир в середину по вертикали; flex-end — на уровне низа строки / подчёркивания */
-      align-items: flex-end;
-      gap: 0.42em;
-      min-width: 0;
-      white-space: nowrap;
-      line-height: 1.25;
-    }
-
-    .scene-main > .line-note > b .scene-note-heading,
-    .scene-main > .intercut > b .scene-note-heading {
-      flex: 0 0 12ch;
-      min-width: 0;
-      box-sizing: border-box;
-      font-family: var(--brand-serif);
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      color: rgba(210, 192, 168, 0.95);
-    }
-
-    .scene-main > .line-note > b::before,
-    .scene-main > .intercut > b::before {
-      content: none;
-      display: none;
-    }
-
-    .scene-main > .line-note > b::after,
-    .scene-main > .intercut > b::after {
-      content: "";
-      flex: 1 1 0;
-      min-width: 0.25em;
-      height: 0;
-      /* Пунктир на одной строке со словом-меткой («Примечание» / «Перебивка»). */
-      border-bottom: 1px dashed rgba(200, 198, 195, 0.38);
-    }
-
-    .scene-main > .line-note:focus-within > b::after,
-    .scene-main > .intercut:focus-within > b::after {
-      border-bottom-color: rgba(200, 198, 195, 0.52);
-    }
-
-    .scene-main > .line-note .note-editable {
-      grid-row: 2;
-    }
-
-    /* Нижний пунктир под полем убран — подчёркивание теперь на строке метки (см. > b::after). */
-    .scene-main > .line-note::after {
-      content: none;
-      display: none;
-    }
-
-    .scene-main > .intercut {
-      display: grid;
-      grid-template-columns: 1fr;
-      grid-template-rows: auto auto;
-      row-gap: 0.32em;
-      align-items: start;
-      position: relative;
-      padding-bottom: 2px;
-      box-sizing: border-box;
-    }
-
-    .scene-main > .intercut > b {
-      grid-row: 1;
-      width: 100%;
-      display: flex;
-      align-items: flex-end;
-      gap: 0.42em;
-      min-width: 0;
-      white-space: nowrap;
-      line-height: 1.25;
-    }
-
-    .scene-main > .intercut .intercut-text {
-      grid-row: 2;
-    }
-
-    /* Нижний пунктир под полем убран — подчёркивание теперь на строке метки (см. > b::after). */
-    .scene-main > .intercut::after {
-      content: none;
-      display: none;
-    }
 
     .field-prep-important {
       scroll-margin-top: 28vh;
@@ -3488,6 +3386,23 @@
     .field .format-row .format-select {
       flex: 1 1 7.5rem;
       min-width: min(100%, 7.5rem);
+    }
+
+    /* Поле «Формат кадра»: подпись слева, по вертикали по центру относительно блоков выбора. */
+    .field:has(> .format-row) {
+      flex-direction: row;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .field:has(> .format-row) > b {
+      flex: 0 0 auto;
+      align-self: center;
+    }
+
+    .field:has(> .format-row) > .format-row {
+      flex: 1 1 auto;
+      min-width: 0;
     }
 
     /* Нативное поле даты без «зелёного» системного оформления */
@@ -5124,10 +5039,9 @@
       border-bottom-width: 0.5px;
     }
 
-    .wrap .scene-main > .line-note > b::after,
-    .wrap .scene-main > .intercut > b::after,
-    .wrap .scene-main > .line-note::after,
-    .wrap .scene-main > .intercut::after {
+    .wrap .scene-main > .line-say .say-editable,
+    .wrap .scene-main > .line-note .note-editable,
+    .wrap .scene-main > .intercut .intercut-text {
       border-bottom-width: 0.5px;
     }
 
@@ -6581,8 +6495,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v315';
-      var BUILD_TIME = '2026-05-29 12:00 MSK';
+      var APP_VERSION = 'v316';
+      var BUILD_TIME = '2026-05-29 21:55 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -7346,6 +7260,66 @@
       }
 
       /** Копия сценария в наборе (отдельный id, разметка и prep как у источника). */
+      /** Переименование сценария (долгое нажатие по плашке в шторке ассистента).
+          Для активного сценария синхронизируем заголовок сцены в основном блоке. */
+      function renameScenarioById(scenarioId) {
+        if (!scenarioId) return false;
+        var bundlePeek = readScenarioBundle();
+        var curName = '';
+        if (bundlePeek && bundlePeek.items) {
+          for (var p = 0; p < bundlePeek.items.length; p++) {
+            if (bundlePeek.items[p] && bundlePeek.items[p].id === scenarioId) {
+              curName = bundlePeek.items[p].name || '';
+              break;
+            }
+          }
+        }
+        var next = window.prompt('Название сценария', curName);
+        if (next === null) return false;
+        next = String(next).replace(/\s+/g, ' ').trim();
+        if (!next || next === curName) return false;
+        try {
+          persistToStorage('Сохранено');
+        } catch (e0) {}
+        var bundle = readScenarioBundle();
+        if (!bundle || !bundle.items) return false;
+        var target = null;
+        for (var i = 0; i < bundle.items.length; i++) {
+          if (bundle.items[i] && bundle.items[i].id === scenarioId) {
+            target = bundle.items[i];
+            break;
+          }
+        }
+        if (!target) return false;
+        target.name = next;
+        target.updatedAt = Date.now();
+        if (!writeScenarioBundle(bundle)) {
+          alert('Не удалось сохранить новое название. Освободите память сайта (кэш/данные) и попробуйте снова.');
+          return false;
+        }
+        /* Активный сценарий — обновляем заголовок основного блока и поле имени, чтобы имя
+           в шторке ассистента и название сцены в основном блоке всегда совпадали. */
+        if (bundle.activeId === scenarioId) {
+          if (scenarioName) scenarioName.value = next;
+          try {
+            syncTitleSubject(next);
+          } catch (eT) {}
+        }
+        try {
+          renderAssistantDrawerList();
+        } catch (eR) {}
+        try {
+          renderScenarioList(bundle);
+        } catch (eS) {}
+        try {
+          renderDailyPlan(bundle);
+        } catch (eD) {}
+        try {
+          triggerHaptic('light');
+        } catch (eH) {}
+        return true;
+      }
+
       function duplicateScenarioById(scenarioId) {
         if (!scenarioId) return false;
         try {
@@ -7825,7 +7799,7 @@
             btn.setAttribute(
               'aria-label',
               (it.name || 'Сценарий') +
-                '. Свайп плашки вправо — дублировать или удалить. Долгое нажатие — перетащить для порядка.'
+                '. Свайп плашки вправо — дублировать или удалить. Долгое нажатие — переименовать.'
             );
             var title = document.createElement('span');
             title.className = 'assistant-drawer-item-title';
@@ -8956,15 +8930,14 @@
               assistantDrawerItemLP.timer = setTimeout(function () {
                 assistantDrawerItemLP.timer = null;
                 if (!assistantDrawerItemLP.down || assistantDrawerItemLP.pointerId !== pid) return;
-                assistantDrawerItemLP.active = true;
-                try {
-                  assistantDrawerItemLP.row.setPointerCapture(pid);
-                } catch (eCap) {}
-                assistantDrawerItemLP.row.classList.add('assistant-drawer-item-row--drag-lift');
+                /* Долгое нажатие — переименование сценария (не перетаскивание). */
+                var renameId = assistantDrawerItemLP.scenarioId;
+                assistantDrawerSuppressClickUntil = Date.now() + 950;
                 try {
                   triggerHaptic('medium');
                 } catch (eH) {}
-                assistantDrawerSuppressClickUntil = Date.now() + 950;
+                assistantDrawerItemLPClear(true);
+                renameScenarioById(renameId);
               }, ASSISTANT_SCENARIO_LONGPRESS_MS);
             },
             true
@@ -10824,6 +10797,11 @@
         var lab = inputEl.closest('label.scene-done-checkbox-only');
         var wrap = lab && lab.querySelector('.camera-lens-shutter');
         if (!wrap) return;
+        /* Анимацию дёргают и change, и click (для надёжности на iOS, где change иногда
+           не доходит) — гасим повторный запуск в пределах одного жеста. */
+        var nowTs = Date.now();
+        if (wrap._lensAnimAt && nowTs - wrap._lensAnimAt < 150) return;
+        wrap._lensAnimAt = nowTs;
         try {
           wrap.classList.remove('take-mark-anim', 'lens-shutter-anim');
           if (wrap._lensAnimT) clearTimeout(wrap._lensAnimT);
@@ -12054,6 +12032,10 @@
         root.addEventListener('click', function (e) {
           var shotCb = e.target && e.target.closest && e.target.closest('.scene-shot-checkbox');
           if (shotCb) {
+            /* Резервный запуск анимации хлопушки прямо по click — на случай если change
+               не сработает; в triggerLensShutterAnim стоит защита от двойного запуска. */
+            syncShotLensLabelClass(shotCb.closest('label.scene-done-checkbox-only'));
+            triggerLensShutterAnim(shotCb);
             requestAnimationFrame(function () {
               syncShotClassForScene(shotCb.closest('.scene-main'));
             });
@@ -13005,6 +12987,13 @@
             var vwEdge = window.innerWidth || document.documentElement.clientWidth || 0;
             swipeFromLeftEdge = startX <= EDGE_SWIPE_ZONE;
             swipeFromRightEdge = vwEdge > 0 && vwEdge - startX <= EDGE_SWIPE_ZONE;
+            /* Жест у левого края (зона открытия меню ассистента, 64px) полностью отдаём
+               pointer-хендлеру wireAssistantDrawerOpenGestures. Иначе горизонтальный
+               preventDefault в touchmove ниже гасит pointer-поток (pointercancel) и
+               drag открытия срывается — отсюда «через раз». Открытие тут и так не делаем. */
+            if (startX <= 64) {
+              swipeArmed = false;
+            }
             pullMaxDy = 0;
             swipeMinDx = 0;
             swipeMaxDx = 0;
@@ -13271,9 +13260,13 @@
           if (el.closest('.assistant-drawer')) return true;
           var tpOv = document.getElementById('teleprompter-overlay');
           if (tpOv && tpOv.classList.contains('open') && el.closest('.teleprompter-overlay')) return true;
+          /* Свайп открытия должен начинаться И с самой шторки (assistant-open-strip):
+             полоска всего 8px, и если жест ловился только правее неё (по .wrap),
+             открытие срабатывало «через раз». Шторка лежит вне .wrap (fixed),
+             поэтому пропускаем её ДО проверки .wrap. */
+          if (el.closest('.assistant-open-strip')) return false;
           if (!el.closest('.wrap')) return true;
           if (el.closest(ASSIST_SWIPE_SKIP_INTERACTIVE)) return true;
-          if (el.closest('.assistant-open-strip')) return true;
           return false;
         }
 
