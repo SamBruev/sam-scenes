@@ -7,7 +7,7 @@
 
 **Сайт:** [sambruev.github.io/sam-scenes/](https://sambruev.github.io/sam-scenes/)
 
-Старый репозиторий `abakan-script` — только история; актуальный деплой — в **`sam-scenes`**.
+Деплой только в **`sam-scenes`**; репозиторий `abakan-script` снят с использования.
 
 После клонирования один раз включите автоотправку коммитов на GitHub (чтобы Pages не отставал):
 
