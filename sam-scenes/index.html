@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v317)</title>
+  <title>Sam Scenes (v318)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -3404,24 +3404,16 @@
       min-width: min(100%, 7.5rem);
     }
 
-    /* Поле «Формат кадра»: подпись слева, по вертикали по центру относительно блоков выбора. */
-    .field:has(> .format-row) {
-      flex-direction: row;
-      align-items: center;
-      gap: 12px;
+    /* «Формат кадра» — та же логика, что «Дата съёмки»: подпись сверху, контролы снизу. */
+    .field-prep-format .prep-format-field-head {
+      margin: 0 0 2px;
     }
 
-    .field:has(> .format-row) > b {
-      flex: 0 0 auto;
-      align-self: center;
+    .field-prep-format .prep-format-wrap {
+      margin-top: 8px;
     }
 
-    .field:has(> .format-row) > .format-row {
-      flex: 1 1 auto;
-      min-width: 0;
-    }
-
-    /* Нативное поле даты без «зелёного» системного оформления */
+    /* Нативное поле даты без «зелёного» системного оформения */
     .field input[type="date"] {
       background: #000000;
       color: var(--text);
@@ -5328,8 +5320,11 @@
           </div>
           <p class="prep-date-hint" id="prep-date-hint">Нажмите строку с датой — календарь; справа маленькая иконка.</p>
         </div>
-        <div class="field"><b>Формат кадра:</b>
-          <div class="format-row">
+        <div class="field field-prep-format">
+          <div class="prep-format-field-head">
+            <b>Формат кадра</b>
+          </div>
+          <div class="prep-format-wrap format-row">
             <select id="prep-format-aspect" class="format-select" aria-label="Соотношение сторон">
               <option value="9:16" selected>9:16</option>
               <option value="16:9">16:9</option>
@@ -6511,8 +6506,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v317';
-      var BUILD_TIME = '2026-05-30 00:42 MSK';
+      var APP_VERSION = 'v318';
+      var BUILD_TIME = '2026-05-30 01:05 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
