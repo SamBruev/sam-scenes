@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v314)</title>
+  <title>Sam Scenes (v315)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -374,9 +374,8 @@
       flex-direction: column;
       position: relative;
       z-index: 12;
-      will-change: filter;
-      /* Тот же темп, что у панели ассистента — blur снимается плавно при закрытии */
-      transition: filter 0.32s cubic-bezier(0.22, 0.9, 0.28, 1);
+      /* blur с .wrap убран ранее — will-change/transition: filter удалены, чтобы не держать
+         лишний композиционный слой на всём контенте во время слайда шторки (iOS jitter). */
     }
 
     /* Pull-from-top: логотип и карточки едут вниз; .wrap остаётся без transform.
@@ -459,6 +458,11 @@
       box-shadow: 10px 0 48px rgba(0, 0, 0, 0.2);
       transform: translateX(-102%);
       transition: transform 0.32s cubic-bezier(0.22, 0.9, 0.28, 1);
+      /* Промоут в отдельный композиционный слой: слайд идёт на GPU, контент под шторкой
+         не перерисовывается каждый кадр — убирает дёрганье открытия/закрытия на iOS Safari. */
+      will-change: transform;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
       /* overflow:hidden + border-radius + backdrop-filter в Safari обрезает flex-контент сверху/снизу */
       overflow: visible;
       display: flex;
@@ -6577,8 +6581,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v314';
-      var BUILD_TIME = '2026-05-25 01:30 MSK';
+      var APP_VERSION = 'v315';
+      var BUILD_TIME = '2026-05-29 12:00 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
