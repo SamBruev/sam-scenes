@@ -1,13 +1,34 @@
 #!/bin/sh
-# После каждого коммита в этом репозитории — сразу push на origin (GitHub Pages видит обновления).
-# Включение один раз из корня репозитория: git config core.hooksPath .githooks
+# После коммита в SamScenes — синхронизация sam-scenes/ → ../sam-scenes и push на GitHub Pages.
+# Включение: git config core.hooksPath .githooks
 
 branch=$(git symbolic-ref --short HEAD 2>/dev/null) || exit 0
 [ "$branch" = "main" ] || exit 0
 
-if git push origin "$branch"; then
-  printf '%s\n' "SamScenes: отправлено на GitHub (origin/$branch)."
-else
-  printf '%s\n' "SamScenes: не удалось выполнить git push — проверьте сеть и доступ к origin." >&2
+repo_root=$(git rev-parse --show-toplevel)
+deploy_dir=$(cd "$repo_root/.." && pwd)/sam-scenes
+
+if [ ! -d "$deploy_dir/.git" ]; then
+  printf '%s\n' "Sam Scenes: нет git в $deploy_dir — push на github.com/SamBruev/sam-scenes пропущен." >&2
   exit 0
 fi
+
+rsync -a --delete --exclude '.git' "$repo_root/sam-scenes/" "$deploy_dir/" || exit 0
+
+(
+  cd "$deploy_dir" || exit 0
+  git add -A
+  if git diff --staged --quiet; then
+    printf '%s\n' "Sam Scenes: sam-scenes на GitHub уже актуален."
+    exit 0
+  fi
+  version=$(sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' build-info.json 2>/dev/null | head -1)
+  [ -n "$version" ] || version="sync"
+  if git commit -m "Sam Scenes ${version}: sync from SamScenes."; then
+    if git push origin main; then
+      printf '%s\n' "Sam Scenes: отправлено на https://github.com/SamBruev/sam-scenes (${version})."
+    else
+      printf '%s\n' "Sam Scenes: git push origin main не удался — проверьте сеть и доступ." >&2
+    fi
+  fi
+)

@@ -1,13 +1,13 @@
 # Sam Scenes
 
-Одностраничное приложение **сценария съёмки** (название в шапке страницы — **Sam Scenes**). **На GitHub** всё лежит в репозитории **`SamBruev/abakan-script`**: один сайт из корня репо — открываете ссылку Pages ниже, и видите приложение (GitHub сам подхватывает главную страницу в корне).
+Одностраничное приложение **сценария съёмки** (название в шапке — **Sam Scenes**).
 
-- Исходники (источник правды): **`SamScenes/`**
-- Копия для выкладки / локальное зеркало: **`abakan-script/`** — тот же сайт и те же ресурсы рядом с ним
+- **Исходники:** `SamScenes/sam-scenes/`
+- **Публикация (GitHub Pages):** [SamBruev/sam-scenes](https://github.com/SamBruev/sam-scenes) — локальное зеркало с git: **`../sam-scenes/`** (соседняя папка `CURSOR/sam-scenes`)
 
-**Сайт:** [sambruev.github.io/abakan-script/](https://sambruev.github.io/abakan-script/)
+**Сайт:** [sambruev.github.io/sam-scenes/](https://sambruev.github.io/sam-scenes/)
 
-Имя репозитория **`abakan-script`** совпадает с сегментом пути в URL Pages; менять необязательно.
+Старый репозиторий `abakan-script` — только история; актуальный деплой — в **`sam-scenes`**.
 
 После клонирования один раз включите автоотправку коммитов на GitHub (чтобы Pages не отставал):
 
