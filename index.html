@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v316)</title>
+  <title>Sam Scenes (v317)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -148,10 +148,10 @@
       /* Выпадающие списки и модальные панели: чёрный фон + золотая кайма (как в эталонном макете). */
       --ui-select-bg: #000000;
       --ui-popup-bg: #000000;
-      /* Фон шторки ассистента — полупрозрачный чёрный (контент за панелью просвечивает).
-         Без живого backdrop-blur: размытие роняло слайд на iOS (см. v313), а альфа даёт
-         «полупрозрачность» без затрат на пересчёт фильтра каждый кадр. */
-      --assistant-drawer-bg: rgba(0, 0, 0, 0.72);
+      /* Фон шторки ассистента — слегка полупрозрачный (только панель; основной UI не трогаем).
+         Без backdrop-blur на слайде (iOS jitter, v313). Не ниже ~0.9 — иначе Safari тянет
+         прозрачность на весь composited слой страницы. */
+      --assistant-drawer-bg: rgba(0, 0, 0, 0.9);
       --ui-select-border: rgba(212, 175, 95, 0.42);
       --ui-select-border-focus: rgba(232, 201, 104, 0.72);
       --border: rgba(255, 255, 255, 0.2);
@@ -378,8 +378,16 @@
       flex-direction: column;
       position: relative;
       z-index: 12;
+      isolation: isolate;
+      opacity: 1;
+      filter: none;
       /* blur с .wrap убран ранее — will-change/transition: filter удалены, чтобы не держать
          лишний композиционный слой на всём контенте во время слайда шторки (iOS jitter). */
+    }
+
+    body.assistant-drawer-open .wrap {
+      opacity: 1;
+      filter: none;
     }
 
     /* Pull-from-top: логотип и карточки едут вниз; .wrap остаётся без transform.
@@ -462,6 +470,9 @@
       box-shadow: 10px 0 48px rgba(0, 0, 0, 0.2);
       transform: translateX(-102%);
       transition: transform 0.32s cubic-bezier(0.22, 0.9, 0.28, 1);
+      /* Отдельный слой: полупрозрачность только у панели, не у .wrap / карточек сцен. */
+      isolation: isolate;
+      contain: layout style;
       /* Промоут в отдельный композиционный слой: слайд идёт на GPU, контент под шторкой
          не перерисовывается каждый кадр — убирает дёрганье открытия/закрытия на iOS Safari. */
       will-change: transform;
@@ -506,6 +517,11 @@
     body.assistant-drawer-open .assistant-drawer {
       transform: translateX(0);
       pointer-events: auto;
+    }
+
+    /* На время слайда — непрозрачная панель (меньше артефактов WebKit при transform). */
+    html.assistant-drawer-anim .assistant-drawer {
+      background: #000000;
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -848,7 +864,7 @@
       padding: 12px 12px 14px;
       border-radius: 16px;
       border: none;
-      background: rgba(8, 7, 6, 0.42);
+      background: rgba(0, 0, 0, 0.92);
       box-shadow: none;
     }
 
@@ -6495,8 +6511,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v316';
-      var BUILD_TIME = '2026-05-29 21:55 MSK';
+      var APP_VERSION = 'v317';
+      var BUILD_TIME = '2026-05-30 00:42 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
