@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v334)</title>
+  <title>Sam Scenes (v339)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -181,6 +181,7 @@
       --assistant-hint-strip-min-width: 18px;
       --assistant-hint-strip-height: min(176px, 48vh);
       --assistant-hint-strip-min-height: 84px;
+      --assistant-strip-fingerprint-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23EBDCBE' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 10.5a2.5 2.5 0 0 1 2.5 2.5V14'/%3E%3Cpath d='M12 4.5V8'/%3E%3Cpath d='M8.8 7.2C7.4 8.6 6.8 10.4 6.8 12.3'/%3E%3Cpath d='M15.2 7.2c1.4 1.4 2 3.2 2 5.1'/%3E%3Cpath d='M7.2 13.2c0 2.65 2.15 4.8 4.8 4.8s4.8-2.15 4.8-4.8'/%3E%3Cpath d='M12 18v2.8'/%3E%3Cpath d='M10.1 4.1c.95-.75 2.15-.75 3.1 0'/%3E%3C/svg%3E");
       /* Удобный алиас для вторичных акцентов вне меню ассистента */
       --ui-violet: var(--assistant-hint-violet);
       --ui-violet-glow: var(--assistant-hint-violet-glow);
@@ -471,8 +472,6 @@
       /* Без полей сверху/снизу у стекла; справа 0 — шторка-подсказка вплотную к краю панели; отступ текста в .assistant-drawer-scroll */
       padding: 0 0 0 calc(14px + env(safe-area-inset-left, 0px));
       background: var(--assistant-drawer-glass);
-      -webkit-backdrop-filter: blur(26px) saturate(145%);
-      backdrop-filter: blur(26px) saturate(145%);
       border-right: 1px solid rgba(255, 248, 235, 0.12);
       border-radius: 0;
       box-shadow:
@@ -641,28 +640,6 @@
       z-index: 100;
     }
 
-    /* Подсказка «нажать», не тянуть — точка-мишень + подпись. */
-    .assistant-strip-tap-hint {
-      position: absolute;
-      left: 50%;
-      top: 62%;
-      transform: translate(-50%, -50%);
-      font-size: 7px;
-      font-weight: 800;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: rgba(245, 232, 210, 0.78);
-      writing-mode: vertical-rl;
-      pointer-events: none;
-      line-height: 1;
-    }
-
-    .assistant-strip-tap-hint--close {
-      top: auto;
-      bottom: 14%;
-      transform: translateX(-50%);
-    }
-
     .assistant-open-strip:focus,
     .assistant-open-strip:focus-visible,
     .assistant-drawer-dismiss-chevron:focus,
@@ -670,20 +647,19 @@
       outline: none;
     }
 
-    .assistant-open-strip::before {
+    .assistant-open-strip::before,
+    .assistant-drawer-dismiss-chevron::before {
       content: "";
       position: absolute;
       left: 50%;
-      top: 36%;
+      top: 50%;
       transform: translate(-50%, -50%);
-      width: 9px;
-      height: 9px;
-      border-radius: 999px;
-      background: rgba(235, 220, 190, 0.94);
-      box-shadow:
-        0 0 0 3px rgba(168, 132, 212, 0.34),
-        0 0 0 7px rgba(168, 132, 212, 0.12);
+      width: 18px;
+      height: 18px;
+      background: var(--assistant-strip-fingerprint-icon) no-repeat center / contain;
       pointer-events: none;
+      opacity: 0.92;
+      filter: drop-shadow(0 0 6px rgba(168, 132, 212, 0.28));
     }
 
     .assistant-open-strip:active {
@@ -698,11 +674,10 @@
         1px 0 8px rgba(0, 0, 0, 0.18);
     }
 
-    .assistant-open-strip:active::before {
-      background: rgba(255, 248, 235, 0.98);
-      box-shadow:
-        0 0 0 4px rgba(188, 152, 228, 0.42),
-        0 0 0 8px rgba(168, 132, 212, 0.16);
+    .assistant-open-strip:active::before,
+    .assistant-drawer-dismiss-chevron:active::before {
+      opacity: 1;
+      filter: drop-shadow(0 0 8px rgba(188, 152, 228, 0.45)) brightness(1.08);
     }
 
     body.assistant-drawer-open .assistant-open-strip {
@@ -724,7 +699,7 @@
 
     .assistant-drawer-host-role {
       display: block;
-      margin: 0 0 10px;
+      margin: 0 0 2px;
       color: var(--label);
       font-family: var(--brand-serif);
       font-weight: 700;
@@ -733,16 +708,65 @@
       text-transform: uppercase;
     }
 
+    .assistant-drawer-host-name-row {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: center;
+      gap: 0.15em 0.5em;
+      margin: -4px 0 0;
+    }
+
     .assistant-drawer-host-name {
       margin: 0;
       padding: 0;
       font-family: "Pacifico", "Bad Script", cursive;
       font-weight: 400;
       font-size: clamp(1.55rem, 5vw, 2.2rem);
-      line-height: 1.28;
+      line-height: 1.12;
       letter-spacing: 0.02em;
       color: var(--anna-gold);
       -webkit-font-smoothing: antialiased;
+    }
+
+    .assistant-drawer-host-clear,
+    .field.field-assistant .assistant-all-clear {
+      display: none;
+      margin: 0;
+      padding: 0;
+      font-family: "Pacifico", "Bad Script", cursive;
+      font-weight: 400;
+      font-size: clamp(1.05rem, 3.6vw, 1.35rem);
+      line-height: 1.15;
+      letter-spacing: 0.02em;
+      color: rgba(245, 230, 184, 0.92);
+      -webkit-font-smoothing: antialiased;
+      white-space: nowrap;
+    }
+
+    .assistant-drawer-host-clear.is-visible,
+    .field.field-assistant .assistant-all-clear.is-visible {
+      display: inline;
+      animation: assistantAllClearIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    @keyframes assistantAllClearIn {
+      from {
+        opacity: 0;
+        transform: translateY(5px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .assistant-drawer-host-clear.is-visible,
+      .field.field-assistant .assistant-all-clear.is-visible {
+        animation: none;
+      }
     }
 
     .assistant-drawer-head {
@@ -844,40 +868,6 @@
       letter-spacing: 0;
     }
 
-    .assistant-drawer-dismiss-chevron::after {
-      content: "нажать";
-      position: absolute;
-      left: 50%;
-      bottom: 14%;
-      transform: translateX(-50%);
-      font-size: 7px;
-      font-weight: 800;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: rgba(245, 232, 210, 0.78);
-      writing-mode: vertical-rl;
-      pointer-events: none;
-      line-height: 1;
-      z-index: 2;
-    }
-
-    .assistant-drawer-dismiss-chevron::before {
-      content: "";
-      position: absolute;
-      left: 50%;
-      top: 22%;
-      transform: translate(-50%, -50%);
-      width: 9px;
-      height: 9px;
-      border-radius: 999px;
-      background: rgba(235, 220, 190, 0.94);
-      box-shadow:
-        0 0 0 3px rgba(168, 132, 212, 0.34),
-        0 0 0 7px rgba(168, 132, 212, 0.12);
-      pointer-events: none;
-      z-index: 2;
-    }
-
     .assistant-drawer-dismiss-chevron:active {
       background: linear-gradient(
         to left,
@@ -888,13 +878,6 @@
       box-shadow:
         1px 0 12px rgba(168, 132, 212, 0.11),
         -1px 0 8px rgba(0, 0, 0, 0.18);
-    }
-
-    .assistant-drawer-dismiss-chevron:active::before {
-      background: rgba(255, 248, 235, 0.98);
-      box-shadow:
-        0 0 0 4px rgba(188, 152, 228, 0.42),
-        0 0 0 8px rgba(168, 132, 212, 0.16);
     }
 
     .assistant-drawer-dismiss-chevron:active .assistant-drawer-scroll-arrow {
@@ -1415,7 +1398,7 @@
     }
 
     .wrap > * { order: 10; }
-    .wrap > *:not(#top-logo-block) { position: relative; z-index: 2; }
+    .wrap > *:not(#top-logo-block) { position: relative; z-index: 12; }
 
     #top-logo-block { order: 0; }
     #scenario-hub { order: 1; }
@@ -1423,17 +1406,12 @@
     .title-row { order: 3; }
 
     /*
-      Выше фиксированной шапки. .top-logo (z-index 10) → .logo-bg внутри неё с
-      transform: scale(2.0) создаёт свой stacking-контекст и в Safari иногда
-      «крадёт» хит-тест над верхней карточкой #scenario-hub. Высокий z-index +
-      isolation помогают, но окончательная страховка — document-level fallback
-      в JS (см. wireDetailsSummaryRowToggle), который через elementsFromPoint
-      находит summary на месте тапа.
+      Логотип fixed ниже карточек (z-index 4): при скролле блоки накрывают SAM BRUEV —
+      лампа (.top-logo-brand::before) остаётся и может слегка просвечивать сквозь полупрозрачные карточки.
+      isolation на hub/plan — стабильный hit-test summary под краем шапки.
     */
     #scenario-hub,
     #daily-plan {
-      position: relative;
-      z-index: 50;
       isolation: isolate;
     }
 
@@ -1458,34 +1436,14 @@
       padding-left: max(14px, env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
       padding-right: max(14px, env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
       box-sizing: border-box;
-      /* Выше карточек .wrap (у них z-index: 2), ниже .assistant-open-strip (100) */
-      z-index: 10;
+      /* Ниже карточек .wrap (z-index 12), выше фона; ниже .assistant-open-strip (100). */
+      z-index: 4;
       /*
         Обязательно none: шапка fixed и большая по высоте — при auto перехватывает тапы над карточками
         (визуально «Настройки сценариев» под краем шапки), и <details> перестаёт открываться.
         Интерактив только у .logo-bg и .logo-controls.
       */
       pointer-events: none;
-    }
-
-    /* Затемнение под логотипом — контент при скролле не «просвечивает» сквозь SAM BRUEV. */
-    .top-logo::before {
-      content: "";
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 0;
-      bottom: -8px;
-      z-index: 0;
-      pointer-events: none;
-      background: linear-gradient(
-        180deg,
-        #000 0%,
-        rgba(0, 0, 0, 0.99) 50%,
-        rgba(0, 0, 0, 0.97) 78%,
-        rgba(0, 0, 0, 0.72) 92%,
-        rgba(0, 0, 0, 0) 100%
-      );
     }
 
     /* Логотип + подпись — одна колонка по центру по горизонтали и вертикали в зоне шапки */
@@ -1704,31 +1662,16 @@
       background-repeat: no-repeat;
       background-position: center center;
       background-size: contain;
-      opacity: calc(0.62 - var(--top-logo-dim, 0) * 0.1);
+      opacity: 0.72;
       z-index: 3;
       pointer-events: auto;
       cursor: move;
       transform: translate(0px, var(--logo-y, 0px)) scale(var(--logo-scale, 1));
       transform-origin: center center;
       user-select: none;
-      touch-action: none;
-      filter:
-        blur(var(--top-logo-blur, 0px))
-        brightness(calc(0.68 - var(--top-logo-dim, 0) * 0.14))
-        contrast(0.88)
-        saturate(0.82);
-      transition: filter 0.2s ease-out, opacity 0.2s ease-out;
-    }
-
-    /* Смягчаем белый «свет» текста SAM BRUEV — лампу (.top-logo-brand::before) не трогаем. */
-    .logo-bg::after {
-      content: "";
-      position: absolute;
-      inset: 2% 4%;
-      border-radius: 12px;
-      background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.38) 0%, rgba(0, 0, 0, 0.12) 55%, transparent 78%);
-      pointer-events: none;
-      mix-blend-mode: multiply;
+      /* pan-y: вертикальный скролл страницы не блокируется касанием по логотипу (scale 2×). */
+      touch-action: pan-y;
+      filter: brightness(0.76) contrast(0.9) saturate(0.86);
     }
 
     .logo-controls {
@@ -2914,6 +2857,154 @@
       background: rgba(255, 95, 28, 0.12);
     }
 
+    .scene-custom-select-dialog {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      margin: 0;
+      border: none;
+      border-radius: 16px;
+      padding: 0;
+      max-width: min(320px, 92vw);
+      width: min(320px, 92vw);
+      max-height: min(240px, 88vh);
+      color-scheme: dark;
+      background: rgba(8, 8, 10, 0.88);
+      color: var(--text);
+      border: 1px solid var(--ui-select-border);
+      box-shadow:
+        0 20px 56px rgba(0, 0, 0, 0.88),
+        inset 0 1px 0 rgba(255, 248, 235, 0.07);
+      -webkit-backdrop-filter: blur(22px) saturate(118%);
+      backdrop-filter: blur(22px) saturate(118%);
+      overflow: hidden;
+    }
+
+    .scene-custom-select-dialog::backdrop {
+      background: rgba(0, 0, 0, 0.52);
+      -webkit-backdrop-filter: blur(14px) saturate(105%);
+      backdrop-filter: blur(14px) saturate(105%);
+    }
+
+    @media (prefers-reduced-transparency: reduce) {
+      .scene-custom-select-dialog {
+        background: #000000;
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+        box-shadow: 0 20px 48px rgba(0, 0, 0, 0.85);
+      }
+
+      .scene-custom-select-dialog::backdrop {
+        background: rgba(0, 0, 0, 0.72);
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+      }
+    }
+
+    .scene-custom-select-dialog-panel {
+      padding: 16px 16px 14px;
+      box-sizing: border-box;
+    }
+
+    .scene-custom-select-dialog-title {
+      margin: 0 0 4px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: rgba(232, 201, 104, 0.82);
+    }
+
+    .scene-custom-select-dialog-hint {
+      margin: 0 0 12px;
+      font-size: 15px;
+      font-weight: 600;
+      color: rgba(247, 243, 236, 0.92);
+    }
+
+    .scene-custom-select-dialog-input {
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+      appearance: none;
+      -webkit-appearance: none;
+      background-color: var(--ui-select-bg);
+      border: 1px solid var(--ui-select-border);
+      border-radius: 15px;
+      color: var(--text);
+      font: inherit;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 10px 12px;
+      min-height: 44px;
+      color-scheme: dark;
+    }
+
+    .scene-custom-select-dialog-input:focus {
+      outline: none;
+      border-color: var(--ui-select-border-focus);
+      box-shadow: 0 0 0 1px rgba(232, 201, 104, 0.28);
+    }
+
+    .scene-custom-select-dialog-actions {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .scene-custom-select-dialog-cancel,
+    .scene-custom-select-dialog-done {
+      -webkit-appearance: none;
+      appearance: none;
+      flex: 1 1 0;
+      min-width: 0;
+      padding: 10px 12px;
+      font: inherit;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      border-radius: 11px;
+      cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      box-shadow: none;
+    }
+
+    .scene-custom-select-dialog-cancel {
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.04);
+      color: rgba(247, 243, 236, 0.88);
+    }
+
+    .scene-custom-select-dialog-cancel:active {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .scene-custom-select-dialog-done {
+      border: 1px solid rgba(255, 118, 42, 0.62);
+      background: #000000;
+      color: rgba(255, 232, 216, 0.96);
+    }
+
+    .scene-custom-select-dialog-done:active {
+      filter: brightness(1.06);
+      background: rgba(255, 95, 28, 0.12);
+    }
+
+    .scene-custom-select-dialog-cancel:focus,
+    .scene-custom-select-dialog-done:focus {
+      outline: none;
+    }
+
+    .scene-custom-select-dialog-cancel:focus-visible,
+    .scene-custom-select-dialog-done:focus-visible {
+      outline: 2px solid rgba(255, 130, 55, 0.85);
+      outline-offset: 2px;
+    }
+
     .scene-time-dialog-wheels {
       display: flex;
       flex-direction: column;
@@ -3095,19 +3186,51 @@
       float: left;
       margin-right: 0.5em;
       white-space: nowrap;
-      font-size: 1.2em;
       line-height: 1.4;
       font-weight: 700;
       color: var(--time);
     }
 
+    .scene-main > .line-say > b {
+      font-size: 1.2em;
+    }
+
+    .scene-main > .line-note > b,
+    .scene-main > .intercut > b {
+      font-size: 1em;
+      font-family: var(--brand-serif);
+    }
+
     .scene-main > .line-note > b .scene-note-heading,
     .scene-main > .intercut > b .scene-note-heading {
       font: inherit;
-      font-size: 1.2em;
       font-weight: 700;
       letter-spacing: 0.02em;
       color: inherit;
+    }
+
+    /* Пунктир только справа от подписи — не под «Говорю» / «Примечание» / «Перебивка». */
+    .scene-main > .line-say > b::after,
+    .scene-main > .line-note > b::after,
+    .scene-main > .intercut > b::after {
+      content: "";
+      display: inline-block;
+      vertical-align: baseline;
+      width: var(--scene-heading-rule-w, 6em);
+      min-width: 2.5em;
+      height: 0;
+      margin-left: 0.08em;
+      border-bottom: 1px dashed rgba(200, 198, 195, 0.38);
+      pointer-events: none;
+    }
+
+    .scene-main > .line-say.scene-line-has-text > b::after,
+    .scene-main > .line-note.scene-line-has-text > b::after,
+    .scene-main > .intercut.scene-line-has-text > b::after,
+    .scene-main > .line-say:focus-within > b::after,
+    .scene-main > .line-note:focus-within > b::after,
+    .scene-main > .intercut:focus-within > b::after {
+      display: none;
     }
 
     .scene-main > .line-say .say-editable,
@@ -3117,21 +3240,34 @@
       min-height: 1.4em;
       line-height: 1.4;
       white-space: pre-wrap;
-      overflow-wrap: anywhere;
+      overflow-wrap: break-word;
+      word-break: normal;
       outline: none;
       border: none;
-      border-bottom: 1px dashed rgba(200, 198, 195, 0.38);
+      border-bottom: none;
       border-radius: 0;
       padding: 0 0 2px;
       margin: 0;
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
+      cursor: text;
+      text-decoration-line: underline;
+      text-decoration-style: dashed;
+      text-decoration-color: transparent;
+      text-underline-offset: 3px;
+      text-decoration-skip-ink: none;
     }
 
-    .scene-main > .line-say:focus-within .say-editable,
-    .scene-main > .line-note:focus-within .note-editable,
-    .scene-main > .intercut:focus-within .intercut-text {
-      border-bottom-color: rgba(200, 198, 195, 0.52);
+    .scene-main > .line-say .say-editable.has-text,
+    .scene-main > .line-note .note-editable.has-text,
+    .scene-main > .intercut .intercut-text.has-text {
+      text-decoration-color: rgba(200, 198, 195, 0.38);
+    }
+
+    .scene-main > .line-say:focus-within .say-editable.has-text,
+    .scene-main > .line-note:focus-within .note-editable.has-text,
+    .scene-main > .intercut:focus-within .intercut-text.has-text {
+      text-decoration-color: rgba(200, 198, 195, 0.52);
     }
 
     .scene-main > .line-say .say-editable:focus,
@@ -3169,11 +3305,25 @@
       vertical-align: baseline;
     }
 
-    /* Старые вставки с блоками <div>: визуальный зазор между абзацами. */
-    .scene-main > .line-say .say-editable > div:not(:last-child),
-    .scene-main > .line-note .note-editable > div:not(:last-child),
-    .scene-main > .intercut .intercut-text > div:not(:last-child) {
-      margin-bottom: 0.42em;
+    /* WebKit/contenteditable вставляет <div> на Enter — без этого 2-я строка снова обтекает подпись. */
+    .scene-main > .line-say .say-editable > div,
+    .scene-main > .line-note .note-editable > div,
+    .scene-main > .intercut .intercut-text > div,
+    .scene-main > .line-say .say-editable > p,
+    .scene-main > .line-note .note-editable > p,
+    .scene-main > .intercut .intercut-text > p {
+      display: contents;
+    }
+
+    /* Абзацы из нескольких <div> — принудительный перенос между блоками. */
+    .scene-main > .line-say .say-editable > div + div::before,
+    .scene-main > .line-note .note-editable > div + div::before,
+    .scene-main > .intercut .intercut-text > div + div::before,
+    .scene-main > .line-say .say-editable > p + p::before,
+    .scene-main > .line-note .note-editable > p + p::before,
+    .scene-main > .intercut .intercut-text > p + p::before {
+      content: "\A";
+      white-space: pre;
     }
 
 
@@ -4022,7 +4172,7 @@
       flex-wrap: nowrap;
       align-items: center;
       justify-content: center;
-      gap: 12px;
+      gap: 4px;
       margin: 0;
       width: 100%;
       text-align: center;
@@ -4037,13 +4187,25 @@
       margin-top: -8px;
     }
 
+    .field.field-assistant .assistant-name-wrap {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: center;
+      gap: 0.15em 0.5em;
+      width: 100%;
+      max-width: 28rem;
+      margin: -12px auto 0;
+    }
+
     /* Имя ассистента всегда --anna-gold: общий --gold для интерфейса нейтральный и менять его нельзя */
     .field.field-assistant input.assistant-name {
       flex: 0 1 auto;
-      min-width: min(100%, 18ch);
-      width: 100%;
-      max-width: 28rem;
-      margin: -10px 0 0;
+      min-width: min(100%, 12ch);
+      width: auto;
+      max-width: 100%;
+      margin: 0;
       padding: 0;
       border: none;
       border-radius: 0;
@@ -4053,7 +4215,7 @@
       font-weight: 400;
       font-size: 32px;
       letter-spacing: 0.02em;
-      line-height: 1.35;
+      line-height: 1.2;
       text-align: center;
       font-synthesis: none;
       -webkit-font-smoothing: antialiased;
@@ -4165,6 +4327,7 @@
       flex-shrink: 0;
       color: var(--time);
       font-family: var(--brand-serif);
+      font-size: 1em;
       font-weight: 700;
     }
 
@@ -4181,6 +4344,7 @@
       min-width: 4.5rem;
       color: var(--time);
       font-family: var(--brand-serif);
+      font-size: 1em;
       font-weight: 700;
     }
 
@@ -4236,8 +4400,10 @@
       box-shadow: none;
     }
 
-    /* Стрелка выпадающего списка локаций — приглушённая, без золотого как у «План / Кадр» */
+    /* Локация / план / кадр — единый стиль выпадающего списка */
     select.scene-loc-select,
+    select.scene-plan-select,
+    select.scene-framing-select,
     select.shotlist-loc-name,
     #prep-hook-location,
     #prep-main-location {
@@ -5518,6 +5684,12 @@
     .wrap .scene-main > .line-say .say-editable,
     .wrap .scene-main > .line-note .note-editable,
     .wrap .scene-main > .intercut .intercut-text {
+      text-decoration-thickness: 0.5px;
+    }
+
+    .wrap .scene-main > .line-say > b::after,
+    .wrap .scene-main > .line-note > b::after,
+    .wrap .scene-main > .intercut > b::after {
       border-bottom-width: 0.5px;
     }
 
@@ -5541,8 +5713,8 @@
     type="button"
     class="assistant-open-strip"
     id="assistant-open-strip"
-    aria-label="Нажмите — открыть план съёмок"
-    title="Нажмите — план съёмок"><span class="assistant-strip-tap-hint" aria-hidden="true">нажать</span></button>
+    aria-label="Открыть план съёмок"
+    title="План съёмок"></button>
   <div
     class="assistant-drawer-backdrop"
     id="assistant-drawer-backdrop"
@@ -5559,8 +5731,8 @@
       type="button"
       class="assistant-drawer-dismiss-chevron"
       id="assistant-drawer-close"
-      aria-label="Нажмите — закрыть план съёмок"
-      title="Нажмите — закрыть">
+      aria-label="Закрыть план съёмок"
+      title="Закрыть">
       <span class="assistant-drawer-axis-track" aria-hidden="true">
         <span class="assistant-drawer-scroll-arrow" id="assistant-drawer-axis-thumb"></span>
       </span>
@@ -5569,7 +5741,10 @@
       <div class="assistant-drawer-inner">
         <div class="assistant-drawer-host">
           <span class="assistant-drawer-host-role">Ассистент</span>
-          <p class="assistant-drawer-host-name" id="assistant-drawer-host-name">Анна Непряхина</p>
+          <div class="assistant-drawer-host-name-row">
+            <p class="assistant-drawer-host-name" id="assistant-drawer-host-name">Анна Непряхина</p>
+            <span class="assistant-drawer-host-clear" id="assistant-drawer-host-clear" hidden>Всё под контролем!</span>
+          </div>
         </div>
         <div class="assistant-drawer-head">
           <h2 class="assistant-drawer-title" id="assistant-drawer-title">План съёмок</h2>
@@ -5874,7 +6049,10 @@
         <div class="field field-assistant">
           <div class="assistant-line">
             <span class="assistant-role">Ассистент</span>
-            <input id="prep-assistant" class="assistant-name" type="text" value="Анна Непряхина" placeholder="имя" autocomplete="name">
+            <div class="assistant-name-wrap">
+              <input id="prep-assistant" class="assistant-name" type="text" value="Анна Непряхина" placeholder="имя" autocomplete="name">
+              <span class="assistant-all-clear" id="prep-assistant-all-clear" hidden>Всё под контролем!</span>
+            </div>
           </div>
         </div>
       </div>
@@ -5936,7 +6114,7 @@
             <option value="__custom__">Свой вариант…</option>
           </select>
         </div>
-        <div class="line line-say"><b>Говорю:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
+        <div class="line line-say"><b>Sam:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
         <div class="line line-note"><b><span class="scene-note-heading">Примечание:</span></b> <div class="note-editable" contenteditable="true" spellcheck="true"></div></div>
         <div class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <div class="intercut-text" contenteditable="true"></div></div>
         <div class="scene-toolbar">
@@ -6000,7 +6178,7 @@
             <option value="__custom__">Свой вариант…</option>
           </select>
         </div>
-        <div class="line line-say"><b>Говорю:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
+        <div class="line line-say"><b>Sam:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
         <div class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <div class="intercut-text" contenteditable="true"></div></div>
         <div class="scene-toolbar">
           <button class="btn mini btn-danger scene-remove" type="button" title="Удалить сцену">Удалить</button>
@@ -6060,7 +6238,7 @@
             <option value="__custom__">Свой вариант…</option>
           </select>
         </div>
-        <div class="line line-say"><b>Говорю:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
+        <div class="line line-say"><b>Sam:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
         <div class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <div class="intercut-text" contenteditable="true"></div></div>
         <div class="scene-toolbar">
           <button class="btn mini btn-danger scene-remove" type="button" title="Удалить сцену">Удалить</button>
@@ -6120,7 +6298,7 @@
             <option value="__custom__">Свой вариант…</option>
           </select>
         </div>
-        <div class="line line-say"><b>Говорю:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
+        <div class="line line-say"><b>Sam:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
         <div class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <div class="intercut-text" contenteditable="true"></div></div>
         <div class="scene-toolbar">
           <button class="btn mini btn-danger scene-remove" type="button" title="Удалить сцену">Удалить</button>
@@ -6180,7 +6358,7 @@
             <option value="__custom__">Свой вариант…</option>
           </select>
         </div>
-        <div class="line line-say"><b>Говорю:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
+        <div class="line line-say"><b>Sam:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
         <div class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <div class="intercut-text" contenteditable="true"></div></div>
         <div class="scene-toolbar">
           <button class="btn mini btn-danger scene-remove" type="button" title="Удалить сцену">Удалить</button>
@@ -6240,7 +6418,7 @@
             <option value="__custom__">Свой вариант…</option>
           </select>
         </div>
-        <div class="line line-say"><b>Говорю:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
+        <div class="line line-say"><b>Sam:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
         <div class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <div class="intercut-text" contenteditable="true"></div></div>
         <div class="scene-toolbar">
           <button class="btn mini btn-danger scene-remove" type="button" title="Удалить сцену">Удалить</button>
@@ -6300,7 +6478,7 @@
             <option value="__custom__">Свой вариант…</option>
           </select>
         </div>
-        <div class="line line-say"><b>Говорю:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
+        <div class="line line-say"><b>Sam:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
         <div class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <div class="intercut-text" contenteditable="true"></div></div>
         <div class="scene-toolbar">
           <button class="btn mini btn-danger scene-remove" type="button" title="Удалить сцену">Удалить</button>
@@ -6360,7 +6538,7 @@
             <option value="__custom__">Свой вариант…</option>
           </select>
         </div>
-        <div class="line line-say"><b>Говорю:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
+        <div class="line line-say"><b>Sam:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
         <div class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <div class="intercut-text" contenteditable="true"></div></div>
         <div class="scene-toolbar">
           <button class="btn mini btn-danger scene-remove" type="button" title="Удалить сцену">Удалить</button>
@@ -6420,7 +6598,7 @@
             <option value="__custom__">Свой вариант…</option>
           </select>
         </div>
-        <div class="line line-say"><b>Говорю:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
+        <div class="line line-say"><b>Sam:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
         <div class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <div class="intercut-text" contenteditable="true"></div></div>
         <div class="scene-toolbar">
           <button class="btn mini btn-danger scene-remove" type="button" title="Удалить сцену">Удалить</button>
@@ -6494,7 +6672,7 @@
                   <option value="extra">Дополнительный акцент / аутро</option>
                 </select>
               </div>
-              <div class="line line-say"><b>Говорю:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
+              <div class="line line-say"><b>Sam:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
               <div class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <div class="intercut-text" contenteditable="true"></div></div>
               <div class="scene-toolbar">
                 <button class="btn mini btn-danger scene-remove" type="button" title="Удалить сцену">Удалить</button>
@@ -7049,8 +7227,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v334';
-      var BUILD_TIME = '2026-06-01 00:00 MSK';
+      var APP_VERSION = 'v339';
+      var BUILD_TIME = '2026-06-01 14:00 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -8050,6 +8228,7 @@
             refreshNoteIntercutHasTextClasses(wrap);
             migratePrepImportantBlock(wrap);
             migrateSceneLocLabels(wrap);
+            migrateSayLabelToSam(wrap);
           }
           var bundle = readScenarioBundle();
           var sc = currentScenarioMeta(bundle);
@@ -8652,7 +8831,12 @@
             за левый край (translateX(-102%)), пересборка DOM не видна. Класс открытия
             (старт CSS-слайда) добавляем уже с готовым содержимым → нет «мигания» после открытия. */
         var hostNameEl = document.getElementById('assistant-drawer-host-name');
-        if (hostNameEl) hostNameEl.textContent = 'Анна Непряхина';
+        var prepNameEl = document.getElementById('prep-assistant');
+        if (hostNameEl) {
+          var prepName = prepNameEl && prepNameEl.value ? String(prepNameEl.value).trim() : '';
+          hostNameEl.textContent = prepName || 'Анна Непряхина';
+        }
+        syncAssistantAllClearLabel();
         var ad = document.getElementById('assistant-new-date');
         if (ad && !ad.value) {
           try {
@@ -10947,9 +11131,10 @@
           btn.type = 'button';
           btn.className = 'say-replace-btn';
           btn.textContent = 'Заменить';
-          btn.title = 'Заменить текст «Говорю» вставкой';
+          btn.title = 'Заменить текст «Sam» вставкой';
           line.appendChild(btn);
           normalizeSayLineWhitespaceNodes(line);
+          syncSceneLineHeadingRuleWidth(line);
         });
       }
 
@@ -10964,12 +11149,13 @@
           }
         } catch (e) {}
         if (!nextText) {
-          nextText = prompt('Вставьте новый текст для поля «Говорю»:', '') || '';
+          nextText = prompt('Вставьте новый текст для поля «Sam»:', '') || '';
         }
         nextText = String(nextText || '').trim();
         if (!nextText) return;
         span.textContent = nextText;
         clipSaySpan(span);
+        syncSceneLineHasTextClass(span);
         markDirty();
       }
 
@@ -11004,7 +11190,8 @@
           if (!stack) return;
           stack.querySelectorAll('.scene-main > .line').forEach(function (line) {
             var b = line.querySelector(':scope > b');
-            if (!b || (b.textContent || '').trim().indexOf('Говорю') !== 0) return;
+            var bt = (b.textContent || '').trim();
+            if (!b || (bt.indexOf('Говорю') !== 0 && bt.indexOf('Sam') !== 0)) return;
             if (line.querySelector('.say-editable')) return;
             line.classList.add('line-say');
             line.removeAttribute('contenteditable');
@@ -11079,7 +11266,7 @@
             changed = true;
           }
           localStorage.setItem(SAMSCENES_SAY_BUNDLE_LS_KEY, String(SAMSCENES_SAY_BUNDLE_VER));
-          if (changed) persistToStorage('Подставлены тексты «Говорю» из шаблона');
+          if (changed) persistToStorage('Подставлены тексты «Sam» из шаблона');
         } catch (e) {}
       }
 
@@ -11290,6 +11477,7 @@
               refreshNoteIntercutHasTextClasses(wrap);
               migratePrepImportantBlock(wrap);
               migrateSceneLocLabels(wrap);
+              migrateSayLabelToSam(wrap);
             }
             if (sc && sc.prep) {
               prepIds.forEach(function (id) {
@@ -11900,7 +12088,7 @@
       function openTeleprompterForScene(scene) {
         if (!teleprompterOverlay || !teleprompterText) return;
         var text = readSceneSayText(scene);
-        teleprompterText.textContent = text || 'Текст «Говорю» пока пуст.';
+        teleprompterText.textContent = text || 'Текст «Sam» пока пуст.';
         teleprompterOverlay.classList.add('open');
         teleprompterOverlay.setAttribute('aria-hidden', 'false');
         lockMainScrollForTeleprompter();
@@ -12491,27 +12679,83 @@
         );
       }
 
-      function syncNoteIntercutHasTextClass(el) {
+      function syncSceneLineHeadingRuleWidth(row) {
+        if (!row) return;
+        var b = row.querySelector(':scope > b');
+        if (!b) return;
+        var btn = row.querySelector(':scope > .say-replace-btn');
+        var rowRect = row.getBoundingClientRect();
+        var bRect = b.getBoundingClientRect();
+        var rightReserve = 0;
+        if (btn) {
+          var btnRect = btn.getBoundingClientRect();
+          if (btnRect.top <= bRect.bottom + 2 && btnRect.top >= bRect.top - 2) {
+            rightReserve = Math.max(0, rowRect.right - btnRect.left + 6);
+          }
+        }
+        var ruleW = rowRect.width - (bRect.right - rowRect.left) - rightReserve - 2;
+        if (!isFinite(ruleW) || ruleW < 24) ruleW = 24;
+        b.style.setProperty('--scene-heading-rule-w', Math.round(ruleW) + 'px');
+      }
+
+      function syncAllSceneLineHeadingRules(scope) {
+        (scope || document)
+          .querySelectorAll('.scene-main > .line-say, .scene-main > .line-note, .scene-main > .intercut')
+          .forEach(syncSceneLineHeadingRuleWidth);
+      }
+
+      function syncSceneLineHasTextClass(el) {
         if (!el || !el.classList) return;
-        if (!el.classList.contains('note-editable') && !el.classList.contains('intercut-text')) return;
+        var isSay = el.classList.contains('say-editable');
+        var isNote = el.classList.contains('note-editable');
+        var isIntercut = el.classList.contains('intercut-text');
+        if (!isSay && !isNote && !isIntercut) return;
         var raw = String(el.textContent || '').replace(/\u00a0/g, ' ');
         var meaningful = false;
-        if (el.classList.contains('intercut-text')) {
+        if (isIntercut) {
           meaningful = raw.replace(/_+/g, '').trim().length > 0;
         } else {
           meaningful = raw.trim().length > 0;
         }
         el.classList.toggle('has-text', meaningful);
+        var row = el.closest('.line-say, .line-note, .intercut');
+        if (row) row.classList.toggle('scene-line-has-text', meaningful);
+      }
+
+      function syncNoteIntercutHasTextClass(el) {
+        syncSceneLineHasTextClass(el);
       }
 
       function refreshNoteIntercutHasTextClasses(scope) {
-        (scope || document).querySelectorAll('.note-editable, .intercut-text').forEach(function (el) {
+        (scope || document).querySelectorAll('.say-editable, .note-editable, .intercut-text').forEach(function (el) {
           if (el.classList.contains('intercut-text')) {
             var raw = String(el.textContent || '').replace(/\u00a0/g, ' ');
             if (!raw.replace(/_+/g, '').trim()) el.textContent = '';
           }
-          syncNoteIntercutHasTextClass(el);
+          syncSceneLineHasTextClass(el);
         });
+        syncAllSceneLineHeadingRules(scope);
+      }
+
+      function wireSceneLineHeadingRules() {
+        if (wireSceneLineHeadingRules._done) return;
+        wireSceneLineHeadingRules._done = true;
+        var resizeTimer = 0;
+        function scheduleSyncAllRules() {
+          if (resizeTimer) clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(function () {
+            resizeTimer = 0;
+            syncAllSceneLineHeadingRules(document);
+          }, 120);
+        }
+        window.addEventListener('resize', scheduleSyncAllRules, { passive: true });
+        window.addEventListener('orientationchange', scheduleSyncAllRules, { passive: true });
+        if (typeof ResizeObserver !== 'undefined') {
+          var ro = new ResizeObserver(scheduleSyncAllRules);
+          document.querySelectorAll('.scene-main').forEach(function (scene) {
+            ro.observe(scene);
+          });
+        }
       }
 
       function wireNoteIntercutHasTextUnderline() {
@@ -12520,8 +12764,15 @@
         function onMaybeChange(e) {
           var t = e.target;
           if (!t || !t.classList) return;
-          if (t.classList.contains('note-editable') || t.classList.contains('intercut-text'))
-            syncNoteIntercutHasTextClass(t);
+          if (
+            t.classList.contains('say-editable') ||
+            t.classList.contains('note-editable') ||
+            t.classList.contains('intercut-text')
+          ) {
+            syncSceneLineHasTextClass(t);
+            var row = t.closest('.line-say, .line-note, .intercut');
+            if (row) syncSceneLineHeadingRuleWidth(row);
+          }
         }
         document.addEventListener('input', onMaybeChange, true);
         document.addEventListener('focusout', onMaybeChange, true);
@@ -12656,8 +12907,23 @@
       /** Развёрнут ли чеклист после заполнения (иначе — компактная плашка «готово»). */
       var prepImportantExpanded = false;
 
+      function syncAssistantAllClearLabel() {
+        var allDone = prepImportantAllChecked();
+        var prepClear = document.getElementById('prep-assistant-all-clear');
+        var drawerClear = document.getElementById('assistant-drawer-host-clear');
+        if (prepClear) {
+          prepClear.hidden = !allDone;
+          prepClear.classList.toggle('is-visible', allDone);
+        }
+        if (drawerClear) {
+          drawerClear.hidden = !allDone;
+          drawerClear.classList.toggle('is-visible', allDone);
+        }
+      }
+
       function updatePrepImportantPin() {
         updatePrepImportantReminder();
+        syncAssistantAllClearLabel();
         var block = document.getElementById('prep-important-block');
         if (!block) return;
         /* Закрепление отключено — блок «Важно» остаётся обычным блоком в карточке «Подготовка». */
@@ -12796,6 +13062,16 @@
             if (newBoxes[j].id && checkedState[newBoxes[j].id]) newBoxes[j].checked = true;
           }
         } catch (eMig) {}
+      }
+
+      /** Старые сохранённые сцены: подпись «Говорю:» → «Sam:». */
+      function migrateSayLabelToSam(root) {
+        try {
+          (root || document).querySelectorAll('.scene-main > .line-say > b').forEach(function (b) {
+            var t = (b.textContent || '').replace(/\s+/g, ' ').trim();
+            if (t === 'Говорю:' || t.indexOf('Говорю') === 0) b.textContent = 'Sam:';
+          });
+        } catch (eSay) {}
       }
 
       /** #1 — старые сохранённые сцены: подпись «Локация кадра:» → «Локация:». */
@@ -13087,27 +13363,45 @@
         } catch (e) {}
       }
 
-      /** Тап в любом месте строки «Примечание»/«Перебивка» — курсор в поле ввода. */
+      /** Тап по подписи / пунктиру «Говорю» / «Примечание» / «Перебивка» — сразу фокус в поле. */
+      function focusSceneLineEditable(host, placeAtStart) {
+        if (!host) return;
+        var editable = host.querySelector('.say-editable, .note-editable, .intercut-text');
+        if (!editable) return;
+        try {
+          editable.focus();
+          var r = document.createRange();
+          r.selectNodeContents(editable);
+          r.collapse(!!placeAtStart);
+          var sel = window.getSelection();
+          if (!sel) return;
+          sel.removeAllRanges();
+          sel.addRange(r);
+        } catch (eFocus) {}
+      }
+
       function wireNoteIntercutTapToFocus() {
         if (wireNoteIntercutTapToFocus._done) return;
         wireNoteIntercutTapToFocus._done = true;
-        document.addEventListener('click', function (e) {
+
+        function onSceneLineTap(e) {
           var t = e.target;
           if (!t || !t.closest) return;
-          var host = t.closest('.line-note, .intercut');
-          if (!host) return;
-          var editable = host.querySelector('.note-editable, .intercut-text');
-          if (!editable || t === editable || editable.contains(t)) return;
-          try {
-            editable.focus();
-            var r = document.createRange();
-            r.selectNodeContents(editable);
-            r.collapse(false);
-            var sel = window.getSelection();
-            sel.removeAllRanges();
-            sel.addRange(r);
-          } catch (eFocus) {}
-        }, false);
+          if (t.closest('.say-replace-btn')) return;
+          var host = t.closest('.line-say, .line-note, .intercut');
+          if (!host || !host.closest('.scene-main')) return;
+          var editable = host.querySelector('.say-editable, .note-editable, .intercut-text');
+          if (!editable) return;
+          if (t === editable || editable.contains(t)) return;
+          var raw = String(editable.textContent || '').replace(/\u00a0/g, ' ');
+          if (editable.classList.contains('intercut-text')) {
+            raw = raw.replace(/_+/g, '');
+          }
+          focusSceneLineEditable(host, !raw.trim());
+        }
+
+        document.addEventListener('pointerdown', onSceneLineTap, true);
+        document.addEventListener('click', onSceneLineTap, false);
       }
 
       function wirePrepDateUiHint() {
@@ -13152,21 +13446,172 @@
         );
       }
 
+      var sceneCustomSelectPending = null;
+
+      function getCustomSceneSelectFieldLabel(sel) {
+        if (!sel) return 'Свой вариант';
+        if (sel.classList && sel.classList.contains('scene-loc-select')) return 'Локация';
+        if (sel.classList && sel.classList.contains('scene-plan-select')) return 'План';
+        if (sel.classList && sel.classList.contains('scene-framing-select')) return 'Кадр';
+        if (sel.id === 'prep-hook-location') return 'Локация хука';
+        if (sel.id === 'prep-main-location') return 'Локация основного кадра';
+        return 'Свой вариант';
+      }
+
+      function ensureSceneCustomSelectDialog() {
+        if (document.getElementById('scene-custom-select-dialog')) return;
+        var dlg = document.createElement('dialog');
+        dlg.id = 'scene-custom-select-dialog';
+        dlg.className = 'scene-custom-select-dialog';
+        dlg.setAttribute('aria-modal', 'true');
+        dlg.innerHTML =
+          '<div class="scene-custom-select-dialog-panel">' +
+          '<p class="scene-custom-select-dialog-title" id="scene-custom-select-dialog-title">Локация</p>' +
+          '<p class="scene-custom-select-dialog-hint">Свой вариант…</p>' +
+          '<input type="text" class="scene-custom-select-dialog-input" id="scene-custom-select-dialog-input" autocomplete="off" enterkeyhint="done" maxlength="120" aria-label="Свой вариант" />' +
+          '<div class="scene-custom-select-dialog-actions">' +
+          '<button type="button" class="scene-custom-select-dialog-cancel" id="scene-custom-select-dialog-cancel">Отмена</button>' +
+          '<button type="button" class="scene-custom-select-dialog-done" id="scene-custom-select-dialog-done">Готово</button>' +
+          '</div>' +
+          '</div>';
+        document.body.appendChild(dlg);
+
+        var input = document.getElementById('scene-custom-select-dialog-input');
+        var cancelBtn = document.getElementById('scene-custom-select-dialog-cancel');
+        var doneBtn = document.getElementById('scene-custom-select-dialog-done');
+
+        function closeCustomSceneSelectDialog(revert) {
+          var pending = sceneCustomSelectPending;
+          sceneCustomSelectPending = null;
+          if (revert && pending) pending.selectedIndex = 0;
+          try {
+            dlg.close();
+          } catch (eClose) {}
+          if (pending) {
+            requestAnimationFrame(function () {
+              try {
+                if (document.activeElement === pending) pending.blur();
+              } catch (eBlur) {}
+            });
+          }
+        }
+
+        function commitCustomSceneSelectDialog() {
+          var pending = sceneCustomSelectPending;
+          if (!pending) {
+            closeCustomSceneSelectDialog(true);
+            return;
+          }
+          var label = input ? String(input.value || '').trim() : '';
+          if (!label) {
+            closeCustomSceneSelectDialog(true);
+            return;
+          }
+          var opt = document.createElement('option');
+          opt.value = 'custom:' + label;
+          opt.textContent = label;
+          var customItem = pending.querySelector('option[value="__custom__"]');
+          if (customItem) pending.insertBefore(opt, customItem);
+          else pending.appendChild(opt);
+          opt.selected = true;
+          sceneCustomSelectPending = null;
+          try {
+            markDirty();
+          } catch (eMd) {}
+          try {
+            dlg.close();
+          } catch (eClose2) {}
+          requestAnimationFrame(function () {
+            try {
+              if (document.activeElement === pending) pending.blur();
+            } catch (eBlur2) {}
+          });
+        }
+
+        if (cancelBtn) {
+          cancelBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            closeCustomSceneSelectDialog(true);
+          });
+        }
+        if (doneBtn) {
+          doneBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            commitCustomSceneSelectDialog();
+          });
+        }
+        if (input) {
+          input.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              commitCustomSceneSelectDialog();
+            }
+          });
+        }
+        dlg.addEventListener('cancel', function (e) {
+          e.preventDefault();
+          closeCustomSceneSelectDialog(true);
+        });
+        if (!dlg._sceneCustomBackdropDown) {
+          dlg._sceneCustomBackdropDown = function (e) {
+            if (typeof dlg.open === 'boolean' && !dlg.open) return;
+            var panel = dlg.querySelector('.scene-custom-select-dialog-panel');
+            if (panel && panel.contains(e.target)) return;
+            e.preventDefault();
+            closeCustomSceneSelectDialog(true);
+          };
+          document.addEventListener('pointerdown', dlg._sceneCustomBackdropDown, true);
+        }
+      }
+
+      function openCustomSceneSelectDialog(sel) {
+        if (!sel) return;
+        ensureSceneCustomSelectDialog();
+        var dlg = document.getElementById('scene-custom-select-dialog');
+        var title = document.getElementById('scene-custom-select-dialog-title');
+        var input = document.getElementById('scene-custom-select-dialog-input');
+        if (!dlg || !input) return;
+        sceneCustomSelectPending = sel;
+        if (title) title.textContent = getCustomSceneSelectFieldLabel(sel);
+        input.value = '';
+        try {
+          dlg.showModal();
+        } catch (eShow) {}
+        requestAnimationFrame(function () {
+          try {
+            input.focus();
+            input.select();
+          } catch (eFocus) {}
+        });
+      }
+
+      function isCustomSceneSelectEligible(sel) {
+        if (!sel || !sel.matches) return false;
+        if (sel.id === 'prep-hook-location' || sel.id === 'prep-main-location') return true;
+        return (
+          sel.matches('select.scene-loc-select, select.scene-plan-select, select.scene-framing-select') &&
+          sel.closest &&
+          sel.closest('.scene-main')
+        );
+      }
+
       function handleCustomSceneSelect(sel) {
         if (!sel || sel.value !== '__custom__') return;
-        var label = window.prompt('Свой вариант', '');
-        label = label == null ? '' : String(label).trim();
-        if (!label) {
-          sel.selectedIndex = 0;
-          return;
-        }
-        var opt = document.createElement('option');
-        opt.value = 'custom:' + label;
-        opt.textContent = label;
-        var customItem = sel.querySelector('option[value="__custom__"]');
-        sel.insertBefore(opt, customItem);
-        opt.selected = true;
-        try { markDirty(); } catch (eMd) {}
+        openCustomSceneSelectDialog(sel);
+      }
+
+      function wireCustomSceneSelectHandlers() {
+        if (wireCustomSceneSelectHandlers._done) return;
+        wireCustomSceneSelectHandlers._done = true;
+        document.addEventListener(
+          'change',
+          function (e) {
+            var t = e.target;
+            if (!isCustomSceneSelectEligible(t)) return;
+            handleCustomSceneSelect(t);
+          },
+          true
+        );
       }
 
       function wireSceneUI() {
@@ -13291,13 +13736,6 @@
           if (t.matches('select.scene-select') && t.closest && t.closest('.scene-main')) {
             triggerHaptic('light');
           }
-          if (
-            t.matches('select.scene-loc-select, select.scene-plan-select, select.scene-framing-select') &&
-            t.closest &&
-            t.closest('.scene-main')
-          ) {
-            handleCustomSceneSelect(t);
-          }
           if (t.matches('select.scene-time-select')) {
             var tw = t.closest('.scene-time-wrap');
             if (tw) {
@@ -13336,6 +13774,7 @@
         bindAllSayLimits(node);
         bindNoteIntercutPastePlain(node);
         ensureSayReplaceButtons(node);
+        refreshNoteIntercutHasTextClasses(node);
         markDirty();
       }
 
@@ -13743,34 +14182,11 @@
 
       var topLogoScrollBlurRaf = null;
       function updateTopLogoScrollBlur() {
-        var root = document.documentElement;
-        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-          root.style.setProperty('--top-logo-blur', '0px');
-          root.style.setProperty('--top-logo-dim', '0');
-          return;
-        }
-        var y = window.scrollY || root.scrollTop || (document.body && document.body.scrollTop) || 0;
-        var start = 20;
-        var range = 180;
-        var maxBlur = 11;
-        var t = Math.max(0, Math.min(1, (y - start) / range));
-        /* Квантуем блюр до целых пикселей: меньше микро-обновлений за кадр — плавнее, без дёрганья. */
-        root.style.setProperty('--top-logo-blur', Math.round(t * maxBlur) + 'px');
-        root.style.setProperty('--top-logo-dim', t.toFixed(3));
+        /* Живой blur/filter на fixed-логотипе при скролле ронял WebKit (артефакты / вылет вкладки). */
       }
       function wireTopLogoScrollBlur() {
         if (wireTopLogoScrollBlur._done) return;
         wireTopLogoScrollBlur._done = true;
-        var onScroll = function () {
-          if (topLogoScrollBlurRaf) return;
-          topLogoScrollBlurRaf = requestAnimationFrame(function () {
-            topLogoScrollBlurRaf = null;
-            updateTopLogoScrollBlur();
-          });
-        };
-        window.addEventListener('scroll', onScroll, { passive: true });
-        window.addEventListener('resize', onScroll, { passive: true });
-        updateTopLogoScrollBlur();
       }
 
       /**
@@ -14707,7 +15123,7 @@
             var ary = Math.abs(rdy);
             if (arx > 14 && arx >= ary * 0.82) {
               assistFromLogoBg = false;
-            } else if (ary > 16 && ary > arx * 1.15) {
+            } else if (ary > 28 && ary > arx * 1.35) {
               var scrollTopPull =
                 window.scrollY ||
                 document.documentElement.scrollTop ||
@@ -14715,6 +15131,13 @@
                 0;
               /* У верха: свайп вниз — pull-to-reload (touch), не перехватывать в перетаскивание логотипа. */
               if (scrollTopPull <= 10 && rdy > 16) {
+                assistFromLogoBg = false;
+                activePid = null;
+                assistOpenGesturePid = null;
+                return;
+              }
+              /* Не у верха страницы — это скролл контента, не перетаскивание логотипа. */
+              if (scrollTopPull > 20) {
                 assistFromLogoBg = false;
                 activePid = null;
                 assistOpenGesturePid = null;
@@ -15175,6 +15598,7 @@
       repairSceneTimeSelectsInDom(document);
       if (wrap) migrateSceneEditableHostsToDiv(wrap);
       upgradeSayLines();
+      migrateSayLabelToSam(document);
       bindAllSayLimits(document);
       bindNoteIntercutPastePlain(document);
       migrateBundledSayLinesFromJson();
@@ -15182,12 +15606,14 @@
       migrateShotCheckboxLensMarkup(document);
       syncAllShotClasses();
       wireSceneUI();
+      wireCustomSceneSelectHandlers();
       wireControls();
       ensureShotlistLocationsMinCount(4);
       migrateShotlistPiecesMarkup(document);
       ensureShotlistPieceSelectOptions(document);
       wireIntercutUnderscoreStrip();
       wireNoteIntercutHasTextUnderline();
+      wireSceneLineHeadingRules();
       wireNoteFocusViewportCenter();
       wireShotlistPiecePickers();
       wireShotlistPiecesManualInput();
