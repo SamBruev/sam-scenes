@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v330)</title>
+  <title>Sam Scenes (v334)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -148,10 +148,15 @@
       /* Выпадающие списки и модальные панели: чёрный фон + золотая кайма (как в эталонном макете). */
       --ui-select-bg: #000000;
       --ui-popup-bg: #000000;
-      /* Фон шторки ассистента — слегка полупрозрачный (только панель; основной UI не трогаем).
-         Без backdrop-blur на слайде (iOS jitter, v313). Не ниже ~0.9 — иначе Safari тянет
-         прозрачность на весь composited слой страницы. */
-      --assistant-drawer-bg: rgba(0, 0, 0, 0.9);
+      /* Фон шторки ассистента — «жидкое стекло»: полупрозрачность + backdrop-blur.
+         На время слайда blur снимается (html.assistant-drawer-anim / -tracking) — меньше дёрганья iOS. */
+      --assistant-drawer-bg: rgba(8, 8, 10, 0.46);
+      --assistant-drawer-glass: linear-gradient(
+        165deg,
+        rgba(22, 20, 18, 0.58) 0%,
+        rgba(6, 6, 8, 0.38) 46%,
+        rgba(12, 11, 10, 0.5) 100%
+      );
       --ui-select-border: rgba(212, 175, 95, 0.42);
       --ui-select-border-focus: rgba(232, 201, 104, 0.72);
       --border: rgba(255, 255, 255, 0.2);
@@ -465,13 +470,15 @@
       height: auto;
       /* Без полей сверху/снизу у стекла; справа 0 — шторка-подсказка вплотную к краю панели; отступ текста в .assistant-drawer-scroll */
       padding: 0 0 0 calc(14px + env(safe-area-inset-left, 0px));
-      /* v313 — эксперимент: у шторки убрано живое размытие (backdrop-filter blur).
-         Именно постоянный пересчёт размытия ронял слайд до ~12 кадров на iOS Safari.
-         Панель остаётся без живого blur, но фон снова полупрозрачный (см. --assistant-drawer-bg). */
-      background: var(--assistant-drawer-bg);
-      border-right: 1px solid var(--ui-select-border);
+      background: var(--assistant-drawer-glass);
+      -webkit-backdrop-filter: blur(26px) saturate(145%);
+      backdrop-filter: blur(26px) saturate(145%);
+      border-right: 1px solid rgba(255, 248, 235, 0.12);
       border-radius: 0;
-      box-shadow: 10px 0 48px rgba(0, 0, 0, 0.2);
+      box-shadow:
+        10px 0 52px rgba(0, 0, 0, 0.38),
+        inset 0 1px 0 rgba(255, 248, 235, 0.1),
+        inset 1px 0 0 rgba(255, 255, 255, 0.05);
       transform: translateX(-102%);
       transition: transform 0.32s cubic-bezier(0.22, 0.9, 0.28, 1);
       /* Отдельный слой: полупрозрачность только у панели, не у .wrap / карточек сцен. */
@@ -523,9 +530,13 @@
       pointer-events: auto;
     }
 
-    /* На время слайда — непрозрачная панель (меньше артефактов WebKit при transform). */
-    html.assistant-drawer-anim .assistant-drawer {
-      background: #000000;
+    /* На время слайда — без живого blur (WebKit артефакты), чуть плотнее фон. */
+    html.assistant-drawer-anim .assistant-drawer,
+    html.assistant-drawer-tracking .assistant-drawer {
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+      background: rgba(8, 8, 10, 0.9);
+      box-shadow: 10px 0 48px rgba(0, 0, 0, 0.42);
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -630,6 +641,28 @@
       z-index: 100;
     }
 
+    /* Подсказка «нажать», не тянуть — точка-мишень + подпись. */
+    .assistant-strip-tap-hint {
+      position: absolute;
+      left: 50%;
+      top: 62%;
+      transform: translate(-50%, -50%);
+      font-size: 7px;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(245, 232, 210, 0.78);
+      writing-mode: vertical-rl;
+      pointer-events: none;
+      line-height: 1;
+    }
+
+    .assistant-strip-tap-hint--close {
+      top: auto;
+      bottom: 14%;
+      transform: translateX(-50%);
+    }
+
     .assistant-open-strip:focus,
     .assistant-open-strip:focus-visible,
     .assistant-drawer-dismiss-chevron:focus,
@@ -638,18 +671,19 @@
     }
 
     .assistant-open-strip::before {
-      content: '\203A';
+      content: "";
       position: absolute;
       left: 50%;
-      top: 50%;
+      top: 36%;
       transform: translate(-50%, -50%);
-      font-size: 15px;
-      font-weight: 600;
-      line-height: 1;
-      color: rgba(220, 205, 175, 0.9);
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: rgba(235, 220, 190, 0.94);
+      box-shadow:
+        0 0 0 3px rgba(168, 132, 212, 0.34),
+        0 0 0 7px rgba(168, 132, 212, 0.12);
       pointer-events: none;
-      letter-spacing: -0.08em;
-      text-shadow: none;
     }
 
     .assistant-open-strip:active {
@@ -665,8 +699,10 @@
     }
 
     .assistant-open-strip:active::before {
-      color: rgba(245, 232, 210, 0.95);
-      text-shadow: none;
+      background: rgba(255, 248, 235, 0.98);
+      box-shadow:
+        0 0 0 4px rgba(188, 152, 228, 0.42),
+        0 0 0 8px rgba(168, 132, 212, 0.16);
     }
 
     body.assistant-drawer-open .assistant-open-strip {
@@ -799,10 +835,47 @@
       top: 50% !important;
       bottom: auto !important;
       transform: translate(-50%, -50%) !important;
+      opacity: 0.42;
+      font-size: 11px;
     }
 
     .assistant-drawer-dismiss-chevron .assistant-drawer-scroll-arrow::before {
-      content: '\2039';
+      content: '\2195';
+      letter-spacing: 0;
+    }
+
+    .assistant-drawer-dismiss-chevron::after {
+      content: "нажать";
+      position: absolute;
+      left: 50%;
+      bottom: 14%;
+      transform: translateX(-50%);
+      font-size: 7px;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(245, 232, 210, 0.78);
+      writing-mode: vertical-rl;
+      pointer-events: none;
+      line-height: 1;
+      z-index: 2;
+    }
+
+    .assistant-drawer-dismiss-chevron::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 22%;
+      transform: translate(-50%, -50%);
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: rgba(235, 220, 190, 0.94);
+      box-shadow:
+        0 0 0 3px rgba(168, 132, 212, 0.34),
+        0 0 0 7px rgba(168, 132, 212, 0.12);
+      pointer-events: none;
+      z-index: 2;
     }
 
     .assistant-drawer-dismiss-chevron:active {
@@ -815,6 +888,13 @@
       box-shadow:
         1px 0 12px rgba(168, 132, 212, 0.11),
         -1px 0 8px rgba(0, 0, 0, 0.18);
+    }
+
+    .assistant-drawer-dismiss-chevron:active::before {
+      background: rgba(255, 248, 235, 0.98);
+      box-shadow:
+        0 0 0 4px rgba(188, 152, 228, 0.42),
+        0 0 0 8px rgba(168, 132, 212, 0.16);
     }
 
     .assistant-drawer-dismiss-chevron:active .assistant-drawer-scroll-arrow {
@@ -859,9 +939,9 @@
       margin: 0 0 24px;
       padding: 12px 12px 14px;
       border-radius: 16px;
-      border: none;
-      background: rgba(0, 0, 0, 0.92);
-      box-shadow: none;
+      border: 1px solid rgba(255, 248, 235, 0.1);
+      background: rgba(255, 255, 255, 0.05);
+      box-shadow: inset 0 1px 0 rgba(255, 248, 235, 0.07);
     }
 
     .assistant-drawer-tools-label {
@@ -1074,8 +1154,8 @@
       padding: 10px 12px;
       margin: 0;
       border-radius: 14px;
-      border: 1px solid var(--ui-select-border);
-      background: #000000;
+      border: 1px solid rgba(255, 248, 235, 0.1);
+      background: rgba(255, 255, 255, 0.04);
       color: var(--text);
       font: inherit;
       cursor: pointer;
@@ -1085,7 +1165,7 @@
     }
 
     .assistant-drawer-item:active {
-      background: #0a0a0a;
+      background: rgba(255, 255, 255, 0.08);
     }
 
     .assistant-drawer-item.is-active {
@@ -1388,6 +1468,26 @@
       pointer-events: none;
     }
 
+    /* Затемнение под логотипом — контент при скролле не «просвечивает» сквозь SAM BRUEV. */
+    .top-logo::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: -8px;
+      z-index: 0;
+      pointer-events: none;
+      background: linear-gradient(
+        180deg,
+        #000 0%,
+        rgba(0, 0, 0, 0.99) 50%,
+        rgba(0, 0, 0, 0.97) 78%,
+        rgba(0, 0, 0, 0.72) 92%,
+        rgba(0, 0, 0, 0) 100%
+      );
+    }
+
     /* Логотип + подпись — одна колонка по центру по горизонтали и вертикали в зоне шапки */
     .top-logo-brand {
       flex: 1 1 auto;
@@ -1402,6 +1502,7 @@
       transition: none;
       filter: none;
       position: relative;
+      z-index: 1;
       isolation: isolate;
       background: transparent;
     }
@@ -1592,6 +1693,7 @@
     }
 
     .logo-bg {
+      position: relative;
       width: 645px;
       max-width: min(95vw, 780px);
       height: 252px;
@@ -1602,7 +1704,7 @@
       background-repeat: no-repeat;
       background-position: center center;
       background-size: contain;
-      opacity: .95;
+      opacity: calc(0.62 - var(--top-logo-dim, 0) * 0.1);
       z-index: 3;
       pointer-events: auto;
       cursor: move;
@@ -1610,8 +1712,23 @@
       transform-origin: center center;
       user-select: none;
       touch-action: none;
-      filter: blur(var(--top-logo-blur, 0px));
-      transition: filter 0.2s ease-out;
+      filter:
+        blur(var(--top-logo-blur, 0px))
+        brightness(calc(0.68 - var(--top-logo-dim, 0) * 0.14))
+        contrast(0.88)
+        saturate(0.82);
+      transition: filter 0.2s ease-out, opacity 0.2s ease-out;
+    }
+
+    /* Смягчаем белый «свет» текста SAM BRUEV — лампу (.top-logo-brand::before) не трогаем. */
+    .logo-bg::after {
+      content: "";
+      position: absolute;
+      inset: 2% 4%;
+      border-radius: 12px;
+      background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.38) 0%, rgba(0, 0, 0, 0.12) 55%, transparent 78%);
+      pointer-events: none;
+      mix-blend-mode: multiply;
     }
 
     .logo-controls {
@@ -1626,6 +1743,8 @@
       user-select: none;
       margin-top: 6px;
       pointer-events: auto;
+      position: relative;
+      z-index: 1;
     }
 
     .logo-controls input[type="range"] {
@@ -3127,6 +3246,17 @@
       animation: prepImportantDonePulse 1.05s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
+    /* В момент анимации завершения — только центрированная плашка, без чеклиста и галочки. */
+    .field-prep-important.prep-important-done-pulse .prep-important-head,
+    .field-prep-important.prep-important-done-pulse .prep-important-options,
+    .field-prep-important.prep-important-done-pulse .prep-important-collapse-btn {
+      display: none !important;
+    }
+
+    .field-prep-important.prep-important-done-pulse .prep-important-done {
+      display: flex !important;
+    }
+
     /* Раскрытие свёрнутого чеклиста — зеркало анимации завершения (#4). */
     @keyframes prepImportantExpandPulse {
       0% {
@@ -3305,44 +3435,35 @@
     .prep-important-done {
       display: none;
       align-items: center;
-      gap: 10px;
+      justify-content: center;
+      gap: 0;
       width: 100%;
       margin: 0;
-      padding: 0;
+      padding: 4px 0;
       border: none;
       background: transparent;
       color: inherit;
       font: inherit;
-      text-align: left;
+      text-align: center;
       cursor: pointer;
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
     }
 
     .prep-important-done-icon {
-      flex-shrink: 0;
-      width: 1.65rem;
-      height: 1.65rem;
-      border-radius: 999px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(120, 200, 140, 0.18);
-      color: rgba(170, 235, 185, 0.98);
-      font-size: 0.95rem;
-      font-weight: 800;
-      line-height: 1;
+      display: none;
     }
 
     .prep-important-done-text {
-      flex: 1 1 auto;
+      flex: 0 1 auto;
       min-width: 0;
       margin: 0;
-      font-size: 0.92rem;
+      font-size: 0.98rem;
       font-weight: 700;
       line-height: 1.35;
       color: rgba(230, 248, 235, 0.96);
       letter-spacing: 0.02em;
+      text-align: center;
     }
 
     .prep-important-collapse-btn {
@@ -5420,8 +5541,8 @@
     type="button"
     class="assistant-open-strip"
     id="assistant-open-strip"
-    aria-label="Открыть план съёмок"
-    title="План съёмок"></button>
+    aria-label="Нажмите — открыть план съёмок"
+    title="Нажмите — план съёмок"><span class="assistant-strip-tap-hint" aria-hidden="true">нажать</span></button>
   <div
     class="assistant-drawer-backdrop"
     id="assistant-drawer-backdrop"
@@ -5438,8 +5559,8 @@
       type="button"
       class="assistant-drawer-dismiss-chevron"
       id="assistant-drawer-close"
-      aria-label="Закрыть меню"
-      title="Закрыть · смахните влево · стрелка показывает позицию прокрутки">
+      aria-label="Нажмите — закрыть план съёмок"
+      title="Нажмите — закрыть">
       <span class="assistant-drawer-axis-track" aria-hidden="true">
         <span class="assistant-drawer-scroll-arrow" id="assistant-drawer-axis-thumb"></span>
       </span>
@@ -5745,10 +5866,9 @@
             class="prep-important-done"
             id="prep-important-done"
             hidden
-            aria-label="Всё готово к съёмке — открыть чеклист"
+            aria-label="Всё под контролем! — открыть чеклист"
           >
-            <span class="prep-important-done-icon" aria-hidden="true">✓</span>
-            <span class="prep-important-done-text">Всё готово к съёмке</span>
+            <span class="prep-important-done-text">Всё под контролем!</span>
           </button>
         </div>
         <div class="field field-assistant">
@@ -6929,8 +7049,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v330';
-      var BUILD_TIME = '2026-05-31 20:30 MSK';
+      var APP_VERSION = 'v334';
+      var BUILD_TIME = '2026-06-01 00:00 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -12513,6 +12633,8 @@
 
       function playPrepImportantDone(block) {
         if (!block) return;
+        var doneBtn = document.getElementById('prep-important-done');
+        if (doneBtn) doneBtn.hidden = false;
         block.classList.remove('prep-important-done-pulse');
         void block.offsetWidth;
         block.classList.add('prep-important-done-pulse');
@@ -12638,9 +12760,8 @@
           '<span class="prep-important-sub">Всё под контролем?</span>' +
           '</span></div><div class="prep-important-options">' + labels + '</div>' +
           '<button type="button" class="prep-important-collapse-btn" id="prep-important-collapse-btn">Свернуть</button>' +
-          '<button type="button" class="prep-important-done" id="prep-important-done" hidden aria-label="Всё готово к съёмке — открыть чеклист">' +
-          '<span class="prep-important-done-icon" aria-hidden="true">✓</span>' +
-          '<span class="prep-important-done-text">Всё готово к съёмке</span></button>';
+          '<button type="button" class="prep-important-done" id="prep-important-done" hidden aria-label="Всё под контролем! — открыть чеклист">' +
+          '<span class="prep-important-done-text">Всё под контролем!</span></button>';
       }
 
       /** Приводит блок «Важно» из сохранённого сценария к актуальному шаблону (новые чек-боксы, id). */
@@ -12665,9 +12786,8 @@
               var tmp = document.createElement('div');
               tmp.innerHTML =
                 '<button type="button" class="prep-important-collapse-btn" id="prep-important-collapse-btn">Свернуть</button>' +
-                '<button type="button" class="prep-important-done" id="prep-important-done" hidden aria-label="Всё готово к съёмке — открыть чеклист">' +
-                '<span class="prep-important-done-icon" aria-hidden="true">✓</span>' +
-                '<span class="prep-important-done-text">Всё готово к съёмке</span></button>';
+                '<button type="button" class="prep-important-done" id="prep-important-done" hidden aria-label="Всё под контролем! — открыть чеклист">' +
+                '<span class="prep-important-done-text">Всё под контролем!</span></button>';
               while (tmp.firstChild) block.appendChild(tmp.firstChild);
             }
           }
@@ -13276,7 +13396,6 @@
           teleprompterViewport.addEventListener(
             'pointerdown',
             function (e) {
-              if (teleprompterSettingsOpen) return;
               if (e.target && e.target.closest && e.target.closest('.teleprompter-settings')) return;
               if (e.pointerType === 'mouse' && e.button !== 0) return;
               teleprompterTapStart = { x: e.clientX, y: e.clientY, id: e.pointerId };
@@ -13286,11 +13405,16 @@
           teleprompterViewport.addEventListener(
             'pointerup',
             function (e) {
-              if (teleprompterSettingsOpen) return;
               if (!teleprompterTapStart || e.pointerId !== teleprompterTapStart.id) return;
               var start = teleprompterTapStart;
               teleprompterTapStart = null;
               if (Math.hypot(e.clientX - start.x, e.clientY - start.y) > INTENT_TAP_MAX_PX) return;
+              if (e.target && e.target.closest && e.target.closest('.teleprompter-settings')) return;
+              if (teleprompterSettingsOpen) {
+                closeTeleprompterSettings();
+                try { triggerHaptic('micro'); } catch (eH) {}
+                return;
+              }
               toggleTeleprompterPause();
               focusTeleprompterKeyCapture();
             },
@@ -13622,6 +13746,7 @@
         var root = document.documentElement;
         if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
           root.style.setProperty('--top-logo-blur', '0px');
+          root.style.setProperty('--top-logo-dim', '0');
           return;
         }
         var y = window.scrollY || root.scrollTop || (document.body && document.body.scrollTop) || 0;
@@ -13631,6 +13756,7 @@
         var t = Math.max(0, Math.min(1, (y - start) / range));
         /* Квантуем блюр до целых пикселей: меньше микро-обновлений за кадр — плавнее, без дёрганья. */
         root.style.setProperty('--top-logo-blur', Math.round(t * maxBlur) + 'px');
+        root.style.setProperty('--top-logo-dim', t.toFixed(3));
       }
       function wireTopLogoScrollBlur() {
         if (wireTopLogoScrollBlur._done) return;
