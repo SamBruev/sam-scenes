@@ -3,7 +3,7 @@
 <html lang="ru" style="--logo-x: 0px; --logo-y: 0px; --logo-scale: 2.00; --top-logo-blur: 0px; --pull-stack-y: 0px;">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#000000">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v323)</title>
+  <title>Sam Scenes (v330)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -1539,6 +1539,58 @@
       box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12), 0 0 18px var(--ui-violet-soft);
     }
 
+    /* Свайп-смена сценария: без transform на .wrap (ломает fixed top-logo). */
+    .wrap.scenario-switch-fade {
+      transition: opacity 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .wrap.scenario-switch-fade-out {
+      opacity: 0.22;
+    }
+
+    @keyframes scenarioTitleSwipeInFromRight {
+      from {
+        opacity: 0.35;
+        transform: translateX(22px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes scenarioTitleSwipeInFromLeft {
+      from {
+        opacity: 0.35;
+        transform: translateX(-22px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .title-row.scenario-title-from-right .title-subject {
+      animation: scenarioTitleSwipeInFromRight 0.48s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .title-row.scenario-title-from-left .title-subject {
+      animation: scenarioTitleSwipeInFromLeft 0.48s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .wrap.scenario-switch-fade,
+      .wrap.scenario-switch-fade-out {
+        transition: none;
+        opacity: 1;
+      }
+
+      .title-row.scenario-title-from-right .title-subject,
+      .title-row.scenario-title-from-left .title-subject {
+        animation: none;
+      }
+    }
+
     .logo-bg {
       width: 645px;
       max-width: min(95vw, 780px);
@@ -2902,32 +2954,15 @@
     .line { margin-top: 8px; color: var(--label); }
     .line b { color: var(--time); font-weight: 700; }
 
-    /* Говорю / Примечание / Перебивка: строка 1 — подпись + пунктир; строка 2 — текст
-       на всю ширину (переносы идут под словами метки, не только под линией справа). */
-    .scene-main > .line-say {
-      display: grid;
-      grid-template-columns: auto minmax(0, 1fr) auto;
-      grid-template-rows: auto auto;
-      align-items: start;
-      column-gap: 10px;
-      row-gap: 0.32em;
-      margin-top: 8px;
-      position: relative;
-      box-sizing: border-box;
-      padding: 0 0 2px;
-    }
-
+    /* Говорю / Примечание / Перебивка: подпись float слева — текст с 1-й строки после неё;
+       переносы идут на всю ширину без отступа под подпись. */
+    .scene-main > .line-say,
     .scene-main > .line-note,
     .scene-main > .intercut {
-      display: grid;
-      grid-template-columns: 1fr;
-      grid-template-rows: auto auto;
-      row-gap: 0.32em;
-      align-items: start;
+      display: flow-root;
       margin-top: 8px;
-      position: relative;
-      box-sizing: border-box;
       padding: 0 0 2px;
+      box-sizing: border-box;
     }
 
     .scene-main > .line-note {
@@ -2935,53 +2970,20 @@
       scroll-margin-bottom: 42vh;
     }
 
-    .scene-main > .line-say > b {
-      grid-column: 1;
-      grid-row: 1;
-      align-self: baseline;
-      white-space: nowrap;
-      line-height: 1.35;
-      font-size: 1.2em;
-      font-weight: 700;
-      color: var(--time);
-    }
-
-    .scene-main > .line-say::after {
-      content: "\200B";
-      grid-column: 2;
-      grid-row: 1;
-      align-self: baseline;
-      min-width: 0.25em;
-      font-size: 1.2em;
-      line-height: 1.35;
-      border-bottom: 1px dashed rgba(200, 198, 195, 0.38);
-      pointer-events: none;
-    }
-
-    .scene-main > .line-say:focus-within::after {
-      border-bottom-color: rgba(200, 198, 195, 0.52);
-    }
-
+    .scene-main > .line-say > b,
     .scene-main > .line-note > b,
     .scene-main > .intercut > b {
-      grid-row: 1;
-      grid-column: 1;
-      width: 100%;
-      display: flex;
-      align-items: flex-end;
-      gap: 0.42em;
-      min-width: 0;
+      float: left;
+      margin-right: 0.5em;
       white-space: nowrap;
-      line-height: 1.35;
+      font-size: 1.2em;
+      line-height: 1.4;
       font-weight: 700;
       color: var(--time);
     }
 
     .scene-main > .line-note > b .scene-note-heading,
     .scene-main > .intercut > b .scene-note-heading {
-      flex: 0 0 auto;
-      min-width: 0;
-      box-sizing: border-box;
       font: inherit;
       font-size: 1.2em;
       font-weight: 700;
@@ -2989,42 +2991,28 @@
       color: inherit;
     }
 
-    .scene-main > .line-note > b::after,
-    .scene-main > .intercut > b::after {
-      content: "";
-      flex: 1 1 0;
-      min-width: 0.25em;
-      height: 0;
-      border-bottom: 1px dashed rgba(200, 198, 195, 0.38);
-    }
-
-    .scene-main > .line-note:focus-within > b::after,
-    .scene-main > .intercut:focus-within > b::after {
-      border-bottom-color: rgba(200, 198, 195, 0.52);
-    }
-
     .scene-main > .line-say .say-editable,
     .scene-main > .line-note .note-editable,
     .scene-main > .intercut .intercut-text {
-      grid-column: 1 / -1;
-      grid-row: 2;
-      align-self: start;
       display: block;
-      min-height: 1.35em;
-      min-width: 0;
-      width: 100%;
-      max-width: 100%;
-      line-height: 1.35;
+      min-height: 1.4em;
+      line-height: 1.4;
       white-space: pre-wrap;
       overflow-wrap: anywhere;
       outline: none;
       border: none;
-      border-bottom: none;
+      border-bottom: 1px dashed rgba(200, 198, 195, 0.38);
       border-radius: 0;
-      padding: 0;
+      padding: 0 0 2px;
       margin: 0;
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
+    }
+
+    .scene-main > .line-say:focus-within .say-editable,
+    .scene-main > .line-note:focus-within .note-editable,
+    .scene-main > .intercut:focus-within .intercut-text {
+      border-bottom-color: rgba(200, 198, 195, 0.52);
     }
 
     .scene-main > .line-say .say-editable:focus,
@@ -3041,14 +3029,11 @@
       color: #f8eed1;
     }
 
-    /* «Заменить» — компактная кнопка справа на строке «Говорю». */
+    /* «Заменить» — справа на строке «Говорю», не ломает обтекание подписи. */
     .scene-main > .line-say .say-replace-btn {
-      grid-column: 3;
-      grid-row: 1;
-      justify-self: end;
-      align-self: baseline;
+      float: right;
+      margin-left: 0.5em;
       display: inline-block;
-      margin: 0;
       border: 1px solid rgba(160, 150, 128, 0.18);
       background: var(--ui-select-bg);
       color: rgba(212, 198, 170, 0.78);
@@ -3142,6 +3127,45 @@
       animation: prepImportantDonePulse 1.05s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
+    /* Раскрытие свёрнутого чеклиста — зеркало анимации завершения (#4). */
+    @keyframes prepImportantExpandPulse {
+      0% {
+        transform: scale(0.96);
+        box-shadow: 0 0 0 0 rgba(120, 220, 150, 0);
+        border-color: rgba(120, 200, 140, 0.28);
+      }
+      38% {
+        transform: scale(1.04);
+        box-shadow: 0 0 0 3px rgba(120, 220, 150, 0.48), 0 0 30px 7px rgba(120, 220, 150, 0.42);
+        border-color: rgba(120, 220, 150, 0.72);
+      }
+      100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(120, 220, 150, 0);
+        border-color: rgba(255, 255, 255, 0.08);
+      }
+    }
+
+    .field-prep-important.prep-important-expand-pulse {
+      animation: prepImportantExpandPulse 1.05s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @keyframes prepImportantContentIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .field-prep-important.prep-important-expand-pulse .prep-important-head,
+    .field-prep-important.prep-important-expand-pulse .prep-important-options {
+      animation: prepImportantContentIn 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
     /* #2: короткая подсветка блока «Важно» при переходе по тапу на значок-напоминание. */
     @keyframes prepImportantAttention {
       0%, 100% {
@@ -3160,7 +3184,10 @@
 
     @media (prefers-reduced-motion: reduce) {
       .field-prep-important.prep-important-done-pulse,
-      .field-prep-important.prep-important-attention {
+      .field-prep-important.prep-important-attention,
+      .field-prep-important.prep-important-expand-pulse,
+      .field-prep-important.prep-important-expand-pulse .prep-important-head,
+      .field-prep-important.prep-important-expand-pulse .prep-important-options {
         animation: none;
       }
     }
@@ -3448,6 +3475,9 @@
 
     .teleprompter-overlay.open {
       display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
 
     .teleprompter-close {
@@ -3469,21 +3499,33 @@
         0 0 36px rgba(255, 140, 70, 0.08);
     }
 
-    .teleprompter-text {
+    .teleprompter-viewport {
       width: min(96vw, 1100px);
       max-height: calc(100vh - 96px);
       min-height: 0;
       flex: 0 1 auto;
-      overflow: auto;
+      overflow-x: hidden;
+      overflow-y: auto;
       overscroll-behavior: contain;
       -webkit-overflow-scrolling: touch;
       touch-action: pan-y;
+      scrollbar-width: none;
+    }
+
+    .teleprompter-viewport::-webkit-scrollbar {
+      display: none;
+    }
+
+    .teleprompter-text {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 38vh 4vw 55vh;
       color: #fff2cd;
       text-align: center;
       font-weight: 800;
-      line-height: 1.25;
-      letter-spacing: 0.01em;
-      font-size: clamp(1.9rem, 6.5vw, 4.1rem);
+      line-height: var(--tp-line-height, 1.25);
+      letter-spacing: var(--tp-letter-spacing, 0.01em);
+      font-size: calc(var(--tp-font-scale, 1) * clamp(1.9rem, 6.5vw, 4.1rem));
       transform: scaleX(-1);
       white-space: pre-wrap;
       word-break: break-word;
@@ -3494,6 +3536,148 @@
         0 0 28px rgba(255, 188, 100, 0.2),
         0 0 56px rgba(255, 150, 70, 0.1),
         0 0 1px rgba(255, 250, 230, 0.45);
+    }
+
+    .teleprompter-hud {
+      position: absolute;
+      left: 50%;
+      bottom: max(12px, env(safe-area-inset-bottom));
+      transform: translateX(-50%);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 218, 132, 0.28);
+      background: rgba(8, 8, 8, 0.72);
+      color: rgba(255, 236, 196, 0.82);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      pointer-events: none;
+      opacity: 0.55;
+      transition: opacity 0.2s ease;
+    }
+
+    .teleprompter-overlay.open .teleprompter-hud {
+      opacity: 0.72;
+    }
+
+    .teleprompter-hud.paused {
+      opacity: 0.95;
+    }
+
+    .teleprompter-hud-state {
+      min-width: 1.1em;
+      text-align: center;
+    }
+
+    .teleprompter-key-capture {
+      position: absolute;
+      opacity: 0;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: 0;
+      border: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .teleprompter-settings-btn {
+      position: absolute;
+      top: max(12px, env(safe-area-inset-top));
+      left: max(12px, env(safe-area-inset-left));
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 218, 132, 0.45);
+      background: rgba(16, 16, 16, 0.92);
+      color: #ffe0a1;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      z-index: 2;
+      box-shadow:
+        0 0 0 1px rgba(255, 200, 120, 0.08),
+        0 0 18px rgba(255, 165, 95, 0.2),
+        0 0 36px rgba(255, 140, 70, 0.08);
+    }
+
+    .teleprompter-settings {
+      position: absolute;
+      top: max(60px, calc(env(safe-area-inset-top) + 48px));
+      left: max(12px, env(safe-area-inset-left));
+      right: max(12px, env(safe-area-inset-right));
+      width: min(360px, calc(100vw - 24px));
+      max-width: calc(100vw - 24px);
+      box-sizing: border-box;
+      padding: 12px 14px 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 218, 132, 0.35);
+      background: rgba(10, 10, 10, 0.94);
+      color: rgba(255, 236, 196, 0.9);
+      z-index: 3;
+      display: none;
+      pointer-events: auto;
+      touch-action: manipulation;
+    }
+
+    .teleprompter-settings.open {
+      display: block;
+    }
+
+    .teleprompter-settings-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 4px;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      color: #ffe0a1;
+    }
+
+    .teleprompter-settings-close {
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 218, 132, 0.35);
+      background: rgba(16, 16, 16, 0.92);
+      color: #ffe0a1;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .teleprompter-settings-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      grid-template-rows: auto auto;
+      gap: 4px 10px;
+      align-items: center;
+      margin-top: 10px;
+      font-size: 13px;
+      color: rgba(255, 236, 196, 0.88);
+      user-select: none;
+    }
+
+    .teleprompter-settings-row input[type="range"] {
+      grid-column: 1 / -1;
+      width: 100%;
+      accent-color: var(--gold);
+    }
+
+    .teleprompter-settings-val {
+      min-width: 4.4em;
+      text-align: right;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: rgba(255, 224, 161, 0.92);
     }
 
     .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -3561,13 +3745,19 @@
       min-width: min(100%, 7.5rem);
     }
 
-    /* «Формат кадра» — та же логика, что «Дата съёмки»: подпись сверху, контролы снизу. */
+    /* «Формат кадра» — подпись сверху, селекты снизу (без наложения). */
+    .field-prep-format {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
     .field-prep-format .prep-format-field-head {
-      margin: 0 0 2px;
+      margin: 0;
     }
 
     .field-prep-format .prep-format-wrap {
-      margin-top: 8px;
+      margin-top: 0;
     }
 
     /* Нативное поле даты без «зелёного» системного оформения */
@@ -5442,6 +5632,7 @@
             <option value="mic">Около микрофона</option>
             <option value="doorcam">Камера над дверью</option>
             <option value="desk-chair">Рабочий стол со стороны кресла</option>
+            <option value="__custom__">Свой вариант…</option>
           </select>
         </div>
         <div class="field"><b>Локация основного кадра:</b>
@@ -5452,6 +5643,7 @@
             <option value="mic">Около микрофона</option>
             <option value="doorcam">Камера над дверью</option>
             <option value="desk-chair">Рабочий стол со стороны кресла</option>
+            <option value="__custom__">Свой вариант…</option>
           </select>
         </div>
         <div class="field field-prep-date">
@@ -5595,6 +5787,7 @@
             <option value="mic">Около микрофона</option>
             <option value="doorcam">Камера над дверью</option>
             <option value="desk-chair">Рабочий стол со стороны кресла</option>
+            <option value="__custom__">Свой вариант…</option>
           </select>
         </p>
         <div class="line scene-line-select-row"><b>План:</b>
@@ -5605,6 +5798,7 @@
             <option value="medium">Средний план</option>
             <option value="close-up">Крупный план</option>
             <option value="detail">Деталь</option>
+            <option value="__custom__">Свой вариант…</option>
           </select>
         </div>
         <div class="line scene-line-select-row"><b>Кадр:</b>
@@ -5619,6 +5813,7 @@
             <option value="med-ui">Средний план + экран / интерфейсы</option>
             <option value="finale">Финал, тёплый тон</option>
             <option value="extra">Дополнительный акцент / аутро</option>
+            <option value="__custom__">Свой вариант…</option>
           </select>
         </div>
         <div class="line line-say"><b>Говорю:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
@@ -5656,6 +5851,7 @@
             <option value="mic">Около микрофона</option>
             <option value="doorcam">Камера над дверью</option>
             <option value="desk-chair">Рабочий стол со стороны кресла</option>
+            <option value="__custom__">Свой вариант…</option>
           </select>
         </p>
         <div class="line scene-line-select-row"><b>План:</b>
@@ -5666,6 +5862,7 @@
             <option value="medium">Средний план</option>
             <option value="close-up">Крупный план</option>
             <option value="detail">Деталь</option>
+            <option value="__custom__">Свой вариант…</option>
           </select>
         </div>
         <div class="line scene-line-select-row"><b>Кадр:</b>
@@ -5680,6 +5877,7 @@
             <option value="med-ui">Средний план + экран / интерфейсы</option>
             <option value="finale">Финал, тёплый тон</option>
             <option value="extra">Дополнительный акцент / аутро</option>
+            <option value="__custom__">Свой вариант…</option>
           </select>
         </div>
         <div class="line line-say"><b>Говорю:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
@@ -5713,6 +5911,7 @@
             <option value="mic">Около микрофона</option>
             <option value="doorcam">Камера над дверью</option>
             <option value="desk-chair">Рабочий стол со стороны кресла</option>
+            <option value="__custom__">Свой вариант…</option>
           </select>
         </p>
         <div class="line scene-line-select-row"><b>План:</b>
@@ -5723,6 +5922,7 @@
             <option value="medium">Средний план</option>
             <option value="close-up">Крупный план</option>
             <option value="detail">Деталь</option>
+            <option value="__custom__">Свой вариант…</option>
           </select>
         </div>
         <div class="line scene-line-select-row"><b>Кадр:</b>
@@ -5737,6 +5937,7 @@
             <option value="med-ui">Средний план + экран / интерфейсы</option>
             <option value="finale">Финал, тёплый тон</option>
             <option value="extra">Дополнительный акцент / аутро</option>
+            <option value="__custom__">Свой вариант…</option>
           </select>
         </div>
         <div class="line line-say"><b>Говорю:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
@@ -5770,6 +5971,7 @@
             <option value="mic">Около микрофона</option>
             <option value="doorcam">Камера над дверью</option>
             <option value="desk-chair">Рабочий стол со стороны кресла</option>
+            <option value="__custom__">Свой вариант…</option>
           </select>
         </p>
         <div class="line scene-line-select-row"><b>План:</b>
@@ -5780,6 +5982,7 @@
             <option value="medium">Средний план</option>
             <option value="close-up">Крупный план</option>
             <option value="detail">Деталь</option>
+            <option value="__custom__">Свой вариант…</option>
           </select>
         </div>
         <div class="line scene-line-select-row"><b>Кадр:</b>
@@ -5794,6 +5997,7 @@
             <option value="med-ui">Средний план + экран / интерфейсы</option>
             <option value="finale">Финал, тёплый тон</option>
             <option value="extra">Дополнительный акцент / аутро</option>
+            <option value="__custom__">Свой вариант…</option>
           </select>
         </div>
         <div class="line line-say"><b>Говорю:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
@@ -5827,6 +6031,7 @@
             <option value="mic">Около микрофона</option>
             <option value="doorcam">Камера над дверью</option>
             <option value="desk-chair">Рабочий стол со стороны кресла</option>
+            <option value="__custom__">Свой вариант…</option>
           </select>
         </p>
         <div class="line scene-line-select-row"><b>План:</b>
@@ -5837,6 +6042,7 @@
             <option value="medium">Средний план</option>
             <option value="close-up">Крупный план</option>
             <option value="detail">Деталь</option>
+            <option value="__custom__">Свой вариант…</option>
           </select>
         </div>
         <div class="line scene-line-select-row"><b>Кадр:</b>
@@ -5851,6 +6057,7 @@
             <option value="med-ui">Средний план + экран / интерфейсы</option>
             <option value="finale">Финал, тёплый тон</option>
             <option value="extra">Дополнительный акцент / аутро</option>
+            <option value="__custom__">Свой вариант…</option>
           </select>
         </div>
         <div class="line line-say"><b>Говорю:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
@@ -5884,6 +6091,7 @@
             <option value="mic">Около микрофона</option>
             <option value="doorcam">Камера над дверью</option>
             <option value="desk-chair">Рабочий стол со стороны кресла</option>
+            <option value="__custom__">Свой вариант…</option>
           </select>
         </p>
         <div class="line scene-line-select-row"><b>План:</b>
@@ -5894,6 +6102,7 @@
             <option value="medium">Средний план</option>
             <option value="close-up">Крупный план</option>
             <option value="detail">Деталь</option>
+            <option value="__custom__">Свой вариант…</option>
           </select>
         </div>
         <div class="line scene-line-select-row"><b>Кадр:</b>
@@ -5908,6 +6117,7 @@
             <option value="med-ui">Средний план + экран / интерфейсы</option>
             <option value="finale">Финал, тёплый тон</option>
             <option value="extra">Дополнительный акцент / аутро</option>
+            <option value="__custom__">Свой вариант…</option>
           </select>
         </div>
         <div class="line line-say"><b>Говорю:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
@@ -5941,6 +6151,7 @@
             <option value="mic">Около микрофона</option>
             <option value="doorcam">Камера над дверью</option>
             <option value="desk-chair">Рабочий стол со стороны кресла</option>
+            <option value="__custom__">Свой вариант…</option>
           </select>
         </p>
         <div class="line scene-line-select-row"><b>План:</b>
@@ -5951,6 +6162,7 @@
             <option value="medium">Средний план</option>
             <option value="close-up">Крупный план</option>
             <option value="detail">Деталь</option>
+            <option value="__custom__">Свой вариант…</option>
           </select>
         </div>
         <div class="line scene-line-select-row"><b>Кадр:</b>
@@ -5965,6 +6177,7 @@
             <option value="med-ui">Средний план + экран / интерфейсы</option>
             <option value="finale">Финал, тёплый тон</option>
             <option value="extra">Дополнительный акцент / аутро</option>
+            <option value="__custom__">Свой вариант…</option>
           </select>
         </div>
         <div class="line line-say"><b>Говорю:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
@@ -5998,6 +6211,7 @@
             <option value="mic">Около микрофона</option>
             <option value="doorcam">Камера над дверью</option>
             <option value="desk-chair">Рабочий стол со стороны кресла</option>
+            <option value="__custom__">Свой вариант…</option>
           </select>
         </p>
         <div class="line scene-line-select-row"><b>План:</b>
@@ -6008,6 +6222,7 @@
             <option value="medium">Средний план</option>
             <option value="close-up">Крупный план</option>
             <option value="detail">Деталь</option>
+            <option value="__custom__">Свой вариант…</option>
           </select>
         </div>
         <div class="line scene-line-select-row"><b>Кадр:</b>
@@ -6022,6 +6237,7 @@
             <option value="med-ui">Средний план + экран / интерфейсы</option>
             <option value="finale">Финал, тёплый тон</option>
             <option value="extra">Дополнительный акцент / аутро</option>
+            <option value="__custom__">Свой вариант…</option>
           </select>
         </div>
         <div class="line line-say"><b>Говорю:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
@@ -6055,6 +6271,7 @@
             <option value="mic">Около микрофона</option>
             <option value="doorcam">Камера над дверью</option>
             <option value="desk-chair">Рабочий стол со стороны кресла</option>
+            <option value="__custom__">Свой вариант…</option>
           </select>
         </p>
         <div class="line scene-line-select-row"><b>План:</b>
@@ -6065,6 +6282,7 @@
             <option value="medium">Средний план</option>
             <option value="close-up">Крупный план</option>
             <option value="detail">Деталь</option>
+            <option value="__custom__">Свой вариант…</option>
           </select>
         </div>
         <div class="line scene-line-select-row"><b>Кадр:</b>
@@ -6079,6 +6297,7 @@
             <option value="med-ui">Средний план + экран / интерфейсы</option>
             <option value="finale">Финал, тёплый тон</option>
             <option value="extra">Дополнительный акцент / аутро</option>
+            <option value="__custom__">Свой вариант…</option>
           </select>
         </div>
         <div class="line line-say"><b>Говорю:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
@@ -6451,8 +6670,42 @@
   </div>
 
   <div class="teleprompter-overlay" id="teleprompter-overlay" aria-hidden="true">
+    <button class="teleprompter-settings-btn" id="teleprompter-settings-btn" type="button" aria-label="Настройки суфлёра" aria-expanded="false" aria-controls="teleprompter-settings">⚙</button>
     <button class="teleprompter-close" id="teleprompter-close" type="button" aria-label="Закрыть телесуфлер">×</button>
-    <div class="teleprompter-text" id="teleprompter-text"></div>
+    <div class="teleprompter-settings" id="teleprompter-settings" aria-hidden="true">
+      <div class="teleprompter-settings-head">
+        <span>Настройки суфлёра</span>
+        <button class="teleprompter-settings-close" id="teleprompter-settings-close" type="button" aria-label="Закрыть настройки">×</button>
+      </div>
+      <label class="teleprompter-settings-row" for="teleprompter-set-font">
+        <span>Размер букв</span>
+        <span class="teleprompter-settings-val" id="teleprompter-set-font-val">100%</span>
+        <input id="teleprompter-set-font" type="range" min="60" max="180" step="5" value="100">
+      </label>
+      <label class="teleprompter-settings-row" for="teleprompter-set-speed">
+        <span>Скорость прокрутки</span>
+        <span class="teleprompter-settings-val" id="teleprompter-set-speed-val">1.0×</span>
+        <input id="teleprompter-set-speed" type="range" min="3" max="35" step="1" value="10">
+      </label>
+      <label class="teleprompter-settings-row" for="teleprompter-set-letter">
+        <span>Расстояние между буквами</span>
+        <span class="teleprompter-settings-val" id="teleprompter-set-letter-val">0.01em</span>
+        <input id="teleprompter-set-letter" type="range" min="-5" max="30" step="1" value="1">
+      </label>
+      <label class="teleprompter-settings-row" for="teleprompter-set-line">
+        <span>Расстояние между строками</span>
+        <span class="teleprompter-settings-val" id="teleprompter-set-line-val">1.25</span>
+        <input id="teleprompter-set-line" type="range" min="100" max="250" step="5" value="125">
+      </label>
+    </div>
+    <div class="teleprompter-hud" id="teleprompter-hud" aria-live="polite">
+      <span class="teleprompter-hud-state" id="teleprompter-hud-state">▶</span>
+      <span class="teleprompter-hud-speed" id="teleprompter-hud-speed">1.0×</span>
+    </div>
+    <div class="teleprompter-viewport" id="teleprompter-viewport">
+      <div class="teleprompter-text" id="teleprompter-text"></div>
+    </div>
+    <input type="text" class="teleprompter-key-capture" id="teleprompter-key-capture" aria-hidden="true" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" tabindex="-1" readonly>
   </div>
 
   <script type="application/json" id="samscenes-say-lines-json">[]</script>
@@ -6676,8 +6929,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v323';
-      var BUILD_TIME = '2026-05-31 12:00 MSK';
+      var APP_VERSION = 'v330';
+      var BUILD_TIME = '2026-05-31 20:30 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -6816,10 +7069,38 @@
       var titleSubject = document.querySelector('.title-row .title-subject');
       var DEFAULT_SCENARIO_TITLE = 'ПОРА ПИЛИТЬ КОНТЕНТ';
       var teleprompterOverlay = document.getElementById('teleprompter-overlay');
+      var teleprompterViewport = document.getElementById('teleprompter-viewport');
       var teleprompterText = document.getElementById('teleprompter-text');
       var teleprompterClose = document.getElementById('teleprompter-close');
+      var teleprompterHud = document.getElementById('teleprompter-hud');
+      var teleprompterHudState = document.getElementById('teleprompter-hud-state');
+      var teleprompterHudSpeed = document.getElementById('teleprompter-hud-speed');
+      var teleprompterKeyCapture = document.getElementById('teleprompter-key-capture');
+      var teleprompterSettingsPanel = document.getElementById('teleprompter-settings');
+      var teleprompterSettingsBtn = document.getElementById('teleprompter-settings-btn');
+      var teleprompterSettingsClose = document.getElementById('teleprompter-settings-close');
+      var teleprompterSetFont = document.getElementById('teleprompter-set-font');
+      var teleprompterSetSpeed = document.getElementById('teleprompter-set-speed');
+      var teleprompterSetLetter = document.getElementById('teleprompter-set-letter');
+      var teleprompterSetLine = document.getElementById('teleprompter-set-line');
+      var teleprompterSetFontVal = document.getElementById('teleprompter-set-font-val');
+      var teleprompterSetSpeedVal = document.getElementById('teleprompter-set-speed-val');
+      var teleprompterSetLetterVal = document.getElementById('teleprompter-set-letter-val');
+      var teleprompterSetLineVal = document.getElementById('teleprompter-set-line-val');
       var teleprompterLockScrollY = 0;
       var teleprompterOwnedScrollLock = false;
+      var TELEPROMPTER_SETTINGS_KEY = 'samscenes-teleprompter-settings-v1';
+      var TELEPROMPTER_SPEED_KEY = 'samscenes-teleprompter-speed';
+      var teleprompterSettingsOpen = false;
+      var teleprompterRafId = null;
+      var teleprompterEnterHeld = false;
+      var teleprompterScrollState = {
+        running: false,
+        paused: false,
+        speed: 1,
+        basePxPerSec: 42,
+        lastTs: 0,
+      };
 
       var x = { value: 0 };
       var y = { value: 0 };
@@ -6890,8 +7171,24 @@
         titleSubject = document.querySelector('.title-row .title-subject');
 
         teleprompterOverlay = document.getElementById('teleprompter-overlay');
+        teleprompterViewport = document.getElementById('teleprompter-viewport');
         teleprompterText = document.getElementById('teleprompter-text');
         teleprompterClose = document.getElementById('teleprompter-close');
+        teleprompterHud = document.getElementById('teleprompter-hud');
+        teleprompterHudState = document.getElementById('teleprompter-hud-state');
+        teleprompterHudSpeed = document.getElementById('teleprompter-hud-speed');
+        teleprompterKeyCapture = document.getElementById('teleprompter-key-capture');
+        teleprompterSettingsPanel = document.getElementById('teleprompter-settings');
+        teleprompterSettingsBtn = document.getElementById('teleprompter-settings-btn');
+        teleprompterSettingsClose = document.getElementById('teleprompter-settings-close');
+        teleprompterSetFont = document.getElementById('teleprompter-set-font');
+        teleprompterSetSpeed = document.getElementById('teleprompter-set-speed');
+        teleprompterSetLetter = document.getElementById('teleprompter-set-letter');
+        teleprompterSetLine = document.getElementById('teleprompter-set-line');
+        teleprompterSetFontVal = document.getElementById('teleprompter-set-font-val');
+        teleprompterSetSpeedVal = document.getElementById('teleprompter-set-speed-val');
+        teleprompterSetLetterVal = document.getElementById('teleprompter-set-letter-val');
+        teleprompterSetLineVal = document.getElementById('teleprompter-set-line-val');
 
         if (wrap) wrap.querySelectorAll('.logo-caption').forEach(function (el) { el.remove(); });
         var shotSec = document.querySelector('.shotlist-section');
@@ -7680,6 +7977,27 @@
         if (!titleSubject || !scenarioName) return;
         var tit = (titleSubject.textContent || '').replace(/\s+/g, ' ').trim();
         if (tit && tit !== DEFAULT_SCENARIO_TITLE) scenarioName.value = tit;
+      }
+
+      var _scenNameSyncT = null;
+
+      function syncActiveScenarioNameToLists(name) {
+        var bundle = readScenarioBundle();
+        if (!bundle || !bundle.items || !bundle.activeId) return;
+        var it = null;
+        for (var i = 0; i < bundle.items.length; i++) {
+          if (bundle.items[i] && bundle.items[i].id === bundle.activeId) {
+            it = bundle.items[i];
+            break;
+          }
+        }
+        if (!it) return;
+        var clean = String(name || '').replace(/\s+/g, ' ').trim();
+        it.name = clean || 'Без названия';
+        writeScenarioBundle(bundle);
+        try { renderScenarioList(bundle); } catch (eRsl) {}
+        try { renderDailyPlan(bundle); } catch (eRdp) {}
+        try { renderAssistantDrawerList(); } catch (eRad) {}
       }
 
       function renderDailyPlan(bundle) {
@@ -11179,6 +11497,286 @@
         });
       }
 
+      function defaultTeleprompterSettings() {
+        return {
+          fontScale: 1,
+          speed: 1,
+          letterSpacingEm: 0.01,
+          lineHeight: 1.25,
+        };
+      }
+
+      function clampTeleprompterSettings(raw) {
+        var d = defaultTeleprompterSettings();
+        var s = raw && typeof raw === 'object' ? raw : {};
+        return {
+          fontScale: Math.max(0.6, Math.min(1.8, parseFloat(s.fontScale) || d.fontScale)),
+          speed: Math.max(0.3, Math.min(3.5, parseFloat(s.speed) || d.speed)),
+          letterSpacingEm: Math.max(-0.05, Math.min(0.3, parseFloat(s.letterSpacingEm) || d.letterSpacingEm)),
+          lineHeight: Math.max(1, Math.min(2.5, parseFloat(s.lineHeight) || d.lineHeight)),
+        };
+      }
+
+      function readTeleprompterSpeedLegacy() {
+        try {
+          var v = parseFloat(localStorage.getItem(TELEPROMPTER_SPEED_KEY));
+          if (isFinite(v) && v >= 0.3 && v <= 3.5) return v;
+        } catch (e) {}
+        return 1;
+      }
+
+      function readTeleprompterSettings() {
+        try {
+          var raw = localStorage.getItem(TELEPROMPTER_SETTINGS_KEY);
+          if (raw) return clampTeleprompterSettings(JSON.parse(raw));
+        } catch (e) {}
+        var migrated = defaultTeleprompterSettings();
+        migrated.speed = readTeleprompterSpeedLegacy();
+        return migrated;
+      }
+
+      function saveTeleprompterSettings(s) {
+        try {
+          localStorage.setItem(TELEPROMPTER_SETTINGS_KEY, JSON.stringify(clampTeleprompterSettings(s)));
+        } catch (e) {}
+      }
+
+      function syncTeleprompterSettingsUi(s) {
+        s = clampTeleprompterSettings(s || readTeleprompterSettings());
+        if (teleprompterSetFont) teleprompterSetFont.value = String(Math.round(s.fontScale * 100));
+        if (teleprompterSetSpeed) teleprompterSetSpeed.value = String(Math.round(s.speed * 10));
+        if (teleprompterSetLetter) teleprompterSetLetter.value = String(Math.round(s.letterSpacingEm * 100));
+        if (teleprompterSetLine) teleprompterSetLine.value = String(Math.round(s.lineHeight * 100));
+        if (teleprompterSetFontVal) teleprompterSetFontVal.textContent = Math.round(s.fontScale * 100) + '%';
+        if (teleprompterSetSpeedVal) teleprompterSetSpeedVal.textContent = s.speed.toFixed(1) + '×';
+        if (teleprompterSetLetterVal) teleprompterSetLetterVal.textContent = s.letterSpacingEm.toFixed(2) + 'em';
+        if (teleprompterSetLineVal) teleprompterSetLineVal.textContent = s.lineHeight.toFixed(2);
+      }
+
+      function applyTeleprompterSettings(s) {
+        s = clampTeleprompterSettings(s);
+        if (teleprompterOverlay) {
+          teleprompterOverlay.style.setProperty('--tp-font-scale', String(s.fontScale));
+          teleprompterOverlay.style.setProperty('--tp-letter-spacing', s.letterSpacingEm.toFixed(2) + 'em');
+          teleprompterOverlay.style.setProperty('--tp-line-height', String(s.lineHeight));
+        }
+        teleprompterScrollState.speed = s.speed;
+        saveTeleprompterSettings(s);
+        syncTeleprompterSettingsUi(s);
+        updateTeleprompterHud();
+        return s;
+      }
+
+      function openTeleprompterSettings() {
+        if (!teleprompterSettingsPanel) return;
+        teleprompterSettingsOpen = true;
+        teleprompterSettingsPanel.classList.add('open');
+        teleprompterSettingsPanel.setAttribute('aria-hidden', 'false');
+        if (teleprompterSettingsBtn) teleprompterSettingsBtn.setAttribute('aria-expanded', 'true');
+        syncTeleprompterSettingsUi(readTeleprompterSettings());
+      }
+
+      function closeTeleprompterSettings() {
+        if (!teleprompterSettingsPanel) return;
+        teleprompterSettingsOpen = false;
+        teleprompterSettingsPanel.classList.remove('open');
+        teleprompterSettingsPanel.setAttribute('aria-hidden', 'true');
+        if (teleprompterSettingsBtn) teleprompterSettingsBtn.setAttribute('aria-expanded', 'false');
+        focusTeleprompterKeyCapture();
+      }
+
+      function toggleTeleprompterSettings() {
+        if (teleprompterSettingsOpen) closeTeleprompterSettings();
+        else openTeleprompterSettings();
+      }
+
+      function updateTeleprompterHud() {
+        if (teleprompterHudState) {
+          teleprompterHudState.textContent = teleprompterScrollState.paused ? '⏸' : '▶';
+        }
+        if (teleprompterHudSpeed) {
+          teleprompterHudSpeed.textContent = teleprompterScrollState.speed.toFixed(1) + '×';
+        }
+        if (teleprompterHud) {
+          teleprompterHud.classList.toggle('paused', teleprompterScrollState.paused);
+        }
+      }
+
+      function stopTeleprompterScroll() {
+        teleprompterScrollState.running = false;
+        if (teleprompterRafId != null) {
+          cancelAnimationFrame(teleprompterRafId);
+          teleprompterRafId = null;
+        }
+      }
+
+      function teleprompterScrollStep(ts) {
+        if (!teleprompterScrollState.running) return;
+        if (!teleprompterViewport) {
+          stopTeleprompterScroll();
+          return;
+        }
+        if (!teleprompterScrollState.lastTs) teleprompterScrollState.lastTs = ts;
+        var dt = Math.min(64, ts - teleprompterScrollState.lastTs);
+        teleprompterScrollState.lastTs = ts;
+
+        if (!teleprompterScrollState.paused) {
+          var px = (teleprompterScrollState.basePxPerSec * teleprompterScrollState.speed * dt) / 1000;
+          var max = teleprompterViewport.scrollHeight - teleprompterViewport.clientHeight;
+          if (max > 0) {
+            var next = Math.min(max, teleprompterViewport.scrollTop + px);
+            teleprompterViewport.scrollTop = next;
+            if (next >= max - 1) {
+              teleprompterScrollState.paused = true;
+              teleprompterEnterHeld = false;
+              updateTeleprompterHud();
+            }
+          }
+        }
+
+        teleprompterRafId = requestAnimationFrame(teleprompterScrollStep);
+      }
+
+      function startTeleprompterScroll() {
+        stopTeleprompterScroll();
+        teleprompterScrollState.running = true;
+        teleprompterScrollState.lastTs = 0;
+        teleprompterRafId = requestAnimationFrame(teleprompterScrollStep);
+      }
+
+      function resetTeleprompterScroll() {
+        teleprompterEnterHeld = false;
+        teleprompterScrollState.paused = true;
+        applyTeleprompterSettings(readTeleprompterSettings());
+        if (teleprompterViewport) teleprompterViewport.scrollTop = 0;
+        updateTeleprompterHud();
+      }
+
+      function setTeleprompterScrollMoving(moving) {
+        teleprompterScrollState.paused = !moving;
+        updateTeleprompterHud();
+      }
+
+      function startTeleprompterEnterScroll(e) {
+        if (e && e.repeat) return;
+        if (teleprompterEnterHeld) return;
+        teleprompterEnterHeld = true;
+        setTeleprompterScrollMoving(true);
+        triggerHaptic('micro');
+      }
+
+      function stopTeleprompterEnterScroll() {
+        if (!teleprompterEnterHeld) return;
+        teleprompterEnterHeld = false;
+        setTeleprompterScrollMoving(false);
+      }
+
+      function toggleTeleprompterPause() {
+        teleprompterEnterHeld = false;
+        teleprompterScrollState.paused = !teleprompterScrollState.paused;
+        updateTeleprompterHud();
+        triggerHaptic('light');
+      }
+
+      function adjustTeleprompterSpeed(delta) {
+        var s = readTeleprompterSettings();
+        s.speed = Math.round((s.speed + delta) * 10) / 10;
+        applyTeleprompterSettings(s);
+        triggerHaptic('micro');
+      }
+
+      function nudgeTeleprompterScroll(deltaPx) {
+        if (!teleprompterViewport) return;
+        var max = teleprompterViewport.scrollHeight - teleprompterViewport.clientHeight;
+        teleprompterViewport.scrollTop = Math.max(0, Math.min(max, teleprompterViewport.scrollTop + deltaPx));
+      }
+
+      function focusTeleprompterKeyCapture() {
+        if (!teleprompterKeyCapture) return;
+        try {
+          teleprompterKeyCapture.focus({ preventScroll: true });
+        } catch (e) {
+          try {
+            teleprompterKeyCapture.focus();
+          } catch (e2) {}
+        }
+      }
+
+      function normalizeTeleprompterKey(key) {
+        if (!key) return '';
+        var k = String(key);
+        if (k === 'UIKeyInputUpArrow') return 'ArrowUp';
+        if (k === 'UIKeyInputDownArrow') return 'ArrowDown';
+        if (k === 'UIKeyInputLeftArrow') return 'ArrowLeft';
+        if (k === 'UIKeyInputRightArrow') return 'ArrowRight';
+        if (k === 'UIKeyInputEscape') return 'Escape';
+        if (k === ' ') return 'Space';
+        return k;
+      }
+
+      function handleTeleprompterKeydown(e) {
+        if (!teleprompterOverlay || !teleprompterOverlay.classList.contains('open')) return false;
+        var key = normalizeTeleprompterKey(e.key);
+
+        if (key === 'Escape' || key === 'Esc') {
+          e.preventDefault();
+          if (teleprompterSettingsOpen) {
+            closeTeleprompterSettings();
+            return true;
+          }
+          closeTeleprompter();
+          return true;
+        }
+        if (key === 'Space') {
+          e.preventDefault();
+          toggleTeleprompterPause();
+          return true;
+        }
+        if (key === 'Enter') {
+          e.preventDefault();
+          startTeleprompterEnterScroll(e);
+          return true;
+        }
+        if (key === 'ArrowUp') {
+          e.preventDefault();
+          if (teleprompterScrollState.paused) nudgeTeleprompterScroll(-48);
+          else adjustTeleprompterSpeed(0.1);
+          return true;
+        }
+        if (key === 'ArrowDown') {
+          e.preventDefault();
+          if (teleprompterScrollState.paused) nudgeTeleprompterScroll(48);
+          else adjustTeleprompterSpeed(-0.1);
+          return true;
+        }
+        if (key === '+' || key === '=') {
+          e.preventDefault();
+          adjustTeleprompterSpeed(0.1);
+          return true;
+        }
+        if (key === '-' || key === '_') {
+          e.preventDefault();
+          adjustTeleprompterSpeed(-0.1);
+          return true;
+        }
+        if (e.target === teleprompterKeyCapture && key.length === 1) {
+          e.preventDefault();
+          return true;
+        }
+        return false;
+      }
+
+      function handleTeleprompterKeyup(e) {
+        if (!teleprompterOverlay || !teleprompterOverlay.classList.contains('open')) return false;
+        var key = normalizeTeleprompterKey(e.key);
+        if (key === 'Enter') {
+          e.preventDefault();
+          stopTeleprompterEnterScroll();
+          return true;
+        }
+        return false;
+      }
+
       function openTeleprompterForScene(scene) {
         if (!teleprompterOverlay || !teleprompterText) return;
         var text = readSceneSayText(scene);
@@ -11186,12 +11784,25 @@
         teleprompterOverlay.classList.add('open');
         teleprompterOverlay.setAttribute('aria-hidden', 'false');
         lockMainScrollForTeleprompter();
+        resetTeleprompterScroll();
+        startTeleprompterScroll();
+        requestAnimationFrame(function () {
+          focusTeleprompterKeyCapture();
+        });
         triggerHaptic('micro');
       }
 
       function closeTeleprompter() {
         if (!teleprompterOverlay) return;
         var wasOpen = teleprompterOverlay.classList.contains('open');
+        stopTeleprompterScroll();
+        teleprompterEnterHeld = false;
+        closeTeleprompterSettings();
+        if (teleprompterKeyCapture) {
+          try {
+            teleprompterKeyCapture.blur();
+          } catch (eBlur) {}
+        }
         teleprompterOverlay.classList.remove('open');
         teleprompterOverlay.setAttribute('aria-hidden', 'true');
         unlockMainScrollForTeleprompter();
@@ -11910,6 +12521,16 @@
         }, 1000);
       }
 
+      function playPrepImportantExpand(block) {
+        if (!block) return;
+        block.classList.remove('prep-important-expand-pulse');
+        void block.offsetWidth;
+        block.classList.add('prep-important-expand-pulse');
+        setTimeout(function () {
+          block.classList.remove('prep-important-expand-pulse');
+        }, 1000);
+      }
+
       /** Развёрнут ли чеклист после заполнения (иначе — компактная плашка «готово»). */
       var prepImportantExpanded = false;
 
@@ -11932,16 +12553,21 @@
       function expandPrepImportantChecklist() {
         prepImportantExpanded = true;
         updatePrepImportantPin();
+        var block = document.getElementById('prep-important-block');
+        playPrepImportantExpand(block);
         try {
-          var block = document.getElementById('prep-important-block');
           if (block) block.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         } catch (eSc) {}
       }
 
       function collapsePrepImportantChecklist() {
         if (!prepImportantAllChecked()) return;
-        prepImportantExpanded = false;
-        updatePrepImportantPin();
+        var block = document.getElementById('prep-important-block');
+        playPrepImportantDone(block);
+        setTimeout(function () {
+          prepImportantExpanded = false;
+          updatePrepImportantPin();
+        }, 900);
       }
 
       /** #4: было ли «всё отмечено» на прошлой проверке — чтобы поймать момент завершения. */
@@ -12157,29 +12783,45 @@
           /* #4: поймали момент «отмечен последний пункт» — проигрываем анимацию завершения. */
           var allNow = prepImportantAllChecked();
           if (allNow && !prepImportantWasAllChecked) {
-            playPrepImportantDone(document.getElementById('prep-important-block'));
+            var doneBlock = document.getElementById('prep-important-block');
+            playPrepImportantDone(doneBlock);
+            updatePrepImportantReminder();
+            setTimeout(function () {
+              prepImportantExpanded = false;
+              updatePrepImportantPin();
+            }, 900);
+          } else {
+            updatePrepImportantPin();
           }
-          updatePrepImportantPin();
         }, false);
-        var doneOpenBtn = document.getElementById('prep-important-done');
-        if (doneOpenBtn) {
-          doneOpenBtn.addEventListener('click', function () {
+        /* Делегируем на document: кнопки «Всё готово…»/«Свернуть» пересоздаются при смене
+           сценария (migratePrepImportantBlock), поэтому прямые слушатели терялись — и свёрнутый
+           чеклист нельзя было раскрыть обратно. */
+        document.addEventListener('click', function (e) {
+          var t = e.target;
+          if (!t || !t.closest) return;
+          if (t.closest('#prep-important-done')) {
+            e.preventDefault();
             expandPrepImportantChecklist();
             try { triggerHaptic('light'); } catch (eH) {}
-          });
-        }
-        var collapseBtn = document.getElementById('prep-important-collapse-btn');
-        if (collapseBtn) {
-          collapseBtn.addEventListener('click', function () {
+            return;
+          }
+          if (t.closest('#prep-important-collapse-btn')) {
+            e.preventDefault();
             collapsePrepImportantChecklist();
             try { triggerHaptic('micro'); } catch (eH2) {}
-          });
-        }
+          }
+        }, false);
         var reminderBadge = document.getElementById('prep-important-reminder');
         if (reminderBadge) {
           reminderBadge.addEventListener('click', function () {
             var block = document.getElementById('prep-important-block');
             if (!block) return;
+            if (prepImportantAllChecked() && !prepImportantExpanded) {
+              expandPrepImportantChecklist();
+              try { triggerHaptic('light'); } catch (eHap) {}
+              return;
+            }
             prepImportantExpanded = true;
             updatePrepImportantPin();
             try {
@@ -12207,14 +12849,27 @@
         updatePrepImportantPin();
       }
 
-      /** #7 — плавная прокрутка основного экрана в самое начало (к названию сценария / первым блокам). */
-      function scrollMainToTopSmooth() {
+      /** #7 — плавная прокрутка к названию активного сценария (.title-row). */
+      function scrollMainToScenarioTitle() {
         try {
           requestAnimationFrame(function () {
             requestAnimationFrame(function () {
+              var titleRow = document.querySelector('.title-row');
+              if (titleRow) {
+                try {
+                  titleRow.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } catch (eSi) {
+                  var y =
+                    titleRow.getBoundingClientRect().top +
+                    (window.scrollY || document.documentElement.scrollTop || 0) -
+                    8;
+                  window.scrollTo(0, Math.max(0, Math.round(y)));
+                }
+                return;
+              }
               try {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
-              } catch (eSmooth) {
+              } catch (eTop) {
                 window.scrollTo(0, 0);
               }
             });
@@ -12222,9 +12877,70 @@
         } catch (eScroll) {}
       }
 
+      function scrollMainToTopSmooth() {
+        scrollMainToScenarioTitle();
+      }
+
+      var SCENARIO_SWIPE_SWITCH_MS = 260;
+
+      function scenarioSwitchPrefersReducedMotion() {
+        try {
+          return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+        } catch (e) {
+          return false;
+        }
+      }
+
+      function pulseScenarioTitleSwitch(dir) {
+        var row = document.querySelector('.title-row');
+        if (!row || scenarioSwitchPrefersReducedMotion()) return;
+        row.classList.remove('scenario-title-from-left', 'scenario-title-from-right');
+        void row.offsetWidth;
+        row.classList.add(dir > 0 ? 'scenario-title-from-right' : 'scenario-title-from-left');
+        setTimeout(function () {
+          row.classList.remove('scenario-title-from-left', 'scenario-title-from-right');
+        }, 520);
+      }
+
+      function finishScenarioSwipeSwitchUi(dir) {
+        scrollMainToScenarioTitle();
+        pulseScenarioTitleSwitch(dir);
+      }
+
+      /** Свайп влево → следующий сценарий; fade + смена DOM + заголовок «въезжает» сбоку. */
+      function playScenarioSwipeSwitch(dir, onSwap) {
+        var wrapEl = wrap || document.querySelector('.wrap');
+        if (!wrapEl || scenarioSwitchPrefersReducedMotion()) {
+          try {
+            window.scrollTo(0, 0);
+          } catch (eSnap) {}
+          onSwap();
+          finishScenarioSwipeSwitchUi(dir);
+          return;
+        }
+        wrapEl.classList.add('scenario-switch-fade');
+        wrapEl.classList.add('scenario-switch-fade-out');
+        setTimeout(function () {
+          try {
+            window.scrollTo(0, 0);
+          } catch (eSnap) {}
+          onSwap();
+          wrapEl.classList.remove('scenario-switch-fade-out');
+          setTimeout(function () {
+            wrapEl.classList.remove('scenario-switch-fade');
+            finishScenarioSwipeSwitchUi(dir);
+          }, SCENARIO_SWIPE_SWITCH_MS);
+        }, SCENARIO_SWIPE_SWITCH_MS);
+      }
+
+      var scenarioSwitchSwipeLockUntil = 0;
+
       /** Переключение на соседний сценарий (свайп влево/вправо в середине экрана). dir: +1 след., -1 пред. */
       function goToAdjacentScenario(dir) {
         try {
+          var now = Date.now();
+          if (now < scenarioSwitchSwipeLockUntil) return;
+          scenarioSwitchSwipeLockUntil = now + 760;
           var bundle = readScenarioBundle();
           if (!bundle || !bundle.items || bundle.items.length < 2) {
             setStatus('Доступен только один сценарий', false);
@@ -12236,17 +12952,18 @@
           var nextIdx = (idx + dir + ids.length) % ids.length;
           if (nextIdx === idx) return;
           try { persistToStorage('Сохранено'); } catch (eSave) {}
-          bundle = readScenarioBundle();
-          if (!bundle) return;
-          bundle.activeId = ids[nextIdx];
-          if (!writeScenarioBundle(bundle)) return;
-          loadFromStorage();
-          try { updatePrepImportantPin(); } catch (ePin) {}
-          var meta = currentScenarioMeta(bundle);
-          setStatus('Сценарий: ' + (meta && meta.name ? meta.name : ''), false);
-          try { triggerHaptic('light'); } catch (eHap) {}
-          /** #7 — после переключения свайпом плавно прокручиваем в самое начало. */
-          scrollMainToTopSmooth();
+          var nextId = ids[nextIdx];
+          playScenarioSwipeSwitch(dir, function () {
+            bundle = readScenarioBundle();
+            if (!bundle) return;
+            bundle.activeId = nextId;
+            if (!writeScenarioBundle(bundle)) return;
+            loadFromStorage();
+            try { updatePrepImportantPin(); } catch (ePin) {}
+            var meta = currentScenarioMeta(bundle);
+            setStatus('Сценарий: ' + (meta && meta.name ? meta.name : ''), false);
+            try { triggerHaptic('light'); } catch (eHap) {}
+          });
         } catch (e) {}
       }
 
@@ -12274,42 +12991,69 @@
       }
 
       function wirePrepDateUiHint() {
-        var inp = document.getElementById('prep-date');
-        if (!inp || inp.getAttribute('data-prep-date-ui') === '1') return;
-        inp.setAttribute('data-prep-date-ui', '1');
-        function sync() {
-          syncPrepDateDisplayRow();
-        }
-        inp.addEventListener('input', sync);
-        inp.addEventListener('change', sync);
-        inp.addEventListener('focus', sync);
-        inp.addEventListener('blur', sync);
-        sync();
+        syncPrepDateDisplayRow();
+      }
+
+      function wirePrepDateDocumentDelegation() {
+        if (wirePrepDateDocumentDelegation._done) return;
+        wirePrepDateDocumentDelegation._done = true;
+        document.addEventListener('input', function (e) {
+          var t = e.target;
+          if (t && t.id === 'prep-date') {
+            syncPrepDateDisplayRow();
+            markDirty();
+          }
+        }, true);
+        document.addEventListener('change', function (e) {
+          var t = e.target;
+          if (t && t.id === 'prep-date') {
+            syncPrepDateDisplayRow();
+            markDirty();
+          }
+        }, true);
       }
 
       function wireShootDateToCalendar() {
-        var dateInput = document.getElementById('prep-date');
-        if (!dateInput || dateInput.getAttribute('data-cal-bound') === '1') return;
-        dateInput.setAttribute('data-cal-bound', '1');
-        dateInput.addEventListener('change', function () {
-          var ics = buildShootDateIcs(dateInput.value);
-          if (!ics) return;
-          var blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
-          var url = URL.createObjectURL(blob);
-          var a = document.createElement('a');
-          a.href = url;
-          a.download =
-            'shoot-date-' + formatIsoDateForDisplay(dateInput.value).replace(/\./g, '-') + '.ics';
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          setTimeout(function () { URL.revokeObjectURL(url); }, 1200);
-        });
+        /* Авто-скачивание .ics при каждой смене даты убрано — навязчиво на мобильных. */
+      }
+
+      function ensureSceneSelectCustomOption(sel) {
+        if (!sel || sel.querySelector('option[value="__custom__"]')) return;
+        var opt = document.createElement('option');
+        opt.value = '__custom__';
+        opt.textContent = 'Свой вариант…';
+        sel.appendChild(opt);
+      }
+
+      function ensureAllSceneSelectCustomOptions(root) {
+        var q = root || document;
+        q.querySelectorAll('select.scene-loc-select, select.scene-plan-select, select.scene-framing-select').forEach(
+          ensureSceneSelectCustomOption
+        );
+      }
+
+      function handleCustomSceneSelect(sel) {
+        if (!sel || sel.value !== '__custom__') return;
+        var label = window.prompt('Свой вариант', '');
+        label = label == null ? '' : String(label).trim();
+        if (!label) {
+          sel.selectedIndex = 0;
+          return;
+        }
+        var opt = document.createElement('option');
+        opt.value = 'custom:' + label;
+        opt.textContent = label;
+        var customItem = sel.querySelector('option[value="__custom__"]');
+        sel.insertBefore(opt, customItem);
+        opt.selected = true;
+        try { markDirty(); } catch (eMd) {}
       }
 
       function wireSceneUI() {
         var root = scenesBlock || sceneStack;
         if (!root) return;
+
+        ensureAllSceneSelectCustomOptions(root);
 
         var sceneRemoveTapStart = null;
         var suppressNextSceneRemoveClick = false;
@@ -12427,6 +13171,13 @@
           if (t.matches('select.scene-select') && t.closest && t.closest('.scene-main')) {
             triggerHaptic('light');
           }
+          if (
+            t.matches('select.scene-loc-select, select.scene-plan-select, select.scene-framing-select') &&
+            t.closest &&
+            t.closest('.scene-main')
+          ) {
+            handleCustomSceneSelect(t);
+          }
           if (t.matches('select.scene-time-select')) {
             var tw = t.closest('.scene-time-wrap');
             if (tw) {
@@ -12461,6 +13212,7 @@
           }
         }
         renumberScenes();
+        ensureAllSceneSelectCustomOptions(node);
         bindAllSayLimits(node);
         bindNoteIntercutPastePlain(node);
         ensureSayReplaceButtons(node);
@@ -12519,17 +13271,109 @@
           });
         }
 
+        if (teleprompterViewport) {
+          var teleprompterTapStart = null;
+          teleprompterViewport.addEventListener(
+            'pointerdown',
+            function (e) {
+              if (teleprompterSettingsOpen) return;
+              if (e.target && e.target.closest && e.target.closest('.teleprompter-settings')) return;
+              if (e.pointerType === 'mouse' && e.button !== 0) return;
+              teleprompterTapStart = { x: e.clientX, y: e.clientY, id: e.pointerId };
+            },
+            { passive: true }
+          );
+          teleprompterViewport.addEventListener(
+            'pointerup',
+            function (e) {
+              if (teleprompterSettingsOpen) return;
+              if (!teleprompterTapStart || e.pointerId !== teleprompterTapStart.id) return;
+              var start = teleprompterTapStart;
+              teleprompterTapStart = null;
+              if (Math.hypot(e.clientX - start.x, e.clientY - start.y) > INTENT_TAP_MAX_PX) return;
+              toggleTeleprompterPause();
+              focusTeleprompterKeyCapture();
+            },
+            { passive: true }
+          );
+          teleprompterViewport.addEventListener(
+            'pointercancel',
+            function (e) {
+              if (teleprompterTapStart && e.pointerId === teleprompterTapStart.id) teleprompterTapStart = null;
+            },
+            { passive: true }
+          );
+        }
+
+        if (teleprompterKeyCapture) {
+          teleprompterKeyCapture.addEventListener('keydown', handleTeleprompterKeydown);
+          teleprompterKeyCapture.addEventListener('keyup', handleTeleprompterKeyup);
+        }
+
         window.addEventListener('keydown', function (e) {
-          if (e.key === 'Escape' && teleprompterOverlay && teleprompterOverlay.classList.contains('open')) {
-            e.preventDefault();
-            closeTeleprompter();
-            return;
-          }
+          if (handleTeleprompterKeydown(e)) return;
           var isSave = (e.key === 's' || e.key === 'S') && (e.metaKey || e.ctrlKey);
           if (!isSave) return;
           e.preventDefault();
           saveToStorage();
         });
+
+        window.addEventListener('keyup', function (e) {
+          handleTeleprompterKeyup(e);
+        });
+
+        function wireTeleprompterSettings() {
+          if (wireTeleprompterSettings._done) return;
+          wireTeleprompterSettings._done = true;
+
+          applyTeleprompterSettings(readTeleprompterSettings());
+
+          function patchTeleprompterSettings(partial) {
+            var s = readTeleprompterSettings();
+            if (partial.fontScale != null) s.fontScale = partial.fontScale;
+            if (partial.speed != null) s.speed = partial.speed;
+            if (partial.letterSpacingEm != null) s.letterSpacingEm = partial.letterSpacingEm;
+            if (partial.lineHeight != null) s.lineHeight = partial.lineHeight;
+            applyTeleprompterSettings(s);
+          }
+
+          if (teleprompterSettingsBtn) {
+            teleprompterSettingsBtn.addEventListener('click', function (e) {
+              e.stopPropagation();
+              toggleTeleprompterSettings();
+              triggerHaptic('light');
+            });
+          }
+          if (teleprompterSettingsClose) {
+            teleprompterSettingsClose.addEventListener('click', function (e) {
+              e.stopPropagation();
+              closeTeleprompterSettings();
+              triggerHaptic('micro');
+            });
+          }
+          if (teleprompterSetFont) {
+            teleprompterSetFont.addEventListener('input', function () {
+              patchTeleprompterSettings({ fontScale: parseInt(teleprompterSetFont.value, 10) / 100 });
+            });
+          }
+          if (teleprompterSetSpeed) {
+            teleprompterSetSpeed.addEventListener('input', function () {
+              patchTeleprompterSettings({ speed: parseInt(teleprompterSetSpeed.value, 10) / 10 });
+            });
+          }
+          if (teleprompterSetLetter) {
+            teleprompterSetLetter.addEventListener('input', function () {
+              patchTeleprompterSettings({ letterSpacingEm: parseInt(teleprompterSetLetter.value, 10) / 100 });
+            });
+          }
+          if (teleprompterSetLine) {
+            teleprompterSetLine.addEventListener('input', function () {
+              patchTeleprompterSettings({ lineHeight: parseInt(teleprompterSetLine.value, 10) / 100 });
+            });
+          }
+        }
+
+        wireTeleprompterSettings();
 
         /** Отложенные blur после change — отменяем при новом тапе по тому же select, иначе поздний blur срывает повторное открытие. */
         var pendingSelectBlurTimeouts = typeof WeakMap !== 'undefined' ? new WeakMap() : null;
@@ -12657,6 +13501,10 @@
         if (titleSubject) titleSubject.addEventListener('input', function () {
           mergeScenarioNameFromTitleSubject();
           markDirty();
+          if (_scenNameSyncT) clearTimeout(_scenNameSyncT);
+          _scenNameSyncT = setTimeout(function () {
+            syncActiveScenarioNameToLists((titleSubject.textContent || '').replace(/\s+/g, ' ').trim());
+          }, 150);
         });
 
         if (logoScale) {
@@ -12675,6 +13523,10 @@
         if (scenarioName) scenarioName.addEventListener('input', function () {
           syncTitleSubject(scenarioName.value || '');
           markDirty();
+          if (_scenNameSyncT) clearTimeout(_scenNameSyncT);
+          _scenNameSyncT = setTimeout(function () {
+            syncActiveScenarioNameToLists(scenarioName ? scenarioName.value : '');
+          }, 150);
         });
         if (scenarioDate) scenarioDate.addEventListener('change', function () { markDirty(); });
         if (scenarioCount) scenarioCount.addEventListener('input', function () { markDirty(); });
@@ -13539,6 +14391,101 @@
         schedulePullSwipeThumbSync();
       }
 
+      /**
+       * Свайп влево/вправо по основному экрану (.wrap, середина) — соседний сценарий.
+       * Pointer Events: на iOS Safari надёжнее, чем только touch в wirePullDownReload.
+       * Края экрана не трогаем — слева меню ассистента, справа reload.
+       */
+      function wireScenarioSwitchSwipe() {
+        if (wireScenarioSwitchSwipe._done) return;
+        wireScenarioSwitchSwipe._done = true;
+
+        var SWIPE_MIN = 54;
+        var EDGE_LEFT = 64;
+        var EDGE_RIGHT = 34;
+        var activePid = null;
+        var sx = 0;
+        var sy = 0;
+        var maxDx = 0;
+        var minDx = 0;
+        var maxAbsDy = 0;
+
+        function inMidZone(clientX) {
+          var w = window.innerWidth || document.documentElement.clientWidth || 0;
+          return clientX > EDGE_LEFT && (w <= 0 || w - clientX > EDGE_RIGHT);
+        }
+
+        function skipScenarioSwipe(el) {
+          el = normalizeGestureTarget(el);
+          if (!el || !el.closest) return true;
+          if (document.body.classList.contains('assistant-drawer-open')) return true;
+          if (el.closest('dialog[open]')) return true;
+          var tp = document.getElementById('teleprompter-overlay');
+          if (tp && tp.classList.contains('open')) return true;
+          if (el.closest('.assistant-drawer')) return true;
+          if (el.closest('.teleprompter-overlay')) return true;
+          if (!el.closest('.wrap')) return true;
+          if (el.closest(ASSIST_SWIPE_SKIP_INTERACTIVE)) return true;
+          return false;
+        }
+
+        function resetGesture() {
+          activePid = null;
+          maxDx = 0;
+          minDx = 0;
+          maxAbsDy = 0;
+        }
+
+        function onPointerDown(e) {
+          if (activePid !== null) return;
+          if (e.pointerType === 'mouse' && e.button !== 0) return;
+          if (!inMidZone(e.clientX)) return;
+          var tgt = gestureHitTargetFromClientXY(e.clientX, e.clientY, e.target);
+          if (skipScenarioSwipe(tgt)) return;
+          activePid = e.pointerId;
+          sx = e.clientX;
+          sy = e.clientY;
+          maxDx = 0;
+          minDx = 0;
+          maxAbsDy = 0;
+        }
+
+        function onPointerMove(e) {
+          if (activePid !== e.pointerId) return;
+          var dx = e.clientX - sx;
+          var dy = e.clientY - sy;
+          if (dx > maxDx) maxDx = dx;
+          if (dx < minDx) minDx = dx;
+          if (Math.abs(dy) > maxAbsDy) maxAbsDy = Math.abs(dy);
+        }
+
+        function onPointerEnd(e) {
+          if (activePid !== e.pointerId) return;
+          var finDx = e.clientX - sx;
+          if (finDx > maxDx) maxDx = finDx;
+          if (finDx < minDx) minDx = finDx;
+          var finDy = Math.abs(e.clientY - sy);
+          var useDy = Math.max(maxAbsDy, finDy);
+          resetGesture();
+
+          if (Math.abs(minDx) < SWIPE_MIN && maxDx < SWIPE_MIN) return;
+          if (useDy > Math.max(Math.abs(minDx), maxDx) * 0.78) return;
+
+          if (minDx <= -SWIPE_MIN && Math.abs(minDx) > maxDx + 6) {
+            goToAdjacentScenario(1);
+            return;
+          }
+          if (maxDx >= SWIPE_MIN && maxDx > Math.abs(minDx) + 6) {
+            goToAdjacentScenario(-1);
+          }
+        }
+
+        document.addEventListener('pointerdown', onPointerDown, true);
+        document.addEventListener('pointermove', onPointerMove, true);
+        document.addEventListener('pointerup', onPointerEnd, true);
+        document.addEventListener('pointercancel', resetGesture, true);
+      }
+
       /** Свайп вправо: Pointer Events (iOS/Safari надёжнее document-touch). Без Pointer API остаётся жест в wirePullDownReload. */
       function wireAssistantDrawerOpenGestures() {
         if (wireAssistantDrawerOpenGestures._done) return;
@@ -13825,7 +14772,9 @@
           var m = viewportMeta();
           if (!m) return;
           lastZoomResetAt = nowMs;
-          var orig = m.getAttribute('content') || 'width=device-width, initial-scale=1.0, viewport-fit=cover';
+          var orig =
+            m.getAttribute('content') ||
+            'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover';
           restoring = true;
           try {
             m.setAttribute(
@@ -13869,17 +14818,88 @@
           },
           { passive: true, capture: true }
         );
+
+        ['gesturestart', 'gesturechange', 'gestureend'].forEach(function (ev) {
+          document.addEventListener(
+            ev,
+            function (e) {
+              e.preventDefault();
+            },
+            { passive: false }
+          );
+        });
+        document.addEventListener(
+          'touchmove',
+          function (e) {
+            if (e.touches && e.touches.length > 1) e.preventDefault();
+          },
+          { passive: false }
+        );
+        var _lastTouchEnd = 0;
+        document.addEventListener(
+          'touchend',
+          function (e) {
+            var now = Date.now();
+            if (now - _lastTouchEnd < 300) e.preventDefault();
+            _lastTouchEnd = now;
+          },
+          { passive: false }
+        );
+      }
+
+      function wireTapOutsideToCloseDrawer() {
+        if (wireTapOutsideToCloseDrawer._done) return;
+        wireTapOutsideToCloseDrawer._done = true;
+        var dn = null;
+        document.addEventListener(
+          'pointerdown',
+          function (e) {
+            if (!document.body.classList.contains('assistant-drawer-open')) {
+              dn = null;
+              return;
+            }
+            dn = { x: e.clientX, y: e.clientY, id: e.pointerId, t: Date.now() };
+          },
+          true
+        );
+        document.addEventListener(
+          'pointerup',
+          function (e) {
+            if (!dn || e.pointerId !== dn.id) {
+              dn = null;
+              return;
+            }
+            var moved = Math.hypot(e.clientX - dn.x, e.clientY - dn.y);
+            var quick = Date.now() - dn.t < 500;
+            dn = null;
+            if (!document.body.classList.contains('assistant-drawer-open')) return;
+            if (moved > 10 || !quick) return;
+            var el = e.target;
+            if (
+              el &&
+              el.closest &&
+              (el.closest('.assistant-drawer') || el.closest('.assistant-open-strip'))
+            ) {
+              return;
+            }
+            closeAssistantDrawer();
+          },
+          true
+        );
       }
 
       loadFromStorage();
       wireTopLogoScrollBlur();
       wireDetailsSummaryRowToggle();
       wirePullDownReload();
+      wireScenarioSwitchSwipe();
       wireViewportPinchZoomReset();
       wireAssistantDrawer();
       wireAssistantDrawerScrollAxisThumb();
       wireAssistantDrawerCloseSwipe();
       wireAssistantDrawerOpenGestures();
+      wireTapOutsideToCloseDrawer();
+      wirePrepDateDocumentDelegation();
       wirePeriodicPageReload();
       initBottomLogoFromTop();
       migrateLegacySceneTimes();
