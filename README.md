@@ -1,18 +1,12 @@
 # Sam Scenes
 
-Одностраничное приложение **сценария съёмки** (название в шапке — **Sam Scenes**).
+Одностраничное PWA «сценарий съёмки».
 
-- **Исходники:** `SamScenes/sam-scenes/`
-- **Публикация (GitHub Pages):** [SamBruev/sam-scenes](https://github.com/SamBruev/sam-scenes) — локальное зеркало с git: **`../sam-scenes/`** (соседняя папка `CURSOR/sam-scenes`)
+- **Сайт:** [sambruev.github.io/sam-scenes/](https://sambruev.github.io/sam-scenes/)
+- **Карта проекта, деплой, MD:** [PROJECT.md](PROJECT.md)
 
-**Сайт:** [sambruev.github.io/sam-scenes/](https://sambruev.github.io/sam-scenes/)
-
-Деплой только в **`sam-scenes`**; репозиторий `abakan-script` снят с использования.
-
-После клонирования один раз включите автоотправку коммитов на GitHub (чтобы Pages не отставал):
+**Исходник:** `sam-scenes/` · **Деплой (git):** `../sam-scenes/` → [SamBruev/sam-scenes](https://github.com/SamBruev/sam-scenes)
 
 ```bash
-git config core.hooksPath .githooks
+git config core.hooksPath .githooks   # один раз — auto push Pages после commit
 ```
-
-Тогда каждый локальный `git commit` на ветке `main` сразу выполняет `git push origin main`.
