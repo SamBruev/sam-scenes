@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v322)</title>
+  <title>Sam Scenes (v323)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -1990,8 +1990,8 @@
         rgba(0, 0, 0, 0.92) 62%,
         #000000 100%
       );
-      backdrop-filter: blur(16px) saturate(105%);
-      -webkit-backdrop-filter: blur(16px) saturate(105%);
+      /* backdrop-filter убран: за карточкой почти чёрный фон (размывать нечего), а живой
+         blur на каждой сцене — главная причина вылета вкладки на iOS при скролле длинного списка. */
       box-shadow: 0 12px 32px rgba(0, 0, 0, 0.62);
       border: 1px solid rgba(255, 255, 255, 0.05);
     }
@@ -2177,8 +2177,9 @@
         rgba(0, 0, 0, 0.995) 74%,
         #000000 100%
       );
-      backdrop-filter: blur(7px) saturate(103%);
-      -webkit-backdrop-filter: blur(7px) saturate(103%);
+      /* backdrop-filter убран намеренно: на каждой сцене это отдельный дорогой GPU-слой,
+         который iOS пересчитывает каждый кадр скролла → переполнение видеопамяти и вылет.
+         Фон за карточкой тёмный, так что визуально размытие почти не читалось. */
       border: 1px solid rgba(255, 255, 255, 0.04);
       box-shadow:
         0 12px 32px rgba(0, 0, 0, 0.5),
@@ -6675,8 +6676,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v322';
-      var BUILD_TIME = '2026-05-30 01:35 MSK';
+      var APP_VERSION = 'v323';
+      var BUILD_TIME = '2026-05-31 12:00 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -8034,14 +8035,13 @@
         var arrowH = Math.max(14, thumb.offsetHeight || 16);
         if (sh <= ch + 2) {
           var travelShort = Math.max(0, th - arrowH);
-          thumb.style.top = travelShort > 0 ? Math.round(travelShort) + 'px' : '0px';
+          thumb.style.top = travelShort > 0 ? Math.round(travelShort / 2) + 'px' : '0px';
           return;
         }
         var maxScroll = sh - ch;
         var scrollRatio = maxScroll > 0 ? st / maxScroll : 0;
         var travel = Math.max(0, th - arrowH);
-        /* Кнопка с rotate(180deg): локальный «верх» стрелки — внизу трека; инвертируем от соотношения прокрутки */
-        thumb.style.top = Math.round((1 - scrollRatio) * travel) + 'px';
+        thumb.style.top = Math.round(scrollRatio * travel) + 'px';
       }
 
       function wireAssistantDrawerScrollAxisThumb() {
