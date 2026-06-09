@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v352)</title>
+  <title>Sam Scenes (v353)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -891,13 +891,10 @@
       line-height: 1;
     }
 
-    /* Шторка закрытия — стрелка по центру, как у шторки открытия (‹ к панели). */
+    /* Иконку-стрелку ↕ у шторки закрытия убрали (по просьбе Sam): шторка остаётся
+       тонкой цветной вкладкой для закрытия, без иконки. */
     .assistant-drawer-dismiss-chevron .assistant-drawer-scroll-arrow {
-      top: 50% !important;
-      bottom: auto !important;
-      transform: translate(-50%, -50%) !important;
-      opacity: 0.42;
-      font-size: 11px;
+      display: none !important;
     }
 
     .assistant-drawer-dismiss-chevron .assistant-drawer-scroll-arrow::before {
@@ -7305,7 +7302,7 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v352';
+      var APP_VERSION = 'v353';
       var BUILD_TIME = '2026-06-09 04:16 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
