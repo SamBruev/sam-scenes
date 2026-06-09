@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v341)</title>
+  <title>Sam Scenes (v342)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -7241,8 +7241,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v341';
-      var BUILD_TIME = '2026-06-09 03:12 MSK';
+      var APP_VERSION = 'v342';
+      var BUILD_TIME = '2026-06-09 03:29 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -15439,12 +15439,26 @@
           },
           { passive: false }
         );
+        /* Анти-даблтап-зум: гасим дефолт только для повторного тапа по НЕинтерактивной зоне
+           (текст/фон). На iOS preventDefault на touchend отменяет синтетический click —
+           если глушить любой быстрый тап, ломаются кнопки (в т.ч. «×» закрытия суфлёра,
+           когда жмёшь его сразу после открытия). Интерактивные цели исключаем. */
+        function _isInteractiveTouchTarget(el) {
+          if (!el || !el.closest) return false;
+          return !!el.closest(
+            'button, a, input, select, textarea, label, summary, ' +
+            '[contenteditable], [contenteditable="true"], [role="button"], [tabindex], ' +
+            '.teleprompter-close, .teleprompter-settings-btn, .scene-play-btn'
+          );
+        }
         var _lastTouchEnd = 0;
         document.addEventListener(
           'touchend',
           function (e) {
             var now = Date.now();
-            if (now - _lastTouchEnd < 300) e.preventDefault();
+            if (now - _lastTouchEnd < 300 && !_isInteractiveTouchTarget(e.target)) {
+              e.preventDefault();
+            }
             _lastTouchEnd = now;
           },
           { passive: false }
