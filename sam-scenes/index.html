@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v344)</title>
+  <title>Sam Scenes (v345)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -3273,15 +3273,26 @@
       display: flow-root;
     }
 
-    .scene-main > .line-say .say-editable.has-text,
-    .scene-main > .line-note .note-editable.has-text,
-    .scene-main > .intercut .intercut-text.has-text {
+    /* Примечание/Перебивка: пунктир-«заполнитель» рисуем как border-bottom самого пустого поля
+       (оно flow-root от подписи до правого края) — линия доходит до края и видна даже при фокусе.
+       С текстом (.has-text) поле — обычный block без линии, то есть подчёркивания нет.
+       Старый b::after здесь отключаем: иначе он дублирует линию и конфликтует с flow-root. */
+    .scene-main > .line-note > b::after,
+    .scene-main > .intercut > b::after {
+      display: none;
+    }
+
+    .scene-main > .line-note .note-editable:not(.has-text),
+    .scene-main > .intercut .intercut-text:not(.has-text) {
+      border-bottom: 1px dashed rgba(200, 198, 195, 0.38);
+    }
+
+    /* Подчёркивание под текстом оставляем только у «Говорю». */
+    .scene-main > .line-say .say-editable.has-text {
       text-decoration-color: rgba(200, 198, 195, 0.38);
     }
 
-    .scene-main > .line-say:focus-within .say-editable.has-text,
-    .scene-main > .line-note:focus-within .note-editable.has-text,
-    .scene-main > .intercut:focus-within .intercut-text.has-text {
+    .scene-main > .line-say:focus-within .say-editable.has-text {
       text-decoration-color: rgba(200, 198, 195, 0.52);
     }
 
@@ -7264,8 +7275,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v344';
-      var BUILD_TIME = '2026-06-09 03:57 MSK';
+      var APP_VERSION = 'v345';
+      var BUILD_TIME = '2026-06-09 04:06 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
