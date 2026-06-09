@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v346)</title>
+  <title>Sam Scenes (v347)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -174,9 +174,10 @@
       --assistant-hint-violet-mid: rgba(212, 175, 95, 0.22);
       --assistant-hint-violet-soft: rgba(212, 175, 95, 0.14);
       --assistant-hint-violet-glow: rgba(212, 175, 95, 0.28);
-      /* Шторки-подсказки (открыть слева экрана / закрыть у края панели): одинаковые размеры и градиент. */
-      --assistant-strip-edge-purple: rgba(168, 132, 212, 0.3);
-      --assistant-strip-edge-purple-soft: rgba(168, 132, 212, 0.1);
+      /* Шторки-подсказки (открыть слева экрана / закрыть у края панели): одинаковые размеры и градиент.
+         Цвет — синий (по просьбе Sam); имена переменных исторически *-purple. */
+      --assistant-strip-edge-purple: rgba(96, 165, 250, 0.3);
+      --assistant-strip-edge-purple-soft: rgba(96, 165, 250, 0.1);
       --assistant-hint-strip-width: 20px;
       --assistant-hint-strip-min-width: 18px;
       --assistant-hint-strip-height: min(176px, 48vh);
@@ -640,7 +641,7 @@
         transparent 78%
       );
       box-shadow:
-        -1px 0 10px rgba(168, 132, 212, 0.08),
+        -1px 0 10px rgba(96, 165, 250, 0.08),
         1px 0 8px rgba(0, 0, 0, 0.14);
       z-index: 100;
     }
@@ -664,18 +665,18 @@
       background: var(--assistant-strip-fingerprint-icon) no-repeat center / contain;
       pointer-events: none;
       opacity: 0.92;
-      filter: drop-shadow(0 0 6px rgba(168, 132, 212, 0.28));
+      filter: drop-shadow(0 0 6px rgba(96, 165, 250, 0.28));
     }
 
     .assistant-open-strip:active {
       background: linear-gradient(
         to right,
         rgba(188, 152, 228, 0.38) 0%,
-        rgba(168, 132, 212, 0.16) 42%,
+        rgba(96, 165, 250, 0.16) 42%,
         transparent 80%
       );
       box-shadow:
-        -1px 0 12px rgba(168, 132, 212, 0.11),
+        -1px 0 12px rgba(96, 165, 250, 0.11),
         1px 0 8px rgba(0, 0, 0, 0.18);
     }
 
@@ -812,7 +813,7 @@
         transparent 78%
       );
       box-shadow:
-        1px 0 10px rgba(168, 132, 212, 0.08),
+        1px 0 10px rgba(96, 165, 250, 0.08),
         -1px 0 8px rgba(0, 0, 0, 0.14);
     }
 
@@ -877,11 +878,11 @@
       background: linear-gradient(
         to left,
         rgba(188, 152, 228, 0.38) 0%,
-        rgba(168, 132, 212, 0.16) 42%,
+        rgba(96, 165, 250, 0.16) 42%,
         transparent 80%
       );
       box-shadow:
-        1px 0 12px rgba(168, 132, 212, 0.11),
+        1px 0 12px rgba(96, 165, 250, 0.11),
         -1px 0 8px rgba(0, 0, 0, 0.18);
     }
 
@@ -7276,8 +7277,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v346';
-      var BUILD_TIME = '2026-06-09 04:10 MSK';
+      var APP_VERSION = 'v347';
+      var BUILD_TIME = '2026-06-09 04:16 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
