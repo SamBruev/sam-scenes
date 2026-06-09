@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v353)</title>
+  <title>Sam Scenes (v354)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -804,6 +804,11 @@
       .field.field-assistant .assistant-all-clear.is-visible {
         animation: none;
       }
+    }
+
+    /* Строка «Всё под контролем!» под фамилией ассистента в блоке подготовки — скрыта по просьбе Sam. */
+    #prep-assistant-all-clear {
+      display: none !important;
     }
 
     .assistant-drawer-head {
@@ -3657,12 +3662,15 @@
       flex: 0 1 auto;
       min-width: 0;
       margin: 0;
-      font-size: 0.98rem;
-      font-weight: 700;
-      line-height: 1.35;
-      color: rgba(230, 248, 235, 0.96);
+      /* Рукописный шрифт (как у строки под фамилией ассистента — он нравится Sam), белым. */
+      font-family: "Pacifico", "Bad Script", cursive;
+      font-weight: 400;
+      font-size: clamp(1.05rem, 3.6vw, 1.35rem);
+      line-height: 1.2;
+      color: #ffffff;
       letter-spacing: 0.02em;
       text-align: center;
+      -webkit-font-smoothing: antialiased;
     }
 
     .prep-important-collapse-btn {
@@ -7302,7 +7310,7 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v353';
+      var APP_VERSION = 'v354';
       var BUILD_TIME = '2026-06-09 04:16 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
