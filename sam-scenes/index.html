@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v348)</title>
+  <title>Sam Scenes (v349)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -7269,7 +7269,7 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v348';
+      var APP_VERSION = 'v349';
       var BUILD_TIME = '2026-06-09 04:16 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
@@ -15733,10 +15733,45 @@
   </script>
 
   <script>
+    /* Авто-обновление установленного PWA (iOS «на рабочий стол»).
+       Без этого standalone-приложение держит в памяти старый JS и не подхватывает фиксы
+       (напр. крестик суфлёра, исправленный в v342) — обновлялся только браузер.
+       Логика: при возврате приложения на передний план проверяем новую версию SW;
+       когда новый SW активируется (skipWaiting+clients.claim → controllerchange) —
+       один раз перезагружаем страницу на свежий код. Перезагрузку откладываем,
+       пока открыт суфлёр, чтобы не прерывать чтение. */
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function () {
-        navigator.serviceWorker.register('sw.js').catch(function () {});
-      });
+      (function () {
+        var hadController = !!navigator.serviceWorker.controller;
+        var reloaded = false;
+        function reloadWhenSafe() {
+          if (reloaded) return;
+          var tp = document.getElementById('teleprompter-overlay');
+          if (tp && tp.classList.contains('open')) {
+            setTimeout(reloadWhenSafe, 1500);
+            return;
+          }
+          reloaded = true;
+          location.reload();
+        }
+        navigator.serviceWorker.addEventListener('controllerchange', function () {
+          if (!hadController) return;
+          reloadWhenSafe();
+        });
+        window.addEventListener('load', function () {
+          navigator.serviceWorker
+            .register('sw.js')
+            .then(function (reg) {
+              try { reg.update(); } catch (e) {}
+              document.addEventListener('visibilitychange', function () {
+                if (document.visibilityState === 'visible') {
+                  try { reg.update(); } catch (e2) {}
+                }
+              });
+            })
+            .catch(function () {});
+        });
+      })();
     }
   </script>
 
