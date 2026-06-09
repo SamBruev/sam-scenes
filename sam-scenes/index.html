@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v343)</title>
+  <title>Sam Scenes (v344)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -3261,6 +3261,16 @@
       text-decoration-color: transparent;
       text-underline-offset: 3px;
       text-decoration-skip-ink: none;
+    }
+
+    /* Пустое поле (нет .has-text): делаем его BFC, чтобы блок встал ПОСЛЕ float-подписи.
+       Иначе каретка в пустом contenteditable рендерится в начале блока (x=0) — визуально
+       «на слове» Говорю/Примечание/Перебивка, а не после него. С текстом (.has-text) —
+       обычный block, поэтому переносы по-прежнему идут на всю ширину без отступа. */
+    .scene-main > .line-say .say-editable:not(.has-text),
+    .scene-main > .line-note .note-editable:not(.has-text),
+    .scene-main > .intercut .intercut-text:not(.has-text) {
+      display: flow-root;
     }
 
     .scene-main > .line-say .say-editable.has-text,
@@ -7254,8 +7264,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v343';
-      var BUILD_TIME = '2026-06-09 03:44 MSK';
+      var APP_VERSION = 'v344';
+      var BUILD_TIME = '2026-06-09 03:57 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
