@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v347)</title>
+  <title>Sam Scenes (v348)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -653,25 +653,17 @@
       outline: none;
     }
 
+    /* Иконку отпечатка пальца убрали (по просьбе Sam): открытие — свайпом от левого края.
+       Шторка остаётся как тонкая цветная вкладка-подсказка; у шторки закрытия — стрелка ↕. */
     .assistant-open-strip::before,
     .assistant-drawer-dismiss-chevron::before {
-      content: "";
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      width: 18px;
-      height: 18px;
-      background: var(--assistant-strip-fingerprint-icon) no-repeat center / contain;
-      pointer-events: none;
-      opacity: 0.92;
-      filter: drop-shadow(0 0 6px rgba(96, 165, 250, 0.28));
+      content: none;
     }
 
     .assistant-open-strip:active {
       background: linear-gradient(
         to right,
-        rgba(188, 152, 228, 0.38) 0%,
+        rgba(140, 190, 255, 0.38) 0%,
         rgba(96, 165, 250, 0.16) 42%,
         transparent 80%
       );
@@ -683,7 +675,7 @@
     .assistant-open-strip:active::before,
     .assistant-drawer-dismiss-chevron:active::before {
       opacity: 1;
-      filter: drop-shadow(0 0 8px rgba(188, 152, 228, 0.45)) brightness(1.08);
+      filter: drop-shadow(0 0 8px rgba(140, 190, 255, 0.45)) brightness(1.08);
     }
 
     body.assistant-drawer-open .assistant-open-strip {
@@ -877,7 +869,7 @@
     .assistant-drawer-dismiss-chevron:active {
       background: linear-gradient(
         to left,
-        rgba(188, 152, 228, 0.38) 0%,
+        rgba(140, 190, 255, 0.38) 0%,
         rgba(96, 165, 250, 0.16) 42%,
         transparent 80%
       );
@@ -7277,7 +7269,7 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v347';
+      var APP_VERSION = 'v348';
       var BUILD_TIME = '2026-06-09 04:16 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
