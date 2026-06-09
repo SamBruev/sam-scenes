@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v351)</title>
+  <title>Sam Scenes (v352)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -7305,7 +7305,7 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v351';
+      var APP_VERSION = 'v352';
       var BUILD_TIME = '2026-06-09 04:16 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
@@ -13945,9 +13945,30 @@
         });
 
         if (teleprompterClose) {
-          teleprompterClose.addEventListener('click', function () {
+          /* «Пуленепробиваемое» закрытие: на iOS standalone синтетический click по кнопке
+             иногда подавляется обработкой касаний — поэтому ловим ещё pointerup и touchend.
+             Гард 500мс не даёт закрыть дважды, если сработают несколько из {touchend,pointerup,click}. */
+          var lastTeleprompterCloseAt = 0;
+          function doTeleprompterClose(e) {
+            var now = Date.now();
+            if (now - lastTeleprompterCloseAt < 500) {
+              if (e) { try { e.preventDefault(); } catch (e1) {} }
+              return;
+            }
+            lastTeleprompterCloseAt = now;
+            if (e) {
+              try { e.preventDefault(); } catch (e2) {}
+              try { e.stopPropagation(); } catch (e3) {}
+            }
+            try { triggerHaptic('light'); } catch (e4) {}
             closeTeleprompter();
+          }
+          teleprompterClose.addEventListener('click', doTeleprompterClose);
+          teleprompterClose.addEventListener('pointerup', function (e) {
+            if (e.pointerType === 'mouse' && e.button !== 0) return;
+            doTeleprompterClose(e);
           });
+          teleprompterClose.addEventListener('touchend', doTeleprompterClose, { passive: false });
         }
 
         if (teleprompterViewport) {
