@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v354)</title>
+  <title>Sam Scenes (v355)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -4240,6 +4240,41 @@
       text-align: center;
     }
 
+    /* Строка ассистента как одна большая кнопка открытия панели «План съёмок». */
+    .field.field-assistant .assistant-line--button {
+      position: relative;
+      padding: 8px 34px;
+      border: none;
+      border-radius: 16px;
+      background: transparent;
+      cursor: pointer;
+      transition: background-color 0.18s ease;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    .field.field-assistant .assistant-line--button:active {
+      background-color: rgba(232, 201, 104, 0.10);
+    }
+
+    .field.field-assistant .assistant-line--button:focus-visible {
+      outline: 2px solid rgba(232, 201, 104, 0.6);
+      outline-offset: 2px;
+    }
+
+    /* Маркер-шеврон слева: подсказка, что строка — кнопка, открывающая блок слева. */
+    .assistant-open-hint {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      width: 11px;
+      height: 11px;
+      border-left: 2px solid rgba(232, 201, 104, 0.88);
+      border-bottom: 2px solid rgba(232, 201, 104, 0.88);
+      transform: translateY(-50%) rotate(45deg);
+      pointer-events: none;
+    }
+
     .field.field-assistant .assistant-role {
       color: var(--label);
       font-weight: 700;
@@ -4281,6 +4316,14 @@
       text-align: center;
       font-synthesis: none;
       -webkit-font-smoothing: antialiased;
+    }
+
+    /* Имя ассистента переименовать нельзя — тап по нему открывает панель (клик идёт на строку-кнопку). */
+    .field.field-assistant input.assistant-name[readonly] {
+      pointer-events: none;
+      cursor: pointer;
+      caret-color: transparent;
+      user-select: none;
     }
 
     .field.field-assistant input.assistant-name::placeholder {
@@ -5776,12 +5819,6 @@
   </style>
 </head>
 <body>
-  <button
-    type="button"
-    class="assistant-open-strip"
-    id="assistant-open-strip"
-    aria-label="Открыть план съёмок"
-    title="План съёмок"></button>
   <div
     class="assistant-drawer-backdrop"
     id="assistant-drawer-backdrop"
@@ -6117,10 +6154,11 @@
           </button>
         </div>
         <div class="field field-assistant">
-          <div class="assistant-line">
+          <div class="assistant-line assistant-line--button" id="prep-assistant-open" role="button" tabindex="0" aria-label="Открыть план съёмок ассистента" aria-controls="assistant-drawer">
+            <span class="assistant-open-hint" aria-hidden="true"></span>
             <span class="assistant-role">Ассистент</span>
             <div class="assistant-name-wrap">
-              <input id="prep-assistant" class="assistant-name" type="text" value="Анна Непряхина" placeholder="имя" autocomplete="name">
+              <input id="prep-assistant" class="assistant-name" type="text" value="Анна Непряхина" placeholder="имя" autocomplete="name" readonly tabindex="-1" aria-readonly="true">
               <span class="assistant-all-clear" id="prep-assistant-all-clear" hidden>Всё под контролем!</span>
             </div>
           </div>
@@ -7310,7 +7348,7 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v354';
+      var APP_VERSION = 'v355';
       var BUILD_TIME = '2026-06-09 04:16 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
@@ -7361,7 +7399,7 @@
        * «Настройки сценариев» / «План дня». Заголовок раскрытия — по-прежнему `summary`.
        */
       var ASSIST_SWIPE_SKIP_INTERACTIVE =
-        'input, textarea, select, button, summary, a, .time-leading, [contenteditable="true"], .logo-controls, .field-prep-date, .prep-date-wrap';
+        'input, textarea, select, button, summary, a, .time-leading, [contenteditable="true"], .logo-controls, .field-prep-date, .prep-date-wrap, .assistant-line--button';
 
       /** Тап по пробелу между блоками даёт Text/node без .closest — жесты не включались. */
       function normalizeGestureTarget(el) {
@@ -15213,16 +15251,18 @@
       function wireAssistantDrawerOpenGestures() {
         if (wireAssistantDrawerOpenGestures._done) return;
         wireAssistantDrawerOpenGestures._done = true;
-        var strip = document.getElementById('assistant-open-strip');
-        if (strip) {
-          strip.addEventListener(
-            'click',
-            function (e) {
+        var openBtn = document.getElementById('prep-assistant-open');
+        if (openBtn) {
+          openBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            openAssistantDrawer();
+          });
+          openBtn.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
               e.preventDefault();
               openAssistantDrawer();
-            },
-            { passive: false }
-          );
+            }
+          });
         }
         var activePid = null;
         /** Пока жест открытия ассистента не передан перетаскиванию логотипа — совпадает с activePid. */
@@ -15270,7 +15310,8 @@
           activePid = e.pointerId;
           sx = e.clientX;
           sy = e.clientY;
-          openFromLeftEdge = e.clientX <= OPEN_EDGE_ZONE;
+          /* Открытие свайпом отключено — панель открывается тапом по строке «Ассистент». */
+          openFromLeftEdge = false;
           maxDx = 0;
           minDx = 0;
           maxAbsDy = 0;
