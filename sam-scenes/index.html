@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v342)</title>
+  <title>Sam Scenes (v343)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -472,6 +472,11 @@
       /* Без полей сверху/снизу у стекла; справа 0 — шторка-подсказка вплотную к краю панели; отступ текста в .assistant-drawer-scroll */
       padding: 0 0 0 calc(14px + env(safe-area-inset-left, 0px));
       background: var(--assistant-drawer-glass);
+      /* Фростед-стекло: без блюра полупрозрачный фон просвечивает и шторка сливается
+         с основным меню. На время слайда блюр снимается (html.assistant-drawer-anim /
+         -tracking, ниже) — там артефакты/дёрганье iOS, поэтому статичный блюр только у открытой панели. */
+      -webkit-backdrop-filter: blur(22px) saturate(1.25);
+      backdrop-filter: blur(22px) saturate(1.25);
       border-right: 1px solid rgba(255, 248, 235, 0.12);
       border-radius: 0;
       box-shadow:
@@ -3966,6 +3971,11 @@
 
     .field b { color: var(--accent); }
 
+    /* Поля «Подготовки» — grid-элементы; при min-width:auto (дефолт) они не сжимаются
+       до своей колонки и вылезают вправо за карточку (выглядит как «блок сдвинут вправо»). */
+    .card-prep .meta,
+    .card-prep .field { min-width: 0; }
+
     /* Локации: без отдельного «золотого» акцента у подписей и стрелки — как обычные подписи полей */
     .field:has(#prep-hook-location) > b,
     .field:has(#prep-main-location) > b {
@@ -4422,6 +4432,9 @@
       margin-left: calc(-1 * max(14px, env(safe-area-inset-left)));
       margin-right: calc(-1 * max(14px, env(safe-area-inset-right)));
       width: calc(100% + max(14px, env(safe-area-inset-left)) + max(14px, env(safe-area-inset-right)));
+      /* border-box: иначе боковые padding добавляются к width (=100%+28px) и секция
+         выходит на 28px шире вьюпорта → горизонтальный сдвиг страницы на iPhone. */
+      box-sizing: border-box;
       padding: 20px max(14px, env(safe-area-inset-left)) 18px max(14px, env(safe-area-inset-right));
       border-radius: 0;
       border: none;
@@ -7241,8 +7254,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v342';
-      var BUILD_TIME = '2026-06-09 03:29 MSK';
+      var APP_VERSION = 'v343';
+      var BUILD_TIME = '2026-06-09 03:44 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
