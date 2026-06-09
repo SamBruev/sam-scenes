@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v349)</title>
+  <title>Sam Scenes (v350)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -3271,23 +3271,16 @@
        (оно flow-root от подписи до правого края) — линия доходит до края и видна даже при фокусе.
        С текстом (.has-text) поле — обычный block без линии, то есть подчёркивания нет.
        Старый b::after здесь отключаем: иначе он дублирует линию и конфликтует с flow-root. */
+    .scene-main > .line-say > b::after,
     .scene-main > .line-note > b::after,
     .scene-main > .intercut > b::after {
       display: none;
     }
 
+    .scene-main > .line-say .say-editable:not(.has-text),
     .scene-main > .line-note .note-editable:not(.has-text),
     .scene-main > .intercut .intercut-text:not(.has-text) {
       border-bottom: 1px dashed rgba(200, 198, 195, 0.38);
-    }
-
-    /* Подчёркивание под текстом оставляем только у «Говорю». */
-    .scene-main > .line-say .say-editable.has-text {
-      text-decoration-color: rgba(200, 198, 195, 0.38);
-    }
-
-    .scene-main > .line-say:focus-within .say-editable.has-text {
-      text-decoration-color: rgba(200, 198, 195, 0.52);
     }
 
     .scene-main > .line-say .say-editable:focus,
@@ -7269,7 +7262,7 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v349';
+      var APP_VERSION = 'v350';
       var BUILD_TIME = '2026-06-09 04:16 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
