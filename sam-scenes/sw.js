@@ -2,13 +2,14 @@
 // Стратегия: Network-first с тайм-аутом для index.html (свежий, но без зависания
 // на медленной сети), Cache-first для остальных файлов — приложение работает офлайн.
 
-var CACHE_NAME = 'samscenes-v339';
+var CACHE_NAME = 'samscenes-v341';
 var CORE_FILES = [
   '/sam-scenes/',
   '/sam-scenes/index.html',
   '/sam-scenes/manifest.json',
   '/sam-scenes/apple-touch-icon.png',
-  '/sam-scenes/favicon-192.png'
+  '/sam-scenes/favicon-192.png',
+  '/sam-scenes/top-lamp-bg.png'
 ];
 
 // #13: на медленной сети не ждём ответ дольше этого времени — отдаём кэш, открытие плавное.
