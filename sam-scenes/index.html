@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v350)</title>
+  <title>Sam Scenes (v351)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -348,6 +348,45 @@
       filter: blur(1.2px) brightness(0.64) drop-shadow(0 -42px 72px rgba(255, 198, 120, 0.42))
         drop-shadow(0 -95px 130px rgba(255, 160, 72, 0.15));
       animation: none;
+    }
+
+    /* Второй слой фона: та же «лампа», но заранее сильнее размыта и притемнена.
+       По мере прокрутки приложения вниз плавно проявляем его через --app-bg-scroll-blur (0..~0.8).
+       ВАЖНО: меняем ТОЛЬКО opacity (дёшево для композитора). Радиус blur статичный — без пересчёта
+       по кадрам скролла, иначе живой filter на fixed-слое роняет WebKit (см. историю с логотипом). */
+    body::after {
+      content: "";
+      position: fixed;
+      top: -48px;
+      left: -48px;
+      right: -48px;
+      bottom: -48px;
+      width: auto;
+      height: auto;
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+      z-index: -1;
+      pointer-events: none;
+      background-color: #000000;
+      background-image:
+        linear-gradient(
+          180deg,
+          rgba(0, 0, 0, 0.72) 0%,
+          rgba(0, 0, 0, 0.44) 14%,
+          rgba(0, 0, 0, 0.38) 26%,
+          rgba(0, 0, 0, 0.46) 52%,
+          rgba(0, 0, 0, 0.70) 72%,
+          rgba(0, 0, 0, 0.94) 88%,
+          #000000 100%
+        ),
+        url("top-lamp-bg.png");
+      background-size: cover, 100% auto;
+      background-position: center, center 82%;
+      background-repeat: no-repeat, no-repeat;
+      transform: translateZ(0) scale(1);
+      backface-visibility: hidden;
+      filter: blur(9px) brightness(0.52);
+      opacity: var(--app-bg-scroll-blur, 0);
     }
 
     @keyframes lampAmbientPulse {
@@ -5562,7 +5601,8 @@
     }
 
       @media (orientation: portrait) {
-        body::before {
+        body::before,
+        body::after {
           background-size: cover, 100% auto;
           background-position: center, center 76%;
         }
@@ -5993,19 +6033,22 @@
           </div>
           <div class="prep-format-wrap format-row">
             <select id="prep-format-aspect" class="format-select" aria-label="Соотношение сторон">
-              <option value="9:16" selected>9:16</option>
+              <option value="" selected>—</option>
+              <option value="9:16">9:16</option>
               <option value="16:9">16:9</option>
               <option value="1:1">1:1</option>
               <option value="4:3">4:3</option>
             </select>
             <select id="prep-format-quality" class="format-select" aria-label="Качество">
+              <option value="" selected>—</option>
               <option value="720p">720p</option>
               <option value="1080p">1080p</option>
-              <option value="4K" selected>4K</option>
+              <option value="4K">4K</option>
             </select>
             <select id="prep-format-fps" class="format-select" aria-label="Частота кадров">
+              <option value="" selected>—</option>
               <option value="24">24 fps</option>
-              <option value="25" selected>25 fps</option>
+              <option value="25">25 fps</option>
               <option value="30">30 fps</option>
               <option value="50">50 fps</option>
               <option value="60">60 fps</option>
@@ -7262,7 +7305,7 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v350';
+      var APP_VERSION = 'v351';
       var BUILD_TIME = '2026-06-09 04:16 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
@@ -7450,11 +7493,12 @@
         'prep-assistant'
       ];
 
-      /** Дефолт формата кадра в подготовке (не опираться только на порядок option в сохранённом HTML). */
+      /** Дефолт формата кадра — прочерк (пусто): для нового сценария/сцены ничего не подставляем
+          автоматически (по просьбе Sam). Ключи нужны, чтобы перебрать именно format-селекты. */
       var PREP_FORMAT_DEFAULTS = {
-        'prep-format-aspect': '9:16',
-        'prep-format-quality': '4K',
-        'prep-format-fps': '25'
+        'prep-format-aspect': '',
+        'prep-format-quality': '',
+        'prep-format-fps': ''
       };
 
       function syncPrepFormatSelectsFromPrepObj(prep) {
@@ -14265,6 +14309,41 @@
         wireTopLogoScrollBlur._done = true;
       }
 
+      /** Размытие фона основного блока при прокрутке вниз: меняем только opacity заранее
+          размытого слоя body::after (через --app-bg-scroll-blur). Дёшево и без пересчёта blur. */
+      var APP_BG_SCROLL_BLUR_RAMP = 420; /* px скролла до максимума */
+      var APP_BG_SCROLL_BLUR_MAX = 0.82; /* максимальная непрозрачность размытого слоя */
+      var appBgScrollBlurRaf = null;
+      var appBgScrollBlurLast = -1;
+      function applyAppBgScrollBlur() {
+        appBgScrollBlurRaf = null;
+        var sy =
+          window.scrollY ||
+          document.documentElement.scrollTop ||
+          (document.body && document.body.scrollTop) ||
+          0;
+        var t = sy <= 0 ? 0 : sy >= APP_BG_SCROLL_BLUR_RAMP ? 1 : sy / APP_BG_SCROLL_BLUR_RAMP;
+        var v = Math.round(t * APP_BG_SCROLL_BLUR_MAX * 1000) / 1000;
+        if (v === appBgScrollBlurLast) return;
+        appBgScrollBlurLast = v;
+        document.body.style.setProperty('--app-bg-scroll-blur', String(v));
+      }
+      function scheduleAppBgScrollBlur() {
+        if (appBgScrollBlurRaf != null) return;
+        appBgScrollBlurRaf = requestAnimationFrame(applyAppBgScrollBlur);
+      }
+      function wireAppBackgroundScrollBlur() {
+        if (wireAppBackgroundScrollBlur._done) return;
+        wireAppBackgroundScrollBlur._done = true;
+        window.addEventListener('scroll', scheduleAppBgScrollBlur, { passive: true });
+        if (window.visualViewport) {
+          try {
+            window.visualViewport.addEventListener('scroll', scheduleAppBgScrollBlur, { passive: true });
+          } catch (eVv) {}
+        }
+        applyAppBgScrollBlur();
+      }
+
       /**
        * Раскрытие/закрытие <details>: ручной toggle с preventDefault на нативном клике.
        * Так надёжнее, чем доверять только нативному поведению — на некоторых WebKit-билдах
@@ -15529,6 +15608,7 @@
 
       loadFromStorage();
       wireTopLogoScrollBlur();
+      wireAppBackgroundScrollBlur();
       wireDetailsSummaryRowToggle();
       wirePullDownReload();
       wireScenarioSwitchSwipe();
