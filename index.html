@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v365)</title>
+  <title>Sam Scenes (v366)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -5623,17 +5623,17 @@
       height: 44px;
       min-height: 44px;
       padding: 0;
-      border-radius: 50%;
-      border: 1px solid rgba(220, 178, 112, 0.5);
-      background: rgba(0, 0, 0, 0.28);
+      border: none;
+      background: transparent;
       box-shadow: none;
+      border-radius: 50%;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       font-size: 0;
       line-height: 0;
       color: rgba(255, 210, 140, 0.95);
-      transition: color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.16s ease;
+      transition: color 0.18s ease, transform 0.16s ease;
     }
 
     .scene-main > .scene-toolbar .mini.scene-add::before {
@@ -5649,8 +5649,9 @@
     .scene-main > .scene-toolbar .mini.scene-add:hover,
     .scene-main > .scene-toolbar .mini.scene-add:focus-visible {
       color: #ffd9a0;
-      border-color: rgba(255, 200, 120, 0.95);
-      box-shadow: 0 0 0 1px rgba(255, 190, 110, 0.4);
+      background: transparent;
+      border: none;
+      box-shadow: none;
       outline: none;
     }
 
@@ -7730,8 +7731,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v365';
-      var BUILD_TIME = '2026-06-10 06:20 MSK';
+      var APP_VERSION = 'v366';
+      var BUILD_TIME = '2026-06-10 06:31 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
