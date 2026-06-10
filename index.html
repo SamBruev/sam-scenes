@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v370)</title>
+  <title>Sam Scenes (v371)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -2194,11 +2194,21 @@
       }
     }
 
+    /* Intro / Outro: только «Снято» по центру — без корзины и плюса */
+    .scene-main[data-scene-role="intro"] > .scene-toolbar,
+    .scene-main[data-scene-role="outro"] > .scene-toolbar {
+      justify-content: center;
+    }
+
     .scene-main[data-scene-role="intro"] > .scene-toolbar .mini.scene-remove,
     .scene-main[data-scene-role="outro"] > .scene-toolbar .mini.scene-remove,
     .scene-main[data-scene-role="intro"] .scene-remove,
-    .scene-main[data-scene-role="outro"] .scene-remove {
-      display: none;
+    .scene-main[data-scene-role="outro"] .scene-remove,
+    .scene-main[data-scene-role="intro"] > .scene-toolbar .mini.scene-add,
+    .scene-main[data-scene-role="outro"] > .scene-toolbar .mini.scene-add,
+    .scene-main[data-scene-role="intro"] .scene-add,
+    .scene-main[data-scene-role="outro"] .scene-add {
+      display: none !important;
     }
 
     .shotlist-pieces-row {
@@ -5611,7 +5621,7 @@
     }
 
     /* «Удалить» — иконка-корзина у левого края; margin-right:auto уводит «Снято» к правому краю.
-       (Для intro/outro, где «Удалить» скрыт, «Снято» остаётся справа за счёт flex-end.) */
+       (Intro/outro — только «Снято» по центру, см. правила data-scene-role выше.) */
     .scene-main > .scene-toolbar .mini.scene-remove {
       margin-right: auto;
       align-self: center;
@@ -6700,9 +6710,7 @@
         </div>
         <div class="line line-say"><b>Sam:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
         <div class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <div class="intercut-text" contenteditable="true"></div></div>
-        <div class="scene-toolbar">
-          <button class="btn mini btn-danger scene-remove" type="button" title="Удалить сцену">Удалить</button>
-        </div>
+        <div class="scene-toolbar"></div>
         </div>
 
       <div class="scene scene-main" data-main-scene="1" data-scene-role="body">
@@ -7194,9 +7202,7 @@
               </div>
               <div class="line line-say"><b>Sam:</b><div class="say-editable" contenteditable="true" spellcheck="true"></div></div>
               <div class="intercut"><b><span class="scene-note-heading">Перебивка:</span></b> <div class="intercut-text" contenteditable="true"></div></div>
-              <div class="scene-toolbar">
-                <button class="btn mini btn-danger scene-remove" type="button" title="Удалить сцену">Удалить</button>
-              </div>
+              <div class="scene-toolbar"></div>
               </div>
     </div>
     </div>
@@ -7774,8 +7780,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v370';
-      var BUILD_TIME = '2026-06-10 07:05 MSK';
+      var APP_VERSION = 'v371';
+      var BUILD_TIME = '2026-06-10 07:15 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -12267,6 +12273,18 @@
         });
       }
 
+      function isIntroOrOutroScene(scene) {
+        var role = scene && scene.getAttribute ? scene.getAttribute('data-scene-role') : '';
+        return role === 'intro' || role === 'outro';
+      }
+
+      function stripIntroOutroToolbarActions(tb) {
+        if (!tb) return;
+        tb.querySelectorAll('.scene-remove, .scene-add').forEach(function (el) {
+          el.remove();
+        });
+      }
+
       function ensureShotCheckboxInHeading() {
         if (!sceneStack && !outroStack) return;
         mainScenes().forEach(function (scene) {
@@ -12276,6 +12294,7 @@
             tb.className = 'scene-toolbar';
             scene.appendChild(tb);
           }
+          if (isIntroOrOutroScene(scene)) stripIntroOutroToolbarActions(tb);
           if (tb.querySelector('.scene-shot-checkbox')) return;
           var lab = document.createElement('label');
           lab.className = 'scene-done-label scene-done-checkbox-only';
@@ -12295,6 +12314,10 @@
             tb = document.createElement('div');
             tb.className = 'scene-toolbar';
             scene.appendChild(tb);
+          }
+          if (isIntroOrOutroScene(scene)) {
+            stripIntroOutroToolbarActions(tb);
+            return;
           }
           if (tb.querySelector('.scene-add')) return;
           var btn = document.createElement('button');
