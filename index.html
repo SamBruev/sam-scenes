@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v366)</title>
+  <title>Sam Scenes (v367)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -7731,8 +7731,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v366';
-      var BUILD_TIME = '2026-06-10 06:31 MSK';
+      var APP_VERSION = 'v367';
+      var BUILD_TIME = '2026-06-10 06:38 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -12941,7 +12941,9 @@
           return;
         }
         triggerHaptic('danger');
-        if (confirm('Удалить эту сцену?')) {
+        var sceneNo = Array.prototype.indexOf.call(bodies, scene) + 1;
+        var confirmMsg = sceneNo > 0 ? 'Удалить сцену ' + sceneNo + '?' : 'Удалить эту сцену?';
+        if (confirm(confirmMsg)) {
           scene.remove();
           renumberScenes();
           markDirty();
