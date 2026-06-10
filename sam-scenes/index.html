@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v357)</title>
+  <title>Sam Scenes (v358)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -3326,6 +3326,15 @@
     .scene-main > .line-note .note-editable:not(.has-text),
     .scene-main > .intercut .intercut-text:not(.has-text) {
       border-bottom: 1px dashed rgba(200, 198, 195, 0.38);
+    }
+
+    /* Пустое поле высотой ~1.4em уводило пунктир к низу строки — ниже слова «Примечание»/«Перебивка».
+       Поджимаем высоту/межстрочный пустого поля, чтобы линия встала под базовой линией подписи (как подчёркивание слова). */
+    .scene-main > .line-note .note-editable:not(.has-text),
+    .scene-main > .intercut .intercut-text:not(.has-text) {
+      min-height: 1.15em;
+      line-height: 1.15;
+      padding-bottom: 0;
     }
 
     .scene-main > .line-say .say-editable:focus,
@@ -7502,7 +7511,7 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v357';
+      var APP_VERSION = 'v358';
       var BUILD_TIME = '2026-06-09 04:16 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
