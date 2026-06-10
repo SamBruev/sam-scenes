@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v355)</title>
+  <title>Sam Scenes (v356)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -4008,6 +4008,156 @@
       color: rgba(255, 224, 161, 0.92);
     }
 
+    /* Блок-меню телесуфлёра перед INTRO: иконка-кнопка запуска (весь сценарий) + шестерёнка с глобальными настройками. */
+    .teleprompter-menu {
+      position: relative;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      margin: 0 0 20px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(220, 178, 112, 0.34);
+      background: rgba(0, 0, 0, 0.32);
+    }
+
+    .teleprompter-menu-main {
+      flex: 1 1 auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+      margin: 0;
+      padding: 0;
+      border: none;
+      background: transparent;
+      color: inherit;
+      text-align: left;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    .teleprompter-menu-icon {
+      flex-shrink: 0;
+      box-sizing: border-box;
+      width: 2.68rem;
+      height: 2.68rem;
+      border-radius: 50%;
+      border: 1px solid rgba(220, 178, 112, 0.62);
+      background:
+        radial-gradient(circle at 50% 38%, rgba(255, 198, 130, 0.18), rgba(255, 198, 130, 0) 58%),
+        radial-gradient(circle at 50% 62%, #15110c 0%, #0a0805 58%, #050302 100%);
+      color: rgba(255, 205, 138, 0.96);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow:
+        inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+        inset 0 0 0 2px rgba(232, 188, 122, 0.2),
+        0 0 18px rgba(255, 170, 95, 0.16),
+        0 4px 12px rgba(0, 0, 0, 0.5);
+      transition: transform 0.16s ease;
+    }
+
+    .teleprompter-menu-icon .tp-menu-lens-icon {
+      width: 1.34rem;
+      height: 1.34rem;
+      display: block;
+      filter: drop-shadow(0 0 5px rgba(255, 185, 115, 0.4));
+    }
+
+    .teleprompter-menu-main:active .teleprompter-menu-icon {
+      transform: scale(0.96);
+    }
+
+    .teleprompter-menu-titles {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .teleprompter-menu-title {
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 0.92rem;
+      color: rgba(255, 205, 138, 0.96);
+    }
+
+    .teleprompter-menu-sub {
+      font-size: 0.74rem;
+      color: rgba(232, 223, 212, 0.6);
+    }
+
+    .teleprompter-menu-gear {
+      flex-shrink: 0;
+      width: 2.2rem;
+      height: 2.2rem;
+      border-radius: 50%;
+      border: 1px solid rgba(220, 178, 112, 0.4);
+      background: rgba(0, 0, 0, 0.3);
+      color: rgba(255, 205, 138, 0.92);
+      font-size: 1.1rem;
+      line-height: 1;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      transition: transform 0.16s ease, box-shadow 0.18s ease;
+    }
+
+    .teleprompter-menu-gear:active {
+      transform: scale(0.94);
+    }
+
+    .teleprompter-menu-gear[aria-expanded="true"] {
+      box-shadow: 0 0 0 2px rgba(255, 165, 90, 0.32);
+    }
+
+    .teleprompter-menu-settings {
+      flex-basis: 100%;
+      width: 100%;
+      margin-top: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .teleprompter-menu-settings[hidden] {
+      display: none;
+    }
+
+    .teleprompter-menu-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      grid-template-rows: auto auto;
+      gap: 4px 10px;
+      align-items: center;
+      margin-top: 8px;
+      font-size: 13px;
+      color: rgba(255, 236, 196, 0.88);
+      user-select: none;
+    }
+
+    .teleprompter-menu-row input[type="range"] {
+      grid-column: 1 / -1;
+      width: 100%;
+      accent-color: var(--gold);
+    }
+
+    .teleprompter-menu-val {
+      min-width: 4.4em;
+      text-align: right;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: rgba(255, 224, 161, 0.92);
+    }
+
     .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
     .field {
@@ -7348,7 +7498,7 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v355';
+      var APP_VERSION = 'v356';
       var BUILD_TIME = '2026-06-09 04:16 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
@@ -7624,6 +7774,7 @@
           migrateShotCheckboxLensMarkup(document);
           syncAllShotClasses();
         } catch (ePrepDateWire) {}
+        try { ensureTeleprompterMenu(); } catch (eTpMenuRef) {}
       }
 
       var autosaveTO = null;
@@ -11861,6 +12012,73 @@
         '<path fill="currentColor" d="M10.25 17.5h3.5v2h2.25v1H8v-1h2.25v-2z"/>' +
         '</svg>';
 
+      /** Иконка-объектив для блока-меню суфлёра (те же контуры экрана/подставки, без pulse-класса сцен). */
+      var TELEPROMPTER_MENU_ICON_SVG =
+        '<svg viewBox="0 0 24 24" aria-hidden="true" class="tp-menu-lens-icon">' +
+        '<path fill="currentColor" d="M5 4.5h14c.83 0 1.5.67 1.5 1.5v8.5c0 .83-.67 1.5-1.5 1.5H5c-.83 0-1.5-.67-1.5-1.5V6c0-.83.67-1.5 1.5-1.5zm1.5 2V14h11V6.5h-11zm2 1.75h7v1h-7v-1zm0 2h7v1h-7v-1zm0 2h4.5v1h-4.5v-1z"/>' +
+        '<path fill="currentColor" d="M10.25 17.5h3.5v2h2.25v1H8v-1h2.25v-2z"/>' +
+        '</svg>';
+
+      var TELEPROMPTER_MENU_INNER_HTML =
+        '<button type="button" class="teleprompter-menu-main" id="teleprompter-menu-open" aria-label="Открыть телесуфлёр (весь сценарий)">' +
+          '<span class="teleprompter-menu-icon" aria-hidden="true">' + TELEPROMPTER_MENU_ICON_SVG + '</span>' +
+          '<span class="teleprompter-menu-titles">' +
+            '<span class="teleprompter-menu-title">Телесуфлёр</span>' +
+            '<span class="teleprompter-menu-sub">Весь сценарий · тап — запуск</span>' +
+          '</span>' +
+        '</button>' +
+        '<button type="button" class="teleprompter-menu-gear" id="teleprompter-menu-gear" aria-label="Настройки суфлёра" aria-expanded="false" aria-controls="teleprompter-menu-settings">\u2699</button>' +
+        '<div class="teleprompter-menu-settings" id="teleprompter-menu-settings" hidden>' +
+          '<label class="teleprompter-menu-row" for="tp-menu-font"><span>Размер букв</span><span class="teleprompter-menu-val" id="tp-menu-font-val">100%</span><input id="tp-menu-font" type="range" min="60" max="180" step="5" value="100"></label>' +
+          '<label class="teleprompter-menu-row" for="tp-menu-speed"><span>Скорость прокрутки</span><span class="teleprompter-menu-val" id="tp-menu-speed-val">1.0×</span><input id="tp-menu-speed" type="range" min="3" max="35" step="1" value="10"></label>' +
+          '<label class="teleprompter-menu-row" for="tp-menu-letter"><span>Расстояние между буквами</span><span class="teleprompter-menu-val" id="tp-menu-letter-val">0.01em</span><input id="tp-menu-letter" type="range" min="-5" max="30" step="1" value="1"></label>' +
+          '<label class="teleprompter-menu-row" for="tp-menu-line"><span>Расстояние между строками</span><span class="teleprompter-menu-val" id="tp-menu-line-val">1.25</span><input id="tp-menu-line" type="range" min="100" max="250" step="5" value="125"></label>' +
+        '</div>';
+
+      /**
+       * Блок-меню суфлёра — первый ребёнок #scenes-block (перед INTRO). #scenes-block лежит внутри .wrap,
+       * чей innerHTML целиком пересобирается при смене/загрузке сценария, поэтому меню ре-инжектим
+       * (через refreshDomRefs). Разметку всегда обновляем заново → актуальная версия и свёрнутые настройки.
+       * Клики/инпуты — делегированием на document, так что пересоздание не требует перепривязки.
+       */
+      function ensureTeleprompterMenu() {
+        var block = document.getElementById('scenes-block');
+        if (!block) return;
+        document.querySelectorAll('.teleprompter-menu').forEach(function (el) { el.remove(); });
+        var sec = document.createElement('section');
+        sec.className = 'teleprompter-menu';
+        sec.id = 'teleprompter-menu';
+        sec.setAttribute('aria-label', 'Телесуфлёр');
+        sec.innerHTML = TELEPROMPTER_MENU_INNER_HTML;
+        block.insertBefore(sec, block.firstChild);
+        try { syncTeleprompterSettingsUi(readTeleprompterSettings()); } catch (e) {}
+      }
+
+      /** Текст «Sam» всех блоков по порядку (INTRO → сцены → OUTRO) — для запуска суфлёра на весь сценарий. */
+      function readAllScenesSayText() {
+        var parts = [];
+        document.querySelectorAll('.scene-main').forEach(function (scene) {
+          var t = readSceneSayText(scene);
+          if (t) parts.push(t);
+        });
+        return parts.join('\n\n');
+      }
+
+      function openTeleprompterAllScenes() {
+        if (!teleprompterOverlay || !teleprompterText) return;
+        var text = readAllScenesSayText();
+        teleprompterText.textContent = text || 'Текст «Sam» пока пуст.';
+        teleprompterOverlay.classList.add('open');
+        teleprompterOverlay.setAttribute('aria-hidden', 'false');
+        lockMainScrollForTeleprompter();
+        resetTeleprompterScroll();
+        startTeleprompterScroll();
+        requestAnimationFrame(function () {
+          focusTeleprompterKeyCapture();
+        });
+        triggerHaptic('micro');
+      }
+
       function ensureScenePlayButtons(scope) {
         var rootScope = scope || document;
         rootScope.querySelectorAll('.scene-main').forEach(function (scene) {
@@ -12022,6 +12240,23 @@
         if (teleprompterSetSpeedVal) teleprompterSetSpeedVal.textContent = s.speed.toFixed(1) + '×';
         if (teleprompterSetLetterVal) teleprompterSetLetterVal.textContent = s.letterSpacingEm.toFixed(2) + 'em';
         if (teleprompterSetLineVal) teleprompterSetLineVal.textContent = s.lineHeight.toFixed(2);
+        // Те же глобальные настройки — дублируем в блок-меню суфлёра (если он на странице).
+        var mFont = document.getElementById('tp-menu-font');
+        var mSpeed = document.getElementById('tp-menu-speed');
+        var mLetter = document.getElementById('tp-menu-letter');
+        var mLine = document.getElementById('tp-menu-line');
+        var mFontVal = document.getElementById('tp-menu-font-val');
+        var mSpeedVal = document.getElementById('tp-menu-speed-val');
+        var mLetterVal = document.getElementById('tp-menu-letter-val');
+        var mLineVal = document.getElementById('tp-menu-line-val');
+        if (mFont) mFont.value = String(Math.round(s.fontScale * 100));
+        if (mSpeed) mSpeed.value = String(Math.round(s.speed * 10));
+        if (mLetter) mLetter.value = String(Math.round(s.letterSpacingEm * 100));
+        if (mLine) mLine.value = String(Math.round(s.lineHeight * 100));
+        if (mFontVal) mFontVal.textContent = Math.round(s.fontScale * 100) + '%';
+        if (mSpeedVal) mSpeedVal.textContent = s.speed.toFixed(1) + '×';
+        if (mLetterVal) mLetterVal.textContent = s.letterSpacingEm.toFixed(2) + 'em';
+        if (mLineVal) mLineVal.textContent = s.lineHeight.toFixed(2);
       }
 
       function applyTeleprompterSettings(s) {
@@ -13982,6 +14217,30 @@
             openTeleprompterForScene(scene);
             return;
           }
+          var tpMenuOpen = e.target && e.target.closest ? e.target.closest('#teleprompter-menu-open') : null;
+          if (tpMenuOpen) {
+            e.preventDefault();
+            triggerHaptic('medium');
+            openTeleprompterAllScenes();
+            return;
+          }
+          var tpMenuGear = e.target && e.target.closest ? e.target.closest('#teleprompter-menu-gear') : null;
+          if (tpMenuGear) {
+            e.preventDefault();
+            triggerHaptic('light');
+            var tpMenuPanel = document.getElementById('teleprompter-menu-settings');
+            if (tpMenuPanel) {
+              var willOpen = tpMenuPanel.hasAttribute('hidden');
+              if (willOpen) {
+                tpMenuPanel.removeAttribute('hidden');
+                try { syncTeleprompterSettingsUi(readTeleprompterSettings()); } catch (eSg) {}
+              } else {
+                tpMenuPanel.setAttribute('hidden', '');
+              }
+              tpMenuGear.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+            }
+            return;
+          }
           if (teleprompterOverlay && e.target === teleprompterOverlay) {
             closeTeleprompter();
           }
@@ -14118,9 +14377,20 @@
               patchTeleprompterSettings({ lineHeight: parseInt(teleprompterSetLine.value, 10) / 100 });
             });
           }
+
+          // Ползунки блока-меню суфлёра — те же глобальные настройки (делегирование, т.к. меню пересоздаётся).
+          document.addEventListener('input', function (e) {
+            var t = e.target;
+            if (!t || !t.id) return;
+            if (t.id === 'tp-menu-font') patchTeleprompterSettings({ fontScale: parseInt(t.value, 10) / 100 });
+            else if (t.id === 'tp-menu-speed') patchTeleprompterSettings({ speed: parseInt(t.value, 10) / 10 });
+            else if (t.id === 'tp-menu-letter') patchTeleprompterSettings({ letterSpacingEm: parseInt(t.value, 10) / 100 });
+            else if (t.id === 'tp-menu-line') patchTeleprompterSettings({ lineHeight: parseInt(t.value, 10) / 100 });
+          });
         }
 
         wireTeleprompterSettings();
+        try { ensureTeleprompterMenu(); } catch (eTpMenu) {}
 
         /** Отложенные blur после change — отменяем при новом тапе по тому же select, иначе поздний blur срывает повторное открытие. */
         var pendingSelectBlurTimeouts = typeof WeakMap !== 'undefined' ? new WeakMap() : null;
