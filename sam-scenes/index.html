@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v356)</title>
+  <title>Sam Scenes (v357)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -3233,6 +3233,10 @@
     .scene-main > .line-say > b {
       font-size: 1.3em;
       text-transform: uppercase;
+      /* Подпись крупнее (1.3em) — сжимаем её межстрочный, иначе базовая линия уходит вниз,
+         а вводимый текст «Sam» (1em) встаёт сверху и выглядит приподнятым. line-height:1
+         сажает текст на одну базовую линию с «SAM:» — как продолжение строки. */
+      line-height: 1;
     }
 
     .scene-main > .line-note > b,
@@ -7498,7 +7502,7 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v356';
+      var APP_VERSION = 'v357';
       var BUILD_TIME = '2026-06-09 04:16 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
