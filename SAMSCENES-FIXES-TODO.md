@@ -308,4 +308,4 @@ if (t.matches('select.scene-loc-select, select.scene-plan-select, select.scene-f
 ## Порядок проверки после всех правок
 1. Бампнуть версию (4 места) и `CACHE_NAME`.
 2. Прогнать сценарии проверки из каждого пункта.
-3. Закоммитить; задеплоить через деплой-папку `~/Documents/CURSOR/sam-scenes` (push на github.com/SamBruev/sam-scenes → https://sambruev.github.io/sam-scenes/).
+3. Закоммитить в `~/Documents/CURSOR/SamScenes` и `git push sam-scenes main` (→ https://sambruev.github.io/sam-scenes/).

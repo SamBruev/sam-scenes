@@ -23,29 +23,27 @@
 | Боевой сайт (GitHub Pages) | https://sambruev.github.io/sam-scenes/ |
 | Боевой репозиторий | https://github.com/SamBruev/sam-scenes |
 
-### Локальные папки на компьютере
+### Локальная папка
 | Назначение | Путь |
 |---|---|
-| Рабочая папка (тут редактируем) | `/Users/apple/Documents/CURSOR/SamScenes/sam-scenes/` |
-| Клон боевого репозитория (git push → Pages) | `/Users/apple/Documents/CURSOR/sam-scenes/` |
-| Локальный монорепо (снимки, portfolio) | `/Users/apple/Documents/CURSOR/SamScenes/` |
+| Разработка + git + деплой (одна папка) | `/Users/apple/Documents/CURSOR/SamScenes/` |
 
-> Деплой: post-commit в `SamScenes` делает `rsync` в `../sam-scenes/` и `git push` на `SamBruev/sam-scenes`.
+> Деплой: `git commit` в `SamScenes` → post-commit hook `git push sam-scenes main` на `SamBruev/sam-scenes`.
 > Репозиторий **`abakan-script` удалён** — не использовать.
 
 ---
 
 ## 3. Как деплоить (важно для агента)
 
-1. Отредактировать `index.html` в рабочей папке.
-2. Скопировать файлы в `/Users/apple/Documents/CURSOR/sam-scenes/` (или положиться на post-commit hook).
-3. При выпуске релиза — **поднять версию кэша**: в `sw.js` строка `CACHE_NAME = 'samscenes-vXXX'`
+1. Отредактировать `index.html` в `/Users/apple/Documents/CURSOR/SamScenes/`.
+2. При выпуске релиза — **поднять версию кэша**: в `sw.js` строка `CACHE_NAME = 'samscenes-vXXX'`
    и в `build-info.json` поле `version`.
-4. Запушить:
+3. Закоммитить и запушить:
    ```
-   cd /Users/apple/Documents/CURSOR/sam-scenes && git add -A && git commit -m "..." && git push origin main
+   cd /Users/apple/Documents/CURSOR/SamScenes && git add -A && git commit -m "..." && git push sam-scenes main
    ```
-5. GitHub Pages пересобирается ~1 минуту. Проверить:
+   (или положиться на post-commit hook после `git commit`.)
+4. GitHub Pages пересобирается ~1 минуту. Проверить:
    ```
    curl -s https://sambruev.github.io/sam-scenes/build-info.json
    ```
@@ -211,5 +209,5 @@ push делает пользователь). Что и как:
 
 ## 9. Ограничения безопасности
 
-- Деплой только в `SamBruev/sam-scenes` из `/Users/apple/Documents/CURSOR/sam-scenes/`.
+- Деплой: `git push sam-scenes main` из `/Users/apple/Documents/CURSOR/SamScenes/`.
 - `abakan-script` на GitHub нужно удалить вручную, если `gh repo delete` не прошёл (нужен scope `delete_repo`).

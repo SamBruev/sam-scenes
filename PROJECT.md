@@ -1,8 +1,10 @@
 # Sam Scenes — структура проекта
 
-**Версия в проде:** v339 · [sambruev.github.io/sam-scenes/](https://sambruev.github.io/sam-scenes/)
+**Версия в проде:** v365 · [sambruev.github.io/sam-scenes/](https://sambruev.github.io/sam-scenes/)
 
 Одностраничное PWA «сценарий съёмки» — один `index.html` (HTML + CSS + JS), без сборки.
+
+**Одна папка** — и разработка, и git-репозиторий [SamBruev/sam-scenes](https://github.com/SamBruev/sam-scenes) (GitHub Pages). Отдельного клона `../sam-scenes/` больше нет.
 
 ---
 
@@ -10,8 +12,7 @@
 
 | Путь | Назначение |
 |------|------------|
-| `sam-scenes/` | **Исходник приложения** — правки здесь |
-| `../sam-scenes/` | **GitHub Pages** — git-репо [SamBruev/sam-scenes](https://github.com/SamBruev/sam-scenes), push = деплой |
+| `index.html`, `sw.js`, `build-info.json`, `manifest.json`, `media/`, иконки | **Приложение** — правки здесь |
 | `tools/` | Локальный сервер ссылок MD → Finder (порт `19847`) |
 | `scripts/` | `snapshot-index.sh`, кодирование медиа |
 | `snapshots/` | Локальные снимки `index.html` по версиям (**в `.gitignore`**, не в git) |
@@ -21,26 +22,21 @@
 
 ## Рабочий цикл
 
-1. Редактировать **`SamScenes/sam-scenes/index.html`** (и при необходимости `sw.js`, `build-info.json`, ассеты).
+1. Редактировать **`index.html`** (и при необходимости `sw.js`, `build-info.json`, ассеты).
 2. Бамп версии в **четырёх местах** (иначе PWA отдаст старый кэш):
    - `index.html` → `<title>` и `APP_VERSION` / `BUILD_TIME`
    - `build-info.json` → `version`, `build`
    - `sw.js` → `CACHE_NAME = 'samscenes-vNNN'`
-3. Синхронизировать в деплой и отправить на GitHub:
+3. **`git add`** → **`git commit`** → **`git push sam-scenes main`** (или полагаться на post-commit hook).
 
-```bash
-rsync -a --delete --exclude '.git' sam-scenes/ ../sam-scenes/
-cd ../sam-scenes && git add -A && git commit -m "Sam Scenes vNNN: …" && git push origin main
-```
-
-**Автопush из monorepo** (один раз):
+**Автопush** (один раз):
 
 ```bash
 cd /Users/apple/Documents/CURSOR/SamScenes
 git config core.hooksPath .githooks
 ```
 
-После `git commit` на `main` hook сам rsync + push в `../sam-scenes/`.
+После `git commit` на `main` hook сам пушит на GitHub Pages.
 
 ---
 
@@ -72,13 +68,12 @@ http://127.0.0.1:19847/reveal?p=/Users/apple/Documents/CURSOR/SamScenes/ИМЯ.m
 
 ## Локальный просмотр
 
-- Деплой-папка: открыть `../sam-scenes/index.html` или `LOCAL-OPEN.html`
-- Проверка продa: `curl -s https://sambruev.github.io/sam-scenes/build-info.json`
+- Открыть `index.html` или `LOCAL-OPEN.html`
+- Проверка прода: `curl -s https://sambruev.github.io/sam-scenes/build-info.json`
 
 ---
 
 ## Что не коммитить
 
-- `snapshots/` — только локально
+- `snapshots/` — локальный архив версий
 - `.DS_Store`
-- Дубликаты `sam-scenes/` внутри деплой-репо (источник один — monorepo или прямой push в deploy)
