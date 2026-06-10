@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v363)</title>
+  <title>Sam Scenes (v364)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -3539,6 +3539,13 @@
       .field-prep-important.prep-important-expand-pulse .prep-important-options {
         animation: none;
       }
+      .prep-important-done-text {
+        animation: none;
+        background-image: none;
+        -webkit-text-fill-color: #ffffff;
+        will-change: auto;
+        filter: none;
+      }
     }
 
     /* #2: плавающий значок-напоминание — виден везде, пока чеклист «Важно» не заполнен. */
@@ -3673,6 +3680,44 @@
       display: none;
     }
 
+    /* Праздничная анимация плашки «Всё под контролем!»: мягкое появление,
+       бегущий блик и дышащее зелёное свечение в тон success-теме. */
+    @keyframes prepDoneTextIn {
+      0% {
+        opacity: 0;
+        transform: translateY(9px) scale(0.82);
+      }
+      55% {
+        opacity: 1;
+        transform: translateY(0) scale(1.07);
+      }
+      78% {
+        transform: translateY(0) scale(0.985);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes prepDoneTextShine {
+      0% {
+        background-position: 230% 50%;
+      }
+      55%, 100% {
+        background-position: -90% 50%;
+      }
+    }
+
+    @keyframes prepDoneTextGlow {
+      0%, 100% {
+        filter: drop-shadow(0 0 4px rgba(120, 220, 150, 0.32));
+      }
+      50% {
+        filter: drop-shadow(0 0 13px rgba(150, 240, 185, 0.7));
+      }
+    }
+
     .prep-important-done-text {
       flex: 0 1 auto;
       min-width: 0;
@@ -3686,6 +3731,28 @@
       letter-spacing: 0.02em;
       text-align: center;
       -webkit-font-smoothing: antialiased;
+      /* Светлый базовый текст с бегущим мятным бликом (background-clip: text). */
+      background-image: linear-gradient(
+        105deg,
+        #ffffff 0%,
+        #ffffff 38%,
+        #eafff1 46%,
+        #b9f5cf 50%,
+        #eafff1 54%,
+        #ffffff 62%,
+        #ffffff 100%
+      );
+      background-size: 250% 100%;
+      background-position: -90% 50%;
+      background-repeat: no-repeat;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      will-change: transform, filter, background-position;
+      animation:
+        prepDoneTextIn 0.62s cubic-bezier(0.22, 1, 0.36, 1) both,
+        prepDoneTextShine 3.6s ease-in-out 0.55s infinite,
+        prepDoneTextGlow 2.8s ease-in-out 0.55s infinite;
     }
 
     .prep-important-collapse-btn {
@@ -7657,8 +7724,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v363';
-      var BUILD_TIME = '2026-06-10 05:58 MSK';
+      var APP_VERSION = 'v364';
+      var BUILD_TIME = '2026-06-10 06:12 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
