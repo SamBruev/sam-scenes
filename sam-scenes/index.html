@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v358)</title>
+  <title>Sam Scenes (v363)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -2190,6 +2190,8 @@
       }
     }
 
+    .scene-main[data-scene-role="intro"] > .scene-toolbar .mini.scene-remove,
+    .scene-main[data-scene-role="outro"] > .scene-toolbar .mini.scene-remove,
     .scene-main[data-scene-role="intro"] .scene-remove,
     .scene-main[data-scene-role="outro"] .scene-remove {
       display: none;
@@ -4021,6 +4023,55 @@
       color: rgba(255, 224, 161, 0.92);
     }
 
+    /* Пикеры горячих клавиш суфлёра (Play / Stop / Удержание) — в панели суфлёра и в блок-меню. */
+    .tp-key-row {
+      grid-template-rows: auto;
+    }
+
+    .tp-key-pick {
+      justify-self: end;
+      min-width: 6.5em;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(220, 178, 112, 0.4);
+      background: rgba(0, 0, 0, 0.35);
+      color: rgba(255, 224, 161, 0.95);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      -webkit-tap-highlight-color: rgba(255, 255, 255, 0.2);
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, transform 0.12s ease;
+    }
+
+    .tp-key-pick:active {
+      transform: scale(0.96);
+    }
+
+    .tp-key-pick.is-capturing {
+      border-color: rgba(255, 165, 90, 0.95);
+      box-shadow: 0 0 0 2px rgba(255, 165, 90, 0.3);
+      color: #ffd9a0;
+      background: rgba(60, 30, 0, 0.4);
+    }
+
+    .teleprompter-settings-keyhead {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgba(255, 214, 150, 0.7);
+    }
+
+    .teleprompter-settings-hint {
+      margin-top: 8px;
+      font-size: 11px;
+      line-height: 1.35;
+      color: rgba(255, 236, 196, 0.55);
+    }
+
     /* Блок-меню телесуфлёра перед INTRO: иконка-кнопка запуска (весь сценарий) + шестерёнка с глобальными настройками. */
     .teleprompter-menu {
       position: relative;
@@ -5443,14 +5494,95 @@
       border-radius: 999px;
     }
 
+    /* «Удалить» — иконка-корзина у левого края; margin-right:auto уводит «Снято» к правому краю.
+       (Для intro/outro, где «Удалить» скрыт, «Снято» остаётся справа за счёт flex-end.) */
     .scene-main > .scene-toolbar .mini.scene-remove {
-      min-height: 38px;
-      padding: 8px 14px;
-      box-sizing: border-box;
-      /* Центр кнопки «Удалить» — по вертикали к визуальному центру хлопушки «СНЯТО». */
+      margin-right: auto;
       align-self: center;
-      position: relative;
-      top: 11px;
+      box-sizing: border-box;
+      width: 44px;
+      height: 44px;
+      min-height: 44px;
+      padding: 0;
+      border: none;
+      background: transparent;
+      box-shadow: none;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0;
+      line-height: 0;
+      color: rgba(222, 120, 110, 0.82);
+      transition: color 0.18s ease, transform 0.16s ease;
+    }
+
+    .scene-main > .scene-toolbar .mini.scene-remove::before {
+      content: "";
+      display: block;
+      width: 22px;
+      height: 22px;
+      background-color: currentColor;
+      -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M9 3h6l1 2h4v2H4V5h4l1-2zM6 9h12l-1 11a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 9zm3 3v7h2v-7H9zm4 0v7h2v-7h-2z'/%3E%3C/svg%3E") no-repeat center / contain;
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M9 3h6l1 2h4v2H4V5h4l1-2zM6 9h12l-1 11a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 9zm3 3v7h2v-7H9zm4 0v7h2v-7h-2z'/%3E%3C/svg%3E") no-repeat center / contain;
+    }
+
+    .scene-main > .scene-toolbar .mini.scene-remove:hover,
+    .scene-main > .scene-toolbar .mini.scene-remove:focus-visible {
+      color: rgba(255, 120, 110, 0.96);
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      outline: none;
+    }
+
+    .scene-main > .scene-toolbar .mini.scene-remove:active {
+      transform: scale(0.92);
+    }
+
+    /* «Добавить» — плюсик по центру нижнего ряда (между корзиной слева и «Снято» справа).
+       Второй margin-right:auto (первый — у .scene-remove) делит свободное место → плюс центрируется. */
+    .scene-main > .scene-toolbar .mini.scene-add {
+      margin-right: auto;
+      align-self: center;
+      box-sizing: border-box;
+      width: 44px;
+      height: 44px;
+      min-height: 44px;
+      padding: 0;
+      border-radius: 50%;
+      border: 1px solid rgba(220, 178, 112, 0.5);
+      background: rgba(0, 0, 0, 0.28);
+      box-shadow: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0;
+      line-height: 0;
+      color: rgba(255, 210, 140, 0.95);
+      transition: color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.16s ease;
+    }
+
+    .scene-main > .scene-toolbar .mini.scene-add::before {
+      content: "";
+      display: block;
+      width: 22px;
+      height: 22px;
+      background-color: currentColor;
+      -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M11 4h2v7h7v2h-7v7h-2v-7H4v-2h7z'/%3E%3C/svg%3E") no-repeat center / contain;
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M11 4h2v7h7v2h-7v7h-2v-7H4v-2h7z'/%3E%3C/svg%3E") no-repeat center / contain;
+    }
+
+    .scene-main > .scene-toolbar .mini.scene-add:hover,
+    .scene-main > .scene-toolbar .mini.scene-add:focus-visible {
+      color: #ffd9a0;
+      border-color: rgba(255, 200, 120, 0.95);
+      box-shadow: 0 0 0 1px rgba(255, 190, 110, 0.4);
+      outline: none;
+    }
+
+    .scene-main > .scene-toolbar .mini.scene-add:active {
+      transform: scale(0.92);
     }
 
     /* «Снято» — только хлопушка: label = чистый #000 как фон сцены, без скругления/тени/обводки
@@ -7266,6 +7398,20 @@
         <span class="teleprompter-settings-val" id="teleprompter-set-line-val">1.25</span>
         <input id="teleprompter-set-line" type="range" min="100" max="250" step="5" value="125">
       </label>
+      <div class="teleprompter-settings-keyhead">Управление прокруткой</div>
+      <div class="teleprompter-settings-row tp-key-row">
+        <span>Play (запуск)</span>
+        <button type="button" class="tp-key-pick" data-tp-key="playKey" aria-label="Клавиша Play">не задано</button>
+      </div>
+      <div class="teleprompter-settings-row tp-key-row">
+        <span>Stop (стоп)</span>
+        <button type="button" class="tp-key-pick" data-tp-key="stopKey" aria-label="Клавиша Stop">не задано</button>
+      </div>
+      <div class="teleprompter-settings-row tp-key-row">
+        <span>Удержание (зажал — едет, отпустил — стоп)</span>
+        <button type="button" class="tp-key-pick" data-tp-key="holdKey" aria-label="Клавиша удержания">Enter</button>
+      </div>
+      <div class="teleprompter-settings-hint">Тап по полю → нажмите нужную клавишу. Esc — отмена, Backspace — очистить.</div>
     </div>
     <div class="teleprompter-hud" id="teleprompter-hud" aria-live="polite">
       <span class="teleprompter-hud-state" id="teleprompter-hud-state">▶</span>
@@ -7511,8 +7657,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v358';
-      var BUILD_TIME = '2026-06-09 04:16 MSK';
+      var APP_VERSION = 'v363';
+      var BUILD_TIME = '2026-06-10 05:58 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -7683,6 +7829,10 @@
         basePxPerSec: 42,
         lastTs: 0,
       };
+      // Кэш горячих клавиш суфлёра (обновляется в applyTeleprompterSettings) — чтобы не парсить localStorage на каждый keydown.
+      var teleprompterKeyBindings = { playKey: '', stopKey: '', holdKey: 'Enter' };
+      // Активный захват клавиши для пикера настроек: 'playKey' | 'stopKey' | 'holdKey' | null.
+      var teleprompterKeyCaptureField = null;
 
       var x = { value: 0 };
       var y = { value: 0 };
@@ -7784,6 +7934,7 @@
           wireShootDateToCalendar();
           migrateShotCheckboxToTimeHeading();
           ensureShotCheckboxInHeading();
+          ensureSceneAddButtons();
           migrateShotCheckboxLensMarkup(document);
           syncAllShotClasses();
         } catch (ePrepDateWire) {}
@@ -12018,6 +12169,28 @@
         });
       }
 
+      /** Плюс «Добавить сцену» в нижнем ряду сцены (между «Удалить» слева и «Снято» справа). */
+      function ensureSceneAddButtons() {
+        if (!sceneStack && !outroStack) return;
+        mainScenes().forEach(function (scene) {
+          var tb = scene.querySelector('.scene-toolbar');
+          if (!tb) {
+            tb = document.createElement('div');
+            tb.className = 'scene-toolbar';
+            scene.appendChild(tb);
+          }
+          if (tb.querySelector('.scene-add')) return;
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'btn mini scene-add';
+          btn.title = 'Добавить сцену';
+          btn.setAttribute('aria-label', 'Добавить сцену');
+          var lens = tb.querySelector('.scene-done-label');
+          if (lens) tb.insertBefore(btn, lens);
+          else tb.appendChild(btn);
+        });
+      }
+
       /** SVG: экран с строками текста + подставка — иконка телесуфлера вместо «play». */
       var SCENE_TELEPROMPTER_ICON_SVG =
         '<svg class="scene-play-icon" viewBox="0 0 24 24" aria-hidden="true">' +
@@ -12046,6 +12219,11 @@
           '<label class="teleprompter-menu-row" for="tp-menu-speed"><span>Скорость прокрутки</span><span class="teleprompter-menu-val" id="tp-menu-speed-val">1.0×</span><input id="tp-menu-speed" type="range" min="3" max="35" step="1" value="10"></label>' +
           '<label class="teleprompter-menu-row" for="tp-menu-letter"><span>Расстояние между буквами</span><span class="teleprompter-menu-val" id="tp-menu-letter-val">0.01em</span><input id="tp-menu-letter" type="range" min="-5" max="30" step="1" value="1"></label>' +
           '<label class="teleprompter-menu-row" for="tp-menu-line"><span>Расстояние между строками</span><span class="teleprompter-menu-val" id="tp-menu-line-val">1.25</span><input id="tp-menu-line" type="range" min="100" max="250" step="5" value="125"></label>' +
+          '<div class="teleprompter-settings-keyhead">Управление прокруткой</div>' +
+          '<div class="teleprompter-menu-row tp-key-row"><span>Play (запуск)</span><button type="button" class="tp-key-pick" data-tp-key="playKey" aria-label="Клавиша Play">не задано</button></div>' +
+          '<div class="teleprompter-menu-row tp-key-row"><span>Stop (стоп)</span><button type="button" class="tp-key-pick" data-tp-key="stopKey" aria-label="Клавиша Stop">не задано</button></div>' +
+          '<div class="teleprompter-menu-row tp-key-row"><span>Удержание (зажал — едет, отпустил — стоп)</span><button type="button" class="tp-key-pick" data-tp-key="holdKey" aria-label="Клавиша удержания">Enter</button></div>' +
+          '<div class="teleprompter-settings-hint">Тап по полю → нажмите нужную клавишу. Esc — отмена, Backspace — очистить.</div>' +
         '</div>';
 
       /**
@@ -12205,7 +12383,16 @@
           speed: 1,
           letterSpacingEm: 0.01,
           lineHeight: 1.25,
+          playKey: '',
+          stopKey: '',
+          holdKey: 'Enter',
         };
+      }
+
+      function sanitizeTeleprompterKey(v, dflt) {
+        if (v === '' || v === null) return '';
+        if (typeof v === 'string' && v.length >= 1 && v.length <= 24) return v;
+        return dflt;
       }
 
       function clampTeleprompterSettings(raw) {
@@ -12216,6 +12403,9 @@
           speed: Math.max(0.3, Math.min(3.5, parseFloat(s.speed) || d.speed)),
           letterSpacingEm: Math.max(-0.05, Math.min(0.3, parseFloat(s.letterSpacingEm) || d.letterSpacingEm)),
           lineHeight: Math.max(1, Math.min(2.5, parseFloat(s.lineHeight) || d.lineHeight)),
+          playKey: sanitizeTeleprompterKey(s.playKey, d.playKey),
+          stopKey: sanitizeTeleprompterKey(s.stopKey, d.stopKey),
+          holdKey: sanitizeTeleprompterKey(s.holdKey, d.holdKey),
         };
       }
 
@@ -12270,6 +12460,9 @@
         if (mSpeedVal) mSpeedVal.textContent = s.speed.toFixed(1) + '×';
         if (mLetterVal) mLetterVal.textContent = s.letterSpacingEm.toFixed(2) + 'em';
         if (mLineVal) mLineVal.textContent = s.lineHeight.toFixed(2);
+        // Горячие клавиши — освежаем кэш и подписи пикеров (в панели суфлёра и в блок-меню).
+        teleprompterKeyBindings = { playKey: s.playKey, stopKey: s.stopKey, holdKey: s.holdKey };
+        if (typeof syncTeleprompterKeyPickers === 'function') syncTeleprompterKeyPickers();
       }
 
       function applyTeleprompterSettings(s) {
@@ -12280,6 +12473,7 @@
           teleprompterOverlay.style.setProperty('--tp-line-height', String(s.lineHeight));
         }
         teleprompterScrollState.speed = s.speed;
+        teleprompterKeyBindings = { playKey: s.playKey, stopKey: s.stopKey, holdKey: s.holdKey };
         saveTeleprompterSettings(s);
         syncTeleprompterSettingsUi(s);
         updateTeleprompterHud();
@@ -12390,6 +12584,19 @@
         setTeleprompterScrollMoving(false);
       }
 
+      // Дискретные действия для назначаемых клавиш Play/Stop.
+      function teleprompterPlayByKey() {
+        teleprompterEnterHeld = false;
+        setTeleprompterScrollMoving(true);
+        triggerHaptic('light');
+      }
+
+      function teleprompterStopByKey() {
+        teleprompterEnterHeld = false;
+        setTeleprompterScrollMoving(false);
+        triggerHaptic('light');
+      }
+
       function toggleTeleprompterPause() {
         teleprompterEnterHeld = false;
         teleprompterScrollState.paused = !teleprompterScrollState.paused;
@@ -12446,6 +12653,23 @@
           closeTeleprompter();
           return true;
         }
+        // Назначаемые клавиши (приоритет над дефолтными Space/Enter/стрелками).
+        var kb = teleprompterKeyBindings;
+        if (kb.playKey && key === kb.playKey) {
+          e.preventDefault();
+          teleprompterPlayByKey();
+          return true;
+        }
+        if (kb.stopKey && key === kb.stopKey) {
+          e.preventDefault();
+          teleprompterStopByKey();
+          return true;
+        }
+        if (kb.holdKey && key === kb.holdKey) {
+          e.preventDefault();
+          startTeleprompterEnterScroll(e);
+          return true;
+        }
         if (key === 'Space') {
           e.preventDefault();
           toggleTeleprompterPause();
@@ -12488,12 +12712,66 @@
       function handleTeleprompterKeyup(e) {
         if (!teleprompterOverlay || !teleprompterOverlay.classList.contains('open')) return false;
         var key = normalizeTeleprompterKey(e.key);
+        if (teleprompterKeyBindings.holdKey && key === teleprompterKeyBindings.holdKey) {
+          e.preventDefault();
+          stopTeleprompterEnterScroll();
+          return true;
+        }
         if (key === 'Enter') {
           e.preventDefault();
           stopTeleprompterEnterScroll();
           return true;
         }
         return false;
+      }
+
+      // ——— Пикеры горячих клавиш суфлёра (Play / Stop / Удержание) ———
+      function teleprompterKeyLabel(key) {
+        if (!key) return 'не задано';
+        var map = {
+          ' ': 'Пробел', Space: 'Пробел', Enter: 'Enter', Tab: 'Tab',
+          ArrowUp: '↑', ArrowDown: '↓', ArrowLeft: '←', ArrowRight: '→',
+          Escape: 'Esc', Backspace: '⌫', Delete: 'Del', PageUp: 'PgUp', PageDown: 'PgDn',
+        };
+        if (map[key]) return map[key];
+        if (key.length === 1) return key.toUpperCase();
+        return key;
+      }
+
+      function syncTeleprompterKeyPickers() {
+        var kb = teleprompterKeyBindings;
+        document.querySelectorAll('.tp-key-pick').forEach(function (btn) {
+          var field = btn.getAttribute('data-tp-key');
+          if (!field) return;
+          if (teleprompterKeyCaptureField === field) {
+            btn.textContent = 'Нажмите клавишу…';
+            btn.classList.add('is-capturing');
+            return;
+          }
+          btn.classList.remove('is-capturing');
+          btn.textContent = teleprompterKeyLabel(kb[field] || '');
+        });
+      }
+
+      function beginTeleprompterKeyCapture(field) {
+        teleprompterKeyCaptureField = field;
+        syncTeleprompterKeyPickers();
+      }
+
+      function endTeleprompterKeyCapture() {
+        var wasOpen = teleprompterOverlay && teleprompterOverlay.classList.contains('open');
+        teleprompterKeyCaptureField = null;
+        syncTeleprompterKeyPickers();
+        if (wasOpen) focusTeleprompterKeyCapture();
+      }
+
+      function applyTeleprompterKeyCapture(key) {
+        if (!teleprompterKeyCaptureField) return;
+        var s = readTeleprompterSettings();
+        s[teleprompterKeyCaptureField] = key; // '' = очистить
+        applyTeleprompterSettings(s);
+        endTeleprompterKeyCapture();
+        triggerHaptic('light');
       }
 
       function openTeleprompterForScene(scene) {
@@ -12565,6 +12843,8 @@
         }
         ensureScenePlayButtons(document);
         ensureSceneNoteLines(document);
+        ensureShotCheckboxInHeading();
+        ensureSceneAddButtons();
         updateAllShotlistProgress();
         ensureShotlistPieceSelectOptions(document);
         refreshNoteIntercutHasTextClasses(document);
@@ -14093,6 +14373,25 @@
           tryRemoveScene(del);
         }, false);
 
+        // «Добавить» (плюс в тулбаре сцены) — touchend + click с антидублем (как у глобального #btn-add-scene).
+        var lastSceneAddTouchAt = 0;
+        document.addEventListener('touchend', function (e) {
+          var add = e.target && e.target.closest ? e.target.closest('.scene-add') : null;
+          if (!add) return;
+          e.preventDefault();
+          lastSceneAddTouchAt = Date.now();
+          triggerHaptic('light');
+          addSceneAfter(add.closest('.scene-main'));
+        }, { passive: false });
+        document.addEventListener('click', function (e) {
+          var add = e.target && e.target.closest ? e.target.closest('.scene-add') : null;
+          if (!add) return;
+          if (lastSceneAddTouchAt && Date.now() - lastSceneAddTouchAt < 700) return;
+          e.preventDefault();
+          triggerHaptic('light');
+          addSceneAfter(add.closest('.scene-main'));
+        }, false);
+
         root.addEventListener('input', function () {
           markDirty();
         });
@@ -14173,6 +14472,33 @@
         node.setAttribute('data-scene-role', 'body');
         node.classList.remove('scene-role-intro', 'scene-role-outro');
         sceneStack.appendChild(node);
+        var tw = node.querySelector('.scene-time-wrap');
+        if (tw) {
+          initSceneTimeBlock(tw);
+          if (!pullSceneStartFromPrevSceneEnd(tw)) {
+            setSceneTimeValues(tw, 0, 0, 0, 5);
+          }
+        }
+        renumberScenes();
+        ensureAllSceneSelectCustomOptions(node);
+        bindAllSayLimits(node);
+        bindNoteIntercutPastePlain(node);
+        ensureSayReplaceButtons(node);
+        refreshNoteIntercutHasTextClasses(node);
+        markDirty();
+      }
+
+      /** Вставить новую сцену сразу после refScene (плюс в тулбаре сцены). */
+      function addSceneAfter(refScene) {
+        if (!sceneStack || !tpl) return;
+        var node = tpl.content.firstElementChild.cloneNode(true);
+        node.setAttribute('data-scene-role', 'body');
+        node.classList.remove('scene-role-intro', 'scene-role-outro');
+        if (refScene && refScene.parentNode === sceneStack) {
+          sceneStack.insertBefore(node, refScene.nextSibling);
+        } else {
+          sceneStack.appendChild(node);
+        }
         var tw = node.querySelector('.scene-time-wrap');
         if (tw) {
           initSceneTimeBlock(tw);
@@ -14400,6 +14726,44 @@
             else if (t.id === 'tp-menu-letter') patchTeleprompterSettings({ letterSpacingEm: parseInt(t.value, 10) / 100 });
             else if (t.id === 'tp-menu-line') patchTeleprompterSettings({ lineHeight: parseInt(t.value, 10) / 100 });
           });
+
+          // Пикеры горячих клавиш (делегирование — работают и в панели суфлёра, и в пересоздаваемом блок-меню).
+          document.addEventListener('click', function (e) {
+            var pick = e.target && e.target.closest ? e.target.closest('.tp-key-pick') : null;
+            if (!pick) return;
+            e.preventDefault();
+            e.stopPropagation();
+            var field = pick.getAttribute('data-tp-key');
+            if (!field) return;
+            if (teleprompterKeyCaptureField === field) {
+              endTeleprompterKeyCapture();
+            } else {
+              beginTeleprompterKeyCapture(field);
+              triggerHaptic('micro');
+            }
+          });
+
+          // Захват назначаемой клавиши — capture-фаза, чтобы перехватить раньше обработчиков суфлёра/окна.
+          document.addEventListener(
+            'keydown',
+            function (e) {
+              if (!teleprompterKeyCaptureField) return;
+              var key = normalizeTeleprompterKey(e.key);
+              if (key === 'Shift' || key === 'Control' || key === 'Alt' || key === 'Meta') return;
+              e.preventDefault();
+              e.stopImmediatePropagation();
+              if (key === 'Escape') {
+                endTeleprompterKeyCapture();
+              } else if (key === 'Backspace' || key === 'Delete') {
+                applyTeleprompterKeyCapture('');
+              } else {
+                applyTeleprompterKeyCapture(key);
+              }
+            },
+            true
+          );
+
+          syncTeleprompterKeyPickers();
         }
 
         wireTeleprompterSettings();
@@ -16123,6 +16487,7 @@
       bindNoteIntercutPastePlain(document);
       migrateBundledSayLinesFromJson();
       ensureShotCheckboxInHeading();
+      ensureSceneAddButtons();
       migrateShotCheckboxLensMarkup(document);
       syncAllShotClasses();
       wireSceneUI();
