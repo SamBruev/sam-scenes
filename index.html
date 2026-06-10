@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v369)</title>
+  <title>Sam Scenes (v370)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -222,7 +222,11 @@
     /* Явная тёмная схема у контейнеров форм — часть движков привязывает нативные пикеры к ancestor. */
     .field,
     .card.card-prep,
-    #scenario-hub {
+    #scenario-hub,
+    .scene-main,
+    .scene.scene-main,
+    .shotlist-section,
+    .shotlist-loc {
       color-scheme: dark;
     }
 
@@ -238,7 +242,7 @@
 
     option,
     optgroup {
-      background-color: #08080a;
+      background-color: var(--ui-popup-bg);
       color: var(--text);
     }
 
@@ -4816,7 +4820,7 @@
       font-weight: 600;
       padding: 10px 32px 10px 12px;
       color-scheme: dark;
-      accent-color: var(--gold);
+      accent-color: var(--accent);
     }
 
     select.scene-select:focus {
@@ -7770,8 +7774,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v369';
-      var BUILD_TIME = '2026-06-10 06:55 MSK';
+      var APP_VERSION = 'v370';
+      var BUILD_TIME = '2026-06-10 07:05 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
