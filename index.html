@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v368)</title>
+  <title>Sam Scenes (v369)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -4263,6 +4263,33 @@
       display: none;
     }
 
+    .teleprompter-menu-settings-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 2px;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      color: #ffe0a1;
+    }
+
+    .teleprompter-menu-settings-close {
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 218, 132, 0.35);
+      background: rgba(16, 16, 16, 0.92);
+      color: #ffe0a1;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
     .teleprompter-menu-row {
       display: grid;
       grid-template-columns: 1fr auto;
@@ -7743,8 +7770,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v368';
-      var BUILD_TIME = '2026-06-10 06:49 MSK';
+      var APP_VERSION = 'v369';
+      var BUILD_TIME = '2026-06-10 06:55 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -12301,6 +12328,10 @@
         '</button>' +
         '<button type="button" class="teleprompter-menu-gear" id="teleprompter-menu-gear" aria-label="Настройки суфлёра" aria-expanded="false" aria-controls="teleprompter-menu-settings">\u2699</button>' +
         '<div class="teleprompter-menu-settings" id="teleprompter-menu-settings" hidden>' +
+          '<div class="teleprompter-menu-settings-head">' +
+            '<span>Настройки суфлёра</span>' +
+            '<button type="button" class="teleprompter-menu-settings-close" id="teleprompter-menu-settings-close" aria-label="Закрыть настройки">×</button>' +
+          '</div>' +
           '<label class="teleprompter-menu-row" for="tp-menu-font"><span>Размер букв</span><span class="teleprompter-menu-val" id="tp-menu-font-val">100%</span><input id="tp-menu-font" type="range" min="60" max="180" step="5" value="100"></label>' +
           '<label class="teleprompter-menu-row" for="tp-menu-speed"><span>Скорость прокрутки</span><span class="teleprompter-menu-val" id="tp-menu-speed-val">1.0×</span><input id="tp-menu-speed" type="range" min="3" max="35" step="1" value="10"></label>' +
           '<label class="teleprompter-menu-row" for="tp-menu-letter"><span>Расстояние между буквами</span><span class="teleprompter-menu-val" id="tp-menu-letter-val">0.01em</span><input id="tp-menu-letter" type="range" min="-5" max="30" step="1" value="1"></label>' +
@@ -12318,6 +12349,13 @@
        * (через refreshDomRefs). Разметку всегда обновляем заново → актуальная версия и свёрнутые настройки.
        * Клики/инпуты — делегированием на document, так что пересоздание не требует перепривязки.
        */
+      function collapseTeleprompterMenuSettings() {
+        var tpMenuPanel = document.getElementById('teleprompter-menu-settings');
+        var tpMenuGear = document.getElementById('teleprompter-menu-gear');
+        if (tpMenuPanel) tpMenuPanel.setAttribute('hidden', '');
+        if (tpMenuGear) tpMenuGear.setAttribute('aria-expanded', 'false');
+      }
+
       function ensureTeleprompterMenu() {
         var block = document.getElementById('scenes-block');
         if (!block) return;
@@ -14662,16 +14700,54 @@
                 tpMenuPanel.removeAttribute('hidden');
                 try { syncTeleprompterSettingsUi(readTeleprompterSettings()); } catch (eSg) {}
               } else {
-                tpMenuPanel.setAttribute('hidden', '');
+                collapseTeleprompterMenuSettings();
               }
               tpMenuGear.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
             }
+            return;
+          }
+          var tpMenuSettingsClose = e.target && e.target.closest
+            ? e.target.closest('#teleprompter-menu-settings-close, .teleprompter-menu-settings-close')
+            : null;
+          if (tpMenuSettingsClose) {
+            e.preventDefault();
+            try { e.stopPropagation(); } catch (eTpMc) {}
+            triggerHaptic('micro');
+            collapseTeleprompterMenuSettings();
             return;
           }
           if (teleprompterOverlay && e.target === teleprompterOverlay) {
             closeTeleprompter();
           }
         });
+
+        /* Крестик в блок-меню суфлёра (#teleprompter-menu-settings-close): на iOS/PWA
+           синтетический click иногда не приходит — дублируем touchend/pointerup. */
+        if (!wireControls._tpMenuSettingsCloseTouch) {
+          wireControls._tpMenuSettingsCloseTouch = true;
+          var lastTpMenuSettingsCloseTouchAt = 0;
+          function doTpMenuSettingsCloseTouch(e) {
+            var btn = e.target && e.target.closest
+              ? e.target.closest('#teleprompter-menu-settings-close, .teleprompter-menu-settings-close')
+              : null;
+            if (!btn) return;
+            var now = Date.now();
+            if (now - lastTpMenuSettingsCloseTouchAt < 500) {
+              try { e.preventDefault(); } catch (e1) {}
+              return;
+            }
+            lastTpMenuSettingsCloseTouchAt = now;
+            try { e.preventDefault(); } catch (e2) {}
+            try { e.stopPropagation(); } catch (e3) {}
+            collapseTeleprompterMenuSettings();
+            try { triggerHaptic('micro'); } catch (e4) {}
+          }
+          document.addEventListener('touchend', doTpMenuSettingsCloseTouch, { passive: false });
+          document.addEventListener('pointerup', function (e) {
+            if (e.pointerType === 'mouse' && e.button !== 0) return;
+            doTpMenuSettingsCloseTouch(e);
+          });
+        }
 
         if (teleprompterClose) {
           /* «Пуленепробиваемое» закрытие: на iOS standalone синтетический click по кнопке
@@ -14778,11 +14854,27 @@
             });
           }
           if (teleprompterSettingsClose) {
-            teleprompterSettingsClose.addEventListener('click', function (e) {
-              e.stopPropagation();
+            var lastTeleprompterSettingsCloseAt = 0;
+            function doTeleprompterSettingsClose(e) {
+              var now = Date.now();
+              if (now - lastTeleprompterSettingsCloseAt < 500) {
+                if (e) { try { e.preventDefault(); } catch (e1) {} }
+                return;
+              }
+              lastTeleprompterSettingsCloseAt = now;
+              if (e) {
+                try { e.preventDefault(); } catch (e2) {}
+                try { e.stopPropagation(); } catch (e3) {}
+              }
               closeTeleprompterSettings();
-              triggerHaptic('micro');
+              try { triggerHaptic('micro'); } catch (e4) {}
+            }
+            teleprompterSettingsClose.addEventListener('click', doTeleprompterSettingsClose);
+            teleprompterSettingsClose.addEventListener('pointerup', function (e) {
+              if (e.pointerType === 'mouse' && e.button !== 0) return;
+              doTeleprompterSettingsClose(e);
             });
+            teleprompterSettingsClose.addEventListener('touchend', doTeleprompterSettingsClose, { passive: false });
           }
           if (teleprompterSetFont) {
             teleprompterSetFont.addEventListener('input', function () {
@@ -16350,7 +16442,8 @@
           return !!el.closest(
             'button, a, input, select, textarea, label, summary, ' +
             '[contenteditable], [contenteditable="true"], [role="button"], [tabindex], ' +
-            '.teleprompter-close, .teleprompter-settings-btn, .scene-play-btn'
+            '.teleprompter-close, .teleprompter-settings-close, .teleprompter-settings-btn, ' +
+            '.teleprompter-menu-settings-close, .scene-play-btn'
           );
         }
         var _lastTouchEnd = 0;
