@@ -3495,25 +3495,14 @@
     .scene-main > .line-say .say-editable:not(.has-text),
     .scene-main > .line-note .note-editable:not(.has-text),
     .scene-main > .intercut .intercut-text:not(.has-text) {
-      border-bottom: 1px dashed rgba(200, 198, 195, 0.38);
-    }
-
-    /* Пустое поле высотой ~1.4em уводило пунктир к низу строки — ниже слова «Примечание»/«Перебивка».
-       Поджимаем высоту/межстрочный пустого поля, чтобы линия встала под базовой линией подписи (как подчёркивание слова). */
-    .scene-main > .line-note .note-editable:not(.has-text),
-    .scene-main > .intercut .intercut-text:not(.has-text) {
-      min-height: 1.15em;
-      line-height: 1.15;
-      padding-bottom: 0;
-    }
-
-    /* Строка «Sam»: пунктир-заполнитель на одной базовой линии с «SAM:» и приглушённее note/intercut. */
-    .scene-main > .line-say .say-editable:not(.has-text) {
       min-height: 1.15em;
       line-height: 1.15;
       padding-bottom: 0;
       border-bottom: 0.5px dashed rgba(200, 198, 195, 0.18);
     }
+
+    /* Пустое поле высотой ~1.4em уводило пунктир к низу строки — ниже слова «Примечание»/«Перебивка».
+       min-height/line-height — в общем правиле выше (как у «Sam»). */
 
     .scene-main > .line-say .say-editable:focus,
     .scene-main > .line-note .note-editable:focus,
