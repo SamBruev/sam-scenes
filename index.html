@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v374)</title>
+  <title>Sam Scenes (v375)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -2373,6 +2373,47 @@
       outline: 2px solid rgba(255, 210, 120, 0.85);
       outline-offset: 2px;
       animation: scene-shot-guide-pulse 1.15s ease-out 1;
+    }
+
+    @keyframes scene-insert-enter {
+      0% {
+        opacity: 0;
+        transform: translateY(-18px) scale(0.972);
+      }
+      58% {
+        opacity: 1;
+        transform: translateY(3px) scale(1.006);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes scene-insert-glow {
+      0% {
+        outline-color: rgba(255, 210, 120, 0.72);
+        outline-offset: 1px;
+      }
+      100% {
+        outline-color: transparent;
+        outline-offset: 7px;
+      }
+    }
+
+    .scene.scene-main.scene-insert-anim {
+      outline: 2px solid rgba(255, 210, 120, 0.72);
+      outline-offset: 1px;
+      animation:
+        scene-insert-enter 0.62s cubic-bezier(0.22, 1, 0.36, 1) both,
+        scene-insert-glow 0.88s ease-out both;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .scene.scene-main.scene-insert-anim {
+        animation: none;
+        outline: none;
+      }
     }
 
     .time {
@@ -7808,8 +7849,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v374';
-      var BUILD_TIME = '2026-06-11 04:10 MSK';
+      var APP_VERSION = 'v375';
+      var BUILD_TIME = '2026-06-11 04:25 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -13436,6 +13477,21 @@
         }, 1300);
       }
 
+      /** Праздничное появление только что добавленной сцены (плюс / «Добавить сцену»). */
+      function playSceneInsertAnimation(scene) {
+        if (!scene) return;
+        scene.classList.remove('scene-insert-anim');
+        void scene.offsetWidth;
+        scene.classList.add('scene-insert-anim');
+        clearTimeout(scene._sceneInsertAnimT);
+        scene._sceneInsertAnimT = setTimeout(function () {
+          scene.classList.remove('scene-insert-anim');
+        }, 920);
+        try {
+          scene.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } catch (eScroll) {}
+      }
+
       function scrollShotlistLocForRow(row) {
         var loc = row && row.closest && row.closest('.shotlist-loc');
         if (loc) loc.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
@@ -14720,6 +14776,7 @@
         bindNoteIntercutPastePlain(node);
         ensureSayReplaceButtons(node);
         refreshNoteIntercutHasTextClasses(node);
+        playSceneInsertAnimation(node);
         markDirty();
       }
 
@@ -14747,6 +14804,7 @@
         bindNoteIntercutPastePlain(node);
         ensureSayReplaceButtons(node);
         refreshNoteIntercutHasTextClasses(node);
+        playSceneInsertAnimation(node);
         markDirty();
       }
 
