@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v380)</title>
+  <title>Sam Scenes (v381)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -2241,9 +2241,9 @@
       gap: 16px;
     }
 
-    /* INTRO: явный отступ от блока «Подготовка» / начало съёмок (не уменьшать ниже в файле без причины). */
+    /* INTRO: отступ от «Подготовки» — через .teleprompter-menu (margin 32px сверху/снизу). */
     .scene-main.scene-role-intro {
-      margin-top: 52px;
+      margin-top: 0;
       margin-bottom: 44px;
       padding-bottom: 26px;
       border-bottom: none;
@@ -4326,24 +4326,26 @@
       color: rgba(255, 236, 196, 0.55);
     }
 
-    /* Блок-меню телесуфлёра перед INTRO: иконка-кнопка запуска (весь сценарий) + шестерёнка с глобальными настройками. */
+    /* Блок-меню телесуфлёра перед INTRO: иконка по центру, одинаковые отступы от «Подготовки» и INTRO. */
     .teleprompter-menu {
       position: relative;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
+      justify-content: center;
       gap: 12px;
-      margin: 0 0 20px;
-      padding: 12px 14px;
+      margin: 32px 0;
+      padding: 12px 48px 12px 14px;
       border-radius: 16px;
       border: 1px solid rgba(220, 178, 112, 0.34);
       background: rgba(0, 0, 0, 0.32);
     }
 
     .teleprompter-menu-main {
-      flex: 1 1 auto;
+      flex: 0 1 auto;
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 12px;
       min-width: 0;
       margin: 0;
@@ -4351,7 +4353,7 @@
       border: none;
       background: transparent;
       color: inherit;
-      text-align: left;
+      text-align: center;
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
@@ -4395,6 +4397,8 @@
       flex-direction: column;
       gap: 2px;
       min-width: 0;
+      align-items: center;
+      text-align: center;
     }
 
     .teleprompter-menu-title {
@@ -4411,6 +4415,10 @@
     }
 
     .teleprompter-menu-gear {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
       flex-shrink: 0;
       width: 2.2rem;
       height: 2.2rem;
@@ -4430,7 +4438,7 @@
     }
 
     .teleprompter-menu-gear:active {
-      transform: scale(0.94);
+      transform: translateY(-50%) scale(0.94);
     }
 
     .teleprompter-menu-gear[aria-expanded="true"] {
@@ -4862,7 +4870,7 @@
 
     /* Подготовка: как кнопка «+ Создать сценарий» в панели — тёмный полупрозрачный, без ореола .card */
     .card.card-prep {
-      margin-bottom: 32px;
+      margin-bottom: 0;
       background: rgba(0, 0, 0, 0.32);
       border: 1px solid var(--ui-select-border);
       -webkit-backdrop-filter: none;
