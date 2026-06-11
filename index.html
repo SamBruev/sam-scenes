@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v381)</title>
+  <title>Sam Scenes (v382)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -4335,7 +4335,7 @@
       justify-content: center;
       gap: 12px;
       margin: 32px 0;
-      padding: 12px 48px 12px 14px;
+      padding: 12px 48px;
       border-radius: 16px;
       border: 1px solid rgba(220, 178, 112, 0.34);
       background: rgba(0, 0, 0, 0.32);
@@ -4344,9 +4344,11 @@
     .teleprompter-menu-main {
       flex: 0 1 auto;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 12px;
+      gap: 8px;
+      width: 100%;
       min-width: 0;
       margin: 0;
       padding: 0;
@@ -7974,8 +7976,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v380';
-      var BUILD_TIME = '2026-06-11 05:25 MSK';
+      var APP_VERSION = 'v382';
+      var BUILD_TIME = '2026-06-11 05:42 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
