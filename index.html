@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v407)</title>
+  <title>Sam Scenes (v409)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -1516,9 +1516,7 @@
       isolation: isolate;
       background: transparent;
       opacity: 1;
-      transform:
-        translate3d(0, calc((1 - var(--top-logo-reveal, 1)) * 14px), 0)
-        scale(calc(0.972 + 0.028 * var(--top-logo-reveal, 1)));
+      transform: translate3d(0, calc((1 - var(--top-logo-reveal, 1)) * 16px), 0);
       transform-origin: center center;
       will-change: transform;
     }
@@ -1737,8 +1735,7 @@
       touch-action: pan-y;
     }
 
-    /* Логотип «Sam Bruev…»: резкий и заранее размытый слой; crossfade через --top-logo-reveal
-       (сглаживается в JS), без живого filter по кадрам — иначе WebKit на fixed-шапке. */
+    /* Логотип: один слой + opacity (без crossfade blur/sharp — на iOS даёт «дёрганье»). */
     .logo-bg::before,
     .logo-bg::after {
       content: "";
@@ -1753,14 +1750,12 @@
 
     .logo-bg::before {
       filter: brightness(0.78) contrast(0.9) saturate(0.92);
-      opacity: calc(0.78 * var(--top-logo-reveal, 1));
+      opacity: calc(0.48 + 0.52 * var(--top-logo-reveal, 1));
       z-index: 1;
     }
 
     .logo-bg::after {
-      filter: blur(11px) brightness(0.66) contrast(0.88) saturate(1.12);
-      opacity: calc(0.78 * (1 - var(--top-logo-reveal, 1)));
-      z-index: 2;
+      display: none;
     }
 
     .logo-controls {
@@ -3770,7 +3765,7 @@
       }
       .prep-important-done-text {
         animation: none;
-        background-image: none;
+        clip-path: none;
         -webkit-text-fill-color: var(--anna-gold);
         color: var(--anna-gold);
         will-change: auto;
@@ -3778,7 +3773,7 @@
       }
       .field-prep-important.prep-important-done-pulse .prep-important-done-text {
         animation: none;
-        background-image: none;
+        clip-path: none;
         -webkit-text-fill-color: var(--anna-gold);
         color: var(--anna-gold);
         will-change: auto;
@@ -3918,37 +3913,13 @@
       display: none;
     }
 
-    /* Праздничная анимация плашки «Всё под контролем!»: мягкое появление,
-       бегущий блик и дышащее зелёное свечение в тон success-теме. */
-    @keyframes prepDoneTextIn {
+    /* «Всё под контролем!» — один проход слева направо (clip-path). */
+    @keyframes prepDoneTextWriteLtr {
       0% {
-        opacity: 0;
-        transform: translateY(8px) scale(0.92);
+        clip-path: inset(0 100% 0 0);
       }
       100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-    }
-
-    @keyframes prepDoneTextShine {
-      0% {
-        background-position: 220% 50%;
-      }
-      100% {
-        background-position: -90% 50%;
-      }
-    }
-
-    @keyframes prepDoneTextGlow {
-      0% {
-        filter: drop-shadow(0 0 2px rgba(212, 175, 55, 0.2));
-      }
-      45% {
-        filter: drop-shadow(0 0 12px rgba(245, 230, 184, 0.55));
-      }
-      100% {
-        filter: drop-shadow(0 0 4px rgba(212, 175, 55, 0.28));
+        clip-path: inset(0 0 0 0);
       }
     }
 
@@ -3966,38 +3937,17 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* Праздничная анимация — только в момент завершения (вместе с pulse блока «Важно»). */
+    /* Анимация — только в момент завершения (вместе с pulse блока «Важно»). */
     .field-prep-important.prep-important-done-pulse .prep-important-done-text {
-      background-image: linear-gradient(
-        105deg,
-        var(--anna-gold) 0%,
-        var(--anna-gold) 38%,
-        var(--anna-gold-bright) 46%,
-        #fff8e0 50%,
-        var(--anna-gold-bright) 54%,
-        var(--anna-gold) 62%,
-        var(--anna-gold) 100%
-      );
-      background-size: 250% 100%;
-      background-position: -90% 50%;
-      background-repeat: no-repeat;
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      will-change: transform, filter, background-position;
-      animation:
-        prepDoneTextIn 0.52s cubic-bezier(0.22, 1, 0.36, 1) both,
-        prepDoneTextShine 0.92s ease-in-out 0.06s 1 forwards,
-        prepDoneTextGlow 0.92s ease-in-out 0s 1 forwards;
+      clip-path: inset(0 100% 0 0);
+      will-change: clip-path;
+      animation: prepDoneTextWriteLtr 0.96s cubic-bezier(0.33, 1, 0.38, 1) forwards;
     }
 
-    /* После «прописывания» — спокойный финал без скачка gradient→solid при снятии pulse. */
+    /* После прохода — спокойный финал без скачка при снятии pulse. */
     .prep-important-done-text.is-settled {
       animation: none !important;
-      background-image: none !important;
-      background-position: 0 0 !important;
-      -webkit-background-clip: border-box !important;
-      background-clip: border-box !important;
+      clip-path: none !important;
       -webkit-text-fill-color: var(--anna-gold) !important;
       color: var(--anna-gold) !important;
       filter: none !important;
@@ -7943,8 +7893,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v407';
-      var BUILD_TIME = '2026-06-11 07:35 MSK';
+      var APP_VERSION = 'v409';
+      var BUILD_TIME = '2026-06-11 08:10 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -14006,10 +13956,10 @@
         if (!textEl) return;
         textEl.classList.remove('is-settled');
         textEl.style.animation = 'none';
-        textEl.style.backgroundPosition = '-90% 50%';
+        textEl.style.clipPath = 'inset(0 100% 0 0)';
         void textEl.offsetWidth;
         textEl.style.animation = '';
-        textEl.style.backgroundPosition = '';
+        textEl.style.clipPath = '';
       }
 
       function finishPrepImportantDonePulse(block) {
@@ -14056,13 +14006,13 @@
         }
         if (textEl) {
           function onAnimEnd(e) {
-            if (e.target !== textEl || e.animationName !== 'prepDoneTextShine') return;
+            if (e.target !== textEl || e.animationName !== 'prepDoneTextWriteLtr') return;
             finishOnce();
           }
           textEl._prepDoneAnimEnd = onAnimEnd;
           textEl.addEventListener('animationend', onAnimEnd);
         }
-        block._prepDoneFallbackTimer = setTimeout(finishOnce, 1120);
+        block._prepDoneFallbackTimer = setTimeout(finishOnce, 1040);
       }
 
       function playPrepImportantExpand(block) {
@@ -15505,17 +15455,14 @@
         wireTopLogoScrollBlur._done = true;
       }
 
-      /** Размытие фона и плавное появление логотипа: одна smoothstep-кривая от scrollY,
-          логотип догоняет быстрее фона, rAF пока идёт скролл + короткий settle. */
+      /** Фон — lerp; логотип — 1:1 со scrollY (без отставания и snap в конце). */
       var APP_BG_SCROLL_BLUR_RAMP = 560;
       var APP_BG_SCROLL_BLUR_MAX = 0.82;
-      var APP_BG_BLUR_LERP_MS = 110;
-      var TOP_LOGO_REVEAL_LERP_MS = 52;
-      var APP_BG_SCROLL_SETTLE_MS = 200;
+      var APP_BG_BLUR_LERP_MS = 120;
+      var APP_BG_SCROLL_SETTLE_MS = 160;
       var appBgScrollBlurTarget = 0;
       var appBgScrollBlurDisplay = 0;
       var topLogoRevealTarget = 1;
-      var topLogoRevealDisplay = 1;
       var appBgScrollBlurLoopId = null;
       var appBgScrollBlurLastTs = 0;
       var appBgScrollActiveUntil = 0;
@@ -15560,7 +15507,6 @@
 
         if (forceSnap) {
           appBgScrollBlurDisplay = appBgScrollBlurTarget;
-          topLogoRevealDisplay = topLogoRevealTarget;
         } else {
           appBgScrollBlurDisplay = lerpScrollVisual(
             appBgScrollBlurDisplay,
@@ -15568,32 +15514,24 @@
             dt,
             APP_BG_BLUR_LERP_MS
           );
-          topLogoRevealDisplay = lerpScrollVisual(
-            topLogoRevealDisplay,
-            topLogoRevealTarget,
-            dt,
-            TOP_LOGO_REVEAL_LERP_MS
-          );
         }
 
         var v = appBgScrollBlurDisplay;
-        var r = topLogoRevealDisplay;
+        var r = topLogoRevealTarget;
         if (forceSnap || Math.abs(v - appBgScrollBlurLast) > 0.0004) {
           appBgScrollBlurLast = v;
           document.body.style.setProperty('--app-bg-scroll-blur', v.toFixed(4));
         }
-        if (forceSnap || Math.abs(r - topLogoRevealLast) > 0.0004) {
+        if (r !== topLogoRevealLast) {
           topLogoRevealLast = r;
-          document.documentElement.style.setProperty('--top-logo-reveal', r.toFixed(4));
+          document.documentElement.style.setProperty('--top-logo-reveal', r.toFixed(5));
         }
       }
 
       function appBgScrollBlurLoopTick() {
         var now = performance.now();
         applyAppBgScrollBlurSmooth(false);
-        var settling =
-          Math.abs(appBgScrollBlurTarget - appBgScrollBlurDisplay) > 0.0012 ||
-          Math.abs(topLogoRevealTarget - topLogoRevealDisplay) > 0.0012;
+        var settling = Math.abs(appBgScrollBlurTarget - appBgScrollBlurDisplay) > 0.0012;
         if (settling || now < appBgScrollActiveUntil) {
           appBgScrollBlurLoopId = requestAnimationFrame(appBgScrollBlurLoopTick);
         } else {
@@ -15617,11 +15555,6 @@
         if (wireAppBackgroundScrollBlur._done) return;
         wireAppBackgroundScrollBlur._done = true;
         window.addEventListener('scroll', scheduleAppBgScrollBlur, { passive: true });
-        if (window.visualViewport) {
-          try {
-            window.visualViewport.addEventListener('scroll', scheduleAppBgScrollBlur, { passive: true });
-          } catch (eVv) {}
-        }
         applyAppBgScrollBlurSmooth(true);
       }
 
