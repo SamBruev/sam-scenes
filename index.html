@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v390)</title>
+  <title>Sam Scenes (v391)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -5720,6 +5720,8 @@
        (Intro/outro — только «Снято» по центру, см. правила data-scene-role выше.) */
     .scene-main > .scene-toolbar .mini.scene-remove {
       flex: 0 0 auto;
+      position: relative;
+      z-index: 3;
       align-self: center;
       box-sizing: border-box;
       width: 44px;
@@ -5765,6 +5767,8 @@
     /* «Добавить» — плюсик у правого края нижнего ряда. */
     .scene-main > .scene-toolbar .mini.scene-add {
       flex: 0 0 auto;
+      position: relative;
+      z-index: 3;
       margin-left: auto;
       align-self: center;
       box-sizing: border-box;
@@ -5819,7 +5823,6 @@
       align-items: center;
       justify-content: center;
       gap: 0;
-      position: relative;
       overflow: visible;
       width: clamp(58px, 17vw, 76px);
       height: clamp(66px, 19vw, 84px);
@@ -7879,8 +7882,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v390';
-      var BUILD_TIME = '2026-06-11 07:12 MSK';
+      var APP_VERSION = 'v391';
+      var BUILD_TIME = '2026-06-11 07:20 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
