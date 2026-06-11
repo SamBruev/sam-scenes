@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v385)</title>
+  <title>Sam Scenes (v387)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -3718,14 +3718,16 @@
       .prep-important-done-text {
         animation: none;
         background-image: none;
-        -webkit-text-fill-color: #ffffff;
+        -webkit-text-fill-color: var(--anna-gold);
+        color: var(--anna-gold);
         will-change: auto;
         filter: none;
       }
       .field-prep-important.prep-important-done-pulse .prep-important-done-text {
         animation: none;
         background-image: none;
-        -webkit-text-fill-color: #ffffff;
+        -webkit-text-fill-color: var(--anna-gold);
+        color: var(--anna-gold);
         will-change: auto;
         filter: none;
       }
@@ -3894,10 +3896,10 @@
 
     @keyframes prepDoneTextGlow {
       0%, 100% {
-        filter: drop-shadow(0 0 4px rgba(120, 220, 150, 0.32));
+        filter: drop-shadow(0 0 4px rgba(212, 175, 55, 0.32));
       }
       50% {
-        filter: drop-shadow(0 0 13px rgba(150, 240, 185, 0.7));
+        filter: drop-shadow(0 0 13px rgba(245, 230, 184, 0.62));
       }
     }
 
@@ -3905,12 +3907,11 @@
       flex: 0 1 auto;
       min-width: 0;
       margin: 0;
-      /* Рукописный шрифт (как у строки под фамилией ассистента — он нравится Sam), белым. */
       font-family: "Pacifico", "Bad Script", cursive;
       font-weight: 400;
       font-size: clamp(1.05rem, 3.6vw, 1.35rem);
       line-height: 1.2;
-      color: #ffffff;
+      color: var(--anna-gold);
       letter-spacing: 0.02em;
       text-align: center;
       -webkit-font-smoothing: antialiased;
@@ -3918,16 +3919,15 @@
 
     /* Праздничная анимация — только в момент завершения (вместе с pulse блока «Важно»). */
     .field-prep-important.prep-important-done-pulse .prep-important-done-text {
-      /* Светлый базовый текст с бегущим мятным бликом (background-clip: text). */
       background-image: linear-gradient(
         105deg,
-        #ffffff 0%,
-        #ffffff 38%,
-        #eafff1 46%,
-        #b9f5cf 50%,
-        #eafff1 54%,
-        #ffffff 62%,
-        #ffffff 100%
+        var(--anna-gold) 0%,
+        var(--anna-gold) 38%,
+        var(--anna-gold-bright) 46%,
+        #fff8e0 50%,
+        var(--anna-gold-bright) 54%,
+        var(--anna-gold) 62%,
+        var(--anna-gold) 100%
       );
       background-size: 250% 100%;
       background-position: -90% 50%;
@@ -7981,8 +7981,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v385';
-      var BUILD_TIME = '2026-06-11 06:25 MSK';
+      var APP_VERSION = 'v386';
+      var BUILD_TIME = '2026-06-11 06:40 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -17073,29 +17073,29 @@
 
   <script>
     /* Авто-обновление установленного PWA (iOS «на рабочий стол»).
-       Без этого standalone-приложение держит в памяти старый JS и не подхватывает фиксы
-       (напр. крестик суфлёра, исправленный в v342) — обновлялся только браузер.
-       Логика: при возврате приложения на передний план проверяем новую версию SW;
-       когда новый SW активируется (skipWaiting+clients.claim → controllerchange) —
-       один раз перезагружаем страницу на свежий код. Перезагрузку откладываем,
-       пока открыт суфлёр, чтобы не прерывать чтение. */
+       Перезагрузку НЕ привязываем к закрытию суфлёра — иначе после «×» кажется,
+       что основная страница «долго грузится» (полный reload + network-first HTML).
+       Если суфлёр открыт в момент controllerchange — ждём уход приложения в фон
+       и возврат (visibility visible), не опрашиваем каждые 1.5 с. */
     if ('serviceWorker' in navigator) {
       (function () {
         var hadController = !!navigator.serviceWorker.controller;
         var reloaded = false;
-        function reloadWhenSafe() {
+        var pendingSwReload = false;
+        function trySwReload() {
           if (reloaded) return;
           var tp = document.getElementById('teleprompter-overlay');
           if (tp && tp.classList.contains('open')) {
-            setTimeout(reloadWhenSafe, 1500);
+            pendingSwReload = true;
             return;
           }
+          pendingSwReload = false;
           reloaded = true;
           location.reload();
         }
         navigator.serviceWorker.addEventListener('controllerchange', function () {
           if (!hadController) return;
-          reloadWhenSafe();
+          trySwReload();
         });
         window.addEventListener('load', function () {
           navigator.serviceWorker
@@ -17105,6 +17105,7 @@
               document.addEventListener('visibilitychange', function () {
                 if (document.visibilityState === 'visible') {
                   try { reg.update(); } catch (e2) {}
+                  if (pendingSwReload) trySwReload();
                 }
               });
             })
