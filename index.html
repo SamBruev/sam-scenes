@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v403)</title>
+  <title>Sam Scenes (v404)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -548,9 +548,8 @@
       /* Без полей сверху/снизу у стекла; справа 0 — шторка-подсказка вплотную к краю панели; отступ текста в .assistant-drawer-scroll */
       padding: 0 0 0 calc(14px + env(safe-area-inset-left, 0px));
       background: var(--assistant-drawer-glass);
-      /* Фростед-стекло: без блюра полупрозрачный фон просвечивает и шторка сливается
-         с основным меню. На время слайда блюр снимается (html.assistant-drawer-anim /
-         -tracking, ниже) — там артефакты/дёрганье iOS, поэтому статичный блюр только у открытой панели. */
+      /* Фростед-стекло: blur(22px) держим и при слайде (anim/tracking) — см. правило ниже.
+         Раньше на время слайда blur снимали → на iOS миг «прозрачной» панели. */
       -webkit-backdrop-filter: blur(22px) saturate(1.25);
       backdrop-filter: blur(22px) saturate(1.25);
       border-right: 1px solid rgba(255, 248, 235, 0.12);
@@ -607,14 +606,14 @@
       pointer-events: auto;
     }
 
-    /* На время слайда — без живого blur (WebKit артефакты), чуть плотнее фон. */
+    /* Стекло держим включённым с ПЕРВОГО кадра слайда (и при перетаскивании).
+       Раньше на время слайда blur снимался (backdrop-filter:none + плотный фон), а
+       включался уже после — на iOS backdrop-filter «доезжает» на кадр позже, и панель
+       на миг выглядела прозрачной (жалоба: «сначала прозрачный фон, потом ликвид-глас»).
+       isolation/contain убраны намеренно: они создают backdrop-root, и blur перестаёт
+       «видеть» контент под стеклом. Базовый backdrop-filter: blur(22px) остаётся активным. */
     html.assistant-drawer-anim .assistant-drawer,
     html.assistant-drawer-tracking .assistant-drawer {
-      isolation: isolate;
-      contain: layout style;
-      -webkit-backdrop-filter: none;
-      backdrop-filter: none;
-      background: rgba(8, 8, 10, 0.9);
       box-shadow: 10px 0 48px rgba(0, 0, 0, 0.42);
     }
 
@@ -7960,8 +7959,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v403';
-      var BUILD_TIME = '2026-06-11 13:00 MSK';
+      var APP_VERSION = 'v404';
+      var BUILD_TIME = '2026-06-11 07:10 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -10373,9 +10372,23 @@
           );
         }
         if (closeBtn) {
-          closeBtn.addEventListener('click', function () {
+          /* Быстрое закрытие по касанию: только click давал заметную задержку в iOS
+             standalone (ждём синтетический click после touchend). Реагируем сразу на
+             touchend; debounce гасит двойной вызов (touchend → синтетический click). */
+          var lastAssistantCloseAt = 0;
+          function fastAssistantClose(e) {
+            if (!document.body.classList.contains('assistant-drawer-open')) return;
+            var now = Date.now();
+            if (now - lastAssistantCloseAt < 700) {
+              if (e && e.cancelable) { try { e.preventDefault(); } catch (e1) {} }
+              return;
+            }
+            lastAssistantCloseAt = now;
+            if (e && e.cancelable) { try { e.preventDefault(); } catch (e2) {} }
             closeAssistantDrawer();
-          });
+          }
+          closeBtn.addEventListener('touchend', fastAssistantClose, { passive: false });
+          closeBtn.addEventListener('click', fastAssistantClose);
         }
         document.addEventListener(
           'keydown',

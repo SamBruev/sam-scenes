@@ -2,7 +2,8 @@
 
 **Как использовать:** новый чат → модель **Opus 4.8** → workspace `/Users/apple/Documents/CURSOR/SamScenes` → вставить блок «Промпт» ниже целиком. Дополнительно приложить `@index.html`, `@sw.js`, `@SAMSCENES-FIXES-TODO.md`, `@SAM_SCENES_HANDOFF.md`, `@AUDIT-SamScenes-v339.md` (как ориентир формата, не дублировать слепо).
 
-**Целевая версия на момент составления:** v400+ · монолит `index.html` (~17k строк).
+**Целевая версия на момент составления:** v403+ · монолит `index.html` (~17k строк).  
+**Точка входа для повторного аудита:** `OPUS_REVIEW/START_HERE.md`
 
 ---
 

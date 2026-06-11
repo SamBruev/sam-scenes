@@ -19,6 +19,13 @@ MD_FILES = [
     ("/Users/apple/Documents/CURSOR/SamScenes/SAM_SCENES_HANDOFF.md", "SAM_SCENES_HANDOFF.md"),
     ("/Users/apple/Documents/CURSOR/SamScenes/AUDIT-PROMPT-OPUS.md", "AUDIT-PROMPT-OPUS.md"),
     ("/Users/apple/Documents/CURSOR/SamScenes/AUDIT-SamScenes-v400.md", "AUDIT-SamScenes-v400.md"),
+    ("/Users/apple/Documents/CURSOR/SamScenes/AUDIT-SamScenes-v401.md", "AUDIT-SamScenes-v401.md"),
+    ("/Users/apple/Documents/CURSOR/SamScenes/OPUS_REVIEW/START_HERE.md", "OPUS_REVIEW/START_HERE.md"),
+    ("/Users/apple/Documents/CURSOR/SamScenes/OPUS_REVIEW/CURRENT.md", "OPUS_REVIEW/CURRENT.md"),
+    ("/Users/apple/Documents/CURSOR/SamScenes/OPUS_REVIEW/OPEN_ITEMS.md", "OPUS_REVIEW/OPEN_ITEMS.md"),
+    ("/Users/apple/Documents/CURSOR/SamScenes/OPUS_REVIEW/IOS_CHECKLIST.md", "OPUS_REVIEW/IOS_CHECKLIST.md"),
+    ("/Users/apple/Documents/CURSOR/SamScenes/OPUS_REVIEW/CODE_MAP.md", "OPUS_REVIEW/CODE_MAP.md"),
+    ("/Users/apple/Documents/CURSOR/SamScenes/OPUS_REVIEW/PROMPT_SHORT.md", "OPUS_REVIEW/PROMPT_SHORT.md"),
 ]
 
 

@@ -1,6 +1,6 @@
 # Sam Scenes — структура проекта
 
-**Версия в проде:** v365 · [sambruev.github.io/sam-scenes/](https://sambruev.github.io/sam-scenes/)
+**Версия в проде:** v404 · [sambruev.github.io/sam-scenes/](https://sambruev.github.io/sam-scenes/)
 
 Одностраничное PWA «сценарий съёмки» — один `index.html` (HTML + CSS + JS), без сборки.
 
@@ -14,6 +14,7 @@
 |------|------------|
 | `index.html`, `sw.js`, `build-info.json`, `manifest.json`, `media/`, иконки | **Приложение** — правки здесь |
 | `tools/` | Локальный сервер ссылок MD → Finder (порт `19847`) |
+| `OPUS_REVIEW/` | Пакет для аудита Opus — [START_HERE](http://127.0.0.1:19847/reveal?p=/Users/apple/Documents/CURSOR/SamScenes/OPUS_REVIEW/START_HERE.md) |
 | `scripts/` | `snapshot-index.sh`, кодирование медиа |
 | `snapshots/` | Локальные снимки `index.html` по версиям (**в `.gitignore`**, не в git) |
 | `portfolio-*` | Отдельные материалы портфолио, **не** часть деплоя Sam Scenes |
@@ -47,6 +48,8 @@ git config core.hooksPath .githooks
 | [PROJECT.md](http://127.0.0.1:19847/reveal?p=/Users/apple/Documents/CURSOR/SamScenes/PROJECT.md) | Этот файл — карта проекта |
 | [SAMSCENES-FIXES-TODO.md](http://127.0.0.1:19847/reveal?p=/Users/apple/Documents/CURSOR/SamScenes/SAMSCENES-FIXES-TODO.md) | ТЗ и чеклисты правок |
 | [SAM_SCENES_HANDOFF.md](http://127.0.0.1:19847/reveal?p=/Users/apple/Documents/CURSOR/SamScenes/SAM_SCENES_HANDOFF.md) | Handoff для нового чата / агента |
+| [OPUS_REVIEW/START_HERE.md](http://127.0.0.1:19847/reveal?p=/Users/apple/Documents/CURSOR/SamScenes/OPUS_REVIEW/START_HERE.md) | Аудит Opus — точка входа |
+| [AUDIT-PROMPT-OPUS.md](http://127.0.0.1:19847/reveal?p=/Users/apple/Documents/CURSOR/SamScenes/AUDIT-PROMPT-OPUS.md) | Полный промпт аудита (матрица A→L) |
 | [README.md](http://127.0.0.1:19847/reveal?p=/Users/apple/Documents/CURSOR/SamScenes/README.md) | Краткий вход в репозиторий |
 
 ### Ссылки MD → Finder (Cursor)
