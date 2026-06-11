@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v382)</title>
+  <title>Sam Scenes (v383)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -4081,8 +4081,9 @@
       position: absolute;
       top: max(12px, env(safe-area-inset-top));
       right: max(12px, env(safe-area-inset-right));
-      width: 40px;
-      height: 40px;
+      z-index: 5;
+      width: 44px;
+      height: 44px;
       border-radius: 999px;
       border: 1px solid rgba(255, 218, 132, 0.45);
       background: rgba(16, 16, 16, 0.92);
@@ -4090,6 +4091,8 @@
       font-size: 24px;
       line-height: 1;
       cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
       box-shadow:
         0 0 0 1px rgba(255, 200, 120, 0.08),
         0 0 18px rgba(255, 165, 95, 0.2),
@@ -4097,6 +4100,8 @@
     }
 
     .teleprompter-viewport {
+      position: relative;
+      z-index: 1;
       width: min(96vw, 1100px);
       max-height: calc(100vh - 96px);
       min-height: 0;
@@ -7976,8 +7981,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v382';
-      var BUILD_TIME = '2026-06-11 05:42 MSK';
+      var APP_VERSION = 'v383';
+      var BUILD_TIME = '2026-06-11 06:10 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -12629,6 +12634,34 @@
       }
 
       /** iOS/PWA: touchend.target иногда не кнопка — добираем координатами касания. */
+      function closestTeleprompterCloseFromEvent(e) {
+        if (!teleprompterOverlay || !teleprompterOverlay.classList.contains('open')) return null;
+        var fromTarget = e && e.target && e.target.closest
+          ? e.target.closest('#teleprompter-close, .teleprompter-close')
+          : null;
+        if (fromTarget) return fromTarget;
+        var x;
+        var y;
+        if (e && e.changedTouches && e.changedTouches.length) {
+          x = e.changedTouches[0].clientX;
+          y = e.changedTouches[0].clientY;
+        } else if (e && typeof e.clientX === 'number' && typeof e.clientY === 'number') {
+          x = e.clientX;
+          y = e.clientY;
+        } else {
+          return null;
+        }
+        var el = document.elementFromPoint(x, y);
+        var hit = el && el.closest ? el.closest('#teleprompter-close, .teleprompter-close') : null;
+        if (hit) return hit;
+        var btn = document.getElementById('teleprompter-close');
+        if (!btn) return null;
+        var r = btn.getBoundingClientRect();
+        if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return btn;
+        return null;
+      }
+
+      /** iOS/PWA: touchend.target иногда не кнопка — добираем координатами касания. */
       function closestTeleprompterMenuSettingsCloseFromEvent(e) {
         var fromTarget = e && e.target && e.target.closest
           ? e.target.closest('#teleprompter-menu-settings-close, .teleprompter-menu-settings-close')
@@ -15101,11 +15134,13 @@
         }
 
         if (teleprompterClose) {
-          /* «Пуленепробиваемое» закрытие: на iOS standalone синтетический click по кнопке
-             иногда подавляется обработкой касаний — поэтому ловим ещё pointerup и touchend.
-             Гард 500мс не даёт закрыть дважды, если сработают несколько из {touchend,pointerup,click}. */
+          /* iOS standalone: viewport мог перехватывать тап (нет z-index) + touchend.target
+             часто не кнопка — document capture + hit-test по координатам/rect. */
           var lastTeleprompterCloseAt = 0;
           function doTeleprompterClose(e) {
+            var btn = closestTeleprompterCloseFromEvent(e);
+            if (!btn && e && e.type !== 'click') return;
+            if (!btn && e && e.type === 'click' && e.target !== teleprompterClose && !teleprompterClose.contains(e.target)) return;
             var now = Date.now();
             if (now - lastTeleprompterCloseAt < 500) {
               if (e) { try { e.preventDefault(); } catch (e1) {} }
@@ -15115,16 +15150,17 @@
             if (e) {
               try { e.preventDefault(); } catch (e2) {}
               try { e.stopPropagation(); } catch (e3) {}
+              try { e.stopImmediatePropagation(); } catch (e4) {}
             }
-            try { triggerHaptic('light'); } catch (e4) {}
+            try { triggerHaptic('light'); } catch (e5) {}
             closeTeleprompter();
           }
           teleprompterClose.addEventListener('click', doTeleprompterClose);
-          teleprompterClose.addEventListener('pointerup', function (e) {
+          document.addEventListener('touchend', doTeleprompterClose, { passive: false, capture: true });
+          document.addEventListener('pointerup', function (e) {
             if (e.pointerType === 'mouse' && e.button !== 0) return;
             doTeleprompterClose(e);
-          });
-          teleprompterClose.addEventListener('touchend', doTeleprompterClose, { passive: false });
+          }, true);
         }
 
         if (teleprompterViewport) {
