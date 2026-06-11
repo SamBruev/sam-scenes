@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v384)</title>
+  <title>Sam Scenes (v385)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -7981,8 +7981,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v384';
-      var BUILD_TIME = '2026-06-11 06:18 MSK';
+      var APP_VERSION = 'v385';
+      var BUILD_TIME = '2026-06-11 06:25 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -12801,51 +12801,27 @@
       }
 
       /**
-       * Блокируем скролл документа под оверлеем (иначе на iOS/Android жест уходит в страницу).
-       * Если body уже position:fixed (например drawer) — не трогаем стили, только помечаем что лок мы не владелец.
+       * Блокируем скролл документа под оверлеем. Без position:fixed на body — на iOS смена
+       * fixed→static после закрытия даёт долгий «прогруз» основной страницы (полный reflow).
+       * Полноэкранный оверлей сам перехватывает жесты; достаточно overflow:hidden.
        */
       function lockMainScrollForTeleprompter() {
-        var alreadyLocked = document.body.style.position === 'fixed';
-        if (!alreadyLocked) {
-          teleprompterLockScrollY =
-            window.pageYOffset ||
-            (document.documentElement && document.documentElement.scrollTop) ||
-            (document.body && document.body.scrollTop) ||
-            0;
-          teleprompterLockScrollY = Math.max(0, teleprompterLockScrollY);
-          document.documentElement.style.overflow = 'hidden';
-          document.body.style.overflow = 'hidden';
-          document.body.style.position = 'fixed';
-          document.body.style.top = '-' + teleprompterLockScrollY + 'px';
-          document.body.style.left = '0';
-          document.body.style.right = '0';
-          document.body.style.width = '100%';
-          teleprompterOwnedScrollLock = true;
-        } else {
-          teleprompterOwnedScrollLock = false;
-        }
+        teleprompterLockScrollY =
+          window.pageYOffset ||
+          (document.documentElement && document.documentElement.scrollTop) ||
+          (document.body && document.body.scrollTop) ||
+          0;
+        teleprompterLockScrollY = Math.max(0, teleprompterLockScrollY);
+        document.documentElement.style.overflow = 'hidden';
+        document.body.style.overflow = 'hidden';
+        teleprompterOwnedScrollLock = true;
       }
 
       function unlockMainScrollForTeleprompter() {
         if (!teleprompterOwnedScrollLock) return;
-        var y = teleprompterLockScrollY;
-        if (typeof y !== 'number' || !isFinite(y) || y < 0) y = 0;
         document.documentElement.style.overflow = '';
         document.body.style.overflow = '';
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.left = '';
-        document.body.style.right = '';
-        document.body.style.width = '';
         teleprompterOwnedScrollLock = false;
-        try {
-          window.scrollTo(0, y);
-        } catch (eSc) {}
-        requestAnimationFrame(function () {
-          try {
-            window.scrollTo(0, y);
-          } catch (eSc2) {}
-        });
       }
 
       function defaultTeleprompterSettings() {
@@ -13273,7 +13249,9 @@
         }
         teleprompterOverlay.classList.remove('open');
         teleprompterOverlay.setAttribute('aria-hidden', 'true');
-        unlockMainScrollForTeleprompter();
+        requestAnimationFrame(function () {
+          unlockMainScrollForTeleprompter();
+        });
         if (wasOpen) triggerHaptic('micro');
       }
 
