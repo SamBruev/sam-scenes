@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- v220: единый пунктир у примечания и перебивки -->
-<html lang="ru" style="--logo-x: 0px; --logo-y: 0px; --logo-scale: 2.00; --top-logo-blur: 0px; --pull-stack-y: 0px;">
+<html lang="ru" style="--logo-x: 0px; --logo-y: 0px; --logo-scale: 2.00; --top-logo-blur: 0px; --top-logo-reveal: 1; --pull-stack-y: 0px;">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v393)</title>
+  <title>Sam Scenes (v402)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -167,6 +167,10 @@
       --script-font: "Pacifico", cursive;
       --brand-serif: "Roboto Slab", Georgia, "Times New Roman", serif;
       --top-logo-space: 28vh;
+      --top-logo-reveal: 1;
+      /* Фон: базовая «стеклянность» наверху + нарастание при скролле (см. body::after). */
+      --app-bg-glass-min: 0.34;
+      --app-bg-glass-scroll-gain: 0.58;
       /* Панель слева: ~85% ширины вьюпорта (раньше было 2/3) */
       --assistant-drawer-w: min(calc(100vw * 0.85), 900px);
       /* Размытие основного блока справа от шторки (только opacity/filter через переменные — клики проходят). */
@@ -333,34 +337,41 @@
       min-height: -webkit-fill-available;
       z-index: -1;
       pointer-events: none;
-      background-color: #000000;
-      /* Без вертикальной линии: одинаковый оттенок по ширине, затемнение только сверху-вниз */
+      background-color: #030304;
+      /* Liquid glass: лёгкий блик + затемнение + лампа */
       background-image:
         linear-gradient(
+          165deg,
+          rgba(255, 248, 235, 0.07) 0%,
+          rgba(255, 255, 255, 0.025) 24%,
+          transparent 52%
+        ),
+        linear-gradient(
           180deg,
-          rgba(0, 0, 0, 0.68) 0%,
-          rgba(0, 0, 0, 0.34) 14%,
-          rgba(0, 0, 0, 0.22) 26%,
-          rgba(0, 0, 0, 0.30) 52%,
-          rgba(0, 0, 0, 0.58) 72%,
-          rgba(0, 0, 0, 0.92) 88%,
+          rgba(0, 0, 0, 0.62) 0%,
+          rgba(0, 0, 0, 0.28) 14%,
+          rgba(0, 0, 0, 0.18) 26%,
+          rgba(0, 0, 0, 0.26) 52%,
+          rgba(0, 0, 0, 0.54) 72%,
+          rgba(0, 0, 0, 0.88) 88%,
           #000000 100%
         ),
         url("top-lamp-bg.png");
-      background-size: cover, 100% auto;
-      background-position: center, center 82%;
-      background-repeat: no-repeat, no-repeat;
+      background-size: cover, cover, 100% auto;
+      background-position: center, center, center 82%;
+      background-repeat: no-repeat, no-repeat, no-repeat;
       transform: translateZ(0) scale(1);
       backface-visibility: hidden;
-      filter: blur(1.2px) brightness(0.64) drop-shadow(0 -42px 72px rgba(255, 198, 120, 0.42))
-        drop-shadow(0 -95px 130px rgba(255, 160, 72, 0.15));
+      filter: blur(2.4px) brightness(0.62) saturate(1.22)
+        drop-shadow(0 -42px 72px rgba(255, 198, 120, 0.38))
+        drop-shadow(0 -95px 130px rgba(255, 160, 72, 0.14));
       animation: none;
     }
 
-    /* Второй слой фона: та же «лампа», но заранее сильнее размыта и притемнена.
-       По мере прокрутки приложения вниз плавно проявляем его через --app-bg-scroll-blur (0..~0.8).
-       ВАЖНО: меняем ТОЛЬКО opacity (дёшево для композитора). Радиус blur статичный — без пересчёта
-       по кадрам скролла, иначе живой filter на fixed-слое роняет WebKit (см. историю с логотипом). */
+    /* Второй слой фона: «жидкое стекло» — заранее сильнее размыт и притемнён.
+       По мере прокрутки плавно усиливаем через --app-bg-scroll-blur (0..~0.82).
+       На верху страницы слой всё равно слегка виден (--app-bg-glass-min) — единый glass-стиль.
+       ВАЖНО: меняем ТОЛЬКО opacity (дёшево для композитора). Радиус blur статичный. */
     body::after {
       content: "";
       position: fixed;
@@ -374,26 +385,35 @@
       min-height: -webkit-fill-available;
       z-index: -1;
       pointer-events: none;
-      background-color: #000000;
+      background-color: #040406;
       background-image:
         linear-gradient(
+          165deg,
+          rgba(22, 20, 18, 0.52) 0%,
+          rgba(6, 6, 8, 0.34) 46%,
+          rgba(12, 11, 10, 0.44) 100%
+        ),
+        linear-gradient(
           180deg,
-          rgba(0, 0, 0, 0.72) 0%,
-          rgba(0, 0, 0, 0.44) 14%,
-          rgba(0, 0, 0, 0.38) 26%,
-          rgba(0, 0, 0, 0.46) 52%,
-          rgba(0, 0, 0, 0.70) 72%,
-          rgba(0, 0, 0, 0.94) 88%,
+          rgba(0, 0, 0, 0.68) 0%,
+          rgba(0, 0, 0, 0.38) 14%,
+          rgba(0, 0, 0, 0.32) 26%,
+          rgba(0, 0, 0, 0.40) 52%,
+          rgba(0, 0, 0, 0.64) 72%,
+          rgba(0, 0, 0, 0.90) 88%,
           #000000 100%
         ),
         url("top-lamp-bg.png");
-      background-size: cover, 100% auto;
-      background-position: center, center 82%;
-      background-repeat: no-repeat, no-repeat;
+      background-size: cover, cover, 100% auto;
+      background-position: center, center, center 82%;
+      background-repeat: no-repeat, no-repeat, no-repeat;
       transform: translateZ(0) scale(1);
       backface-visibility: hidden;
-      filter: blur(9px) brightness(0.52);
-      opacity: var(--app-bg-scroll-blur, 0);
+      filter: blur(14px) brightness(0.54) saturate(1.28);
+      opacity: calc(
+        var(--app-bg-glass-min, 0.34) +
+        var(--app-bg-scroll-blur, 0) * var(--app-bg-glass-scroll-gain, 0.58)
+      );
     }
 
     @keyframes lampAmbientPulse {
@@ -766,11 +786,11 @@
 
     .assistant-drawer-host-name-row {
       display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      align-items: baseline;
+      flex-direction: column;
+      flex-wrap: nowrap;
+      align-items: center;
       justify-content: center;
-      gap: 0.15em 0.5em;
+      gap: 2px;
       margin: -4px 0 0;
     }
 
@@ -796,14 +816,17 @@
       font-size: clamp(1.05rem, 3.6vw, 1.35rem);
       line-height: 1.15;
       letter-spacing: 0.02em;
-      color: rgba(245, 230, 184, 0.92);
+      color: var(--anna-gold);
       -webkit-font-smoothing: antialiased;
       white-space: nowrap;
     }
 
     .assistant-drawer-host-clear.is-visible,
     .field.field-assistant .assistant-all-clear.is-visible {
-      display: inline;
+      display: block;
+      width: 100%;
+      text-align: center;
+      margin-top: 2px;
       animation: assistantAllClearIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
     }
 
@@ -823,11 +846,6 @@
       .field.field-assistant .assistant-all-clear.is-visible {
         animation: none;
       }
-    }
-
-    /* Строка «Всё под контролем!» под фамилией ассистента в блоке подготовки — скрыта по просьбе Sam. */
-    #prep-assistant-all-clear {
-      display: none !important;
     }
 
     .assistant-drawer-head {
@@ -1521,6 +1539,12 @@
       z-index: 1;
       isolation: isolate;
       background: transparent;
+      opacity: calc(0.38 + 0.62 * var(--top-logo-reveal, 1));
+      transform:
+        translateY(calc((1 - var(--top-logo-reveal, 1)) * 10px))
+        scale(calc(0.965 + 0.035 * var(--top-logo-reveal, 1)));
+      transform-origin: center center;
+      will-change: transform, opacity;
     }
 
     .top-logo-brand::before {
@@ -1535,7 +1559,7 @@
       background-repeat: no-repeat;
       background-position: center center;
       background-size: contain;
-      opacity: 0.13;
+      opacity: calc(0.14 * (0.42 + 0.58 * var(--top-logo-reveal, 1)));
       filter: blur(11px) saturate(1.05) brightness(0.6) drop-shadow(0 18px 42px rgba(255, 195, 110, 0.38))
         drop-shadow(0 36px 72px rgba(255, 165, 70, 0.14));
       -webkit-mask-image: linear-gradient(to bottom, transparent 0%, transparent 40%, #000 66%, #000 100%);
@@ -1548,6 +1572,8 @@
       .top-logo-brand {
         transition: none !important;
         filter: none !important;
+        transform: none !important;
+        opacity: 1 !important;
       }
 
       .logo-bg {
@@ -1559,7 +1585,7 @@
       }
 
       .logo-bg::before {
-        opacity: 0.72;
+        opacity: calc(0.78 * var(--top-logo-reveal, 1));
       }
     }
 
@@ -1735,8 +1761,8 @@
       touch-action: pan-y;
     }
 
-    /* Логотип «Sam Bruev…»: два слоя — резкий и заранее размытый; при скролле меняем только opacity
-       (как body::after для лампы), без живого filter по кадрам — иначе WebKit на fixed-шапке. */
+    /* Логотип «Sam Bruev…»: резкий и заранее размытый слой; crossfade через --top-logo-reveal
+       (сглаживается в JS), без живого filter по кадрам — иначе WebKit на fixed-шапке. */
     .logo-bg::before,
     .logo-bg::after {
       content: "";
@@ -1750,14 +1776,14 @@
     }
 
     .logo-bg::before {
-      filter: brightness(0.76) contrast(0.9) saturate(0.86);
-      opacity: calc(0.72 * (1 - var(--app-bg-scroll-blur, 0)));
+      filter: brightness(0.78) contrast(0.9) saturate(0.92);
+      opacity: calc(0.78 * var(--top-logo-reveal, 1));
       z-index: 1;
     }
 
     .logo-bg::after {
-      filter: blur(9px) brightness(0.68) contrast(0.88) saturate(0.82);
-      opacity: calc(0.72 * var(--app-bg-scroll-blur, 0));
+      filter: blur(11px) brightness(0.66) contrast(0.88) saturate(1.12);
+      opacity: calc(0.78 * (1 - var(--top-logo-reveal, 1)));
       z-index: 2;
     }
 
@@ -1775,6 +1801,7 @@
       pointer-events: auto;
       position: relative;
       z-index: 1;
+      opacity: calc(0.45 + 0.55 * var(--top-logo-reveal, 1));
     }
 
     .logo-controls input[type="range"] {
@@ -2554,7 +2581,9 @@
     @keyframes scene-remove-collapse {
       0% {
         max-height: var(--scene-remove-start-h, 1200px);
-        margin-bottom: 44px;
+        margin-bottom: var(--scene-remove-start-mb, 0px);
+        padding-top: var(--scene-remove-start-pt, 10px);
+        padding-bottom: var(--scene-remove-start-pb, 12px);
       }
       100% {
         max-height: 0;
@@ -2567,12 +2596,17 @@
     .scene.scene-main.scene-remove-anim {
       overflow: hidden;
       pointer-events: none;
+      box-sizing: border-box;
+      /* flex-ребёнок .scene-stack: без min-height:0 height/max-height не схлопываются */
+      min-height: 0 !important;
+      transform-origin: center top;
+      will-change: transform, opacity, max-height;
       outline: 2px solid rgba(222, 120, 110, 0.62);
       outline-offset: 1px;
       animation:
-        scene-remove-exit 0.5s cubic-bezier(0.4, 0, 0.75, 0.2) forwards,
-        scene-remove-glow 0.58s ease-out forwards,
-        scene-remove-collapse 0.52s cubic-bezier(0.4, 0, 0.75, 0.2) forwards;
+        scene-remove-exit 0.58s cubic-bezier(0.22, 1, 0.36, 1) forwards,
+        scene-remove-glow 0.72s ease-out forwards,
+        scene-remove-collapse 0.56s cubic-bezier(0.22, 1, 0.36, 1) 0.14s forwards;
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -5870,10 +5904,10 @@
       justify-content: center;
       gap: 0;
       overflow: visible;
-      width: clamp(58px, 17vw, 76px);
-      height: clamp(66px, 19vw, 84px);
-      min-width: clamp(58px, 17vw, 76px);
-      min-height: clamp(66px, 19vw, 84px);
+      width: clamp(54px, 16vw, 70px);
+      height: clamp(62px, 18vw, 78px);
+      min-width: clamp(54px, 16vw, 70px);
+      min-height: clamp(62px, 18vw, 78px);
       padding: 0;
       box-sizing: border-box;
       border-radius: 0;
@@ -5910,8 +5944,8 @@
 
     .scene-main > .scene-toolbar .camera-lens-shutter {
       position: relative;
-      width: clamp(50px, 14.5vw, 66px);
-      height: clamp(58px, 16.5vw, 74px);
+      width: clamp(46px, 13.5vw, 62px);
+      height: clamp(54px, 15.5vw, 68px);
       flex-shrink: 0;
       pointer-events: none;
       z-index: 1;
@@ -6579,7 +6613,7 @@
       </div>
     </details>
 
-    <details class="card daily-plan" id="daily-plan" open>
+    <details class="card daily-plan" id="daily-plan">
       <summary><span class="details-summary-label">План дня</span></summary>
       <div class="daily-plan-body">
         <div class="plan-summary" id="plan-summary">Нет данных.</div>
@@ -6673,8 +6707,8 @@
             <span class="assistant-role">Ассистент</span>
             <div class="assistant-name-wrap">
               <input id="prep-assistant" class="assistant-name" type="text" value="Анна Непряхина" placeholder="имя" autocomplete="name" readonly tabindex="-1" aria-readonly="true">
-              <span class="assistant-all-clear" id="prep-assistant-all-clear" hidden>Всё под контролем!</span>
             </div>
+            <span class="assistant-all-clear" id="prep-assistant-all-clear" hidden aria-live="polite">Всё под контролем!</span>
           </div>
         </div>
         <div class="field field-prep-important" id="prep-important-block" role="group" aria-labelledby="prep-important-heading">
@@ -7928,8 +7962,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v393';
-      var BUILD_TIME = '2026-06-11 07:35 MSK';
+      var APP_VERSION = 'v402';
+      var BUILD_TIME = '2026-06-11 12:00 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -8210,6 +8244,15 @@
           syncAllShotClasses();
         } catch (ePrepDateWire) {}
         try { ensureTeleprompterMenu(); } catch (eTpMenuRef) {}
+        /* F1-fix: после пересборки DOM (.shotlist-section уничтожена вместе со слушателями)
+           переустанавливаем пикеры/удаление номеров. refreshDomRefs выше уже снял
+           data-shotlist-*-bound, поэтому guard'ы внутри wire* пропустят перепривязку. */
+        try {
+          ensureShotlistPieceSelectOptions(wrap || document);
+          wireShotlistPiecePickers();
+          wireShotlistPiecesManualInput();
+          wireShotlistPiecesRemove();
+        } catch (eShotRewire) {}
       }
 
       var autosaveTO = null;
@@ -8518,7 +8561,7 @@
         /* 2) истёкшие записи корзины */
         try {
           var trash = readScenarioTrashRaw();
-          if (purgeExpiredTrashEntries(trash) > 0) writeScenarioTrash(trash);
+          if (purgeExpiredTrashEntries(trash) > 0) writeScenarioTrashDirect(trash);
         } catch (e2) {}
         if (trySet()) return true;
 
@@ -8530,7 +8573,7 @@
           });
           while (t.items.length) {
             t.items.shift();
-            writeScenarioTrash(t);
+            writeScenarioTrashDirect(t);
             if (trySet()) return true;
           }
         } catch (e3) {}
@@ -8578,9 +8621,22 @@
         return before - trash.items.length;
       }
 
-      function writeScenarioTrash(trash) {
+      /** Прямая запись корзины — только внутри quota recovery (без рекурсии). */
+      function writeScenarioTrashDirect(trash) {
         try {
           localStorage.setItem(SCENARIO_TRASH_STORAGE_KEY, JSON.stringify(trash));
+          return true;
+        } catch (e) {
+          return false;
+        }
+      }
+
+      function writeScenarioTrash(trash) {
+        try {
+          if (!setLocalStorageItemWithQuotaRecovery(SCENARIO_TRASH_STORAGE_KEY, JSON.stringify(trash))) {
+            console.warn('writeScenarioTrash failed (quota)');
+            return false;
+          }
           return true;
         } catch (e) {
           console.warn('writeScenarioTrash failed', e);
@@ -8756,6 +8812,9 @@
       /** Удалить сценарий из набора (подтверждение, перезагрузка как у кнопки «Удалить»). */
       function removeScenarioById(scenarioId) {
         if (!scenarioId) return false;
+        /* #4-fix: сохранить несохранённый DOM активного сценария ДО чтения/правки bundle,
+           иначе правки активного могут потеряться при удалении соседнего (autosave отключён). */
+        try { persistToStorage('Сохранено'); } catch (ePersistDel) {}
         var bundle = readScenarioBundle();
         if (!bundle || !bundle.items || bundle.items.length <= 1) {
           alert('Нужен минимум один сценарий.');
@@ -8774,9 +8833,13 @@
         var toTrash = bundle.items[idx];
         try {
           if (!pushScenarioToTrash(toTrash)) {
-            console.warn('pushScenarioToTrash failed');
+            alert('Не удалось сохранить копию в корзину. Освободите память сайта или очистите корзину в плане съёмок.');
+            return false;
           }
-        } catch (eT) {}
+        } catch (eT) {
+          alert('Не удалось сохранить копию в корзину.');
+          return false;
+        }
         var wasActive = bundle.activeId === scenarioId;
         bundle.items.splice(idx, 1);
         removeAssistantOrderId(bundle, scenarioId);
@@ -12547,7 +12610,7 @@
           '<span class="teleprompter-menu-icon" aria-hidden="true">' + TELEPROMPTER_MENU_ICON_SVG + '</span>' +
           '<span class="teleprompter-menu-titles">' +
             '<span class="teleprompter-menu-title">Телесуфлёр</span>' +
-            '<span class="teleprompter-menu-sub">Весь сценарий</span>' +
+            '<span class="teleprompter-menu-sub">(Весь сценарий)</span>' +
           '</span>' +
         '</button>';
 
@@ -13183,6 +13246,9 @@
         var sceneNo = Array.prototype.indexOf.call(bodies, scene) + 1;
         var confirmMsg = sceneNo > 0 ? 'Удалить сцену ' + sceneNo + '?' : 'Удалить эту сцену?';
         if (confirm(confirmMsg)) {
+          try {
+            flushUndoSnapshot();
+          } catch (eUndo) {}
           playSceneRemoveAnimation(scene, function () {
             scene.remove();
             renumberScenes();
@@ -13561,7 +13627,13 @@
         }
         scene.classList.remove('scene-remove-anim');
         try {
-          scene.style.setProperty('--scene-remove-start-h', scene.offsetHeight + 'px');
+          var cs = window.getComputedStyle(scene);
+          var h = scene.offsetHeight;
+          if (h < 1) h = scene.scrollHeight || 320;
+          scene.style.setProperty('--scene-remove-start-h', h + 'px');
+          scene.style.setProperty('--scene-remove-start-mb', cs.marginBottom);
+          scene.style.setProperty('--scene-remove-start-pt', cs.paddingTop);
+          scene.style.setProperty('--scene-remove-start-pb', cs.paddingBottom);
         } catch (eH) {}
         void scene.offsetWidth;
         scene.classList.add('scene-remove-anim');
@@ -13572,11 +13644,14 @@
           scene.classList.remove('scene-remove-anim');
           try {
             scene.style.removeProperty('--scene-remove-start-h');
+            scene.style.removeProperty('--scene-remove-start-mb');
+            scene.style.removeProperty('--scene-remove-start-pt');
+            scene.style.removeProperty('--scene-remove-start-pb');
           } catch (eCl) {}
           if (done) done();
         }
         clearTimeout(scene._sceneRemoveAnimT);
-        scene._sceneRemoveAnimT = setTimeout(finish, 560);
+        scene._sceneRemoveAnimT = setTimeout(finish, 760);
       }
 
       function scrollShotlistLocForRow(row) {
@@ -14980,7 +15055,7 @@
             if (!btn && e && e.type !== 'click') return;
             if (!btn && e && e.type === 'click' && e.target !== teleprompterClose && !teleprompterClose.contains(e.target)) return;
             var now = Date.now();
-            if (now - lastTeleprompterCloseAt < 500) {
+            if (now - lastTeleprompterCloseAt < 900) {
               if (e) { try { e.preventDefault(); } catch (e1) {} }
               return;
             }
@@ -15420,29 +15495,89 @@
         wireTopLogoScrollBlur._done = true;
       }
 
-      /** Размытие фона и логотипа при прокрутке вниз: меняем только opacity заранее
-          размытых слоёв body::after и .logo-bg::after (через --app-bg-scroll-blur). */
-      var APP_BG_SCROLL_BLUR_RAMP = 420; /* px скролла до максимума */
+      /** Размытие фона и плавное появление логотипа при прокрутке: opacity заранее
+          размытых слоёв body::after и .logo-bg (через --app-bg-scroll-blur / --top-logo-reveal).
+          Значения сглаживаются rAF+lerp — без рывка при отскоке скролла наверх (iOS). */
+      var APP_BG_SCROLL_BLUR_RAMP = 520; /* px скролла до максимума */
       var APP_BG_SCROLL_BLUR_MAX = 0.82; /* максимальная непрозрачность размытого слоя */
-      var appBgScrollBlurRaf = null;
+      var appBgScrollBlurTarget = 0;
+      var appBgScrollBlurDisplay = 0;
+      var topLogoRevealTarget = 1;
+      var topLogoRevealDisplay = 1;
+      var appBgScrollBlurLoopId = null;
       var appBgScrollBlurLast = -1;
-      function applyAppBgScrollBlur() {
-        appBgScrollBlurRaf = null;
+      var topLogoRevealLast = -1;
+
+      function scrollBlurEase(t) {
+        t = Math.max(0, Math.min(1, t));
+        return t * t * (3 - 2 * t);
+      }
+
+      function readScrollTopForBgBlur() {
         var sy =
           window.scrollY ||
           document.documentElement.scrollTop ||
           (document.body && document.body.scrollTop) ||
           0;
-        var t = sy <= 0 ? 0 : sy >= APP_BG_SCROLL_BLUR_RAMP ? 1 : sy / APP_BG_SCROLL_BLUR_RAMP;
-        var v = Math.round(t * APP_BG_SCROLL_BLUR_MAX * 1000) / 1000;
-        if (v === appBgScrollBlurLast) return;
-        appBgScrollBlurLast = v;
-        document.body.style.setProperty('--app-bg-scroll-blur', String(v));
+        return sy < 0 ? 0 : sy;
       }
+
+      function computeAppBgScrollBlurTargets() {
+        var sy = readScrollTopForBgBlur();
+        var t = sy >= APP_BG_SCROLL_BLUR_RAMP ? 1 : sy / APP_BG_SCROLL_BLUR_RAMP;
+        var blurT = scrollBlurEase(t);
+        appBgScrollBlurTarget = blurT * APP_BG_SCROLL_BLUR_MAX;
+        var revealLinear = APP_BG_SCROLL_BLUR_MAX > 0 ? 1 - appBgScrollBlurTarget / APP_BG_SCROLL_BLUR_MAX : 1;
+        topLogoRevealTarget = scrollBlurEase(Math.max(0, Math.min(1, revealLinear)));
+      }
+
+      function applyAppBgScrollBlurSmooth(forceSnap) {
+        computeAppBgScrollBlurTargets();
+        var blurDiff = appBgScrollBlurTarget - appBgScrollBlurDisplay;
+        if (forceSnap || Math.abs(blurDiff) < 0.0006) {
+          appBgScrollBlurDisplay = appBgScrollBlurTarget;
+        } else {
+          appBgScrollBlurDisplay += blurDiff * 0.15;
+        }
+        var revealDiff = topLogoRevealTarget - topLogoRevealDisplay;
+        if (forceSnap || Math.abs(revealDiff) < 0.0006) {
+          topLogoRevealDisplay = topLogoRevealTarget;
+        } else {
+          topLogoRevealDisplay += revealDiff * 0.13;
+        }
+        var v = Math.round(appBgScrollBlurDisplay * 1000) / 1000;
+        var r = Math.round(topLogoRevealDisplay * 1000) / 1000;
+        if (forceSnap || v !== appBgScrollBlurLast) {
+          appBgScrollBlurLast = v;
+          document.body.style.setProperty('--app-bg-scroll-blur', String(v));
+        }
+        if (forceSnap || r !== topLogoRevealLast) {
+          topLogoRevealLast = r;
+          document.documentElement.style.setProperty('--top-logo-reveal', String(r));
+        }
+        var needsLoop =
+          Math.abs(appBgScrollBlurTarget - appBgScrollBlurDisplay) > 0.0006 ||
+          Math.abs(topLogoRevealTarget - topLogoRevealDisplay) > 0.0006;
+        if (needsLoop) {
+          appBgScrollBlurLoopId = requestAnimationFrame(appBgScrollBlurLoopTick);
+        } else {
+          appBgScrollBlurLoopId = null;
+        }
+      }
+
+      function appBgScrollBlurLoopTick() {
+        appBgScrollBlurLoopId = null;
+        applyAppBgScrollBlurSmooth(false);
+      }
+
       function scheduleAppBgScrollBlur() {
-        if (appBgScrollBlurRaf != null) return;
-        appBgScrollBlurRaf = requestAnimationFrame(applyAppBgScrollBlur);
+        if (appBgScrollBlurLoopId != null) return;
+        appBgScrollBlurLoopId = requestAnimationFrame(function () {
+          appBgScrollBlurLoopId = null;
+          applyAppBgScrollBlurSmooth(false);
+        });
       }
+
       function wireAppBackgroundScrollBlur() {
         if (wireAppBackgroundScrollBlur._done) return;
         wireAppBackgroundScrollBlur._done = true;
@@ -15452,7 +15587,7 @@
             window.visualViewport.addEventListener('scroll', scheduleAppBgScrollBlur, { passive: true });
           } catch (eVv) {}
         }
-        applyAppBgScrollBlur();
+        applyAppBgScrollBlurSmooth(true);
       }
 
       /**
@@ -16941,6 +17076,8 @@
           }
           pendingSwReload = false;
           reloaded = true;
+          /* #8-fix: явный flush перед reload по обновлению SW (lifecycle-момент, не фоновый автосейв). */
+          try { if (typeof flushSave === 'function') flushSave(); } catch (eFlushReload) {}
           location.reload();
         }
         navigator.serviceWorker.addEventListener('controllerchange', function () {

@@ -2,14 +2,16 @@
 // Стратегия: Network-first с тайм-аутом для index.html (свежий, но без зависания
 // на медленной сети), Cache-first для остальных файлов — приложение работает офлайн.
 
-var CACHE_NAME = 'samscenes-v394';
+var CACHE_NAME = 'samscenes-v402';
 var CORE_FILES = [
   '/sam-scenes/',
   '/sam-scenes/index.html',
   '/sam-scenes/manifest.json',
+  '/sam-scenes/build-info.json',
   '/sam-scenes/apple-touch-icon.png',
   '/sam-scenes/favicon-192.png',
-  '/sam-scenes/top-lamp-bg.png'
+  '/sam-scenes/top-lamp-bg.png',
+  '/sam-scenes/top-logo.png'
 ];
 
 // #13: на медленной сети не ждём ответ дольше этого времени — отдаём кэш, открытие плавное.
@@ -86,15 +88,19 @@ self.addEventListener('fetch', function (e) {
     return;
   }
 
-  // Остальные файлы (скрипты, картинки, шрифты, манифест) — cache-first: офлайн без сети.
+  // #5-fix: остальные файлы (скрипты, картинки, шрифты, манифест) — stale-while-revalidate.
+  // Мгновенно отдаём кэш (офлайн-плавность), а в фоне тянем свежую версию и обновляем кэш,
+  // чтобы новые ассеты с тем же именем подтягивались без обязательного бампа CACHE_NAME.
   e.respondWith(
     caches.match(req).then(function (cached) {
-      if (cached) return cached;
-      return fetch(req).then(function (response) {
-        var clone = response.clone();
-        caches.open(CACHE_NAME).then(function (cache) { cache.put(req, clone); });
+      var network = fetch(req).then(function (response) {
+        if (response && response.status === 200) {
+          var clone = response.clone();
+          caches.open(CACHE_NAME).then(function (cache) { cache.put(req, clone); });
+        }
         return response;
-      }).catch(function () { return new Response('', { status: 408 }); });
+      }).catch(function () { return cached || new Response('', { status: 408 }); });
+      return cached || network;
     })
   );
 });

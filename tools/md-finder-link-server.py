@@ -17,6 +17,8 @@ MD_FILES = [
     ("/Users/apple/Documents/CURSOR/SamScenes/README.md", "README.md"),
     ("/Users/apple/Documents/CURSOR/SamScenes/SAMSCENES-FIXES-TODO.md", "SAMSCENES-FIXES-TODO.md"),
     ("/Users/apple/Documents/CURSOR/SamScenes/SAM_SCENES_HANDOFF.md", "SAM_SCENES_HANDOFF.md"),
+    ("/Users/apple/Documents/CURSOR/SamScenes/AUDIT-PROMPT-OPUS.md", "AUDIT-PROMPT-OPUS.md"),
+    ("/Users/apple/Documents/CURSOR/SamScenes/AUDIT-SamScenes-v400.md", "AUDIT-SamScenes-v400.md"),
 ]
 
 
