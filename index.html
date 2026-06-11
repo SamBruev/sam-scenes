@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v402)</title>
+  <title>Sam Scenes (v403)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -6450,7 +6450,6 @@
           <span class="assistant-drawer-host-role">Ассистент</span>
           <div class="assistant-drawer-host-name-row">
             <p class="assistant-drawer-host-name" id="assistant-drawer-host-name">Анна Непряхина</p>
-            <span class="assistant-drawer-host-clear" id="assistant-drawer-host-clear" hidden>Всё под контролем!</span>
           </div>
         </div>
         <div class="assistant-drawer-head">
@@ -6708,7 +6707,6 @@
             <div class="assistant-name-wrap">
               <input id="prep-assistant" class="assistant-name" type="text" value="Анна Непряхина" placeholder="имя" autocomplete="name" readonly tabindex="-1" aria-readonly="true">
             </div>
-            <span class="assistant-all-clear" id="prep-assistant-all-clear" hidden aria-live="polite">Всё под контролем!</span>
           </div>
         </div>
         <div class="field field-prep-important" id="prep-important-block" role="group" aria-labelledby="prep-important-heading">
@@ -7962,8 +7960,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v402';
-      var BUILD_TIME = '2026-06-11 12:00 MSK';
+      var APP_VERSION = 'v403';
+      var BUILD_TIME = '2026-06-11 13:00 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -9672,7 +9670,6 @@
           var prepName = prepNameEl && prepNameEl.value ? String(prepNameEl.value).trim() : '';
           hostNameEl.textContent = prepName || 'Анна Непряхина';
         }
-        syncAssistantAllClearLabel();
         var ad = document.getElementById('assistant-new-date');
         if (ad && !ad.value) {
           try {
@@ -14051,23 +14048,8 @@
       /** Развёрнут ли чеклист после заполнения (иначе — компактная плашка «готово»). */
       var prepImportantExpanded = false;
 
-      function syncAssistantAllClearLabel() {
-        var allDone = prepImportantAllChecked();
-        var prepClear = document.getElementById('prep-assistant-all-clear');
-        var drawerClear = document.getElementById('assistant-drawer-host-clear');
-        if (prepClear) {
-          prepClear.hidden = !allDone;
-          prepClear.classList.toggle('is-visible', allDone);
-        }
-        if (drawerClear) {
-          drawerClear.hidden = !allDone;
-          drawerClear.classList.toggle('is-visible', allDone);
-        }
-      }
-
       function updatePrepImportantPin() {
         updatePrepImportantReminder();
-        syncAssistantAllClearLabel();
         var block = document.getElementById('prep-important-block');
         if (!block) return;
         /* Закрепление отключено — блок «Важно» остаётся обычным блоком в карточке «Подготовка». */
