@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v388)</title>
+  <title>Sam Scenes (v390)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -4641,9 +4641,13 @@
       text-align: right;
     }
 
-    /* Строка ассистента — на всю ширину сетки «Подготовки» (не в полколонки). */
-    .card-prep .meta > .field.field-assistant {
+    /* Строка ассистента и блок «Важно» — на всю ширину сетки «Подготовки». */
+    .card-prep .meta > .field.field-assistant,
+    .card-prep .meta > .field.field-prep-important {
       grid-column: 1 / -1;
+    }
+
+    .card-prep .meta > .field.field-assistant {
       align-items: center;
     }
 
@@ -7875,8 +7879,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v388';
-      var BUILD_TIME = '2026-06-11 07:00 MSK';
+      var APP_VERSION = 'v390';
+      var BUILD_TIME = '2026-06-11 07:12 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -14040,7 +14044,21 @@
           for (var j = 0; j < newBoxes.length; j++) {
             if (newBoxes[j].id && checkedState[newBoxes[j].id]) newBoxes[j].checked = true;
           }
+          ensurePrepImportantAfterAssistant(root);
         } catch (eMig) {}
+      }
+
+      /** Блок «Важно» — сразу после строки «Ассистент / …». */
+      function ensurePrepImportantAfterAssistant(root) {
+        try {
+          var meta = (root || document).querySelector('.card-prep .meta');
+          if (!meta) return;
+          var assistant = meta.querySelector('.field.field-assistant');
+          var important = meta.querySelector('.field.field-prep-important');
+          if (!assistant || !important) return;
+          if (important.previousElementSibling === assistant) return;
+          meta.insertBefore(important, assistant.nextElementSibling);
+        } catch (eOrd) {}
       }
 
       /** Старые сохранённые сцены: подпись «Говорю:» → «Sam:». */
