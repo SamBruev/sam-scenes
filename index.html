@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v375)</title>
+  <title>Sam Scenes (v376)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -5613,14 +5613,15 @@
 
     .scene-main > .scene-toolbar {
       order: 4;
-      position: static;
+      position: relative;
       display: flex;
-      flex-wrap: wrap;
-      justify-content: flex-end;
+      flex-wrap: nowrap;
+      justify-content: flex-start;
       align-items: center;
       gap: 10px;
       margin: 28px 0 0;
       padding: 0;
+      min-height: clamp(66px, 19vw, 84px);
       z-index: 25;
     }
 
@@ -5689,10 +5690,10 @@
       border-radius: 999px;
     }
 
-    /* «Удалить» — иконка-корзина у левого края; margin-right:auto уводит «Снято» к правому краю.
+    /* «Удалить» — иконка-корзина у левого края.
        (Intro/outro — только «Снято» по центру, см. правила data-scene-role выше.) */
     .scene-main > .scene-toolbar .mini.scene-remove {
-      margin-right: auto;
+      flex: 0 0 auto;
       align-self: center;
       box-sizing: border-box;
       width: 44px;
@@ -5735,10 +5736,10 @@
       transform: scale(0.92);
     }
 
-    /* «Добавить» — плюсик по центру нижнего ряда (между корзиной слева и «Снято» справа).
-       Второй margin-right:auto (первый — у .scene-remove) делит свободное место → плюс центрируется. */
+    /* «Добавить» — плюсик у правого края нижнего ряда. */
     .scene-main > .scene-toolbar .mini.scene-add {
-      margin-right: auto;
+      flex: 0 0 auto;
+      margin-left: auto;
       align-self: center;
       box-sizing: border-box;
       width: 44px;
@@ -5781,9 +5782,13 @@
       transform: scale(0.92);
     }
 
-    /* «Снято» — только хлопушка: label = чистый #000 как фон сцены, без скругления/тени/обводки
-       (иначе на градиенте карточки читается серая «коробка» вокруг SVG). */
+    /* «Снято» — хлопушка строго по центру нижнего ряда (корзина слева, плюс справа). */
     .scene-main > .scene-toolbar .scene-done-label.scene-done-checkbox-only {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 2;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -7849,8 +7854,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v375';
-      var BUILD_TIME = '2026-06-11 04:25 MSK';
+      var APP_VERSION = 'v376';
+      var BUILD_TIME = '2026-06-11 04:40 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -12371,10 +12376,21 @@
           lab.innerHTML = buildShotCheckboxMarkup();
           tb.appendChild(lab);
           syncShotLensLabelClass(lab);
+          reorderSceneToolbar(tb);
         });
       }
 
-      /** Плюс «Добавить сцену» в нижнем ряду сцены (между «Удалить» слева и «Снято» справа). */
+      function reorderSceneToolbar(tb) {
+        if (!tb) return;
+        var rm = tb.querySelector('.scene-remove');
+        var done = tb.querySelector('.scene-done-label');
+        var add = tb.querySelector('.scene-add');
+        if (rm) tb.appendChild(rm);
+        if (done) tb.appendChild(done);
+        if (add) tb.appendChild(add);
+      }
+
+      /** Плюс «Добавить сцену» в нижнем ряду сцены (справа; «Снято» — по центру). */
       function ensureSceneAddButtons() {
         if (!sceneStack && !outroStack) return;
         mainScenes().forEach(function (scene) {
@@ -12386,17 +12402,20 @@
           }
           if (isIntroOrOutroScene(scene)) {
             stripIntroOutroToolbarActions(tb);
+            reorderSceneToolbar(tb);
             return;
           }
-          if (tb.querySelector('.scene-add')) return;
+          if (tb.querySelector('.scene-add')) {
+            reorderSceneToolbar(tb);
+            return;
+          }
           var btn = document.createElement('button');
           btn.type = 'button';
           btn.className = 'btn mini scene-add';
           btn.title = 'Добавить сцену';
           btn.setAttribute('aria-label', 'Добавить сцену');
-          var lens = tb.querySelector('.scene-done-label');
-          if (lens) tb.insertBefore(btn, lens);
-          else tb.appendChild(btn);
+          tb.appendChild(btn);
+          reorderSceneToolbar(tb);
         });
       }
 
