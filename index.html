@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v404)</title>
+  <title>Sam Scenes (v407)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -173,9 +173,6 @@
       --app-bg-glass-scroll-gain: 0.58;
       /* Панель слева: ~85% ширины вьюпорта (раньше было 2/3) */
       --assistant-drawer-w: min(calc(100vw * 0.85), 900px);
-      /* Размытие основного блока справа от шторки (только opacity/filter через переменные — клики проходят). */
-      --assistant-main-bg-blur: 0px;
-      --assistant-main-bg-bright: 1;
       /* Крайние полоски ассистента: тёплое золото (холодный аметист на #000 даёт «зеленоватый» каст) */
       --assistant-hint-violet: rgba(232, 201, 104, 0.52);
       --assistant-hint-violet-mid: rgba(212, 175, 95, 0.22);
@@ -462,19 +459,7 @@
          лишний композиционный слой на всём контенте во время слайда шторки (iOS jitter). */
     }
 
-    body.assistant-drawer-open .wrap {
-      opacity: 1;
-      filter: blur(var(--assistant-main-bg-blur, 0px))
-        brightness(var(--assistant-main-bg-bright, 1));
-      transition: filter 0.32s cubic-bezier(0.22, 0.9, 0.28, 1);
-    }
-
-    /* На время слайда шторки — без filter на .wrap (iOS jitter / двойной blur с backdrop). */
-    html.assistant-drawer-anim body.assistant-drawer-open .wrap,
-    html.assistant-drawer-tracking body.assistant-drawer-open .wrap {
-      filter: none !important;
-      transition: none !important;
-    }
+    /* Основное меню при открытой шторке — без blur/brightness: liquid glass только у .assistant-drawer. */
 
     /* Pull-from-top: логотип и карточки едут вниз; .wrap остаётся без transform.
        --pull-stack-y задаётся из JS каждый rAF — без transition на transform (иначе CSS
@@ -597,10 +582,6 @@
       transition: none !important;
     }
 
-    html.assistant-drawer-tracking body.assistant-drawer-open .wrap {
-      transition: none !important;
-    }
-
     body.assistant-drawer-open .assistant-drawer {
       transform: translateX(0);
       pointer-events: auto;
@@ -628,10 +609,6 @@
     }
 
     @media (prefers-reduced-transparency: reduce) {
-      body.assistant-drawer-open .wrap {
-        filter: none !important;
-      }
-
       .assistant-drawer {
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
@@ -1538,12 +1515,12 @@
       z-index: 1;
       isolation: isolate;
       background: transparent;
-      opacity: calc(0.38 + 0.62 * var(--top-logo-reveal, 1));
+      opacity: 1;
       transform:
-        translateY(calc((1 - var(--top-logo-reveal, 1)) * 10px))
-        scale(calc(0.965 + 0.035 * var(--top-logo-reveal, 1)));
+        translate3d(0, calc((1 - var(--top-logo-reveal, 1)) * 14px), 0)
+        scale(calc(0.972 + 0.028 * var(--top-logo-reveal, 1)));
       transform-origin: center center;
-      will-change: transform, opacity;
+      will-change: transform;
     }
 
     .top-logo-brand::before {
@@ -3701,13 +3678,10 @@
         box-shadow: 0 0 0 0 rgba(120, 220, 150, 0);
         border-color: rgba(255, 255, 255, 0.08);
       }
-      30% {
-        transform: scale(1.04);
+      32% {
+        transform: scale(1.03);
         box-shadow: 0 0 0 3px rgba(120, 220, 150, 0.5), 0 0 32px 8px rgba(120, 220, 150, 0.5);
         border-color: rgba(120, 220, 150, 0.78);
-      }
-      62% {
-        transform: scale(1.008);
       }
       100% {
         transform: scale(1);
@@ -3717,7 +3691,7 @@
     }
 
     .field-prep-important.prep-important-done-pulse {
-      animation: prepImportantDonePulse 1.05s cubic-bezier(0.22, 1, 0.36, 1);
+      animation: prepImportantDonePulse 0.92s cubic-bezier(0.22, 1, 0.36, 1) forwards;
     }
 
     /* В момент анимации завершения — только центрированная плашка, без чеклиста и галочки. */
@@ -3949,14 +3923,7 @@
     @keyframes prepDoneTextIn {
       0% {
         opacity: 0;
-        transform: translateY(9px) scale(0.82);
-      }
-      55% {
-        opacity: 1;
-        transform: translateY(0) scale(1.07);
-      }
-      78% {
-        transform: translateY(0) scale(0.985);
+        transform: translateY(8px) scale(0.92);
       }
       100% {
         opacity: 1;
@@ -3966,19 +3933,22 @@
 
     @keyframes prepDoneTextShine {
       0% {
-        background-position: 230% 50%;
+        background-position: 220% 50%;
       }
-      55%, 100% {
+      100% {
         background-position: -90% 50%;
       }
     }
 
     @keyframes prepDoneTextGlow {
-      0%, 100% {
-        filter: drop-shadow(0 0 4px rgba(212, 175, 55, 0.32));
+      0% {
+        filter: drop-shadow(0 0 2px rgba(212, 175, 55, 0.2));
       }
-      50% {
-        filter: drop-shadow(0 0 13px rgba(245, 230, 184, 0.62));
+      45% {
+        filter: drop-shadow(0 0 12px rgba(245, 230, 184, 0.55));
+      }
+      100% {
+        filter: drop-shadow(0 0 4px rgba(212, 175, 55, 0.28));
       }
     }
 
@@ -4016,9 +3986,23 @@
       -webkit-text-fill-color: transparent;
       will-change: transform, filter, background-position;
       animation:
-        prepDoneTextIn 0.62s cubic-bezier(0.22, 1, 0.36, 1) both,
-        prepDoneTextShine 2.4s ease-in-out 0.06s infinite,
-        prepDoneTextGlow 1.05s ease-in-out 0s both;
+        prepDoneTextIn 0.52s cubic-bezier(0.22, 1, 0.36, 1) both,
+        prepDoneTextShine 0.92s ease-in-out 0.06s 1 forwards,
+        prepDoneTextGlow 0.92s ease-in-out 0s 1 forwards;
+    }
+
+    /* После «прописывания» — спокойный финал без скачка gradient→solid при снятии pulse. */
+    .prep-important-done-text.is-settled {
+      animation: none !important;
+      background-image: none !important;
+      background-position: 0 0 !important;
+      -webkit-background-clip: border-box !important;
+      background-clip: border-box !important;
+      -webkit-text-fill-color: var(--anna-gold) !important;
+      color: var(--anna-gold) !important;
+      filter: none !important;
+      transform: none !important;
+      will-change: auto;
     }
 
     .prep-important-collapse-btn {
@@ -7959,8 +7943,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v404';
-      var BUILD_TIME = '2026-06-11 07:10 MSK';
+      var APP_VERSION = 'v407';
+      var BUILD_TIME = '2026-06-11 07:35 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -9595,21 +9579,14 @@
         bk.style.pointerEvents = 'none';
       }
 
-      /** Размытие/затемнение основного блока справа от шторки (лампа + логотип + карточки).
-          Клики по сценам проходят — filter на .wrap не блокирует pointer-events. */
-      function setAssistantDrawerWrapBlurProgress(progress) {
-        var p = Math.max(0, Math.min(1, Number(progress) || 0));
+      /** Размытие основного блока отключено — liquid glass только на панели ассистента. */
+      function setAssistantDrawerWrapBlurProgress(_progress) {
         var root = document.documentElement;
         if (!root) return;
-        if (p <= 0.001) {
+        try {
           root.style.removeProperty('--assistant-main-bg-blur');
           root.style.removeProperty('--assistant-main-bg-bright');
-          return;
-        }
-        var blurPx = Math.round(p * 12 * 10) / 10;
-        var bright = Math.round((1 - p * 0.3) * 1000) / 1000;
-        root.style.setProperty('--assistant-main-bg-blur', blurPx + 'px');
-        root.style.setProperty('--assistant-main-bg-bright', String(bright));
+        } catch (eClr) {}
       }
 
       function beginAssistantDrawerTracking() {
@@ -9620,8 +9597,7 @@
         document.documentElement.classList.remove('assistant-drawer-tracking');
       }
 
-      /** #1: на время CSS-анимации открытия/закрытия шторки держим класс assistant-drawer-anim
-          (снимает backdrop-filter, см. CSS). Снимаем по таймеру — длительность анимации ~280–320мс. */
+      /** На время CSS-анимации открытия/закрытия — класс assistant-drawer-anim (усиленная тень панели). */
       var assistantDrawerAnimTimer = null;
       /** #2 — id отложенной (на конец слайда) фикс-блокировки скролла; сбрасывается при закрытии. */
       var assistantDrawerDeferLockTimer = null;
@@ -14028,6 +14004,7 @@
         if (!block) return;
         var textEl = block.querySelector('.prep-important-done-text');
         if (!textEl) return;
+        textEl.classList.remove('is-settled');
         textEl.style.animation = 'none';
         textEl.style.backgroundPosition = '-90% 50%';
         void textEl.offsetWidth;
@@ -14035,17 +14012,57 @@
         textEl.style.backgroundPosition = '';
       }
 
-      function playPrepImportantDone(block) {
+      function finishPrepImportantDonePulse(block) {
+        if (!block) return;
+        var textEl = block.querySelector('.prep-important-done-text');
+        if (textEl) textEl.classList.add('is-settled');
+        block.style.animation = 'none';
+        block.style.transform = '';
+        requestAnimationFrame(function () {
+          block.classList.remove('prep-important-done-pulse');
+          block.style.animation = '';
+          block.style.transform = '';
+        });
+      }
+
+      function playPrepImportantDone(block, onComplete) {
         if (!block) return;
         var doneBtn = document.getElementById('prep-important-done');
         if (doneBtn) doneBtn.hidden = false;
+        var textEl = block.querySelector('.prep-important-done-text');
+        if (textEl) {
+          textEl.classList.remove('is-settled');
+          try { textEl.removeEventListener('animationend', textEl._prepDoneAnimEnd); } catch (eRm) {}
+        }
         block.classList.remove('prep-important-done-pulse');
         void block.offsetWidth;
         block.classList.add('prep-important-done-pulse');
         restartPrepImportantDoneTextAnimation(block);
-        setTimeout(function () {
-          block.classList.remove('prep-important-done-pulse');
-        }, 1050);
+        textEl = block.querySelector('.prep-important-done-text');
+        var finished = false;
+        function finishOnce() {
+          if (finished) return;
+          finished = true;
+          if (textEl) {
+            try { textEl.removeEventListener('animationend', textEl._prepDoneAnimEnd); } catch (eRm2) {}
+            textEl._prepDoneAnimEnd = null;
+          }
+          if (block._prepDoneFallbackTimer) {
+            clearTimeout(block._prepDoneFallbackTimer);
+            block._prepDoneFallbackTimer = null;
+          }
+          finishPrepImportantDonePulse(block);
+          if (typeof onComplete === 'function') onComplete();
+        }
+        if (textEl) {
+          function onAnimEnd(e) {
+            if (e.target !== textEl || e.animationName !== 'prepDoneTextShine') return;
+            finishOnce();
+          }
+          textEl._prepDoneAnimEnd = onAnimEnd;
+          textEl.addEventListener('animationend', onAnimEnd);
+        }
+        block._prepDoneFallbackTimer = setTimeout(finishOnce, 1120);
       }
 
       function playPrepImportantExpand(block) {
@@ -14090,11 +14107,10 @@
       function collapsePrepImportantChecklist() {
         if (!prepImportantAllChecked()) return;
         var block = document.getElementById('prep-important-block');
-        playPrepImportantDone(block);
-        setTimeout(function () {
+        playPrepImportantDone(block, function () {
           prepImportantExpanded = false;
           updatePrepImportantPin();
-        }, 1050);
+        });
       }
 
       /** #4: было ли «всё отмечено» на прошлой проверке — чтобы поймать момент завершения. */
@@ -14332,13 +14348,12 @@
           /* #4: поймали момент «отмечен последний пункт» — проигрываем анимацию завершения. */
           var allNow = prepImportantAllChecked();
           if (allNow && !prepImportantWasAllChecked) {
-            var doneBlock = document.getElementById('prep-important-block');
-            playPrepImportantDone(doneBlock);
             updatePrepImportantReminder();
-            setTimeout(function () {
+            var doneBlock = document.getElementById('prep-important-block');
+            playPrepImportantDone(doneBlock, function () {
               prepImportantExpanded = false;
               updatePrepImportantPin();
-            }, 1050);
+            });
           } else {
             updatePrepImportantPin();
           }
@@ -15490,22 +15505,32 @@
         wireTopLogoScrollBlur._done = true;
       }
 
-      /** Размытие фона и плавное появление логотипа при прокрутке: opacity заранее
-          размытых слоёв body::after и .logo-bg (через --app-bg-scroll-blur / --top-logo-reveal).
-          Значения сглаживаются rAF+lerp — без рывка при отскоке скролла наверх (iOS). */
-      var APP_BG_SCROLL_BLUR_RAMP = 520; /* px скролла до максимума */
-      var APP_BG_SCROLL_BLUR_MAX = 0.82; /* максимальная непрозрачность размытого слоя */
+      /** Размытие фона и плавное появление логотипа: одна smoothstep-кривая от scrollY,
+          логотип догоняет быстрее фона, rAF пока идёт скролл + короткий settle. */
+      var APP_BG_SCROLL_BLUR_RAMP = 560;
+      var APP_BG_SCROLL_BLUR_MAX = 0.82;
+      var APP_BG_BLUR_LERP_MS = 110;
+      var TOP_LOGO_REVEAL_LERP_MS = 52;
+      var APP_BG_SCROLL_SETTLE_MS = 200;
       var appBgScrollBlurTarget = 0;
       var appBgScrollBlurDisplay = 0;
       var topLogoRevealTarget = 1;
       var topLogoRevealDisplay = 1;
       var appBgScrollBlurLoopId = null;
+      var appBgScrollBlurLastTs = 0;
+      var appBgScrollActiveUntil = 0;
       var appBgScrollBlurLast = -1;
       var topLogoRevealLast = -1;
 
       function scrollBlurEase(t) {
         t = Math.max(0, Math.min(1, t));
         return t * t * (3 - 2 * t);
+      }
+
+      function lerpScrollVisual(display, target, dtMs, tauMs) {
+        if (tauMs <= 0) return target;
+        var k = 1 - Math.exp(-dtMs / tauMs);
+        return display + (target - display) * k;
       }
 
       function readScrollTopForBgBlur() {
@@ -15520,57 +15545,72 @@
       function computeAppBgScrollBlurTargets() {
         var sy = readScrollTopForBgBlur();
         var t = sy >= APP_BG_SCROLL_BLUR_RAMP ? 1 : sy / APP_BG_SCROLL_BLUR_RAMP;
-        var blurT = scrollBlurEase(t);
-        appBgScrollBlurTarget = blurT * APP_BG_SCROLL_BLUR_MAX;
-        var revealLinear = APP_BG_SCROLL_BLUR_MAX > 0 ? 1 - appBgScrollBlurTarget / APP_BG_SCROLL_BLUR_MAX : 1;
-        topLogoRevealTarget = scrollBlurEase(Math.max(0, Math.min(1, revealLinear)));
+        var eased = scrollBlurEase(t);
+        appBgScrollBlurTarget = eased * APP_BG_SCROLL_BLUR_MAX;
+        topLogoRevealTarget = 1 - eased;
       }
 
       function applyAppBgScrollBlurSmooth(forceSnap) {
+        var now = performance.now();
+        if (!appBgScrollBlurLastTs) appBgScrollBlurLastTs = now;
+        var dt = Math.min(48, now - appBgScrollBlurLastTs);
+        appBgScrollBlurLastTs = now;
+
         computeAppBgScrollBlurTargets();
-        var blurDiff = appBgScrollBlurTarget - appBgScrollBlurDisplay;
-        if (forceSnap || Math.abs(blurDiff) < 0.0006) {
+
+        if (forceSnap) {
           appBgScrollBlurDisplay = appBgScrollBlurTarget;
-        } else {
-          appBgScrollBlurDisplay += blurDiff * 0.15;
-        }
-        var revealDiff = topLogoRevealTarget - topLogoRevealDisplay;
-        if (forceSnap || Math.abs(revealDiff) < 0.0006) {
           topLogoRevealDisplay = topLogoRevealTarget;
         } else {
-          topLogoRevealDisplay += revealDiff * 0.13;
+          appBgScrollBlurDisplay = lerpScrollVisual(
+            appBgScrollBlurDisplay,
+            appBgScrollBlurTarget,
+            dt,
+            APP_BG_BLUR_LERP_MS
+          );
+          topLogoRevealDisplay = lerpScrollVisual(
+            topLogoRevealDisplay,
+            topLogoRevealTarget,
+            dt,
+            TOP_LOGO_REVEAL_LERP_MS
+          );
         }
-        var v = Math.round(appBgScrollBlurDisplay * 1000) / 1000;
-        var r = Math.round(topLogoRevealDisplay * 1000) / 1000;
-        if (forceSnap || v !== appBgScrollBlurLast) {
+
+        var v = appBgScrollBlurDisplay;
+        var r = topLogoRevealDisplay;
+        if (forceSnap || Math.abs(v - appBgScrollBlurLast) > 0.0004) {
           appBgScrollBlurLast = v;
-          document.body.style.setProperty('--app-bg-scroll-blur', String(v));
+          document.body.style.setProperty('--app-bg-scroll-blur', v.toFixed(4));
         }
-        if (forceSnap || r !== topLogoRevealLast) {
+        if (forceSnap || Math.abs(r - topLogoRevealLast) > 0.0004) {
           topLogoRevealLast = r;
-          document.documentElement.style.setProperty('--top-logo-reveal', String(r));
-        }
-        var needsLoop =
-          Math.abs(appBgScrollBlurTarget - appBgScrollBlurDisplay) > 0.0006 ||
-          Math.abs(topLogoRevealTarget - topLogoRevealDisplay) > 0.0006;
-        if (needsLoop) {
-          appBgScrollBlurLoopId = requestAnimationFrame(appBgScrollBlurLoopTick);
-        } else {
-          appBgScrollBlurLoopId = null;
+          document.documentElement.style.setProperty('--top-logo-reveal', r.toFixed(4));
         }
       }
 
       function appBgScrollBlurLoopTick() {
-        appBgScrollBlurLoopId = null;
+        var now = performance.now();
         applyAppBgScrollBlurSmooth(false);
+        var settling =
+          Math.abs(appBgScrollBlurTarget - appBgScrollBlurDisplay) > 0.0012 ||
+          Math.abs(topLogoRevealTarget - topLogoRevealDisplay) > 0.0012;
+        if (settling || now < appBgScrollActiveUntil) {
+          appBgScrollBlurLoopId = requestAnimationFrame(appBgScrollBlurLoopTick);
+        } else {
+          appBgScrollBlurLoopId = null;
+          appBgScrollBlurLastTs = 0;
+          applyAppBgScrollBlurSmooth(true);
+        }
+      }
+
+      function ensureAppBgScrollBlurLoop() {
+        if (appBgScrollBlurLoopId != null) return;
+        appBgScrollBlurLoopId = requestAnimationFrame(appBgScrollBlurLoopTick);
       }
 
       function scheduleAppBgScrollBlur() {
-        if (appBgScrollBlurLoopId != null) return;
-        appBgScrollBlurLoopId = requestAnimationFrame(function () {
-          appBgScrollBlurLoopId = null;
-          applyAppBgScrollBlurSmooth(false);
-        });
+        appBgScrollActiveUntil = performance.now() + APP_BG_SCROLL_SETTLE_MS;
+        ensureAppBgScrollBlurLoop();
       }
 
       function wireAppBackgroundScrollBlur() {
