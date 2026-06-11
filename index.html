@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v377)</title>
+  <title>Sam Scenes (v378)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -169,6 +169,9 @@
       --top-logo-space: 28vh;
       /* Панель слева: ~85% ширины вьюпорта (раньше было 2/3) */
       --assistant-drawer-w: min(calc(100vw * 0.85), 900px);
+      /* Размытие основного блока справа от шторки (только opacity/filter через переменные — клики проходят). */
+      --assistant-main-bg-blur: 0px;
+      --assistant-main-bg-bright: 1;
       /* Крайние полоски ассистента: тёплое золото (холодный аметист на #000 даёт «зеленоватый» каст) */
       --assistant-hint-violet: rgba(232, 201, 104, 0.52);
       --assistant-hint-violet-mid: rgba(212, 175, 95, 0.22);
@@ -441,7 +444,16 @@
 
     body.assistant-drawer-open .wrap {
       opacity: 1;
-      filter: none;
+      filter: blur(var(--assistant-main-bg-blur, 0px))
+        brightness(var(--assistant-main-bg-bright, 1));
+      transition: filter 0.32s cubic-bezier(0.22, 0.9, 0.28, 1);
+    }
+
+    /* На время слайда шторки — без filter на .wrap (iOS jitter / двойной blur с backdrop). */
+    html.assistant-drawer-anim body.assistant-drawer-open .wrap,
+    html.assistant-drawer-tracking body.assistant-drawer-open .wrap {
+      filter: none !important;
+      transition: none !important;
     }
 
     /* Pull-from-top: логотип и карточки едут вниз; .wrap остаётся без transform.
@@ -529,11 +541,8 @@
         inset 1px 0 0 rgba(255, 255, 255, 0.05);
       transform: translateX(-102%);
       transition: transform 0.32s cubic-bezier(0.22, 0.9, 0.28, 1);
-      /* Отдельный слой: полупрозрачность только у панели, не у .wrap / карточек сцен. */
-      isolation: isolate;
-      contain: layout style;
-      /* Промоут в отдельный композиционный слой: слайд идёт на GPU, контент под шторкой
-         не перерисовывается каждый кадр — убирает дёрганье открытия/закрытия на iOS Safari. */
+      /* Промоут в отдельный композиционный слой: слайд на GPU. isolation/contain — только
+         на время слайда (ниже), иначе backdrop-filter не «видит» контент под стеклом. */
       will-change: transform;
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
@@ -581,6 +590,8 @@
     /* На время слайда — без живого blur (WebKit артефакты), чуть плотнее фон. */
     html.assistant-drawer-anim .assistant-drawer,
     html.assistant-drawer-tracking .assistant-drawer {
+      isolation: isolate;
+      contain: layout style;
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
       background: rgba(8, 8, 10, 0.9);
@@ -598,6 +609,10 @@
     }
 
     @media (prefers-reduced-transparency: reduce) {
+      body.assistant-drawer-open .wrap {
+        filter: none !important;
+      }
+
       .assistant-drawer {
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
@@ -7883,8 +7898,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v377';
-      var BUILD_TIME = '2026-06-11 05:00 MSK';
+      var APP_VERSION = 'v378';
+      var BUILD_TIME = '2026-06-11 05:05 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -9476,12 +9491,21 @@
         bk.style.pointerEvents = 'none';
       }
 
-      /** Раньше дублировал opacity бэкдропа; оставлено как noop совместимости. */
+      /** Размытие/затемнение основного блока справа от шторки (лампа + логотип + карточки).
+          Клики по сценам проходят — filter на .wrap не блокирует pointer-events. */
       function setAssistantDrawerWrapBlurProgress(progress) {
-        var bk = document.getElementById('assistant-drawer-backdrop');
-        if (!bk) return;
-        bk.style.opacity = '0';
-        bk.style.pointerEvents = 'none';
+        var p = Math.max(0, Math.min(1, Number(progress) || 0));
+        var root = document.documentElement;
+        if (!root) return;
+        if (p <= 0.001) {
+          root.style.removeProperty('--assistant-main-bg-blur');
+          root.style.removeProperty('--assistant-main-bg-bright');
+          return;
+        }
+        var blurPx = Math.round(p * 12 * 10) / 10;
+        var bright = Math.round((1 - p * 0.3) * 1000) / 1000;
+        root.style.setProperty('--assistant-main-bg-blur', blurPx + 'px');
+        root.style.setProperty('--assistant-main-bg-bright', String(bright));
       }
 
       function beginAssistantDrawerTracking() {
@@ -9525,6 +9549,10 @@
           bk.style.pointerEvents = '';
           bk.style.transition = '';
         }
+        try {
+          document.documentElement.style.removeProperty('--assistant-main-bg-blur');
+          document.documentElement.style.removeProperty('--assistant-main-bg-bright');
+        } catch (eClr) {}
       }
 
       function openAssistantDrawerCoreAfterSnap() {
@@ -9561,6 +9589,7 @@
         /** Скролл держит html.assistant-drawer-open { overflow:hidden } — без body.position:fixed (iOS jitter). */
         cancelDeferredAssistantDrawerLock();
         lockAssistantDrawerMainScroll();
+        setAssistantDrawerWrapBlurProgress(1);
         try {
           triggerHaptic('micro');
         } catch (eH) {}
@@ -9853,6 +9882,7 @@
         }
 
         if (assistantDrawerReducedMotion()) {
+          setAssistantDrawerWrapBlurProgress(0);
           document.documentElement.classList.remove('assistant-drawer-open');
           document.body.classList.remove('assistant-drawer-open');
           document.body.removeAttribute('data-assistant-drawer-open');
