@@ -1530,7 +1530,10 @@
       top: 50%;
       width: min(540px, 90vw);
       height: min(540px, 90vw);
-      transform: translate(-50%, calc(-50% + 385px));
+      /* translate3d + will-change: opacity — кэшируем тяжёлый blur+drop-shadow,
+         по кадрам меняется только прозрачность лампы (без пере-растеризации). */
+      transform: translate3d(-50%, calc(-50% + 385px), 0);
+      will-change: opacity;
       background-image: url("top-lamp-bg.png");
       background-repeat: no-repeat;
       background-position: center center;
@@ -1748,6 +1751,10 @@
       background-position: center center;
       background-size: contain;
       pointer-events: none;
+      /* Отдельный композит-слой: отфильтрованный bitmap кэшируется, по кадрам
+         меняется только opacity (на GPU) — без пере-растеризации blur каждый кадр. */
+      transform: translateZ(0);
+      will-change: opacity;
     }
 
     .logo-bg::before {
@@ -3776,6 +3783,8 @@
         animation: none;
         opacity: 1;
         transform: none;
+        -webkit-clip-path: none;
+        clip-path: none;
         color: var(--anna-gold);
         will-change: auto;
         filter: none;
@@ -3784,6 +3793,8 @@
         animation: none;
         opacity: 1;
         transform: none;
+        -webkit-clip-path: none;
+        clip-path: none;
         color: var(--anna-gold);
         will-change: auto;
         filter: none;
@@ -3886,7 +3897,8 @@
     .field-prep-important.prep-important-collapsed {
       padding: 10px 12px;
       gap: 0;
-      background: rgba(0, 0, 0, 0.52);
+      /* Плотный фон после завершения — блок не становится полупрозрачным. */
+      background: rgba(8, 7, 6, 0.97);
       border-color: rgba(120, 200, 140, 0.32);
     }
 
@@ -3922,15 +3934,16 @@
       display: none;
     }
 
-    /* «Всё под контролем!» — мягкий вход слева (opacity + slide, без clip/mask). */
-    @keyframes prepDoneTextRevealLtr {
+    /* «Всё под контролем!» — эффект написания: текст проявляется слева направо
+       (clip-path wipe), как будто его пишут. Без opacity/slide. */
+    @keyframes prepDoneTextWriteLtr {
       0% {
-        opacity: 0;
-        transform: translateX(-12px);
+        -webkit-clip-path: inset(0 100% 0 0);
+        clip-path: inset(0 100% 0 0);
       }
       100% {
-        opacity: 1;
-        transform: translateX(0);
+        -webkit-clip-path: inset(0 0 0 0);
+        clip-path: inset(0 0 0 0);
       }
     }
 
@@ -3950,16 +3963,19 @@
 
     /* Анимация — только в момент завершения (вместе с pulse блока «Важно»). */
     .field-prep-important.prep-important-done-pulse .prep-important-done-text {
-      opacity: 0;
-      transform: translateX(-12px);
-      will-change: opacity, transform;
-      animation: prepDoneTextRevealLtr 0.72s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      opacity: 1;
+      -webkit-clip-path: inset(0 100% 0 0);
+      clip-path: inset(0 100% 0 0);
+      will-change: clip-path;
+      animation: prepDoneTextWriteLtr 0.9s cubic-bezier(0.33, 0, 0.2, 1) forwards;
     }
 
     .prep-important-done-text.is-settled {
       animation: none !important;
       opacity: 1 !important;
       transform: none !important;
+      -webkit-clip-path: none !important;
+      clip-path: none !important;
       color: var(--anna-gold) !important;
       filter: none !important;
       will-change: auto;
@@ -13965,8 +13981,7 @@
         var textEl = block.querySelector('.prep-important-done-text');
         if (!textEl) return;
         textEl.classList.remove('is-settled');
-        // Перезапуск CSS-анимации prepDoneTextRevealLtr (opacity + slide).
-        // Старый mask-write код удалён — текущая анимация маской не пользуется.
+        // Перезапуск CSS-анимации prepDoneTextWriteLtr (clip-path wipe «написание»).
         textEl.style.animation = 'none';
         void textEl.offsetWidth;
         textEl.style.animation = '';
@@ -14018,9 +14033,9 @@
         }
         // Завершаем по концу самой длинной видимой анимации: в обычном режиме это
         // зелёный pulse блока (prepImportantDonePulse, 0.92s), в quiet — проявление
-        // текста (prepDoneTextRevealLtr, 0.72s). Имена должны совпадать с @keyframes.
+        // текста (prepDoneTextWriteLtr, 0.9s). Имена должны совпадать с @keyframes.
         // Слушаем на блоке: animationend от текста всплывает сюда же.
-        var doneAnimName = opts.quiet ? 'prepDoneTextRevealLtr' : 'prepImportantDonePulse';
+        var doneAnimName = opts.quiet ? 'prepDoneTextWriteLtr' : 'prepImportantDonePulse';
         function onAnimEnd(e) {
           if (e.animationName !== doneAnimName) return;
           finishOnce();
@@ -14029,7 +14044,7 @@
         block.addEventListener('animationend', onAnimEnd);
         // Запасной таймер чуть длиннее анимации — на случай prefers-reduced-motion
         // (animation: none → animationend не приходит) или фонового таба.
-        block._prepDoneFallbackTimer = setTimeout(finishOnce, opts.quiet ? 820 : 1000);
+        block._prepDoneFallbackTimer = setTimeout(finishOnce, opts.quiet ? 980 : 1000);
       }
 
       function playPrepImportantExpand(block) {
@@ -15480,7 +15495,6 @@
       var appBgScrollBlurTarget = 0;
       var appBgScrollBlurDisplay = 0;
       var topLogoRevealTarget = 1;
-      var topLogoRevealDisplay = 1;
       var appBgScrollBlurLoopId = null;
       var appBgScrollBlurLastTs = 0;
       var appBgScrollActiveUntil = 0;
@@ -15532,7 +15546,6 @@
 
         if (forceSnap) {
           appBgScrollBlurDisplay = appBgScrollBlurTarget;
-          topLogoRevealDisplay = topLogoRevealTarget;
         } else {
           appBgScrollBlurDisplay = lerpScrollVisual(
             appBgScrollBlurDisplay,
@@ -15540,16 +15553,11 @@
             dt,
             APP_BG_BLUR_LERP_MS
           );
-          topLogoRevealDisplay = lerpScrollVisual(
-            topLogoRevealDisplay,
-            topLogoRevealTarget,
-            dt,
-            APP_BG_BLUR_LERP_MS
-          );
         }
 
         var v = appBgScrollBlurDisplay;
-        var r = topLogoRevealDisplay;
+        // Логотип — 1:1 со scrollY (без lerp): без отставания и без snap в конце.
+        var r = topLogoRevealTarget;
         var lv = topLogoVisibleFromReveal(r);
         if (forceSnap || Math.abs(v - appBgScrollBlurLast) > 0.0004) {
           appBgScrollBlurLast = v;
@@ -15566,8 +15574,7 @@
       function appBgScrollBlurLoopTick() {
         var now = performance.now();
         applyAppBgScrollBlurSmooth(false);
-        var settling = Math.abs(appBgScrollBlurTarget - appBgScrollBlurDisplay) > 0.0012
-          || Math.abs(topLogoRevealTarget - topLogoRevealDisplay) > 0.0012;
+        var settling = Math.abs(appBgScrollBlurTarget - appBgScrollBlurDisplay) > 0.0012;
         if (settling || now < appBgScrollActiveUntil) {
           appBgScrollBlurLoopId = requestAnimationFrame(appBgScrollBlurLoopTick);
         } else {
