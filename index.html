@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- v220: единый пунктир у примечания и перебивки -->
-<html lang="ru" style="--logo-x: 0px; --logo-y: 0px; --logo-scale: 2.00; --top-logo-blur: 0px; --top-logo-reveal: 1; --pull-stack-y: 0px;">
+<html lang="ru" style="--logo-x: 0px; --logo-y: 0px; --logo-scale: 2.00; --top-logo-blur: 0px; --top-logo-reveal: 1; --top-logo-visible: 1; --pull-stack-y: 0px;">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v409)</title>
+  <title>Sam Scenes (v410)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -168,6 +168,7 @@
       --brand-serif: "Roboto Slab", Georgia, "Times New Roman", serif;
       --top-logo-space: 28vh;
       --top-logo-reveal: 1;
+      --top-logo-visible: 1;
       /* Фон: базовая «стеклянность» наверху + нарастание при скролле (см. body::after). */
       --app-bg-glass-min: 0.34;
       --app-bg-glass-scroll-gain: 0.58;
@@ -1452,7 +1453,10 @@
     .wrap > * { order: 10; }
     .wrap > *:not(#top-logo-block) { position: relative; z-index: 12; }
 
-    #top-logo-block { order: 0; }
+    #top-logo-block {
+      order: 0;
+      opacity: var(--top-logo-visible, 1);
+    }
     #scenario-hub { order: 1; }
     #daily-plan { order: 2; }
     .title-row { order: 3; }
@@ -1515,10 +1519,7 @@
       z-index: 1;
       isolation: isolate;
       background: transparent;
-      opacity: 1;
-      transform: translate3d(0, calc((1 - var(--top-logo-reveal, 1)) * 16px), 0);
-      transform-origin: center center;
-      will-change: transform;
+      transform: none;
     }
 
     .top-logo-brand::before {
@@ -1533,7 +1534,7 @@
       background-repeat: no-repeat;
       background-position: center center;
       background-size: contain;
-      opacity: calc(0.14 * (0.42 + 0.58 * var(--top-logo-reveal, 1)));
+      opacity: calc(0.14 * (0.42 + 0.58 * var(--top-logo-visible, 1)));
       filter: blur(11px) saturate(1.05) brightness(0.6) drop-shadow(0 18px 42px rgba(255, 195, 110, 0.38))
         drop-shadow(0 36px 72px rgba(255, 165, 70, 0.14));
       -webkit-mask-image: linear-gradient(to bottom, transparent 0%, transparent 40%, #000 66%, #000 100%);
@@ -1750,7 +1751,7 @@
 
     .logo-bg::before {
       filter: brightness(0.78) contrast(0.9) saturate(0.92);
-      opacity: calc(0.48 + 0.52 * var(--top-logo-reveal, 1));
+      opacity: calc(0.78 * var(--top-logo-visible, 1));
       z-index: 1;
     }
 
@@ -1772,7 +1773,7 @@
       pointer-events: auto;
       position: relative;
       z-index: 1;
-      opacity: calc(0.45 + 0.55 * var(--top-logo-reveal, 1));
+      opacity: calc(0.45 + 0.55 * var(--top-logo-visible, 1));
     }
 
     .logo-controls input[type="range"] {
@@ -3689,6 +3690,11 @@
       animation: prepImportantDonePulse 0.92s cubic-bezier(0.22, 1, 0.36, 1) forwards;
     }
 
+    /* Сворачивание «Свернуть» — только write текста, без зелёного pulse блока. */
+    .field-prep-important.prep-important-done-pulse.prep-important-done-pulse--quiet {
+      animation: none;
+    }
+
     /* В момент анимации завершения — только центрированная плашка, без чеклиста и галочки. */
     .field-prep-important.prep-important-done-pulse .prep-important-head,
     .field-prep-important.prep-important-done-pulse .prep-important-options,
@@ -3765,7 +3771,8 @@
       }
       .prep-important-done-text {
         animation: none;
-        clip-path: none;
+        -webkit-mask-image: none;
+        mask-image: none;
         -webkit-text-fill-color: var(--anna-gold);
         color: var(--anna-gold);
         will-change: auto;
@@ -3773,7 +3780,8 @@
       }
       .field-prep-important.prep-important-done-pulse .prep-important-done-text {
         animation: none;
-        clip-path: none;
+        -webkit-mask-image: none;
+        mask-image: none;
         -webkit-text-fill-color: var(--anna-gold);
         color: var(--anna-gold);
         will-change: auto;
@@ -3913,13 +3921,15 @@
       display: none;
     }
 
-    /* «Всё под контролем!» — один проход слева направо (clip-path). */
+    /* «Всё под контролем!» — один мягкий проход слева направo (mask, без clip-path). */
     @keyframes prepDoneTextWriteLtr {
       0% {
-        clip-path: inset(0 100% 0 0);
+        -webkit-mask-position: 100% 0;
+        mask-position: 100% 0;
       }
       100% {
-        clip-path: inset(0 0 0 0);
+        -webkit-mask-position: 0 0;
+        mask-position: 0 0;
       }
     }
 
@@ -3939,15 +3949,35 @@
 
     /* Анимация — только в момент завершения (вместе с pulse блока «Важно»). */
     .field-prep-important.prep-important-done-pulse .prep-important-done-text {
-      clip-path: inset(0 100% 0 0);
-      will-change: clip-path;
+      -webkit-mask-image: linear-gradient(
+        to right,
+        #000 0%,
+        #000 70%,
+        rgba(0, 0, 0, 0.4) 84%,
+        transparent 100%
+      );
+      mask-image: linear-gradient(
+        to right,
+        #000 0%,
+        #000 70%,
+        rgba(0, 0, 0, 0.4) 84%,
+        transparent 100%
+      );
+      -webkit-mask-size: 240% 100%;
+      mask-size: 240% 100%;
+      -webkit-mask-repeat: no-repeat;
+      mask-repeat: no-repeat;
+      -webkit-mask-position: 100% 0;
+      mask-position: 100% 0;
+      will-change: -webkit-mask-position, mask-position;
       animation: prepDoneTextWriteLtr 0.96s cubic-bezier(0.33, 1, 0.38, 1) forwards;
     }
 
     /* После прохода — спокойный финал без скачка при снятии pulse. */
     .prep-important-done-text.is-settled {
       animation: none !important;
-      clip-path: none !important;
+      -webkit-mask-image: none !important;
+      mask-image: none !important;
       -webkit-text-fill-color: var(--anna-gold) !important;
       color: var(--anna-gold) !important;
       filter: none !important;
@@ -13956,10 +13986,12 @@
         if (!textEl) return;
         textEl.classList.remove('is-settled');
         textEl.style.animation = 'none';
-        textEl.style.clipPath = 'inset(0 100% 0 0)';
+        textEl.style.webkitMaskPosition = '100% 0';
+        textEl.style.maskPosition = '100% 0';
         void textEl.offsetWidth;
         textEl.style.animation = '';
-        textEl.style.clipPath = '';
+        textEl.style.webkitMaskPosition = '';
+        textEl.style.maskPosition = '';
       }
 
       function finishPrepImportantDonePulse(block) {
@@ -13969,13 +14001,14 @@
         block.style.animation = 'none';
         block.style.transform = '';
         requestAnimationFrame(function () {
-          block.classList.remove('prep-important-done-pulse');
+          block.classList.remove('prep-important-done-pulse', 'prep-important-done-pulse--quiet');
           block.style.animation = '';
           block.style.transform = '';
         });
       }
 
-      function playPrepImportantDone(block, onComplete) {
+      function playPrepImportantDone(block, onComplete, opts) {
+        opts = opts || {};
         if (!block) return;
         var doneBtn = document.getElementById('prep-important-done');
         if (doneBtn) doneBtn.hidden = false;
@@ -13984,9 +14017,10 @@
           textEl.classList.remove('is-settled');
           try { textEl.removeEventListener('animationend', textEl._prepDoneAnimEnd); } catch (eRm) {}
         }
-        block.classList.remove('prep-important-done-pulse');
+        block.classList.remove('prep-important-done-pulse', 'prep-important-done-pulse--quiet');
         void block.offsetWidth;
         block.classList.add('prep-important-done-pulse');
+        if (opts.quiet) block.classList.add('prep-important-done-pulse--quiet');
         restartPrepImportantDoneTextAnimation(block);
         textEl = block.querySelector('.prep-important-done-text');
         var finished = false;
@@ -14060,7 +14094,7 @@
         playPrepImportantDone(block, function () {
           prepImportantExpanded = false;
           updatePrepImportantPin();
-        });
+        }, { quiet: true });
       }
 
       /** #4: было ли «всё отмечено» на прошлой проверке — чтобы поймать момент завершения. */
@@ -15468,6 +15502,7 @@
       var appBgScrollActiveUntil = 0;
       var appBgScrollBlurLast = -1;
       var topLogoRevealLast = -1;
+      var topLogoVisibleLast = -1;
 
       function scrollBlurEase(t) {
         t = Math.max(0, Math.min(1, t));
@@ -15487,6 +15522,12 @@
           (document.body && document.body.scrollTop) ||
           0;
         return sy < 0 ? 0 : sy;
+      }
+
+      function topLogoVisibleFromReveal(r) {
+        if (r <= 0.08) return 0;
+        var t = (r - 0.08) / 0.92;
+        return scrollBlurEase(t);
       }
 
       function computeAppBgScrollBlurTargets() {
@@ -15518,13 +15559,16 @@
 
         var v = appBgScrollBlurDisplay;
         var r = topLogoRevealTarget;
+        var lv = topLogoVisibleFromReveal(r);
         if (forceSnap || Math.abs(v - appBgScrollBlurLast) > 0.0004) {
           appBgScrollBlurLast = v;
           document.body.style.setProperty('--app-bg-scroll-blur', v.toFixed(4));
         }
-        if (r !== topLogoRevealLast) {
+        if (r !== topLogoRevealLast || lv !== topLogoVisibleLast) {
           topLogoRevealLast = r;
+          topLogoVisibleLast = lv;
           document.documentElement.style.setProperty('--top-logo-reveal', r.toFixed(5));
+          document.documentElement.style.setProperty('--top-logo-visible', lv.toFixed(5));
         }
       }
 
