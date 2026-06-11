@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v372)</title>
+  <title>Sam Scenes (v373)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -3560,6 +3560,13 @@
         will-change: auto;
         filter: none;
       }
+      .field-prep-important.prep-important-done-pulse .prep-important-done-text {
+        animation: none;
+        background-image: none;
+        -webkit-text-fill-color: #ffffff;
+        will-change: auto;
+        filter: none;
+      }
     }
 
     /* #2: плавающий значок-напоминание — виден везде, пока чеклист «Важно» не заполнен. */
@@ -3745,6 +3752,10 @@
       letter-spacing: 0.02em;
       text-align: center;
       -webkit-font-smoothing: antialiased;
+    }
+
+    /* Праздничная анимация — только в момент завершения (вместе с pulse блока «Важно»). */
+    .field-prep-important.prep-important-done-pulse .prep-important-done-text {
       /* Светлый базовый текст с бегущим мятным бликом (background-clip: text). */
       background-image: linear-gradient(
         105deg,
@@ -3765,8 +3776,8 @@
       will-change: transform, filter, background-position;
       animation:
         prepDoneTextIn 0.62s cubic-bezier(0.22, 1, 0.36, 1) both,
-        prepDoneTextShine 3.6s ease-in-out 0.55s infinite,
-        prepDoneTextGlow 2.8s ease-in-out 0.55s infinite;
+        prepDoneTextShine 2.4s ease-in-out 0.06s infinite,
+        prepDoneTextGlow 1.05s ease-in-out 0s both;
     }
 
     .prep-important-collapse-btn {
@@ -7789,8 +7800,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v372';
-      var BUILD_TIME = '2026-06-11 03:40 MSK';
+      var APP_VERSION = 'v373';
+      var BUILD_TIME = '2026-06-11 03:55 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -13777,6 +13788,17 @@
         return true;
       }
 
+      function restartPrepImportantDoneTextAnimation(block) {
+        if (!block) return;
+        var textEl = block.querySelector('.prep-important-done-text');
+        if (!textEl) return;
+        textEl.style.animation = 'none';
+        textEl.style.backgroundPosition = '-90% 50%';
+        void textEl.offsetWidth;
+        textEl.style.animation = '';
+        textEl.style.backgroundPosition = '';
+      }
+
       function playPrepImportantDone(block) {
         if (!block) return;
         var doneBtn = document.getElementById('prep-important-done');
@@ -13784,9 +13806,10 @@
         block.classList.remove('prep-important-done-pulse');
         void block.offsetWidth;
         block.classList.add('prep-important-done-pulse');
+        restartPrepImportantDoneTextAnimation(block);
         setTimeout(function () {
           block.classList.remove('prep-important-done-pulse');
-        }, 1000);
+        }, 1050);
       }
 
       function playPrepImportantExpand(block) {
@@ -14080,7 +14103,7 @@
             setTimeout(function () {
               prepImportantExpanded = false;
               updatePrepImportantPin();
-            }, 900);
+            }, 1050);
           } else {
             updatePrepImportantPin();
           }
