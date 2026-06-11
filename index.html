@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v373)</title>
+  <title>Sam Scenes (v374)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -3351,6 +3351,14 @@
       min-height: 1.15em;
       line-height: 1.15;
       padding-bottom: 0;
+    }
+
+    /* Строка «Sam»: пунктир-заполнитель на одной базовой линии с «SAM:» и приглушённее note/intercut. */
+    .scene-main > .line-say .say-editable:not(.has-text) {
+      min-height: 1.15em;
+      line-height: 1.15;
+      padding-bottom: 0;
+      border-bottom: 0.5px dashed rgba(200, 198, 195, 0.18);
     }
 
     .scene-main > .line-say .say-editable:focus,
