@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v387)</title>
+  <title>Sam Scenes (v388)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -4340,7 +4340,7 @@
       justify-content: center;
       gap: 12px;
       margin: 32px 0;
-      padding: 12px 48px;
+      padding: 12px 14px;
       border-radius: 16px;
       border: 1px solid rgba(220, 178, 112, 0.34);
       background: rgba(0, 0, 0, 0.32);
@@ -4419,112 +4419,6 @@
     .teleprompter-menu-sub {
       font-size: 0.74rem;
       color: rgba(232, 223, 212, 0.6);
-    }
-
-    .teleprompter-menu-gear {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      flex-shrink: 0;
-      width: 2.2rem;
-      height: 2.2rem;
-      border-radius: 50%;
-      border: 1px solid rgba(220, 178, 112, 0.4);
-      background: rgba(0, 0, 0, 0.3);
-      color: rgba(255, 205, 138, 0.92);
-      font-size: 1.1rem;
-      line-height: 1;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-      transition: transform 0.16s ease, box-shadow 0.18s ease;
-    }
-
-    .teleprompter-menu-gear:active {
-      transform: translateY(-50%) scale(0.94);
-    }
-
-    .teleprompter-menu-gear[aria-expanded="true"] {
-      box-shadow: 0 0 0 2px rgba(255, 165, 90, 0.32);
-    }
-
-    .teleprompter-menu-settings {
-      flex-basis: 100%;
-      width: 100%;
-      margin-top: 4px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .teleprompter-menu-settings[hidden] {
-      display: none;
-    }
-
-    .teleprompter-menu-settings-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 2px;
-      font-size: 14px;
-      font-weight: 800;
-      letter-spacing: 0.03em;
-      color: #ffe0a1;
-    }
-
-    .teleprompter-menu-settings-close {
-      position: relative;
-      z-index: 3;
-      box-sizing: border-box;
-      width: 44px;
-      height: 44px;
-      min-width: 44px;
-      min-height: 44px;
-      padding: 0;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 218, 132, 0.35);
-      background: rgba(16, 16, 16, 0.92);
-      color: #ffe0a1;
-      font-size: 22px;
-      line-height: 1;
-      cursor: pointer;
-      flex-shrink: 0;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .teleprompter-menu-row {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      grid-template-rows: auto auto;
-      gap: 4px 10px;
-      align-items: center;
-      margin-top: 8px;
-      font-size: 13px;
-      color: rgba(255, 236, 196, 0.88);
-      user-select: none;
-    }
-
-    .teleprompter-menu-row input[type="range"] {
-      grid-column: 1 / -1;
-      width: 100%;
-      accent-color: var(--gold);
-    }
-
-    .teleprompter-menu-val {
-      min-width: 4.4em;
-      text-align: right;
-      font-weight: 700;
-      font-variant-numeric: tabular-nums;
-      color: rgba(255, 224, 161, 0.92);
     }
 
     .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -7981,8 +7875,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v386';
-      var BUILD_TIME = '2026-06-11 06:40 MSK';
+      var APP_VERSION = 'v388';
+      var BUILD_TIME = '2026-06-11 07:00 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -12602,37 +12496,13 @@
             '<span class="teleprompter-menu-title">Телесуфлёр</span>' +
             '<span class="teleprompter-menu-sub">Весь сценарий</span>' +
           '</span>' +
-        '</button>' +
-        '<button type="button" class="teleprompter-menu-gear" id="teleprompter-menu-gear" aria-label="Настройки суфлёра" aria-expanded="false" aria-controls="teleprompter-menu-settings">\u2699</button>' +
-        '<div class="teleprompter-menu-settings" id="teleprompter-menu-settings" hidden>' +
-          '<div class="teleprompter-menu-settings-head">' +
-            '<span>Настройки суфлёра</span>' +
-            '<button type="button" class="teleprompter-menu-settings-close" id="teleprompter-menu-settings-close" aria-label="Закрыть настройки">×</button>' +
-          '</div>' +
-          '<label class="teleprompter-menu-row" for="tp-menu-font"><span>Размер букв</span><span class="teleprompter-menu-val" id="tp-menu-font-val">100%</span><input id="tp-menu-font" type="range" min="60" max="180" step="5" value="100"></label>' +
-          '<label class="teleprompter-menu-row" for="tp-menu-speed"><span>Скорость прокрутки</span><span class="teleprompter-menu-val" id="tp-menu-speed-val">1.0×</span><input id="tp-menu-speed" type="range" min="3" max="35" step="1" value="10"></label>' +
-          '<label class="teleprompter-menu-row" for="tp-menu-letter"><span>Расстояние между буквами</span><span class="teleprompter-menu-val" id="tp-menu-letter-val">0.01em</span><input id="tp-menu-letter" type="range" min="-5" max="30" step="1" value="1"></label>' +
-          '<label class="teleprompter-menu-row" for="tp-menu-line"><span>Расстояние между строками</span><span class="teleprompter-menu-val" id="tp-menu-line-val">1.25</span><input id="tp-menu-line" type="range" min="100" max="250" step="5" value="125"></label>' +
-          '<div class="teleprompter-settings-keyhead">Управление прокруткой</div>' +
-          '<div class="teleprompter-menu-row tp-key-row"><span>Play (запуск)</span><button type="button" class="tp-key-pick" data-tp-key="playKey" aria-label="Клавиша Play">не задано</button></div>' +
-          '<div class="teleprompter-menu-row tp-key-row"><span>Stop (стоп)</span><button type="button" class="tp-key-pick" data-tp-key="stopKey" aria-label="Клавиша Stop">не задано</button></div>' +
-          '<div class="teleprompter-menu-row tp-key-row"><span>Удержание (зажал — едет, отпустил — стоп)</span><button type="button" class="tp-key-pick" data-tp-key="holdKey" aria-label="Клавиша удержания">Enter</button></div>' +
-          '<div class="teleprompter-settings-hint">Тап по полю → нажмите нужную клавишу. Esc — отмена, Backspace — очистить.</div>' +
-        '</div>';
+        '</button>';
 
       /**
        * Блок-меню суфлёра — первый ребёнок #scenes-block (перед INTRO). #scenes-block лежит внутри .wrap,
        * чей innerHTML целиком пересобирается при смене/загрузке сценария, поэтому меню ре-инжектим
-       * (через refreshDomRefs). Разметку всегда обновляем заново → актуальная версия и свёрнутые настройки.
-       * Клики/инпуты — делегированием на document, так что пересоздание не требует перепривязки.
+       * (через refreshDomRefs). Настройки — только внутри оверлея суфлёра (шестерёнка слева сверху).
        */
-      function collapseTeleprompterMenuSettings() {
-        var tpMenuPanel = document.getElementById('teleprompter-menu-settings');
-        var tpMenuGear = document.getElementById('teleprompter-menu-gear');
-        if (tpMenuPanel) tpMenuPanel.setAttribute('hidden', '');
-        if (tpMenuGear) tpMenuGear.setAttribute('aria-expanded', 'false');
-      }
-
       /** iOS/PWA: touchend.target иногда не кнопка — добираем координатами касания. */
       function closestTeleprompterCloseFromEvent(e) {
         if (!teleprompterOverlay || !teleprompterOverlay.classList.contains('open')) return null;
@@ -12661,47 +12531,6 @@
         return null;
       }
 
-      /** iOS/PWA: touchend.target иногда не кнопка — добираем координатами касания. */
-      function closestTeleprompterMenuSettingsCloseFromEvent(e) {
-        var fromTarget = e && e.target && e.target.closest
-          ? e.target.closest('#teleprompter-menu-settings-close, .teleprompter-menu-settings-close')
-          : null;
-        if (fromTarget) return fromTarget;
-        if (!e || !e.changedTouches || !e.changedTouches.length) return null;
-        var touch = e.changedTouches[0];
-        var el = document.elementFromPoint(touch.clientX, touch.clientY);
-        return el && el.closest
-          ? el.closest('#teleprompter-menu-settings-close, .teleprompter-menu-settings-close')
-          : null;
-      }
-
-      function bindTeleprompterMenuSettingsCloseButton() {
-        var btn = document.getElementById('teleprompter-menu-settings-close');
-        if (!btn) return;
-        var lastAt = 0;
-        function handleMenuSettingsClose(e) {
-          var now = Date.now();
-          if (now - lastAt < 500) {
-            if (e) { try { e.preventDefault(); } catch (e1) {} }
-            return;
-          }
-          lastAt = now;
-          if (e) {
-            try { e.preventDefault(); } catch (e2) {}
-            try { e.stopPropagation(); } catch (e3) {}
-            try { e.stopImmediatePropagation(); } catch (e4) {}
-          }
-          collapseTeleprompterMenuSettings();
-          try { triggerHaptic('micro'); } catch (e5) {}
-        }
-        btn.addEventListener('click', handleMenuSettingsClose);
-        btn.addEventListener('pointerup', function (e) {
-          if (e.pointerType === 'mouse' && e.button !== 0) return;
-          handleMenuSettingsClose(e);
-        });
-        btn.addEventListener('touchend', handleMenuSettingsClose, { passive: false });
-      }
-
       function ensureTeleprompterMenu() {
         var block = document.getElementById('scenes-block');
         if (!block) return;
@@ -12712,8 +12541,6 @@
         sec.setAttribute('aria-label', 'Телесуфлёр');
         sec.innerHTML = TELEPROMPTER_MENU_INNER_HTML;
         block.insertBefore(sec, block.firstChild);
-        try { syncTeleprompterSettingsUi(readTeleprompterSettings()); } catch (e) {}
-        bindTeleprompterMenuSettingsCloseButton();
       }
 
       /** Текст «Sam» всех блоков по порядку (INTRO → сцены → OUTRO) — для запуска суфлёра на весь сценарий. */
@@ -12890,24 +12717,7 @@
         if (teleprompterSetSpeedVal) teleprompterSetSpeedVal.textContent = s.speed.toFixed(1) + '×';
         if (teleprompterSetLetterVal) teleprompterSetLetterVal.textContent = s.letterSpacingEm.toFixed(2) + 'em';
         if (teleprompterSetLineVal) teleprompterSetLineVal.textContent = s.lineHeight.toFixed(2);
-        // Те же глобальные настройки — дублируем в блок-меню суфлёра (если он на странице).
-        var mFont = document.getElementById('tp-menu-font');
-        var mSpeed = document.getElementById('tp-menu-speed');
-        var mLetter = document.getElementById('tp-menu-letter');
-        var mLine = document.getElementById('tp-menu-line');
-        var mFontVal = document.getElementById('tp-menu-font-val');
-        var mSpeedVal = document.getElementById('tp-menu-speed-val');
-        var mLetterVal = document.getElementById('tp-menu-letter-val');
-        var mLineVal = document.getElementById('tp-menu-line-val');
-        if (mFont) mFont.value = String(Math.round(s.fontScale * 100));
-        if (mSpeed) mSpeed.value = String(Math.round(s.speed * 10));
-        if (mLetter) mLetter.value = String(Math.round(s.letterSpacingEm * 100));
-        if (mLine) mLine.value = String(Math.round(s.lineHeight * 100));
-        if (mFontVal) mFontVal.textContent = Math.round(s.fontScale * 100) + '%';
-        if (mSpeedVal) mSpeedVal.textContent = s.speed.toFixed(1) + '×';
-        if (mLetterVal) mLetterVal.textContent = s.letterSpacingEm.toFixed(2) + 'em';
-        if (mLineVal) mLineVal.textContent = s.lineHeight.toFixed(2);
-        // Горячие клавиши — освежаем кэш и подписи пикеров (в панели суфлёра и в блок-меню).
+        // Горячие клавиши — освежаем кэш и подписи пикеров в панели суфлёра.
         teleprompterKeyBindings = { playKey: s.playKey, stopKey: s.stopKey, holdKey: s.holdKey };
         if (typeof syncTeleprompterKeyPickers === 'function') syncTeleprompterKeyPickers();
       }
@@ -15052,64 +14862,10 @@
             openTeleprompterAllScenes();
             return;
           }
-          var tpMenuGear = e.target && e.target.closest ? e.target.closest('#teleprompter-menu-gear') : null;
-          if (tpMenuGear) {
-            e.preventDefault();
-            triggerHaptic('light');
-            var tpMenuPanel = document.getElementById('teleprompter-menu-settings');
-            if (tpMenuPanel) {
-              var willOpen = tpMenuPanel.hasAttribute('hidden');
-              if (willOpen) {
-                tpMenuPanel.removeAttribute('hidden');
-                try { syncTeleprompterSettingsUi(readTeleprompterSettings()); } catch (eSg) {}
-              } else {
-                collapseTeleprompterMenuSettings();
-              }
-              tpMenuGear.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
-            }
-            return;
-          }
-          var tpMenuSettingsClose = e.target && e.target.closest
-            ? e.target.closest('#teleprompter-menu-settings-close, .teleprompter-menu-settings-close')
-            : null;
-          if (tpMenuSettingsClose) {
-            e.preventDefault();
-            try { e.stopPropagation(); } catch (eTpMc) {}
-            triggerHaptic('micro');
-            collapseTeleprompterMenuSettings();
-            return;
-          }
           if (teleprompterOverlay && e.target === teleprompterOverlay) {
             closeTeleprompter();
           }
         });
-
-        /* Крестик в блок-меню суфлёра (#teleprompter-menu-settings-close): на iOS/PWA
-           синтетический click иногда не приходит — дублируем touchend/pointerup (capture + coords). */
-        if (!wireControls._tpMenuSettingsCloseTouch) {
-          wireControls._tpMenuSettingsCloseTouch = true;
-          var lastTpMenuSettingsCloseTouchAt = 0;
-          function doTpMenuSettingsCloseTouch(e) {
-            var btn = closestTeleprompterMenuSettingsCloseFromEvent(e);
-            if (!btn) return;
-            var now = Date.now();
-            if (now - lastTpMenuSettingsCloseTouchAt < 500) {
-              try { e.preventDefault(); } catch (e1) {}
-              return;
-            }
-            lastTpMenuSettingsCloseTouchAt = now;
-            try { e.preventDefault(); } catch (e2) {}
-            try { e.stopPropagation(); } catch (e3) {}
-            try { e.stopImmediatePropagation(); } catch (e4) {}
-            collapseTeleprompterMenuSettings();
-            try { triggerHaptic('micro'); } catch (e5) {}
-          }
-          document.addEventListener('touchend', doTpMenuSettingsCloseTouch, { passive: false, capture: true });
-          document.addEventListener('pointerup', function (e) {
-            if (e.pointerType === 'mouse' && e.button !== 0) return;
-            doTpMenuSettingsCloseTouch(e);
-          }, true);
-        }
 
         if (teleprompterClose) {
           /* iOS standalone: viewport мог перехватывать тап (нет z-index) + touchend.target
@@ -15262,17 +15018,7 @@
             });
           }
 
-          // Ползунки блока-меню суфлёра — те же глобальные настройки (делегирование, т.к. меню пересоздаётся).
-          document.addEventListener('input', function (e) {
-            var t = e.target;
-            if (!t || !t.id) return;
-            if (t.id === 'tp-menu-font') patchTeleprompterSettings({ fontScale: parseInt(t.value, 10) / 100 });
-            else if (t.id === 'tp-menu-speed') patchTeleprompterSettings({ speed: parseInt(t.value, 10) / 10 });
-            else if (t.id === 'tp-menu-letter') patchTeleprompterSettings({ letterSpacingEm: parseInt(t.value, 10) / 100 });
-            else if (t.id === 'tp-menu-line') patchTeleprompterSettings({ lineHeight: parseInt(t.value, 10) / 100 });
-          });
-
-          // Пикеры горячих клавиш (делегирование — работают и в панели суфлёра, и в пересоздаваемом блок-меню).
+          // Пикеры горячих клавиш (делегирование — в панели суфлёра).
           document.addEventListener('click', function (e) {
             var pick = e.target && e.target.closest ? e.target.closest('.tp-key-pick') : null;
             if (!pick) return;
@@ -16813,7 +16559,7 @@
             'button, a, input, select, textarea, label, summary, ' +
             '[contenteditable], [contenteditable="true"], [role="button"], [tabindex], ' +
             '.teleprompter-close, .teleprompter-settings-close, .teleprompter-settings-btn, ' +
-            '.teleprompter-menu-settings-close, #teleprompter-menu-gear, #teleprompter-menu-open, .scene-play-btn'
+            '#teleprompter-menu-open, .scene-play-btn'
           );
         }
         var _lastTouchEnd = 0;
