@@ -2,7 +2,7 @@
 // Стратегия: Network-first с тайм-аутом для index.html (свежий, но без зависания
 // на медленной сети), Cache-first для остальных файлов — приложение работает офлайн.
 
-var CACHE_NAME = 'samscenes-v410';
+var CACHE_NAME = 'samscenes-v411';
 var CORE_FILES = [
   '/sam-scenes/',
   '/sam-scenes/index.html',
@@ -10,18 +10,44 @@ var CORE_FILES = [
   '/sam-scenes/build-info.json',
   '/sam-scenes/apple-touch-icon.png',
   '/sam-scenes/favicon-192.png',
+  '/sam-scenes/icon-512.png',
+  '/sam-scenes/icon-512-maskable.png',
   '/sam-scenes/top-lamp-bg.png',
-  '/sam-scenes/top-logo.png'
+  '/sam-scenes/top-logo.png',
+  '/sam-scenes/brand-logo.png',
+  '/sam-scenes/media/symbol-lamp.svg',
+  // #2+#6 (аудит v401): локальные шрифты в прекэше — фирменный вид с первого офлайн-старта.
+  '/sam-scenes/fonts/roboto-slab-cyrillic-wght-normal.woff2',
+  '/sam-scenes/fonts/roboto-slab-latin-wght-normal.woff2',
+  '/sam-scenes/fonts/pacifico-cyrillic-400-normal.woff2',
+  '/sam-scenes/fonts/pacifico-latin-400-normal.woff2',
+  '/sam-scenes/fonts/bad-script-cyrillic-400-normal.woff2',
+  '/sam-scenes/fonts/bad-script-latin-400-normal.woff2'
 ];
 
 // #13: на медленной сети не ждём ответ дольше этого времени — отдаём кэш, открытие плавное.
 var HTML_NETWORK_TIMEOUT_MS = 2500;
 
+// v411-review: критичные файлы кэшируем строго — их сбой роняет install, и SW честно
+// попробует снова при следующем визите (раньше .catch молча «съедал» провал addAll,
+// а addAll — «всё или ничего»: один флаки-запрос оставлял пустым весь прекэш).
+// Остальное — поштучно с допуском отказа: один упавший файл не рушит офлайн-ядро.
+var CORE_CRITICAL = [
+  '/sam-scenes/',
+  '/sam-scenes/index.html'
+];
+
 self.addEventListener('install', function (e) {
   self.skipWaiting();
   e.waitUntil(
     caches.open(CACHE_NAME).then(function (cache) {
-      return cache.addAll(CORE_FILES).catch(function () {});
+      return cache.addAll(CORE_CRITICAL).then(function () {
+        return Promise.all(
+          CORE_FILES
+            .filter(function (u) { return CORE_CRITICAL.indexOf(u) === -1; })
+            .map(function (u) { return cache.add(u).catch(function () {}); })
+        );
+      });
     })
   );
 });
@@ -66,10 +92,14 @@ self.addEventListener('fetch', function (e) {
         fetch(req)
           .then(function (response) {
             // Кэш обновляем всегда — даже если по тайм-ауту уже отдали старую версию.
-            var clone = response.clone();
-            caches.open(CACHE_NAME).then(function (cache) {
-              cache.put(req, clone);
-            });
+            // v411-review: но только успешный ответ (200) — иначе можно «запинить»
+            // страницу ошибки в офлайн-кэше; asset-ветка ниже такой guard уже имела.
+            if (response && response.status === 200) {
+              var clone = response.clone();
+              caches.open(CACHE_NAME).then(function (cache) {
+                cache.put(req, clone);
+              });
+            }
             if (settled) return;
             settled = true;
             clearTimeout(timer);

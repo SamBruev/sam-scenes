@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v220: единый пунктир у примечания и перебивки -->
+<!-- Sam Scenes — одностраничное PWA «сценарий съёмки». Актуальная версия: <title> / APP_VERSION / build-info.json -->
 <html lang="ru" style="--logo-x: 0px; --logo-y: 0px; --logo-scale: 2.00; --top-logo-blur: 0px; --top-logo-reveal: 1; --pull-stack-y: 0px;">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <title>Sam Scenes (v410)</title>
+  <title>Sam Scenes (v411)</title>
   <!-- Маска до восстановления скролла: первый кадр не «прыгает» с 0 на Y -->
   <style id="samscenes-restore-critical">
     html {
@@ -127,9 +127,60 @@
       }
     })();
   </script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bad+Script&family=Pacifico&family=Roboto+Slab:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- #2 (аудит v401): шрифты локально (fonts/*.woff2, latin+cyrillic) — офлайн-first, без Google Fonts CDN.
+       Roboto Slab — вариативный (100-900) вместо пяти отдельных весов. -->
+  <link rel="preload" href="fonts/roboto-slab-cyrillic-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/roboto-slab-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <style>
+    @font-face {
+      font-family: 'Roboto Slab';
+      font-style: normal;
+      font-display: swap;
+      font-weight: 100 900;
+      src: url('fonts/roboto-slab-cyrillic-wght-normal.woff2') format('woff2-variations');
+      unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+    }
+    @font-face {
+      font-family: 'Roboto Slab';
+      font-style: normal;
+      font-display: swap;
+      font-weight: 100 900;
+      src: url('fonts/roboto-slab-latin-wght-normal.woff2') format('woff2-variations');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+    @font-face {
+      font-family: 'Pacifico';
+      font-style: normal;
+      font-display: swap;
+      font-weight: 400;
+      src: url('fonts/pacifico-cyrillic-400-normal.woff2') format('woff2');
+      unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+    }
+    @font-face {
+      font-family: 'Pacifico';
+      font-style: normal;
+      font-display: swap;
+      font-weight: 400;
+      src: url('fonts/pacifico-latin-400-normal.woff2') format('woff2');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+    @font-face {
+      font-family: 'Bad Script';
+      font-style: normal;
+      font-display: swap;
+      font-weight: 400;
+      src: url('fonts/bad-script-cyrillic-400-normal.woff2') format('woff2');
+      unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+    }
+    @font-face {
+      font-family: 'Bad Script';
+      font-style: normal;
+      font-display: swap;
+      font-weight: 400;
+      src: url('fonts/bad-script-latin-400-normal.woff2') format('woff2');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+  </style>
   <style>
     /* Палитра только как в логотипе: чёрный, крем/белый, золото/янтарь. Фон — плотный градиент «свет лампы сверху → чёрный низ». Имя ассистента — Pacifico, как скрипт Mixing & Recording */
     :root {
@@ -210,6 +261,10 @@
       margin: 0;
       min-height: 100vh;
       min-height: -webkit-fill-available;
+      /* #13 (аудит v401): body — на динамической высоте вьюпорта (dvh, iOS 15.4+).
+         Фоновым body::before/::after этого не нужно: они fixed с top/bottom-инсетами
+         −48px, высота задаётся инсетами, min-height там не имел бы эффекта. */
+      min-height: 100dvh;
       position: relative;
       font-family: var(--brand-serif);
       color: var(--text);
@@ -1942,13 +1997,13 @@
       font-variant-numeric: tabular-nums;
       line-height: 1.35;
       color: rgba(248, 242, 255, 0.94);
-      background: rgba(4, 4, 4, 0.94);
+      /* #7 (аудит v401): без живого backdrop-filter на постоянном fixed-слое —
+         правило проекта против вылетов WebKit; взамен плотнее фон. */
+      background: rgba(4, 4, 4, 0.97);
       border: 1px solid rgba(255, 255, 255, 0.22);
       box-shadow:
         0 4px 18px rgba(0, 0, 0, 0.45),
         0 0 16px var(--ui-violet-soft);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
       pointer-events: auto;
       cursor: default;
       user-select: text;
@@ -1958,6 +2013,51 @@
     body.assistant-drawer-open .app-build-chip {
       opacity: 0.28;
       pointer-events: none;
+    }
+
+    /* 💡 Quota-meter: заполнение localStorage (~5 МБ iOS) в «Настройках сценариев» */
+    .hub-quota {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .hub-quota[hidden] {
+      display: none;
+    }
+
+    .hub-quota-bar {
+      flex: 1 1 auto;
+      height: 4px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+    }
+
+    .hub-quota-fill {
+      display: block;
+      height: 100%;
+      width: 0;
+      border-radius: 2px;
+      background: var(--gold);
+      transition: width 0.25s ease;
+    }
+
+    .hub-quota-text {
+      flex: 0 0 auto;
+      font-size: 11px;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .hub-quota--warn .hub-quota-fill {
+      background: var(--accent);
+    }
+
+    .hub-quota--warn .hub-quota-text {
+      color: var(--accent);
     }
 
     .scenario-hub .row {
@@ -6568,6 +6668,7 @@
           <button type="button" class="btn-assistant-create" id="btn-scenario-new">+ Новый шаблон</button>
           <button class="btn btn-danger" id="btn-scenario-delete" type="button">Удалить</button>
         </div>
+        <div class="hub-quota" id="hub-quota" hidden><div class="hub-quota-bar" aria-hidden="true"><span class="hub-quota-fill" id="hub-quota-fill"></span></div><span class="hub-quota-text" id="hub-quota-text"></span></div>
       </div>
     </details>
 
@@ -7919,8 +8020,8 @@
        * Номер релиза и время деплоя (обновлять при каждом push на GitHub Pages).
        * Дублируйте те же поля в build-info.json — плашка подгружает его с cache: no-store.
        */
-      var APP_VERSION = 'v410';
-      var BUILD_TIME = '2026-06-11 08:20 MSK';
+      var APP_VERSION = 'v411';
+      var BUILD_TIME = '2026-08-02 00:48 MSK';
 
       /** Любые фрагменты YYYY-MM-DD в строке → DD.MM.YYYY (время/суффикс сохраняются). */
       function formatDatesInDisplayString(str) {
@@ -8077,7 +8178,6 @@
       var teleprompterSetSpeedVal = document.getElementById('teleprompter-set-speed-val');
       var teleprompterSetLetterVal = document.getElementById('teleprompter-set-letter-val');
       var teleprompterSetLineVal = document.getElementById('teleprompter-set-line-val');
-      var teleprompterLockScrollY = 0;
       var teleprompterOwnedScrollLock = false;
       var TELEPROMPTER_SETTINGS_KEY = 'samscenes-teleprompter-settings-v1';
       var TELEPROMPTER_SPEED_KEY = 'samscenes-teleprompter-speed';
@@ -8210,10 +8310,20 @@
           wireShotlistPiecesManualInput();
           wireShotlistPiecesRemove();
         } catch (eShotRewire) {}
+        /* #11 (аудит v401): «подтяжка start из end предыдущей сцены» — ре-байнд на новый #scene-stack. */
+        try { wireSceneStackTimelineContinuity(); } catch (eTimeCont) {}
+        /* 💡 Quota-meter: блок в хабе пересоздаётся вместе с wrap.innerHTML — восстановить
+           и обновить. Здесь (в отличие от persistToStorage) — безусловно: refreshDomRefs
+           выполняется до baseline-снапшота undo, поэтому шума в истории не создаёт,
+           а цифры после загрузки сценария детерминированно свежие. */
+        try {
+          ensureHubQuotaMarkup();
+          updateStorageQuotaMeter();
+        } catch (eQuotaRef) {}
       }
 
       var autosaveTO = null;
-      var AUTOSAVE_MS = 1500;
+      var AUTOSAVE_IDLE_MS = 5000; /* #1 (аудит v401): пауза ввода до тихого автосейва */
       var undoSnapshotTO = null;
       var UNDO_SNAPSHOT_DEBOUNCE_MS = 450;
       var undoHistory = [];
@@ -8236,6 +8346,69 @@
         if (!saveStatus) return;
         saveStatus.textContent = text;
         saveStatus.classList.toggle('dirty', !!isDirty);
+      }
+
+      /* 💡 (OPEN_ITEMS): quota-meter — сколько занято в localStorage из ~5 МБ iOS.
+         Блок живёт в «Настройках сценариев»; wrap.innerHTML сохраняется в bundle,
+         поэтому в старых сценариях блока нет — ensureHubQuotaMarkup достраивает его. */
+      var QUOTA_LIMIT_BYTES = 5 * 1024 * 1024;
+
+      function ensureHubQuotaMarkup() {
+        var body = document.querySelector('#scenario-hub .scenario-hub-body');
+        if (!body || body.querySelector('#hub-quota')) return;
+        var box = document.createElement('div');
+        box.className = 'hub-quota';
+        box.id = 'hub-quota';
+        box.hidden = true;
+        box.innerHTML =
+          '<div class="hub-quota-bar" aria-hidden="true"><span class="hub-quota-fill" id="hub-quota-fill"></span></div>' +
+          '<span class="hub-quota-text" id="hub-quota-text"></span>';
+        body.appendChild(box);
+      }
+
+      function updateStorageQuotaMeter() {
+        var box = document.getElementById('hub-quota');
+        if (!box) return;
+        var bytes = 0;
+        try {
+          for (var qi = 0; qi < localStorage.length; qi++) {
+            var qk = localStorage.key(qi);
+            if (!qk) continue;
+            /* v411-review: лимит ~5 МБ действует на ВЕСЬ origin, поэтому считаем все
+               ключи: legacy `abakan-*` (миграция копирует, не удаляя) и данные других
+               страниц sambruev.github.io тоже занимают квоту приложения. */
+            bytes += (qk.length + (localStorage.getItem(qk) || '').length) * 2; /* UTF-16 */
+          }
+        } catch (eQuotaRead) {
+          box.hidden = true;
+          return;
+        }
+        var pct = Math.min(100, Math.round((bytes / QUOTA_LIMIT_BYTES) * 100));
+        var newText = (bytes / (1024 * 1024)).toFixed(2).replace('.', ',') + ' из ~5 МБ';
+        var fill = document.getElementById('hub-quota-fill');
+        var txt = document.getElementById('hub-quota-text');
+        /* v411-review: идемпотентность — DOM не мутируем, пока не изменились НИ текст,
+           НИ ширина (float-округления на границах могут дать новый процент при том же
+           тексте — сравниваем оба, полоска не «залипает»). Фантомные шаги Undo этим
+           больше не управляются — snapshotCurrentHtml канонизирует блок целиком;
+           guard оставлен, чтобы не делать лишних DOM-записей на каждом автосейве. */
+        if (!box.hidden && txt && txt.textContent === newText && fill && fill.style.width === pct + '%') return;
+        if (fill) fill.style.width = pct + '%';
+        if (txt) txt.textContent = newText;
+        box.classList.toggle('hub-quota--warn', pct >= 80);
+        box.hidden = false;
+      }
+
+      function wireHubQuotaMeter() {
+        /* toggle не всплывает — ловим в capture-фазе на document, переживает пересборку хаба. */
+        document.addEventListener(
+          'toggle',
+          function (e) {
+            var t = e.target;
+            if (t && t.id === 'scenario-hub' && t.open) updateStorageQuotaMeter();
+          },
+          true
+        );
       }
 
       function uid() {
@@ -8504,10 +8677,27 @@
        *   1) диаг-лог  2) истёкшие записи корзины  3) самые старые записи корзины.
        * Возвращает true, если запись в итоге удалась.
        */
+      /* v411-review: метка времени «recovery подчистил корзину» — persistToStorage
+         переставляет уведомление ПОСЛЕ своего финального setStatus (иначе затиралось бы),
+         в т.ч. в потоке «удалить сценарий»: recovery на записи КОРЗИНЫ → сразу persist.
+         Окно 30 с — давний notice не «переигрывается» на несвязанном позднем сейве. */
+      var quotaRecoveryTrashNoticeAt = 0;
+      var QUOTA_TRASH_NOTICE_WINDOW_MS = 30000;
+
       function setLocalStorageItemWithQuotaRecovery(key, value) {
+        var trashCleaned = false;
         function trySet() {
           try { localStorage.setItem(key, value); return true; }
           catch (e) { return false; }
+        }
+        function doneOk() {
+          /* v411-review: уборка не должна быть немой — тихий autosave статус не трогает,
+             и пользователь не узнал бы, что ради записи удалены НЕистёкшие записи корзины. */
+          if (trashCleaned) {
+            quotaRecoveryTrashNoticeAt = Date.now();
+            try { setStatus('Сохранено — не хватало места, корзина подчищена', false); } catch (eStQ) {}
+          }
+          return true;
         }
         if (trySet()) return true;
 
@@ -8515,7 +8705,7 @@
         try { localStorage.removeItem('samscenes-diag-log-v1'); } catch (e1) {}
         if (trySet()) return true;
 
-        /* 2) истёкшие записи корзины */
+        /* 2) истёкшие записи корзины (удаляются по 30-дневной политике — без уведомления) */
         try {
           var trash = readScenarioTrashRaw();
           if (purgeExpiredTrashEntries(trash) > 0) writeScenarioTrashDirect(trash);
@@ -8530,12 +8720,13 @@
           });
           while (t.items.length) {
             t.items.shift();
+            trashCleaned = true;
             writeScenarioTrashDirect(t);
-            if (trySet()) return true;
+            if (trySet()) return doneOk();
           }
         } catch (e3) {}
 
-        return trySet();
+        return trySet() ? doneOk() : false;
       }
 
       function writeScenarioBundle(bundle) {
@@ -8546,7 +8737,7 @@
           }
           try {
             if (typeof invalidateAssistantDrawerListCache === 'function') {
-              invalidateAssistantDrawerListCache();
+              invalidateAssistantDrawerListCache(bundle);
             }
           } catch (eInv) {}
           return true;
@@ -8660,7 +8851,13 @@
             break;
           }
         }
-        if (!entry || !entry.scenario) return false;
+        if (!entry || !entry.scenario) {
+          /* v411-review: запись могла быть удалена quota-recovery, пока список был открыт —
+             сообщаем и обновляем шторку вместо молчаливого return. */
+          alert('Записи уже нет в корзине (могла быть удалена при нехватке места).');
+          try { invalidateAssistantDrawerListCache(); } catch (eInvTrash) {}
+          return false;
+        }
         trash.items = trash.items.filter(function (e) {
           return e.trashId !== trashId;
         });
@@ -8959,8 +9156,24 @@
         } catch (e) {}
       })();
 
+      var HUB_QUOTA_CANONICAL_HTML =
+        '<div class="hub-quota" id="hub-quota" hidden>' +
+        '<div class="hub-quota-bar" aria-hidden="true"><span class="hub-quota-fill" id="hub-quota-fill"></span></div>' +
+        '<span class="hub-quota-text" id="hub-quota-text"></span></div>';
+
       function snapshotCurrentHtml() {
-        return wrap ? String(wrap.innerHTML || '') : '';
+        var html = wrap ? String(wrap.innerHTML || '') : '';
+        if (!html) return html;
+        /* v411-review: цифры quota-метра — не состояние сценария. Канонизируем блок,
+           чтобы два снапшота не различались только метром («фантомный» шаг Undo при
+           открытом хабе). \s* на стыке — статическая форма блока в исходнике могла
+           сериализоваться с переносами строк (в старых bundle). Разметка после отката
+           самолечится в refreshDomRefs (ensureHubQuotaMarkup/updateStorageQuotaMeter);
+           при несовпадении паттерна replace просто ничего не меняет. */
+        return html.replace(
+          /<div class="hub-quota[^"]*" id="hub-quota"[\s\S]*?id="hub-quota-text"[^<]*<\/span>\s*<\/div>/,
+          HUB_QUOTA_CANONICAL_HTML
+        );
       }
 
       function rememberUndoState() {
@@ -8991,6 +9204,12 @@
           alert('Пока нечего откатывать.');
           return;
         }
+        /* v411-review: гасим висящий autosave только перед реальным откатом (после
+           early-return'ов): bundle ниже записывается синхронно, отложенный persist
+           сделал бы лишнюю multi-МБ запись (hitch). В ветках «нечего откатывать»
+           состояние не меняется — таймер не трогаем. */
+        clearTimeout(autosaveTO);
+        autosaveTO = null;
         var prevHtml = undoHistory.pop();
         try {
           // Применяем HTML прямо в DOM — без перезагрузки страницы
@@ -9076,7 +9295,9 @@
         writeScenarioBundle(bundle);
         try { renderScenarioList(bundle); } catch (eRsl) {}
         try { renderDailyPlan(bundle); } catch (eRdp) {}
-        try { renderAssistantDrawerList(); } catch (eRad) {}
+        /* v411-review: шторку обновляет digest-aware хвост renderScenarioList — прямой
+           renderAssistantDrawerList() здесь дублировал полную пересборку на каждый тик
+           дебаунса синка имени. */
       }
 
       function renderDailyPlan(bundle) {
@@ -9253,8 +9474,12 @@
           scenarioSelect.value = scenarioSelect.options[0].value;
         }
         if (!scenarioSelect.options.length) syncTitleSubject('');
+        /* v411-review: только digest-aware — безусловный renderAssistantDrawerList() здесь
+           обходил защиту invalidateAssistantDrawerListCache и пересобирал открытую шторку
+           на каждом (в т.ч. тихом) сейве; заодно ушла двойная перерисовка при реальном
+           изменении digest'а. IfDirty сам обновляет digest после рендера. */
         try {
-          renderAssistantDrawerList();
+          renderAssistantDrawerListIfDirty(false, bundle);
         } catch (eDrawerList) {}
       }
 
@@ -9660,9 +9885,11 @@
       /** Хэш свежей пачки сценариев. Чтобы не перерисовывать список, если ничего не поменялось. */
       var assistantDrawerListLastDigest = '';
 
-      function assistantDrawerBundleDigest() {
+      function assistantDrawerBundleDigest(bundleOpt) {
         try {
-          var bundle = readScenarioBundle();
+          /* v411-review: bundle можно передать снаружи (persist уже держит его в руках) —
+             без повторного JSON.parse многомегабайтной строки на каждом автосейве. */
+          var bundle = bundleOpt || readScenarioBundle();
           var items = bundle && bundle.items ? bundle.items : [];
           var activeId = bundle && bundle.activeId ? bundle.activeId : '';
           var orderIds = bundle && bundle.assistantOrderIds ? bundle.assistantOrderIds.join('|') : '';
@@ -9675,14 +9902,22 @@
               ':' + (it.shootBlock || '')
             );
           }
+          /* v411-review: корзина — тоже часть списка шторки. Состав по trashId без
+             JSON.parse (в корзине лежат полные html сценариев — парсить дорого):
+             quota-recovery, удалившая записи, меняет digest → список честно обновится. */
+          try {
+            var trashRawDig = localStorage.getItem(SCENARIO_TRASH_STORAGE_KEY) || '';
+            var trashIdsDig = trashRawDig.match(/"trashId"\s*:\s*"[^"]*"/g);
+            parts.push('trash:' + (trashIdsDig ? trashIdsDig.join('|') : ''));
+          } catch (eTrashDig) {}
           return parts.join('§');
         } catch (eDig) {
           return String(Date.now());
         }
       }
 
-      function renderAssistantDrawerListIfDirty(force) {
-        var dig = assistantDrawerBundleDigest();
+      function renderAssistantDrawerListIfDirty(force, bundleOpt) {
+        var dig = assistantDrawerBundleDigest(bundleOpt);
         var host = document.getElementById('assistant-drawer-list');
         if (!force && host && host.firstChild && dig === assistantDrawerListLastDigest) return;
         renderAssistantDrawerList();
@@ -9690,92 +9925,21 @@
       }
 
       /** При изменении сценариев: помечаем кеш «грязным», но НЕ перерисовываем — это отложит до следующего открытия. */
-      function invalidateAssistantDrawerListCache() {
-        assistantDrawerListLastDigest = '';
+      function invalidateAssistantDrawerListCache(bundleOpt) {
         if (document.body.classList.contains('assistant-drawer-open')) {
-          renderAssistantDrawerListIfDirty(true);
-        }
-      }
-
-      function assistantDrawerSnapOpenFromDrag(fromTx, Wc) {
-        var d = document.getElementById('assistant-drawer');
-        var bk = document.getElementById('assistant-drawer-backdrop');
-        if (!d) {
-          endAssistantDrawerTracking();
-          clearAssistantDrawerInlineVisuals();
-          clearAssistantDrawerCloseListeners();
-          openAssistantDrawerCoreAfterSnap();
+          /* v411-review: при открытой шторке — перерисовка только по реальному изменению
+             digest'а (состав/имена/даты), без слепого force: тихий autosave (правка текста
+             сцены digest не меняет) не должен пересобирать список под пальцем —
+             слетали бы открытая свайп-панель строки и LP-drag. bundleOpt — чтобы digest
+             не парсил bundle повторно, когда вызывающий уже держит его в руках. */
+          renderAssistantDrawerListIfDirty(false, bundleOpt);
           return;
         }
-        var dur = 280;
-        var ease = 'cubic-bezier(0.22, 0.9, 0.28, 1)';
-        d.style.transition = 'transform ' + dur + 'ms ' + ease;
-        if (bk) bk.style.transition = 'opacity ' + dur + 'ms ' + ease;
-        requestAnimationFrame(function () {
-          requestAnimationFrame(function () {
-            d.style.transform = 'translateX(0px)';
-            setAssistantDrawerBackdropVisual(1, bk);
-            setAssistantDrawerWrapBlurProgress(1);
-            var doneCalled = false;
-            function done() {
-              if (doneCalled) return;
-              doneCalled = true;
-              try {
-                d.removeEventListener('transitionend', onEnd);
-              } catch (eRm) {}
-              clearAssistantDrawerInlineVisuals();
-              endAssistantDrawerTracking();
-              clearAssistantDrawerCloseListeners();
-              openAssistantDrawerCoreAfterSnap();
-            }
-            function onEnd(e) {
-              if (e.target !== d || e.propertyName !== 'transform') return;
-              done();
-            }
-            d.addEventListener('transitionend', onEnd);
-            setTimeout(done, dur + 140);
-          });
-        });
+        assistantDrawerListLastDigest = '';
       }
 
-      function assistantDrawerSnapCancelOpenDrag(fromTx, Wc) {
-        var d = document.getElementById('assistant-drawer');
-        var bk = document.getElementById('assistant-drawer-backdrop');
-        if (!d || !Wc || Wc < 1) {
-          endAssistantDrawerTracking();
-          clearAssistantDrawerInlineVisuals();
-          return;
-        }
-        var dur = 260;
-        var ease = 'cubic-bezier(0.22, 0.9, 0.28, 1)';
-        var closedTx = -Wc;
-        d.style.transition = 'transform ' + dur + 'ms ' + ease;
-        if (bk) bk.style.transition = 'opacity ' + dur + 'ms ' + ease;
-        requestAnimationFrame(function () {
-          requestAnimationFrame(function () {
-            d.style.transform = 'translateX(' + closedTx + 'px)';
-            setAssistantDrawerBackdropVisual(0, bk);
-            setAssistantDrawerWrapBlurProgress(0);
-            var doneCalled = false;
-            function finish() {
-              if (doneCalled) return;
-              doneCalled = true;
-              try {
-                d.removeEventListener('transitionend', onEnd);
-              } catch (eRm2) {}
-              clearAssistantDrawerInlineVisuals();
-              endAssistantDrawerTracking();
-            }
-            function onEnd(e) {
-              if (e.target !== d || e.propertyName !== 'transform') return;
-              finish();
-            }
-            d.addEventListener('transitionend', onEnd);
-            setTimeout(finish, dur + 140);
-          });
-        });
-      }
-
+      /* v411 (OPEN_ITEMS): assistantDrawerSnapOpenFromDrag / assistantDrawerSnapCancelOpenDrag
+         удалены вместе с мёртвым кодом свайп-открытия панели (open-drag). */
       function assistantDrawerSnapShutFromDrag(fromTx, Wc) {
         closeAllAssistantRowSwipePanels();
         clearAssistantDrawerCloseListeners();
@@ -10876,7 +11040,22 @@
           }
           renderScenarioList(bundle);
           renderDailyPlan(bundle);
-          setStatus(statusText || 'Сохранено', false);
+          /* v411-review: обновляем метр только при открытом хабе — он внутри .wrap,
+             и мутации при каждом (авто)сейве попадали бы в сохраняемый html и undo-снапшоты. */
+          try {
+            var hubForQuota = document.getElementById('scenario-hub');
+            if (hubForQuota && hubForQuota.open) updateStorageQuotaMeter();
+          } catch (eQuotaUi) {}
+          /* statusText === false — тихий autosave: статус не трогаем (ошибки всё равно видимы). */
+          if (statusText !== false) setStatus(statusText || 'Сохранено', false);
+          /* v411-review: уведомление quota-recovery переживает финальный setStatus —
+             при ручном сейве / переключении / удалении сценария (recovery мог сработать
+             на записи корзины прямо перед этим persist'ом) факт подчистки иначе
+             затирался бы; окно 30 с отсекает «переигрыш» давнего события. */
+          if (quotaRecoveryTrashNoticeAt && Date.now() - quotaRecoveryTrashNoticeAt < QUOTA_TRASH_NOTICE_WINDOW_MS) {
+            quotaRecoveryTrashNoticeAt = 0;
+            setStatus('Сохранено — не хватало места, корзина подчищена', false);
+          }
         } catch (e) {
           setStatus('Не удалось сохранить (браузер / память)', true);
         }
@@ -10889,6 +11068,10 @@
       function createNewScenarioTemplate(opts) {
         opts = opts || {};
         var skipReload = !!opts.skipReload;
+        /* v411-review (defense-in-depth): гасим отложенный autosave до смены activeId —
+           строкой ниже текущий сценарий персистится явно и синхронно. */
+        clearTimeout(autosaveTO);
+        autosaveTO = null;
         try {
           persistToStorage('Сохранено');
         } catch (e) {}
@@ -10978,17 +11161,59 @@
       try {
         document.addEventListener('touchstart', _markUiInteraction, { passive: true, capture: true });
         document.addEventListener('pointerdown', _markUiInteraction, { passive: true, capture: true });
+        /* v411-review: движения тоже метятся — длящийся жест (drag/свайп) не должен
+           считаться «тишиной» для autosave. Обработчик — одна запись timestamp, дёшево. */
+        document.addEventListener('touchmove', _markUiInteraction, { passive: true, capture: true });
+        document.addEventListener('pointermove', _markUiInteraction, { passive: true, capture: true });
         document.addEventListener('change', _markUiInteraction, { passive: true, capture: true });
         document.addEventListener('focusin', _markUiInteraction, { capture: true });
       } catch (eUiTrack) {}
       var UI_QUIESCE_MS = 1200; /* «тишина» от пользователя до того как разрешено серьёзное сохранение */
 
-      /** #4 — фоновое автосохранение отключено по просьбе пользователя.
-          Сохранение остаётся «безопасным»: при переключении сценариев (persistToStorage)
-          и при сворачивании/закрытии/обновлении приложения (flushSave). */
-      function scheduleAutosave() {
+      /** #1 (аудит v401) — мягкое фоновое автосохранение (включено по решению Sam, 2026-08-02).
+          Тихий persist через AUTOSAVE_IDLE_MS после паузы ввода. Отсрочки:
+          - активность (UI_QUIESCE_MS от последнего касания/движения; touchmove/pointermove
+            метятся) — откладывает без лимита: пока пользователь работает, живые жесты
+            (LP-drag, свайпы) не обрываются перерисовкой списков из persistToStorage;
+          - «занятый UI» — открытая шторка ассистента, drag логотипа, открытый суфлёр
+            (тяжёлый persist дёргал бы автоскролл в начале чтения), открытый dialog
+            (колёса времени сцены и т.п.), нативный SELECT-пикер (iOS может «залипнуть»
+            фокусом без change) — откладывает максимум
+            AUTOSAVE_MAX_UI_DEFERRALS «тихих» тиков (~25 с простоя), дальше сохраняем: редкий косметический
+            риск (закрыть пикер/свайп-панель, разовый hitch) меньше риска потери данных
+            при foreground-OOM-kill, который flushSave не покрывает.
+          Фокус в INPUT/contenteditable сознательно НЕ откладывает: persist не трогает DOM сцены
+          и каретку (syncFormControlStateForSave пишет только атрибуты), а главный сценарий потери
+          при OOM-kill — именно набор текста с открытой клавиатурой.
+          flushSave (pagehide/visibilitychange) остаётся жёсткой гарантией. */
+      var AUTOSAVE_MAX_UI_DEFERRALS = 4;
+      function scheduleAutosave(deferCount) {
+        var n = typeof deferCount === 'number' ? deferCount : 0;
         clearTimeout(autosaveTO);
-        autosaveTO = null;
+        autosaveTO = setTimeout(function () {
+          autosaveTO = null;
+          var quiesceBusy = Date.now() - _lastUiInteractionTs < UI_QUIESCE_MS;
+          var uiBusy = false;
+          try {
+            var tpOvAuto = document.getElementById('teleprompter-overlay');
+            var aeAuto = document.activeElement;
+            uiBusy =
+              document.body.classList.contains('assistant-drawer-open') ||
+              !!dragging ||
+              !!(tpOvAuto && tpOvAuto.classList.contains('open')) ||
+              !!document.querySelector('dialog[open]') ||
+              !!(aeAuto && aeAuto.tagName === 'SELECT');
+          } catch (eUiBusy) {}
+          if (quiesceBusy || (uiBusy && n < AUTOSAVE_MAX_UI_DEFERRALS)) {
+            /* Счётчик лимита растёт только на «тихих» тиках занятого UI: активная работа
+               (quiesce) не съедает лимит — семантика «~25 с простоя с занятым UI». */
+            scheduleAutosave(uiBusy ? (quiesceBusy ? n : n + 1) : 0);
+            return;
+          }
+          try {
+            persistToStorage(false);
+          } catch (eAuto) {}
+        }, AUTOSAVE_IDLE_MS);
       }
 
       function _doUndoSnapshotIfIdle() {
@@ -11008,7 +11233,8 @@
       function markDirty() {
         if (undoSnapshotTO) clearTimeout(undoSnapshotTO);
         undoSnapshotTO = setTimeout(_doUndoSnapshotIfIdle, UNDO_SNAPSHOT_DEBOUNCE_MS);
-        /* #4 — фоновое автосохранение отключено: статус «Сохраню…» и scheduleAutosave убраны. */
+        /* #1 — мягкий autosave: тихая запись после паузы ввода (см. scheduleAutosave). */
+        scheduleAutosave();
       }
 
       function saveToStorage() {
@@ -11027,6 +11253,11 @@
           persistToStorage(null);
         } catch (e) {}
       }
+
+      /* v411-review: экспорт для хвостового SW-скрипта (он вне этого IIFE) — иначе его
+         guard `typeof flushSave === 'function'` в trySwReload был всегда false, и явный
+         flush перед reload не выполнялся (спасали только pagehide/beforeunload). */
+      try { window.flushSave = flushSave; } catch (eExpFlush) {}
 
       function applyLogo() {
         var scaleNum = Number(s.value) || 100;
@@ -11248,9 +11479,12 @@
       }
 
       function wireSceneStackTimelineContinuity() {
-        if (wireSceneStackTimelineContinuity._done) return;
-        wireSceneStackTimelineContinuity._done = true;
+        /* #11 (аудит v401): guard — JS-свойство элемента (в bundle.html не сериализуется):
+           после wrap.innerHTML старый #scene-stack умирает вместе со слушателями,
+           новый элемент свойства не имеет — перепривязка проходит. */
         if (!sceneStack) return;
+        if (sceneStack._timelineContinuityBound) return;
+        sceneStack._timelineContinuityBound = true;
         sceneStack.addEventListener(
           'focusin',
           function (e) {
@@ -12250,6 +12484,10 @@
       }
 
       function loadFromStorage() {
+        /* v411-review: висящий autosave от прежнего сценария гасим — после подмены DOM
+           он сделал бы лишнюю (хоть и корректную) multi-МБ запись bundle с риском hitch. */
+        clearTimeout(autosaveTO);
+        autosaveTO = null;
         try {
           var bundle = readScenarioBundle();
           if (bundle && bundle.items && bundle.items.length) {
@@ -12711,12 +12949,6 @@
        * Полноэкранный оверлей сам перехватывает жесты; достаточно overflow:hidden.
        */
       function lockMainScrollForTeleprompter() {
-        teleprompterLockScrollY =
-          window.pageYOffset ||
-          (document.documentElement && document.documentElement.scrollTop) ||
-          (document.body && document.body.scrollTop) ||
-          0;
-        teleprompterLockScrollY = Math.max(0, teleprompterLockScrollY);
         document.documentElement.style.overflow = 'hidden';
         document.body.style.overflow = 'hidden';
         teleprompterOwnedScrollLock = true;
@@ -14781,6 +15013,7 @@
 
         var sceneRemoveTapStart = null;
         var suppressNextSceneRemoveClick = false;
+        var suppressNextSceneRemoveClickTO = null;
 
         root.addEventListener(
           'pointerdown',
@@ -14805,7 +15038,21 @@
             e.preventDefault();
             e.stopPropagation();
             suppressNextSceneRemoveClick = true;
-            tryRemoveScene(g.el);
+            if (suppressNextSceneRemoveClickTO) clearTimeout(suppressNextSceneRemoveClickTO);
+            /* #10 (аудит v401): авто-сброс — если синтетический click так и не пришёл,
+               флаг не должен «съесть» следующий настоящий клик. Таймер взводим ПОСЛЕ
+               tryRemoveScene (в finally): его confirm() блокирует JS, и окно 700 мс
+               стартует после закрытия диалога — иначе долгий confirm «просрочил» бы
+               подавление. Старый таймер погашен выше: два удаления подряд не сбрасывают
+               флаг второго таймером первого. */
+            try {
+              tryRemoveScene(g.el);
+            } finally {
+              suppressNextSceneRemoveClickTO = setTimeout(function () {
+                suppressNextSceneRemoveClickTO = null;
+                suppressNextSceneRemoveClick = false;
+              }, 700);
+            }
           },
           true
         );
@@ -16462,17 +16709,8 @@
         var assistOpenGesturePid = null;
         var sx = 0;
         var sy = 0;
-        var maxDx = 0;
-        var minDx = 0;
-        var maxAbsDy = 0;
-        var OPEN_MIN = 40;
-        /* Меню ассистента открывается свайпом от левого края экрана (зона шире — надёжнее ловит жест). */
-        var OPEN_EDGE_ZONE = 64;
-        var openFromLeftEdge = false;
-        var openDragVisual = false;
-        var openDragLastTx = 0;
-        var openDragLastX = 0;
-        var openDragLastT = 0;
+        /* v411 (OPEN_ITEMS): мёртвый код свайп-открытия (openFromLeftEdge / open-drag / OPEN_MIN)
+           удалён — открытие панели только тапом по строке «Ассистент»; свайп-закрытие живёт отдельно. */
         /** Старт с .logo-bg: сначала различаем горизонталь (ассистент) и вертикаль (позиция логотипа). */
         var assistFromLogoBg = false;
 
@@ -16484,10 +16722,9 @@
           if (el.closest('.assistant-drawer')) return true;
           var tpOv = document.getElementById('teleprompter-overlay');
           if (tpOv && tpOv.classList.contains('open') && el.closest('.teleprompter-overlay')) return true;
-          /* Свайп открытия должен начинаться И с самой шторки (assistant-open-strip):
-             полоска всего 8px, и если жест ловился только правее неё (по .wrap),
-             открытие срабатывало «через раз». Шторка лежит вне .wrap (fixed),
-             поэтому пропускаем её ДО проверки .wrap. */
+          /* Legacy (v411): свайп-открытие удалено, полоски .assistant-open-strip в DOM
+             давно нет — проверка безвредна, оставлена на случай возврата элемента;
+             стоит ДО проверки .wrap, т.к. полоска жила вне .wrap (fixed). */
           if (el.closest('.assistant-open-strip')) return false;
           if (!el.closest('.wrap')) return true;
           if (el.closest(ASSIST_SWIPE_SKIP_INTERACTIVE)) return true;
@@ -16504,14 +16741,6 @@
           sx = e.clientX;
           sy = e.clientY;
           /* Открытие свайпом отключено — панель открывается тапом по строке «Ассистент». */
-          openFromLeftEdge = false;
-          maxDx = 0;
-          minDx = 0;
-          maxAbsDy = 0;
-          openDragVisual = false;
-          openDragLastTx = 0;
-          openDragLastX = e.clientX;
-          openDragLastT = Date.now();
           assistFromLogoBg = !!(ptrTgt.closest && ptrTgt.closest('.logo-bg'));
           try {
             var capEl = ptrTgt;
@@ -16527,7 +16756,6 @@
           if (
             assistOpenGesturePid === e.pointerId &&
             assistFromLogoBg &&
-            !openDragVisual &&
             !dragging &&
             !assistantDrawerReducedMotion() &&
             !document.body.classList.contains('assistant-drawer-open')
@@ -16571,51 +16799,9 @@
             }
           }
 
-          if (activePid !== e.pointerId) return;
-          var dx = e.clientX - sx;
-          var dy = e.clientY - sy;
-          if (dx > maxDx) maxDx = dx;
-          if (dx < minDx) minDx = dx;
-          if (Math.abs(dy) > maxAbsDy) maxAbsDy = Math.abs(dy);
-          if (
-            !assistantDrawerReducedMotion() &&
-            !document.body.classList.contains('assistant-drawer-open')
-          ) {
-            var adxr = Math.abs(dx);
-            var adyr = Math.abs(dy);
-            if (openFromLeftEdge && dx > 2 && adxr >= adyr * 0.78) {
-              var del = document.getElementById('assistant-drawer');
-              if (del) {
-                if (!openDragVisual) {
-                  openDragVisual = true;
-                  beginAssistantDrawerTracking();
-                }
-                var Wc = assistantDrawerPxClosedOffset(del);
-                var tx = Math.max(-Wc, -Wc + dx);
-                openDragLastTx = tx;
-                openDragLastX = e.clientX;
-                openDragLastT = Date.now();
-                del.style.transform = 'translateX(' + tx + 'px)';
-                var pr = (tx + Wc) / Wc;
-                setAssistantDrawerBackdropVisual(pr);
-                setAssistantDrawerWrapBlurProgress(pr);
-                del.style.pointerEvents = pr > 0.035 ? 'auto' : 'none';
-              }
-            }
-          }
-          if (e.pointerType === 'touch' || e.pointerType === 'pen') {
-            var adx = Math.abs(dx);
-            var ady = Math.abs(dy);
-            if (ady > 20 && ady > adx * 1.2) return;
-            if (
-              openDragVisual ||
-              (adx > 8 && adx >= ady * 0.8)
-            ) {
-              try {
-                e.preventDefault();
-              } catch (ePrev) {}
-            }
-          }
+          /* v411: хвост open-drag удалён — дальше делать нечего: жест либо уже передан
+             перетаскиванию логотипа выше, либо это скролл/свайп, которыми владеют
+             другие жест-машины (переключение сценария — touch, закрытие шторки — pointer). */
         }
 
         function onPointerEnd(e) {
@@ -16623,44 +16809,16 @@
           assistOpenGesturePid = null;
           assistFromLogoBg = false;
           activePid = null;
-          if (openDragVisual && !assistantDrawerReducedMotion()) {
-            var del = document.getElementById('assistant-drawer');
-            var Wc = assistantDrawerPxClosedOffset(del);
-            var progress = Wc > 0 ? (openDragLastTx + Wc) / Wc : 0;
-            var now = Date.now();
-            var vel = (e.clientX - openDragLastX) / Math.max(5, now - openDragLastT);
-            openDragVisual = false;
-            if (progress > 0.3 || vel > 0.38) {
-              try {
-                triggerHaptic('light');
-              } catch (eHog) {}
-              assistantDrawerSnapOpenFromDrag(openDragLastTx, Wc);
-            } else {
-              assistantDrawerSnapCancelOpenDrag(openDragLastTx, Wc);
-            }
-            return;
-          }
-          var finDx = e.clientX - sx;
-          var finDy = Math.abs(e.clientY - sy);
-          var useDx = Math.max(maxDx, finDx);
-          var useDy = Math.max(maxAbsDy, finDy);
-          if (openFromLeftEdge && useDx >= OPEN_MIN && useDx + 8 >= Math.abs(minDx) && useDx >= useDy * 0.82) {
-            openAssistantDrawer();
-          }
         }
 
         document.addEventListener('pointerdown', onPointerDown, { passive: true, capture: true });
-        document.addEventListener('pointermove', onPointerMove, { passive: false, capture: true });
+        /* v411: onPointerMove больше не зовёт preventDefault (open-drag удалён) —
+           passive:true, чтобы скролл не ждал обработчик. */
+        document.addEventListener('pointermove', onPointerMove, { passive: true, capture: true });
         document.addEventListener('pointerup', onPointerEnd, { passive: true, capture: true });
         document.addEventListener(
           'pointercancel',
           function (e) {
-            if (assistOpenGesturePid === e.pointerId && openDragVisual && !assistantDrawerReducedMotion()) {
-              var del = document.getElementById('assistant-drawer');
-              var WcPx = assistantDrawerPxClosedOffset(del);
-              openDragVisual = false;
-              assistantDrawerSnapCancelOpenDrag(openDragLastTx, WcPx);
-            }
             if (assistOpenGesturePid === e.pointerId) {
               assistOpenGesturePid = null;
               assistFromLogoBg = false;
@@ -17054,6 +17212,10 @@
       wirePrepImportantPin();
       wireNoteIntercutTapToFocus();
       wireShootDateToCalendar();
+      /* 💡 Quota-meter (OPEN_ITEMS): индикатор заполнения localStorage в хабе. */
+      ensureHubQuotaMarkup();
+      wireHubQuotaMeter();
+      updateStorageQuotaMeter();
       updateShotlistLocationHeadings(document);
       updateAllShotlistProgress();
       renumberScenes();
@@ -17087,7 +17249,9 @@
           }
           pendingSwReload = false;
           reloaded = true;
-          /* #8-fix: явный flush перед reload по обновлению SW (lifecycle-момент, не фоновый автосейв). */
+          /* #8-fix: явный flush перед reload по обновлению SW (lifecycle-момент, не фоновый
+             автосейв). flushSave экспортирован из главного IIFE через window (v411) —
+             до этого guard был всегда false и спасали только pagehide/beforeunload. */
           try { if (typeof flushSave === 'function') flushSave(); } catch (eFlushReload) {}
           location.reload();
         }
